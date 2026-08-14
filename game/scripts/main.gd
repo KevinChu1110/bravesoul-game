@@ -172,6 +172,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			_refresh_hud()
 			get_viewport().set_input_as_handled()
 			return
+		## F11：切換全螢幕／視窗
+		if event.keycode == KEY_F11:
+			if DisplaySettings.mode == "windowed":
+				DisplaySettings.set_mode("fullscreen")
+			else:
+				DisplaySettings.set_mode("windowed")
+			_show_toast(DisplaySettings.summary_line())
+			get_viewport().set_input_as_handled()
+			return
 		## I：物品欄
 		if event.keycode == KEY_I and _current != Screen.TITLE:
 			if _dialogue and _dialogue.visible:
@@ -363,6 +372,10 @@ func _build_pause_layer() -> void:
 
 	_pause_btn(box, "繼續", func():
 		_close_pause()
+	)
+	_pause_btn(box, "顯示設定", func():
+		_close_pause()
+		_go_display_settings()
 	)
 	_pause_btn(box, "物品欄 (I)", func():
 		_close_pause()
@@ -2392,6 +2405,7 @@ func _go_title() -> void:
 	buttons.append({"text": "公會／盟約", "cb": _go_guild_panel})
 	var online_lbl := "連線設定 · 純單機" if OnlineGate.offline_only else "連線設定 · 星途"
 	buttons.append({"text": online_lbl, "cb": _go_online_panel})
+	buttons.append({"text": "顯示設定 · %s" % DisplaySettings.mode_label(), "cb": _go_display_settings})
 	## 語言切換
 	var lang_label := "Language: English" if Loc.locale == "zh_TW" else "語言：繁體中文"
 	buttons.append({"text": lang_label, "cb": _toggle_locale})
@@ -2429,6 +2443,68 @@ func _toggle_locale() -> void:
 		Loc.set_locale("zh_TW")
 	AudioManager.play_ui()
 	_go_title()
+
+
+func _go_display_settings() -> void:
+	## 顯示：全螢幕／視窗 + 解析度 + 垂直同步
+	var body := "[b]顯示設定[/b]\n\n"
+	body += DisplaySettings.summary_line() + "\n\n"
+	body += "預設為[b]全螢幕[/b]。切到視窗後可用解析度調整大小。\n"
+	body += "邏輯畫面固定 16:9；多餘區域為黑邊。\n"
+	var buttons: Array = []
+	buttons.append({"text": "模式：%s（點擊切換）" % DisplaySettings.mode_label(), "cb": _display_cycle_mode})
+	buttons.append({"text": "解析度：%s（下一檔）" % DisplaySettings.res_label(), "cb": _display_cycle_res})
+	buttons.append({"text": "解析度：上一檔", "cb": _display_cycle_res_back})
+	for r in DisplaySettings.RESOLUTIONS:
+		var rid := str(r.get("id", ""))
+		var mark := " ✓" if rid == DisplaySettings.res_id else ""
+		buttons.append({
+			"text": "　%s%s" % [str(r.get("label", rid)), mark],
+			"cb": _display_pick_res.bind(rid),
+		})
+	var vs_label := "垂直同步：開" if DisplaySettings.vsync else "垂直同步：關"
+	buttons.append({"text": vs_label, "cb": _display_toggle_vsync})
+	buttons.append({"text": "套用並返回", "cb": _display_settings_back})
+	_panel("顯示設定", body, buttons)
+	_refresh_hud()
+
+
+func _display_cycle_mode() -> void:
+	DisplaySettings.cycle_mode()
+	AudioManager.play_ui()
+	_go_display_settings()
+
+
+func _display_cycle_res() -> void:
+	DisplaySettings.cycle_resolution(1)
+	AudioManager.play_ui()
+	_go_display_settings()
+
+
+func _display_cycle_res_back() -> void:
+	DisplaySettings.cycle_resolution(-1)
+	AudioManager.play_ui()
+	_go_display_settings()
+
+
+func _display_pick_res(rid: String) -> void:
+	DisplaySettings.set_resolution(rid)
+	AudioManager.play_ui()
+	_go_display_settings()
+
+
+func _display_toggle_vsync() -> void:
+	DisplaySettings.set_vsync(not DisplaySettings.vsync)
+	AudioManager.play_ui()
+	_go_display_settings()
+
+
+func _display_settings_back() -> void:
+	DisplaySettings.apply()
+	AudioManager.play_ui()
+	_show_toast(DisplaySettings.summary_line())
+	_hub_back()
+
 
 
 func _boot_tutorial() -> void:

@@ -15,10 +15,19 @@ Brave Soul
 官網：https://kevinchu1110.github.io/bravesoul-game/
 ```
 
-5. **大頭貼**：用 `web/media/gemini/keyart_hero.png` 裁成正方形（兔子半身最佳）  
-6. **封面**：`keyart_leo.png` 或 `keyart_hero.png` 橫式  
-7. **行動呼籲按鈕**：「了解更多」→ 官網 URL  
-8. 建好後把粉專完整 URL 填進 `web/config.js` 的 `facebook` 欄位
+5. **大頭貼**：直接上傳  
+   `web/media/social/fb_avatar.png`（已裁好 800×800）  
+6. **封面**：  
+   `web/media/social/fb_cover.png`（雷歐）或 `fb_cover_alt.png`（主視覺）  
+7. **行動呼籲按鈕**：「了解更多」→  
+   `https://kevinchu1110.github.io/bravesoul-game/`  
+8. 建好後把粉專完整 URL 傳給我，或自己填進 `web/config.js` 的 `facebook` 欄位（頁尾會出現連結）
+
+### 一鍵開建立頁（需已登入 Facebook）
+
+https://www.facebook.com/pages/create
+
+（我無法代你按「建立」——必須用你的 Facebook 帳號登入並同意條款。）
 
 ## 文案禁忌（AI／小編）
 
