@@ -1,4 +1,4 @@
-# 翠嶺·兔勇者 · Agent 執行憲章（Godogen 適配）
+# 勇者之魂 · Agent 執行憲章（Godogen 適配）
 
 本專案用 **Godot 4.7 + GDScript**（非 Godogen 預設的 C# 綠地專案）。  
 Godogen 流程仍適用：**用「跑起來的畫面」證明進度，不要只信編譯通過。**

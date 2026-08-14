@@ -21,7 +21,7 @@
 cd /Users/kevin.chu/develop/sideprojects/bravesoul-game
 git init
 git add .
-git commit -m "Initial: 翠嶺·兔勇者 + GitHub Pages"
+git commit -m "Initial: 勇者之魂 + GitHub Pages"
 # 在 GitHub 新建空 repo（例如 bravesoul-game），再：
 git branch -M main
 git remote add origin git@github.com:你的帳號/bravesoul-game.git

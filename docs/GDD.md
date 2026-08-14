@@ -1,6 +1,6 @@
 # GDD · 遊戲設計總文件（索引）
 
-> **翠嶺·兔勇者**（工作名 `bravesoul-game`）  
+> **勇者之魂** / Brave Soul（repo：`bravesoul-game`）  
 > 本檔是設計入口。細節以各專章為準；衝突時以**較新、較專的檔**為準，並回寫 DECISIONS。
 
 ---

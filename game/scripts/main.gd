@@ -2415,7 +2415,7 @@ func _go_title() -> void:
 		]
 	body += "[color=#b8a88a]%s%s[/color]\n\n" % [title_line, ng_line]
 	body += "[color=#8a8070]%s[/color]" % Loc.t("title.controls")
-	_panel("翠嶺·兔勇者", body, buttons)
+	_panel("勇者之魂", body, buttons)
 	_refresh_hud()
 	## 首次啟動引導
 	if not TutorialSystem.seen("boot"):

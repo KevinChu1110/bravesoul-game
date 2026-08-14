@@ -1,7 +1,7 @@
 # itch 商店頁文案（可直接貼）
 
-> 遊戲標題建議：**翠嶺·兔勇者**  
-> 英文副標：Cuiling · Brave Soul  
+> 遊戲標題：**勇者之魂**  
+> 英文副標：Brave Soul  
 > 定價：免費 或 PWYW（Pay what you want）  
 > 分類：Role Playing · Story Rich · Pixel Art · Singleplayer · Offline
 
@@ -17,7 +17,7 @@ English: A tiny rabbit. A rusty sword. A lion god who forgot what chivalry means
 
 ## Full description（繁中）
 
-**翠嶺·兔勇者**是一款**敘事優先**的像素 2D RPG。
+**勇者之魂**是一款**敘事優先**的像素 2D RPG。
 
 你扮演一隻不慕強權的兔子，從被黑焰燒過的村子出發，走過騎士域、霧隱村、道場與海岸，最後登上法師之塔。  
 多數戰鬥會自己呼吸；真正要記住的，是聖獸與魔王那幾場**時機格擋與抉擇**。
@@ -57,9 +57,9 @@ English: A tiny rabbit. A rusty sword. A lion god who forgot what chivalry means
 
 ## Full description（English）
 
-**Cuiling · Brave Soul** is a **story-first** pixel RPG.
+**Brave Soul**（勇者之魂）is a **story-first** pixel RPG.
 
-Play a rabbit who refuses to worship power. Walk Cuiling’s domains, talk to people who remember the land, and face beast-kings in real-time battles—most fights breathe on their own; boss moments ask you to **parry, read, and choose**.
+Play a rabbit who refuses to worship power. Walk six domains, talk to people who remember the land, and face beast-kings in real-time battles—most fights breathe on their own; boss moments ask you to **parry, read, and choose**.
 
 ### Features
 
@@ -92,9 +92,9 @@ Play a rabbit who refuses to worship power. Walk Cuiling’s domains, talk to pe
 
 | 平台 | 檔案 |
 |------|------|
-| Windows | `Cuiling-BraveSoul-0.6.0-win.zip` |
-| macOS | `Cuiling-BraveSoul-0.6.0-mac.zip` |
-| Linux | `Cuiling-BraveSoul-0.6.0-linux.zip` |
+| Windows | `BraveSoul-0.6.0-win.zip` |
+| macOS | `BraveSoul-0.6.0-mac.zip` |
+| Linux | `BraveSoul-0.6.0-linux.zip` |
 
 每個 zip 內附 `README.txt`。
 

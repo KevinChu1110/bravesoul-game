@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>養成系統 — 翠嶺·兔勇者</title>
-  <meta name="description" content="器／魂／招三重養成說明。星途觀星＝戰魂，不是鐵骨職業。" />
+  <title>養成 — 勇者之魂</title>
+  <meta name="description" content="勇者之魂：器、魂、招三重養成。" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/site.css" />
   <script src="../config.js"></script>
@@ -12,9 +12,9 @@
 <body data-page="systems">
   <header class="page-hero" style="--hero-img:url('../media/gemini/keyart_soul.png')">
     <div class="container">
-      <div class="breadcrumb"><a href="../index.html">首頁</a> / 養成系統</div>
-      <h1>三重養成：器 · 魂 · 招</h1>
-      <p>一句話：<strong>鐵匠養器 · 星途養魂 · 旅途養招</strong>。與「武器流派」正交，不互相取代。</p>
+      <div class="breadcrumb"><a href="../index.html">首頁</a> / 養成</div>
+      <h1>器 · 魂 · 招</h1>
+      <p><strong>鐵匠養器 · 觀星養魂 · 旅途養招</strong>。與武器流派正交，可自由疊加。</p>
     </div>
   </header>
   <main class="page">
@@ -24,51 +24,28 @@
           <img src="../media/gemini/keyart_forge.png" alt="鐵匠鍛造" />
           <div class="body">
             <h3>器 · 鍛造升階</h3>
-            <p>找<strong>釘釘</strong>把武器升階（失敗不掉階）。職系武器可鍛造切換；材料來自野外掉落與<strong>琥珀材料行</strong>。</p>
-            <p class="muted" style="margin-top:0.5rem">遊戲內：騎士堡鐵匠鋪 · Esc 裝備</p>
+            <p>找<strong>釘釘</strong>鍛造武器。材料來自野外掉落與<strong>琥珀材料行</strong>；失敗不會掉階。</p>
           </div>
         </article>
         <article class="sys-card">
           <img src="../media/gemini/keyart_starfall.png" alt="星途觀星" />
           <div class="body">
-            <h3>魂 · 星途觀星（原抽魂設計）</h3>
-            <p><strong>是</strong>你原本的戰魂系統，但已<strong>去 gacha 化</strong>：不用每日抽、不付費。路上撿<strong>星屑</strong>→找<strong>星讀</strong>舉行<strong>觀星</strong>→得到可嵌可拆的戰魂（偏暴擊／攻防等）。</p>
-            <p class="muted" style="margin-top:0.5rem">足跡權重影響星型 · 3 合 1 合成 · 秘境魂器</p>
+            <h3>魂 · 星途觀星</h3>
+            <p>路上收集<strong>星屑</strong>，找<strong>星讀</strong>舉行觀星，獲得可嵌可拆的戰魂，調整暴擊、攻防等傾向。</p>
           </div>
         </article>
         <article class="sys-card">
           <img src="../media/gemini/keyart_leo.png" alt="旅途養招" />
           <div class="body">
             <h3>招 · 技能熟練</h3>
-            <p>戰鬥與演武場累積熟練自動升級。武器流派會解鎖對應招式線（劍連斬、法星芒、拳破勢等，持續擴充）。</p>
-            <p class="muted" style="margin-top:0.5rem">Esc → 技能／招式 · 演武場每日練功</p>
+            <p>戰鬥與演武場累積熟練、自動升級。不同武器流派會解鎖對應招式線。</p>
           </div>
         </article>
       </div>
 
-      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>星途觀測是什麼？</span></h2>
+      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>怎麼一起用？</span></h2>
       <div class="panel">
-        <p><strong>「星途」</strong>是世界觀裡的連線／命運隱喻，也是<strong>戰魂養成的入口名</strong>。</p>
-        <ul>
-          <li><strong>不是</strong>第三種職業（以前官網「星途觀測」當流派是誤導，已改）。</li>
-          <li><strong>是</strong>：星屑 → 觀星儀式 → 戰魂入槽 → 可拆換 build。</li>
-          <li>畫面：星讀 NPC 半身像、觀星台面板、魂槽在裝備上。</li>
-          <li>詳見設計稿 <code>docs/PROGRESSION.md</code>。</li>
-        </ul>
-      </div>
-
-      <h2 class="section-h2" style="margin-top:1.5rem"><span class="accent"></span><span>鐵骨守護是什麼？</span></h2>
-      <div class="panel">
-        <p>舊版暫時把「偏血防的養成風格」叫成<strong>鐵骨守護</strong>，容易讓人以為是職業。</p>
-        <ul>
-          <li><strong>已廢棄為流派名</strong>。血防向請選武器流派<strong>鎚</strong>或<strong>水晶</strong>。</li>
-          <li>鍛造穩、站樁硬吃機制的味道，掛在<strong>鎚／槍／水晶</strong>與防具線上。</li>
-        </ul>
-      </div>
-
-      <h2 class="section-h2" style="margin-top:1.5rem"><span class="accent"></span><span>和武器流派怎麼疊？</span></h2>
-      <div class="panel">
-        <p>例：選<strong>弓</strong>（遠距暴擊）＋養<strong>魂</strong>偏暴擊星＋升<strong>器</strong>階＋熟練<strong>招</strong>。換槍流派會改被動與技能權重，戰魂可拆到新武器。</p>
+        <p>例如：選<strong>弓</strong>（遠距）＋戰魂偏暴擊＋鍛造升階＋提升招式熟練。之後換槍，戰魂仍可拆到新武器上。</p>
         <p style="margin-bottom:0"><a class="btn btn-primary" href="weapons.html">看十種武器流派</a></p>
       </div>
     </div>

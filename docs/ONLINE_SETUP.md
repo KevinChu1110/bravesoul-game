@@ -11,7 +11,8 @@
 ```bash
 # 複製範例
 cp game/data/online/config.example.json \
-   "$HOME/Library/Application Support/Godot/app_userdata/翠嶺·兔勇者/online_settings.json"
+   "$HOME/Library/Application Support/Godot/app_userdata/勇者之魂/online_settings.json"
+   （舊版若叫「翠嶺·兔勇者」資料夾，請手動搬移或重新設定）
 ```
 
 或遊戲內：**標題 → 連線設定** 貼上 URL／anon key，關閉「純單機」。
