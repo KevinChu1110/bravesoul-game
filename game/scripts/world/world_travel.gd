@@ -50,36 +50,36 @@ static func links() -> Dictionary:
 		"to_leo_court": {"map": "wild_leo_court", "screen": "C1_WILD"},
 		"back_wild": {"map": "wild", "screen": "C1_WILD"},
 
-		## ── 岔路 ──
+		## ── 岔路（0.12：鍛造後即可練功／自由探索，不必先打雷歐）──
 		"path_crossroads": {
 			"map": "crossroads", "screen": "C1_WILD",
-			"need_flag": "boss.leo_cleared",
-			"deny": "岔路仍被黑霧封著。先通過騎士域的試煉。",
+			"need_flag": "c1_forged",
+			"deny": "岔路仍封著。先找釘釘把劍養好。",
 		},
 		"exit_cross_m": {
 			"map": "crossroads", "screen": "C1_WILD",
-			"need_flag": "boss.leo_cleared",
-			"deny": "岔路仍被黑霧封著。先通過騎士域的試煉。",
+			"need_flag": "c1_forged",
+			"deny": "岔路仍封著。先找釘釘把劍養好。",
 		},
 		"exit_cross_d": {
 			"map": "crossroads", "screen": "C1_WILD",
-			"need_flag": "boss.leo_cleared",
-			"deny": "岔路仍被黑霧封著。",
+			"need_flag": "c1_forged",
+			"deny": "岔路仍封著。",
 		},
 		"exit_cross_f": {
 			"map": "crossroads", "screen": "C1_WILD",
-			"need_flag": "boss.leo_cleared",
-			"deny": "岔路仍被黑霧封著。",
+			"need_flag": "c1_forged",
+			"deny": "岔路仍封著。",
 		},
 		"exit_cross_c": {
 			"map": "crossroads", "screen": "C1_WILD",
-			"need_flag": "boss.leo_cleared",
-			"deny": "岔路仍被黑霧封著。",
+			"need_flag": "c1_forged",
+			"deny": "岔路仍封著。",
 		},
 		"exit_cross_t": {
 			"map": "crossroads", "screen": "C1_WILD",
-			"need_flag": "boss.leo_cleared",
-			"deny": "岔路仍被黑霧封著。",
+			"need_flag": "c1_forged",
+			"deny": "岔路仍封著。",
 		},
 		"to_cross_north": {"map": "cross_north", "screen": "C1_WILD"},
 		"to_cross_east": {"map": "cross_east", "screen": "C1_WILD"},

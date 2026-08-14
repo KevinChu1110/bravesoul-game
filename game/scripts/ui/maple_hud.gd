@@ -139,13 +139,8 @@ func refresh() -> void:
 	var name_s := str(GameState.player_name)
 	if name_s == "":
 		name_s = "小白"
-	var tier: int = int(GameState.weapon_tier)
-	var lv_approx: int = maxi(1, tier + 1 + (1 if GameState.has_flag("boss.leo_cleared") else 0) \
-		+ (1 if GameState.has_flag("boss.white_fog_cleared") else 0) \
-		+ (1 if GameState.has_flag("boss.abo_cleared") else 0))
-	if GameState.ng_plus > 0:
-		lv_approx += GameState.ng_plus * 5
-	_lv_l.text = "Lv.%d" % lv_approx
+	var lv_real: int = maxi(1, int(GameState.level))
+	_lv_l.text = "Lv.%d · 戰力%d" % [lv_real, GameState.power_score()]
 	_name_l.text = name_s
 
 	var max_hp: int = GameState.effective_max_hp()
@@ -160,28 +155,11 @@ func refresh() -> void:
 	_mp_bar.value = dust
 	_mp_bar.tooltip_text = "星屑 %d" % dust
 
-	var exp_v := 0.12
-	match str(GameState.chapter):
-		"c0":
-			exp_v = 0.08
-		"c1":
-			exp_v = 0.22
-		"c2":
-			exp_v = 0.38
-		"c3":
-			exp_v = 0.52
-		"c4":
-			exp_v = 0.65
-		"c5":
-			exp_v = 0.78
-		"c6":
-			exp_v = 0.9
-		"cleared":
-			exp_v = 1.0
-	if GameState.has_flag("boss.scar_lord_cleared"):
-		exp_v = mini(1.0, exp_v + 0.03)
+	## 經驗條：真實升級進度
+	var need_xp: int = maxi(1, GameState.xp_to_next())
 	_exp_bar.max_value = 100
-	_exp_bar.value = exp_v * 100.0
+	_exp_bar.value = clampf(float(GameState.xp) / float(need_xp) * 100.0, 0.0, 100.0)
+	_exp_bar.tooltip_text = "經驗 %d／%d" % [GameState.xp, need_xp]
 
 	var claim := 0
 	if Engine.get_main_loop() is SceneTree:
@@ -190,5 +168,8 @@ func refresh() -> void:
 			claim = int(q.call("claimable_count"))
 	var claim_s := "  待領%d" % claim if claim > 0 else ""
 	var week := "一周目" if GameState.ng_plus <= 0 else "二周目×%d" % GameState.ng_plus
+	var path_s := GameState.path_display() if GameState.path_style != "" else "未選流派"
 	_gold_l.text = "金 %d · %s · %s%s" % [GameState.gold, GameState.weapon_name, week, claim_s]
-	_tip_l.text = "HP %d/%d · 星屑 %d · 拖移此窗" % [hp, max_hp, dust]
+	_tip_l.text = "HP %d/%d · 星屑 %d · %s · XP %d/%d" % [
+		hp, max_hp, dust, path_s, GameState.xp, GameState.xp_to_next()
+	]

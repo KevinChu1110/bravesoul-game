@@ -399,6 +399,14 @@ func _build_pause_layer() -> void:
 		_close_pause()
 		_go_online_panel()
 	)
+	_pause_btn(box, "流派／養成（%s）" % GameState.path_display(), func():
+		_close_pause()
+		_go_path_panel(false)
+	)
+	_pause_btn(box, "技能／招式", func():
+		_close_pause()
+		_go_skill_panel()
+	)
 	_pause_btn(box, "裝備", func():
 		_close_pause()
 		_go_equip_panel()
@@ -2508,11 +2516,65 @@ func _handle_side_content(id: String) -> bool:
 		"amber":
 			_side_amber()
 			return true
+		"target_dummy", "training_ring":
+			_side_training_spar(id)
+			return true
 		"guard_dog":
 			_play_dialog([{"speaker": "守車犬", "text": "汪。（尾巴一下，像在說：先付金幣。）"}])
 			return true
 		_:
 			return false
+
+
+func _side_training_spar(id: String) -> void:
+	## 演武場可重複練功：經驗 + 招式熟練
+	if id == "training_ring" and not GameState.has_flag("c1_forged"):
+		_play_dialog([{"speaker": "旁白", "text": "演武台沙上還有舊腳印。先去釘釘把劍養好再練。"}])
+		return
+	var cost := 0
+	if int(GameState.get_flag("meta.train_today", 0)) >= 8:
+		_play_dialog([{"speaker": "系統", "text": "今日練功已達上限。去野外或獵場換換空氣。"}])
+		return
+	_play_dialog([
+		{"speaker": "系統", "text": "木靶／演武：要練一回合嗎？（無金幣消耗 · 每日有限）"},
+		{
+			"speaker": "系統",
+			"text": "戰力 %d · Lv%d · 流派 %s" % [GameState.power_score(), GameState.level, GameState.path_display()],
+			"choices": ["開練", "離開"],
+			"replies": ["腳步沉進沙裡。", "改天。"],
+		},
+	], func():
+		## 選項 0 = 開練：用簡易獎勵模擬（避免每次都進全戰可省時間）
+		_side_training_do()
+	)
+
+
+func _side_training_do() -> void:
+	## 簡化練功：直接給經驗與熟練（也可改為真開 ash_rat）
+	var n := int(GameState.get_flag("meta.train_today", 0))
+	GameState.set_flag("meta.train_today", n + 1)
+	var base_xp := 10 + GameState.level * 2
+	if GameState.path_style == "sword":
+		base_xp += 4
+	var xr: Dictionary = GameState.add_xp(base_xp)
+	SkillSystem.add_mastery("slash", 6)
+	if SkillSystem.is_learned("blade_dance"):
+		SkillSystem.add_mastery("blade_dance", 5)
+	if SkillSystem.is_learned("star_pierce"):
+		SkillSystem.add_mastery("star_pierce", 5)
+	if SkillSystem.is_learned("iron_guard"):
+		SkillSystem.add_mastery("iron_guard", 4)
+	## 小幅回血
+	GameState.hp = mini(GameState.effective_max_hp(), GameState.hp + 3)
+	SaveManager.save_game()
+	var msg := "練功結束。經驗 +%d" % int(xr.get("gained", base_xp))
+	if int(xr.get("levels", 0)) > 0:
+		msg += " · 升級至 Lv%d！" % GameState.level
+	msg += " · 招式熟練↑ · 今日 %d／8" % int(GameState.get_flag("meta.train_today", 0))
+	_play_dialog([
+		{"speaker": "系統", "text": msg},
+		{"speaker": "系統", "text": "戰力現為 %d。不夠就再練、鍛階、觀星，或去岔路獵場。" % GameState.power_score()},
+	])
 
 
 func _side_silk(id: String) -> void:
@@ -2686,14 +2748,16 @@ func _side_ronin_persuade() -> void:
 func _side_finish_ronin_battle(won: bool) -> void:
 	if won:
 		_grant_boss_loot(55, 3, 0)
+		var xr: Dictionary = GameState.add_xp(70)
 		GameState.set_flag("side.ronin_defeated", true)
 		GameState.set_flag("side.ronin_done", true)
 		GameState.set_flag("meta.skirmish_wins", int(GameState.get_flag("meta.skirmish_wins", 0)) + 1)
 		TitleCatalog.evaluate_all()
 		SaveManager.save_game()
+		var lv_msg := " · 升級！" if int(xr.get("levels", 0)) > 0 else ""
 		_play_dialog([
 			{"speaker": "黑焰浪人", "text": "……強……又如何……焰還是空的。"},
-			{"speaker": "系統", "text": "戰勝黑焰浪人。金 55 · 星屑 3。他倒下的地方，靴印不再燒。"},
+			{"speaker": "系統", "text": "戰勝黑焰浪人。金 55 · 星屑 3 · 經驗 %d%s。他倒下的地方，靴印不再燒。" % [int(xr.get("gained", 70)), lv_msg]},
 		], func():
 			_open_explore(_last_explore_map if _last_explore_map != "" else "crossroads", _last_explore_screen)
 		)
@@ -3135,33 +3199,40 @@ func _go_world_map() -> void:
 		WorldContent.visit_count(),
 		WorldTravel.list_map_ids().size(),
 	]
-	body += "解鎖狀態：\n"
+	body += "戰力 %d · Lv%d · 流派「%s」· 器階 T%d\n" % [
+		GameState.power_score(), GameState.level, GameState.path_display(), GameState.weapon_tier
+	]
+	body += "經驗 %d／%d\n\n" % [GameState.xp, GameState.xp_to_next()]
+	body += "解鎖（0.12 自由路線 · 建議戰力）：\n"
 	body += "· 騎士堡 " + ("✓" if GameState.has_flag("c1_entered_city") or GameState.chapter != "c0" else "·") + "\n"
-	body += "· 霧隱 " + ("✓" if GameState.has_flag("c2_entered") else "鎖") + "\n"
-	body += "· 道場 " + ("✓" if GameState.has_flag("c3_entered") else "鎖") + "\n"
-	body += "· 森林 " + ("✓" if GameState.has_flag("c4_entered") else "可選") + "\n"
-	body += "· 海岸 " + ("✓" if GameState.has_flag("c5_entered") else "可選") + "\n"
-	body += "· 塔 " + ("✓" if GameState.has_flag("c6_camp_cut") or GameState.has_flag("boss.abo_cleared") else "鎖") + "\n"
+	body += "· 岔路／練功 " + ("✓ 鍛造後" if GameState.has_flag("c1_forged") else "鎖（先鍛造）") + "\n"
+	body += "· 霧隱 " + ("✓" if GameState.has_flag("c2_entered") else "建議 18+") + "\n"
+	body += "· 道場 " + ("✓" if GameState.has_flag("c3_entered") else "建議 26+") + "\n"
+	body += "· 森林 " + ("✓" if GameState.has_flag("c4_entered") else "建議 30+ · 可選序") + "\n"
+	body += "· 海岸 " + ("✓" if GameState.has_flag("c5_entered") else "建議 30+ · 可選序") + "\n"
+	body += "· 塔 " + ("✓" if GameState.has_flag("c6_camp_cut") or GameState.has_flag("boss.abo_cleared") else "需足夠試煉") + "\n"
 	var buttons: Array = [
 		{"text": "騎士堡廣場", "cb": _go_c1_town},
 		{"text": "城外荒野", "cb": _go_c1_wild},
 	]
-	if GameState.has_flag("boss.leo_cleared"):
+	if GameState.has_flag("c1_forged") or GameState.has_flag("boss.leo_cleared"):
 		buttons.append({"text": "六域岔路", "cb": func(): _open_explore("crossroads", Screen.C1_WILD)})
 		buttons.append({"text": "行商驛站", "cb": func(): _open_explore("caravan_camp", Screen.C1_WILD)})
 		buttons.append({"text": "星落平原", "cb": func(): _open_explore("starfall_plain", Screen.C1_WILD)})
 		buttons.append({"text": "霧隱村", "cb": _go_c2_enter})
-	if GameState.has_flag("boss.white_fog_cleared"):
 		buttons.append({"text": "武鬥道場", "cb": _go_c3_enter})
-	if GameState.has_flag("boss.abo_cleared"):
 		buttons.append({"text": "遊俠森林", "cb": _go_c4_enter})
 		buttons.append({"text": "維京海岸", "cb": _go_c5_enter})
+	if GameState.has_flag("boss.abo_cleared") or GameState.power_score() >= 36:
 		buttons.append({"text": "黑焰疤地", "cb": func(): _open_explore("blackflame_scar", Screen.C1_WILD)})
+	if GameState.has_flag("boss.abo_cleared") or GameState.has_flag("boss.shadowwind_cleared") \
+			or GameState.has_flag("boss.stonefist_cleared") or GameState.power_score() >= 42:
 		buttons.append({"text": "塔下營地", "cb": _go_c6_camp})
 	if EventRuntime.has_active():
 		buttons.append({"text": EventRuntime.title_button_label(), "cb": _go_event_panel})
 	if HuntSystem.is_unlocked():
 		buttons.append({"text": "星途獵場", "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
+	buttons.append({"text": "流派／養成", "cb": _go_path_panel})
 	buttons.append({"text": "返回當前", "cb": _hub_back})
 	_panel("世界地圖", body, buttons)
 
@@ -3588,6 +3659,10 @@ func _on_world_battle_finished(won: bool) -> void:
 		var gold_n := 12 + int(def.get("max_hp", 50) / 12)
 		var dust_n := 1 if int(def.get("max_hp", 50)) >= 90 else 0
 		_grant_boss_loot(gold_n, dust_n, 0)
+		var xp_n := 12 + int(def.get("max_hp", 50) / 10)
+		if bool(def.get("is_boss", false)):
+			xp_n = 80 + int(def.get("max_hp", 100) / 5)
+		var xr: Dictionary = GameState.add_xp(xp_n)
 		GameState.set_flag("meta.skirmish_wins", int(GameState.get_flag("meta.skirmish_wins", 0)) + 1)
 		var loot_s := InventorySystem.apply_drops(InventorySystem.roll_skirmish_loot(mode))
 		var eq_s := ""
@@ -3602,6 +3677,9 @@ func _on_world_battle_finished(won: bool) -> void:
 		GameLog.combat("擊敗 %s · 金 %d" % [ename, gold_n])
 		SaveManager.save_game()
 		var extra := (" · 星屑 %d" % dust_n) if dust_n > 0 else ""
+		extra += " · 經驗 %d" % int(xr.get("gained", xp_n))
+		if int(xr.get("levels", 0)) > 0:
+			extra += " · 升級！"
 		if loot_s != "":
 			extra += " · " + loot_s
 		extra += eq_s
@@ -4022,7 +4100,11 @@ func _go_c1_forge() -> void:
 			GameState.set_flag("c1_forged", true)
 			GameState.set_flag("c1_ding_recognized_sword", true)
 			SaveManager.save_game()
-			_show_forge_panel()
+			## 0.12：鍛造後選流派（養成起點）
+			if GameState.path_style == "":
+				_go_path_panel(true)
+			else:
+				_show_forge_panel()
 		)
 	else:
 		_show_forge_panel()
@@ -4052,8 +4134,49 @@ func _show_forge_panel() -> void:
 		if GameState.has_flag("side.ding_debt_asked") and not GameState.has_flag("item.broken_blade"):
 			debt_label = "舊債進度（斷劍未取）"
 		buttons.append({"text": debt_label, "cb": _side_start_ding_debt})
+	if GameState.has_flag("c1_forged"):
+		buttons.append({"text": "流派／養成（%s）" % GameState.path_display(), "cb": _go_path_panel})
 	buttons.append({"text": "回到廣場", "cb": _go_c1_town})
 	_panel("鐵匠鋪 · 釘釘", body, buttons)
+
+
+func _go_path_panel(from_forge: bool = false) -> void:
+	var body := "流派決定「哪條養成長得快」，不是鎖死職業。\n"
+	body += "目前：%s · 戰力 %d · Lv%d（經驗 %d／%d）\n\n" % [
+		GameState.path_display(), GameState.power_score(), GameState.level, GameState.xp, GameState.xp_to_next()
+	]
+	body += "⚔ 劍道行者 — 攻擊／招式熟練↑\n"
+	body += "✦ 星途觀測 — 暴擊／經驗略↑ · 星芒技\n"
+	body += "🛡 鐵骨守護 — 血防↑ · 鐵骨吐息 · 鍛造更穩\n\n"
+	body += "鐵匠鍛造 · 星讀觀星 · 演武場練功 · 獵場 · 支線 都是養成，不必死卡主線。"
+	var buttons: Array = [
+		{"text": "選·劍道行者", "cb": func(): _set_path_and_back("sword", from_forge)},
+		{"text": "選·星途觀測", "cb": func(): _set_path_and_back("soul", from_forge)},
+		{"text": "選·鐵骨守護", "cb": func(): _set_path_and_back("iron", from_forge)},
+	]
+	if from_forge:
+		buttons.append({"text": "稍後再選", "cb": _show_forge_panel})
+	else:
+		buttons.append({"text": "技能／招式", "cb": _go_skill_panel})
+		buttons.append({"text": "返回", "cb": _hub_back})
+	_panel("流派 · 三重養成", body, buttons)
+
+
+func _set_path_and_back(p: String, from_forge: bool) -> void:
+	GameState.set_path_style(p)
+	## 流派技自動嘗試解鎖
+	for sid in ["star_pierce", "iron_guard", "blade_dance", "emergency_heal"]:
+		SkillSystem.try_unlock(sid)
+	SaveManager.save_game()
+	_play_dialog([
+		{"speaker": "系統", "text": "你選定了【%s】。三軸仍可同養，這條只是長得更快。" % GameState.path_display()},
+		{"speaker": "系統", "text": "戰力 %d。不夠打就練功、鍛階、觀星——不必死卡一個門。" % GameState.power_score()},
+	], func():
+		if from_forge:
+			_show_forge_panel()
+		else:
+			_go_path_panel(false)
+	)
 
 
 func _forge_wood_sword() -> void:
@@ -4086,6 +4209,8 @@ func _try_forge() -> void:
 	var forge_rate := 0.70
 	if GameState.has_flag("meta.forge_debt_bonus"):
 		forge_rate = 0.88
+	if GameState.path_style == "iron":
+		forge_rate = minf(0.95, forge_rate + 0.08)
 	var ok := randf() < forge_rate or GameState.forge_fail_streak >= 3
 	if ok:
 		GameState.weapon_tier += 1
@@ -4231,9 +4356,18 @@ func _go_aftermath() -> void:
 # ─── C2 霧與真 ───
 
 func _go_c2_enter() -> void:
-	if not GameState.has_flag("boss.leo_cleared"):
-		_play_dialog([{"speaker": "系統", "text": "霧太深。先通過騎士域的試煉。"}])
+	if not _try_soft_enter_region("mist"):
 		return
+	if not GameState.has_flag("boss.leo_cleared") and not GameState.has_flag("c2_soft_warn"):
+		GameState.set_flag("c2_soft_warn", true)
+		_play_dialog([
+			{"speaker": "系統", "text": "你尚未戰勝雷歐也能進霧——白霧仍很難。建議先鍛造、練等，或挑戰內殿。"},
+		], func(): _go_c2_enter_body())
+		return
+	_go_c2_enter_body()
+
+
+func _go_c2_enter_body() -> void:
 	GameState.set_chapter("c2")
 	if not GameState.has_flag("c2_entered"):
 		GameState.set_flag("c2_entered", true)
@@ -4403,10 +4537,53 @@ func _go_c2_cleared_panel() -> void:
 
 # ─── C3 武鬥道場 ───
 
+func _region_power_ok(need: int) -> bool:
+	return GameState.power_score() >= need or GameState.level >= maxi(1, need / 4)
+
+
+func _try_soft_enter_region(region: String) -> bool:
+	## 0.12 自由路線：戰力／等級／任一相關旗 可進；不足則警告可硬闖
+	## 回傳 false = 完全不可進
+	var power := GameState.power_score()
+	match region:
+		"mist":
+			if GameState.has_flag("boss.leo_cleared") or GameState.has_flag("c1_forged"):
+				return true
+			_play_dialog([{"speaker": "系統", "text": "霧還太遠。先在騎士堡把劍養起來。"}])
+			return false
+		"dojo":
+			if GameState.has_flag("boss.white_fog_cleared") or GameState.has_flag("boss.leo_cleared") or power >= 26:
+				return true
+			_play_dialog([{"speaker": "系統", "text": "道場氣壓重。建議戰力 26+（你 %d），或先走霧隱／升等練功。" % power}])
+			return false
+		"forest":
+			if GameState.has_flag("boss.abo_cleared") or GameState.has_flag("boss.leo_cleared") or power >= 30:
+				return true
+			_play_dialog([{"speaker": "系統", "text": "林風很急。建議戰力 30+（你 %d）。可先道場／獵場練。" % power}])
+			return false
+		"coast":
+			if GameState.has_flag("boss.abo_cleared") or GameState.has_flag("boss.leo_cleared") or power >= 30:
+				return true
+			_play_dialog([{"speaker": "系統", "text": "岸浪重。建議戰力 30+（你 %d）。" % power}])
+			return false
+		_:
+			return true
+
+
 func _go_c3_enter() -> void:
-	if not GameState.has_flag("boss.white_fog_cleared"):
-		_play_dialog([{"speaker": "系統", "text": "山霧未散。先看破白霧。"}])
+	if not _try_soft_enter_region("dojo"):
 		return
+	if not GameState.has_flag("boss.white_fog_cleared") and not GameState.has_flag("c3_soft_warn"):
+		GameState.set_flag("c3_soft_warn", true)
+		_play_dialog([
+			{"speaker": "系統", "text": "你尚未看破白霧也能上山——阿波不會因此手下留情。戰力 %d。" % GameState.power_score()},
+			{"speaker": "系統", "text": "不夠就回城鍛造、觀星、演武場練功、星途獵場。"},
+		], func(): _go_c3_enter_body())
+		return
+	_go_c3_enter_body()
+
+
+func _go_c3_enter_body() -> void:
 	GameState.set_chapter("c3")
 	if not GameState.has_flag("c3_entered"):
 		GameState.set_flag("c3_entered", true)
@@ -4558,8 +4735,7 @@ func _go_c3_cleared_panel() -> void:
 # ─── C4 遊俠森林 · 疾影 ───
 
 func _go_c4_enter() -> void:
-	if not GameState.has_flag("boss.abo_cleared"):
-		_play_dialog([{"speaker": "系統", "text": "山鐘未響。先上道場。"}])
+	if not _try_soft_enter_region("forest"):
 		return
 	GameState.set_chapter("c4")
 	if not GameState.has_flag("c4_entered"):
@@ -4724,10 +4900,9 @@ func _go_c4_cleared_panel() -> void:
 # ─── C5 維京海岸 · 石拳 ───
 
 func _go_c5_enter() -> void:
-	if not GameState.has_flag("boss.abo_cleared"):
-		_play_dialog([{"speaker": "系統", "text": "山鐘未響。先上道場。"}])
+	if not _try_soft_enter_region("coast"):
 		return
-	## 允許跳過 C4 直接進 C5（可選域）
+	## 0.12：海岸／森林可與道場並行，不必固定順序
 	GameState.set_chapter("c5")
 	if not GameState.has_flag("c5_entered"):
 		GameState.set_flag("c5_entered", true)

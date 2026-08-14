@@ -59,7 +59,44 @@ const CATALOG: Array[Dictionary] = [
 		"desc": "滿怒優先的大招。獅子認可後的體悟。",
 		"lv2": "雷勢更強。",
 		"lv3": "怒雷尾音延長，傷害封頂前一檔。",
-		"unlock_hint": "擊敗雷歐後體悟",
+		"unlock_hint": "擊敗雷歐後體悟 · 或劍道 Lv10",
+	},
+	{
+		"id": "star_pierce",
+		"name": "星芒穿刺",
+		"line": "星",
+		"kind": "attack",
+		"base_mult": 2.2,
+		"priority": 28,
+		"desc": "星途流派：偏暴擊節奏的一刺。",
+		"lv2": "星芒更銳。",
+		"lv3": "穿刺附帶短暫識破（倍率再升）。",
+		"unlock_hint": "星途觀測 · 或等級 6",
+	},
+	{
+		"id": "iron_guard",
+		"name": "鐵骨吐息",
+		"line": "骨",
+		"kind": "heal",
+		"base_mult": 0.0,
+		"heal_pct": 0.22,
+		"priority": 8,
+		"desc": "鐵骨流派：較早觸發的穩血吐息。",
+		"lv2": "回血略增。",
+		"lv3": "危急門檻更寬，回血再增。",
+		"unlock_hint": "鐵骨守護 · 或等級 5",
+	},
+	{
+		"id": "blade_dance",
+		"name": "連鋒三斬",
+		"line": "劍",
+		"kind": "attack",
+		"base_mult": 2.1,
+		"priority": 32,
+		"desc": "劍道流派：中速連斬，熟練成長快。",
+		"lv2": "連鋒更密。",
+		"lv3": "三斬尾勁延長。",
+		"unlock_hint": "劍道行者 · 或等級 8",
 	},
 ]
 
@@ -229,16 +266,24 @@ func learn(id: String, min_lv: int = 1) -> bool:
 
 
 func is_unlocked(id: String) -> bool:
-	## 可否習得（條件）
+	## 可否習得（條件）— 0.12：等級／流派可解鎖，不全綁主線
 	match id:
 		"slash":
 			return true
 		"counter_strike":
 			return GameState.has_flag("boss.leo_cleared") or GameState.level >= 7
 		"emergency_heal":
-			return GameState.has_flag("c1_forged") or GameState.has_flag("c1_entered_city")
+			return GameState.has_flag("c1_forged") or GameState.has_flag("c1_entered_city") or GameState.level >= 3
 		"thunder_fury":
-			return GameState.has_flag("boss.leo_cleared")
+			return GameState.has_flag("boss.leo_cleared") \
+				or (GameState.path_style == "sword" and GameState.level >= 10) \
+				or GameState.level >= 14
+		"star_pierce":
+			return GameState.path_style == "soul" or GameState.level >= 6 or GameState.has_flag("c1_soul_intro")
+		"iron_guard":
+			return GameState.path_style == "iron" or GameState.level >= 5
+		"blade_dance":
+			return GameState.path_style == "sword" or GameState.level >= 8
 		_:
 			return false
 
@@ -254,7 +299,18 @@ func try_unlock(id: String) -> bool:
 ## 戰鬥用：挑當前該放的技能
 func pick_battle_skill(hp_ratio: float = 1.0) -> Dictionary:
 	ensure_skill_map()
-	## 危急恢復
+	## 危急恢復（鐵骨吐息門檻略寬）
+	var heal_need := 0.40
+	if is_learned("iron_guard"):
+		heal_need = 0.48 if get_lv("iron_guard") >= 3 else 0.44
+	if is_learned("iron_guard") and hp_ratio <= heal_need:
+		return {
+			"id": "iron_guard",
+			"name": str(def_of("iron_guard").get("name", "鐵骨吐息")),
+			"kind": "heal",
+			"mult": 0.0,
+			"heal_pct": heal_pct_for("iron_guard"),
+		}
 	if is_learned("emergency_heal") and hp_ratio <= 0.40:
 		return {
 			"id": "emergency_heal",

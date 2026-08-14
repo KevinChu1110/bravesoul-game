@@ -2091,7 +2091,7 @@ func _on_end(won: bool) -> void:
 			if GameState.skill_slash_lv < 1:
 				GameState.skill_slash_lv = 1
 			GameState.add_gold(15)
-			GameState.xp += 20
+			_award_xp(20)
 		elif _mode == "leo":
 			GameState.set_flag("boss.leo_cleared", true)
 			if Engine.get_main_loop() is SceneTree:
@@ -2099,36 +2099,36 @@ func _on_end(won: bool) -> void:
 				if sk1 and sk1.has_method("grant_leo_insight"):
 					sk1.call("grant_leo_insight")
 			GameState.add_gold(300)
-			GameState.xp += 200
+			_award_xp(200)
 			GameState.add_stardust(4)
 		elif _mode == "fog":
 			GameState.set_flag("boss.white_fog_cleared", true)
 			GameState.add_gold(250)
-			GameState.xp += 180
+			_award_xp(180)
 			GameState.add_stardust(3)
 		elif _mode == "demon":
 			GameState.set_flag("boss.demon_cleared", true)
 			GameState.add_gold(400)
-			GameState.xp += 300
+			_award_xp(300)
 			GameState.add_stardust(6)
 			if sim and sim.refuse_count >= 3:
 				GameState.set_flag("c6_refuse_all", true)
 		elif _mode == "abo":
 			GameState.set_flag("boss.abo_cleared", true)
 			GameState.add_gold(280)
-			GameState.xp += 200
+			_award_xp(200)
 			GameState.add_stardust(3)
 			if sim and sim.abo_break_count >= 2:
 				GameState.set_flag("c3_abo_perfect", true)
 		elif _mode == "falcon":
 			GameState.set_flag("boss.shadowwind_cleared", true)
 			GameState.add_gold(260)
-			GameState.xp += 190
+			_award_xp(190)
 			GameState.add_stardust(3)
 		elif _mode == "boar":
 			GameState.set_flag("boss.stonefist_cleared", true)
 			GameState.add_gold(270)
-			GameState.xp += 195
+			_award_xp(195)
 			GameState.add_stardust(3)
 		elif _mode in ["wrath", "tide", "statue", "chrono"]:
 			_grant_rift_rewards(_mode)
@@ -2178,6 +2178,16 @@ func _on_btn_flee_pressed() -> void:
 	battle_finished.emit(false)
 
 
+func _award_xp(n: int) -> void:
+	if n <= 0:
+		return
+	var r: Dictionary = GameState.add_xp(n)
+	var g := int(r.get("gained", n))
+	_append_log("[color=#9cf]經驗 +%d（%d／%d · Lv%d）[/color]" % [g, GameState.xp, GameState.xp_to_next(), GameState.level])
+	for m in r.get("messages", []):
+		_append_log("[color=#fc8]%s[/color]" % str(m))
+
+
 func _grant_rift_rewards(mode: String) -> void:
 	var flag_map: Dictionary = {
 		"wrath": "postgame.wrath_cleared",
@@ -2199,7 +2209,7 @@ func _grant_rift_rewards(mode: String) -> void:
 	if gold_n > 0:
 		GameState.add_gold(gold_n)
 	if xp_n > 0:
-		GameState.xp += xp_n
+		_award_xp(xp_n)
 	if not bool(mult.get("practice", false)):
 		GameState.set_flag("item.rift_ember", true)
 	var first := "postgame.%s_first_bonus" % mode

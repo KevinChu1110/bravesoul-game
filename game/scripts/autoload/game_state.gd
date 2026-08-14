@@ -18,6 +18,9 @@ var level: int = 1
 var xp: int = 0
 var gold: int = 30
 
+## 流派："" | sword | soul | iron（0.12 養成軸，非鎖死職業）
+var path_style: String = ""
+
 ## 簡易面板（之後接裝備／戰魂）
 var max_hp: int = 50
 var hp: int = 50
@@ -101,19 +104,30 @@ func effective_atk() -> int:
 		a += 3
 	a += soul_bonus_atk()
 	a += equip_bonus_atk()
+	if path_style == "sword":
+		a += 2 + level / 5
 	return a
 
 
 func effective_def() -> int:
-	return def_stat + soul_bonus_def() + equip_bonus_def()
+	var d := def_stat + soul_bonus_def() + equip_bonus_def()
+	if path_style == "iron":
+		d += 2 + level / 6
+	return d
 
 
 func effective_max_hp() -> int:
-	return max_hp + soul_bonus_hp() + equip_bonus_hp()
+	var h := max_hp + soul_bonus_hp() + equip_bonus_hp()
+	if path_style == "iron":
+		h += 8 + level
+	return h
 
 
 func effective_crit() -> float:
-	return crit_rate + equip_bonus_crit()
+	var c := crit_rate + equip_bonus_crit()
+	if path_style == "soul":
+		c += 3.0 + float(level) * 0.15
+	return c
 
 
 func effective_crit_dmg() -> float:
@@ -182,6 +196,70 @@ func add_stardust(n: int) -> void:
 	stardust = maxi(0, stardust + n)
 
 
+## 升級所需經驗（Lv1→2 約 50，之後緩升）
+func xp_to_next() -> int:
+	return 40 + level * 25 + (level * level) / 2
+
+
+## 加經驗；回傳 {gained, levels, messages}
+func add_xp(n: int) -> Dictionary:
+	var gained := maxi(0, n)
+	## 星途流派：戰鬥經驗略增
+	if path_style == "soul":
+		gained = int(round(float(gained) * 1.08))
+	xp += gained
+	var levels := 0
+	var msgs: PackedStringArray = []
+	while level < 40 and xp >= xp_to_next():
+		xp -= xp_to_next()
+		level += 1
+		levels += 1
+		## 成長：血必升；攻／防交錯
+		max_hp += 4
+		hp = mini(effective_max_hp(), hp + 4)
+		if level % 2 == 0:
+			atk += 1
+		if level % 3 == 0:
+			def_stat += 1
+		if level % 5 == 0:
+			crit_rate += 0.5
+		## 鐵骨：升級多一點血
+		if path_style == "iron":
+			max_hp += 2
+			hp = mini(effective_max_hp(), hp + 2)
+		## 劍道：偶數等再 +1 攻
+		if path_style == "sword" and level % 2 == 0:
+			atk += 1
+		msgs.append("等級提升 → Lv%d（HP %d · 攻 %d · 防 %d）" % [level, max_hp, atk, def_stat])
+	return {"gained": gained, "levels": levels, "messages": msgs}
+
+
+## 綜合戰力（路線建議／軟鎖用）
+func power_score() -> int:
+	var s := level * 3 + weapon_tier * 4 + effective_atk() + effective_def()
+	s += int(effective_crit() / 2.0)
+	if path_style != "":
+		s += 2
+	return s
+
+
+func path_display() -> String:
+	match path_style:
+		"sword":
+			return "劍道行者"
+		"soul":
+			return "星途觀測"
+		"iron":
+			return "鐵骨守護"
+		_:
+			return "未選擇"
+
+
+func set_path_style(p: String) -> void:
+	if p in ["sword", "soul", "iron", ""]:
+		path_style = p
+
+
 ## 敵強化倍率（NG0=1.0；1→1.15 … 上限約 1.30）
 func ng_enemy_mult() -> float:
 	if ng_plus <= 0:
@@ -197,6 +275,7 @@ func to_dict() -> Dictionary:
 		"player_name": player_name,
 		"level": level,
 		"xp": xp,
+		"path_style": path_style,
 		"gold": gold,
 		"max_hp": max_hp,
 		"hp": hp,
@@ -236,6 +315,9 @@ func from_dict(d: Dictionary) -> void:
 	player_name = str(d.get("player_name", "小白"))
 	level = int(d.get("level", 1))
 	xp = int(d.get("xp", 0))
+	path_style = str(d.get("path_style", ""))
+	if path_style not in ["sword", "soul", "iron", ""]:
+		path_style = ""
 	gold = int(d.get("gold", 0))
 	max_hp = int(d.get("max_hp", 50))
 	hp = int(d.get("hp", max_hp))
@@ -285,6 +367,7 @@ func reset_new_game() -> void:
 		"player_name": "小白",
 		"level": 1,
 		"xp": 0,
+		"path_style": "",
 		"gold": 30,
 		"max_hp": 50,
 		"hp": 50,
