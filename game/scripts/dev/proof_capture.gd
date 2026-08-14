@@ -1,56 +1,52 @@
 extends SceneTree
-## 多場景截圖（官網用）
+## 多場景截圖（官網用）v3 — 探索地圖加厚
 ##   godot --path game --script res://scripts/dev/proof_capture.gd
 ## 輸出：../screenshots/proof_*.png
 
-enum Phase {
-	BOOT,
-	WAIT_TITLE,
-	CAP_TITLE,
-	JUMP_TOWN,
-	WAIT_TOWN,
-	CAP_TOWN,
-	OPEN_INV,
-	WAIT_INV,
-	CAP_INV,
-	CLOSE_INV,
-	JUMP_MIST,
-	WAIT_MIST,
-	CAP_MIST,
-	JUMP_CROSS,
-	WAIT_CROSS,
-	CAP_CROSS,
-	JUMP_FOREST,
-	WAIT_FOREST,
-	CAP_FOREST,
-	JUMP_COAST,
-	WAIT_COAST,
-	CAP_COAST,
-	SHOW_FORGE,
-	WAIT_FORGE,
-	CAP_FORGE,
-	SHOW_PATHS,
-	WAIT_PATHS,
-	CAP_PATHS,
-	SHOW_SOUL,
-	WAIT_SOUL,
-	CAP_SOUL,
-	SHOW_BATTLE,
-	WAIT_BATTLE,
-	CAP_BATTLE,
-	DONE,
-}
+## 每筆：file, tag, kind, map/mode, wait
+## kind: title | explore | inv_open | inv_close | forge | paths | soul | battle
+const SHOTS: Array = [
+	{"file": "proof_01_title.png", "tag": "title", "kind": "title", "wait": 50},
+	{"file": "proof_02_explore_town.png", "tag": "explore", "kind": "explore", "map": "town", "wait": 45},
+	{"file": "proof_03_inventory.png", "tag": "inventory", "kind": "inv_open", "wait": 28},
+	{"file": "proof_04_mist.png", "tag": "mist", "kind": "explore", "map": "mist_village", "wait": 40},
+	{"file": "proof_05_crossroads.png", "tag": "cross", "kind": "explore", "map": "crossroads", "wait": 40},
+	{"file": "proof_06_forest.png", "tag": "forest", "kind": "explore", "map": "forest", "wait": 40},
+	{"file": "proof_07_coast.png", "tag": "coast", "kind": "explore", "map": "coast", "wait": 40},
+	{"file": "proof_08_forge.png", "tag": "forge", "kind": "forge", "wait": 38},
+	{"file": "proof_09_weapon_paths.png", "tag": "paths", "kind": "paths", "wait": 38},
+	{"file": "proof_10_soul.png", "tag": "soul", "kind": "soul", "wait": 38},
+	{"file": "proof_11_battle.png", "tag": "battle", "kind": "battle", "mode": "road_bandit", "wait": 55},
+	## ── 0.13.2 加厚：更多域與次場景 ──
+	{"file": "proof_12_village.png", "tag": "explore", "kind": "explore", "map": "village", "wait": 42},
+	{"file": "proof_13_dojo.png", "tag": "explore", "kind": "explore", "map": "dojo", "wait": 42},
+	{"file": "proof_14_tower.png", "tag": "explore", "kind": "explore", "map": "tower_foyer", "wait": 42},
+	{"file": "proof_15_market.png", "tag": "explore", "kind": "explore", "map": "town_market", "wait": 42},
+	{"file": "proof_16_blackflame.png", "tag": "explore", "kind": "explore", "map": "blackflame_scar", "wait": 42},
+	{"file": "proof_17_starfall.png", "tag": "explore", "kind": "explore", "map": "starfall_plain", "wait": 42},
+	{"file": "proof_18_forest_lake.png", "tag": "forest", "kind": "explore", "map": "forest_lake", "wait": 42},
+	{"file": "proof_19_harbor.png", "tag": "coast", "kind": "explore", "map": "coast_harbor", "wait": 42},
+	{"file": "proof_20_mist_shrine.png", "tag": "mist", "kind": "explore", "map": "mist_shrine", "wait": 42},
+	{"file": "proof_21_hunt.png", "tag": "explore", "kind": "explore", "map": "hunting_grounds", "wait": 42},
+	{"file": "proof_22_dojo_peak.png", "tag": "explore", "kind": "explore", "map": "dojo_peak", "wait": 42},
+	{"file": "proof_23_coast_wreck.png", "tag": "coast", "kind": "explore", "map": "coast_wreck", "wait": 42},
+	{"file": "proof_24_caravan.png", "tag": "explore", "kind": "explore", "map": "caravan_camp", "wait": 42},
+]
 
-var _phase: Phase = Phase.BOOT
+enum Step { BOOT, ACT, WAIT, CAP, NEXT, DONE }
+
+var _step: Step = Step.BOOT
+var _idx: int = 0
 var _wait: int = 0
 var _main: Node = null
 var _out_dir: String = ""
 var _saved: PackedStringArray = PackedStringArray()
 var _errors: PackedStringArray = PackedStringArray()
+var _need_close_inv: bool = false
 
 
 func _initialize() -> void:
-	print("PROOF start multi-stage v2")
+	print("PROOF start multi-stage v3 shots=", SHOTS.size())
 	_out_dir = ProjectSettings.globalize_path("res://").path_join("../screenshots")
 	DirAccess.make_dir_recursive_absolute(_out_dir)
 	root.size = Vector2i(1280, 720)
@@ -61,145 +57,43 @@ func _initialize() -> void:
 
 
 func _process(_delta: float) -> bool:
-	match _phase:
-		Phase.BOOT:
+	match _step:
+		Step.BOOT:
 			var err := change_scene_to_file("res://scenes/main.tscn")
 			print("PROOF change_scene err=", err)
-			_phase = Phase.WAIT_TITLE
+			_idx = 0
+			_step = Step.ACT
 			_wait = 0
-		Phase.WAIT_TITLE:
+		Step.ACT:
+			if _idx >= SHOTS.size():
+				_step = Step.DONE
+				return false
+			var shot: Dictionary = SHOTS[_idx]
+			if _need_close_inv:
+				_call_proof("proof_close_inventory", [])
+				_need_close_inv = false
+			_run_action(shot)
+			_wait = 0
+			_step = Step.WAIT
+		Step.WAIT:
 			_wait += 1
-			_main = current_scene
-			if _wait >= 50 and _main != null:
-				_phase = Phase.CAP_TITLE
-		Phase.CAP_TITLE:
-			_capture("proof_01_title.png", "title")
-			_phase = Phase.JUMP_TOWN
-			_wait = 0
-		Phase.JUMP_TOWN:
-			_call_proof("proof_jump_explore", ["town"])
-			_phase = Phase.WAIT_TOWN
-			_wait = 0
-		Phase.WAIT_TOWN:
-			_wait += 1
-			if _wait >= 45:
-				_phase = Phase.CAP_TOWN
-		Phase.CAP_TOWN:
-			_capture("proof_02_explore_town.png", "explore")
-			_phase = Phase.OPEN_INV
-			_wait = 0
-		Phase.OPEN_INV:
-			_call_proof("proof_open_inventory", [])
-			_phase = Phase.WAIT_INV
-			_wait = 0
-		Phase.WAIT_INV:
-			_wait += 1
-			if _wait >= 25:
-				_phase = Phase.CAP_INV
-		Phase.CAP_INV:
-			_capture("proof_03_inventory.png", "inventory")
-			_phase = Phase.CLOSE_INV
-			_wait = 0
-		Phase.CLOSE_INV:
-			_call_proof("proof_close_inventory", [])
-			_phase = Phase.JUMP_MIST
-			_wait = 0
-		Phase.JUMP_MIST:
-			_call_proof("proof_jump_explore", ["mist_village"])
-			_phase = Phase.WAIT_MIST
-			_wait = 0
-		Phase.WAIT_MIST:
-			_wait += 1
-			if _wait >= 40:
-				_phase = Phase.CAP_MIST
-		Phase.CAP_MIST:
-			_capture("proof_04_mist.png", "mist")
-			_phase = Phase.JUMP_CROSS
-			_wait = 0
-		Phase.JUMP_CROSS:
-			_call_proof("proof_jump_explore", ["crossroads"])
-			_phase = Phase.WAIT_CROSS
-			_wait = 0
-		Phase.WAIT_CROSS:
-			_wait += 1
-			if _wait >= 40:
-				_phase = Phase.CAP_CROSS
-		Phase.CAP_CROSS:
-			_capture("proof_05_crossroads.png", "cross")
-			_phase = Phase.JUMP_FOREST
-			_wait = 0
-		Phase.JUMP_FOREST:
-			_call_proof("proof_jump_explore", ["forest"])
-			_phase = Phase.WAIT_FOREST
-			_wait = 0
-		Phase.WAIT_FOREST:
-			_wait += 1
-			if _wait >= 40:
-				_phase = Phase.CAP_FOREST
-		Phase.CAP_FOREST:
-			_capture("proof_06_forest.png", "forest")
-			_phase = Phase.JUMP_COAST
-			_wait = 0
-		Phase.JUMP_COAST:
-			_call_proof("proof_jump_explore", ["coast"])
-			_phase = Phase.WAIT_COAST
-			_wait = 0
-		Phase.WAIT_COAST:
-			_wait += 1
-			if _wait >= 40:
-				_phase = Phase.CAP_COAST
-		Phase.CAP_COAST:
-			_capture("proof_07_coast.png", "coast")
-			_phase = Phase.SHOW_FORGE
-			_wait = 0
-		Phase.SHOW_FORGE:
-			_call_proof("proof_show_forge", [])
-			_phase = Phase.WAIT_FORGE
-			_wait = 0
-		Phase.WAIT_FORGE:
-			_wait += 1
-			if _wait >= 35:
-				_phase = Phase.CAP_FORGE
-		Phase.CAP_FORGE:
-			_capture("proof_08_forge.png", "forge")
-			_phase = Phase.SHOW_PATHS
-			_wait = 0
-		Phase.SHOW_PATHS:
-			_call_proof("proof_show_paths", [])
-			_phase = Phase.WAIT_PATHS
-			_wait = 0
-		Phase.WAIT_PATHS:
-			_wait += 1
-			if _wait >= 35:
-				_phase = Phase.CAP_PATHS
-		Phase.CAP_PATHS:
-			_capture("proof_09_weapon_paths.png", "paths")
-			_phase = Phase.SHOW_SOUL
-			_wait = 0
-		Phase.SHOW_SOUL:
-			_call_proof("proof_show_soul", [])
-			_phase = Phase.WAIT_SOUL
-			_wait = 0
-		Phase.WAIT_SOUL:
-			_wait += 1
-			if _wait >= 35:
-				_phase = Phase.CAP_SOUL
-		Phase.CAP_SOUL:
-			_capture("proof_10_soul.png", "soul")
-			_phase = Phase.SHOW_BATTLE
-			_wait = 0
-		Phase.SHOW_BATTLE:
-			_call_proof("proof_show_battle", ["road_bandit"])
-			_phase = Phase.WAIT_BATTLE
-			_wait = 0
-		Phase.WAIT_BATTLE:
-			_wait += 1
-			if _wait >= 50:
-				_phase = Phase.CAP_BATTLE
-		Phase.CAP_BATTLE:
-			_capture("proof_11_battle.png", "battle")
-			_phase = Phase.DONE
-		Phase.DONE:
+			var shot_w: Dictionary = SHOTS[_idx]
+			var need: int = int(shot_w.get("wait", 40))
+			## 第一張 title 多等一下讓主場景就緒
+			if _idx == 0:
+				_main = current_scene
+				if _main == null:
+					return false
+			if _wait >= need:
+				_step = Step.CAP
+		Step.CAP:
+			var shot_c: Dictionary = SHOTS[_idx]
+			_capture(str(shot_c["file"]), str(shot_c["tag"]))
+			if str(shot_c.get("kind", "")) == "inv_open":
+				_need_close_inv = true
+			_idx += 1
+			_step = Step.ACT
+		Step.DONE:
 			_write_manifest()
 			print("PROOF done saved=%d errors=%d" % [_saved.size(), _errors.size()])
 			for p in _saved:
@@ -209,6 +103,29 @@ func _process(_delta: float) -> bool:
 			quit(0 if _errors.is_empty() else 1)
 			return true
 	return false
+
+
+func _run_action(shot: Dictionary) -> void:
+	var kind := str(shot.get("kind", "explore"))
+	match kind:
+		"title":
+			## 主場景載入後就是 title；不需額外呼叫
+			_main = current_scene
+			print("PROOF title ready")
+		"explore":
+			_call_proof("proof_jump_explore", [str(shot.get("map", "town"))])
+		"inv_open":
+			_call_proof("proof_open_inventory", [])
+		"forge":
+			_call_proof("proof_show_forge", [])
+		"paths":
+			_call_proof("proof_show_paths", [])
+		"soul":
+			_call_proof("proof_show_soul", [])
+		"battle":
+			_call_proof("proof_show_battle", [str(shot.get("mode", "road_bandit"))])
+		_:
+			_errors.append("unknown kind %s" % kind)
 
 
 func _call_proof(method: String, args: Array) -> void:
@@ -301,9 +218,10 @@ func _composite_fallback(tag: String) -> Image:
 
 func _write_manifest() -> void:
 	var lines: PackedStringArray = PackedStringArray()
-	lines.append("# proof capture manifest")
+	lines.append("# proof capture manifest v3")
 	lines.append("time=%s" % Time.get_datetime_string_from_system())
 	lines.append("viewport=%s" % str(root.size))
+	lines.append("planned=%d" % SHOTS.size())
 	lines.append("saved=%d" % _saved.size())
 	for p in _saved:
 		lines.append("file=%s" % p)
