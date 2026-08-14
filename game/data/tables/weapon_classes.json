@@ -1,0 +1,127 @@
+{
+  "schema": "weapon_classes_v1",
+  "version": 1,
+  "note": "武器流派 ≠ 三重養成。器=鍛造升階，魂=觀星戰魂，招=技能熟練。流派決定武器手感與被動。",
+  "classes": [
+    {
+      "id": "sword",
+      "name": "劍",
+      "title": "劍士",
+      "tagline": "平衡的刃",
+      "pros": ["攻防均衡，上手容易", "技能節奏穩，怒氣循環順", "裝備線最完整（新手友善）"],
+      "cons": ["極致輸出不如火槍／法", "坦度不如鎚／斧", "遠距無力"],
+      "play": "近戰中距離 · 普攻＋怒氣技輪轉",
+      "atk": 2, "def": 1, "hp": 0, "crit": 1.0, "speed": 0,
+      "starter_weapon": "meager_edge",
+      "color": "#c25e73"
+    },
+    {
+      "id": "bow",
+      "name": "弓",
+      "title": "遊俠",
+      "tagline": "等風的人",
+      "pros": ["遠距安全輸出", "暴擊成長佳", "適配疾影域節奏"],
+      "cons": ["近身脆弱", "怒氣技詠唱感較慢", "防具線較薄"],
+      "play": "保持距離 · 等破綻再射",
+      "atk": 2, "def": 0, "hp": -4, "crit": 3.0, "speed": 1,
+      "starter_weapon": "reed_bow",
+      "color": "#3e9b6b"
+    },
+    {
+      "id": "magic",
+      "name": "法",
+      "title": "星法",
+      "tagline": "把星屑當墨",
+      "pros": ["技能倍率高", "與戰魂／觀星協同最佳", "範圍感強"],
+      "cons": ["物防低", "星屑消耗感重", "被近身易崩"],
+      "play": "靠技能與魂器打節奏",
+      "atk": 1, "def": -1, "hp": -2, "crit": 2.5, "speed": 0,
+      "starter_weapon": "star_rod",
+      "color": "#6b6ad4"
+    },
+    {
+      "id": "fist",
+      "name": "拳",
+      "title": "拳師",
+      "tagline": "破勢在勤",
+      "pros": ["攻速高、破防灌條快", "適配道場阿波機制", "危急回血技契合"],
+      "cons": ["單下傷害偏低", "武器 thr 成長慢", "遠距差"],
+      "play": "貼身連打 · 灌破防",
+      "atk": 1, "def": 1, "hp": 4, "crit": 1.5, "speed": 2,
+      "starter_weapon": "wrap_gloves",
+      "color": "#d4a017"
+    },
+    {
+      "id": "axe",
+      "name": "斧",
+      "title": "斧衛",
+      "tagline": "一擊要有重量",
+      "pros": ["高單下傷害", "對重甲／石拳友好", "威嚇感強"],
+      "cons": ["出手慢", "失手懲罰大", "靈活性差"],
+      "play": "重擊窗口輸出",
+      "atk": 4, "def": 1, "hp": 2, "crit": 0.5, "speed": -1,
+      "starter_weapon": "notch_axe",
+      "color": "#8b4513"
+    },
+    {
+      "id": "hammer",
+      "name": "鎚",
+      "title": "鎚守",
+      "tagline": "站到最後",
+      "pros": ["血防最高向", "鍛造成功率隱性加成", "硬吃機制穩"],
+      "cons": ["輸出最低檔之一", "清雜慢", "追逃困難"],
+      "play": "坦克站樁 · 耗死對手",
+      "atk": 1, "def": 4, "hp": 12, "crit": 0.0, "speed": -1,
+      "starter_weapon": "anvil_hammer",
+      "color": "#514e59"
+    },
+    {
+      "id": "spear",
+      "name": "長槍",
+      "title": "槍騎",
+      "tagline": "比劍更長的一步",
+      "pros": ["中距離優勢", "對衝／迎擊加成", "控場感"],
+      "cons": ["狹窄地形弱", "轉向慢", "暴擊偏低"],
+      "play": "卡距離 · 迎擊",
+      "atk": 3, "def": 2, "hp": 2, "crit": 0.5, "speed": 0,
+      "starter_weapon": "ash_spear",
+      "color": "#4a7c59"
+    },
+    {
+      "id": "gun",
+      "name": "火槍",
+      "title": "火銃",
+      "tagline": "一響定生死",
+      "pros": ["爆發極高", "遠距秒殺窗口", "爽感強"],
+      "cons": ["換彈／後搖長", "近身極危", "容錯最低"],
+      "play": "遠距點射 · 拉開再開",
+      "atk": 5, "def": -1, "hp": -6, "crit": 4.0, "speed": 0,
+      "starter_weapon": "flint_gun",
+      "color": "#2b2630"
+    },
+    {
+      "id": "dart",
+      "name": "鏢",
+      "title": "影鏢",
+      "tagline": "真假同色的一手",
+      "pros": ["高速連擊", "適配白霧／看破節奏", "暴擊與命中感"],
+      "cons": ["單下低", "耐久差", "依賴走位"],
+      "play": "高速貼打 · 看破綻",
+      "atk": 2, "def": 0, "hp": -2, "crit": 3.5, "speed": 3,
+      "starter_weapon": "mist_darts",
+      "color": "#5a7a9a"
+    },
+    {
+      "id": "crystal",
+      "name": "水晶",
+      "title": "晶使",
+      "tagline": "把護盾織成刃",
+      "pros": ["防／血與輔助向", "魂槽親和", "生存與續航"],
+      "cons": ["輸出偏軟", "前期慢熱", "依賴材料"],
+      "play": "穩打 · 靠魂與護體",
+      "atk": 0, "def": 3, "hp": 10, "crit": 1.0, "speed": 0,
+      "starter_weapon": "shard_focus",
+      "color": "#7ec8e3"
+    }
+  ]
+}

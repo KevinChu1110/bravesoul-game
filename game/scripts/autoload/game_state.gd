@@ -18,7 +18,8 @@ var level: int = 1
 var xp: int = 0
 var gold: int = 30
 
-## 流派："" | sword | soul | iron（0.12 養成軸，非鎖死職業）
+## 武器流派 id（見 data/tables/weapon_classes.json）；與器／魂／招正交
+## 舊存檔 sword|soul|iron 會對應到 sword|magic|hammer
 var path_style: String = ""
 
 ## 簡易面板（之後接裝備／戰魂）
@@ -111,35 +112,34 @@ func effective_atk() -> int:
 		a += 3
 	a += soul_bonus_atk()
 	a += equip_bonus_atk()
-	if path_style == "sword":
-		a += 2 + level / 5
-	## 武器線與流派一致：額外契合
+	var wb := weapon_class_bonuses()
+	a += int(wb.get("atk", 0))
+	## 裝備武器線與所選流派一致
 	var wline := _equipped_weapon_line()
-	if wline != "" and wline == path_style:
+	var pid := _migrate_path_style(path_style)
+	if wline != "" and wline == pid:
 		a += 2
 	return a
 
 
 func effective_def() -> int:
 	var d := def_stat + soul_bonus_def() + equip_bonus_def()
-	if path_style == "iron":
-		d += 2 + level / 6
+	var wb := weapon_class_bonuses()
+	d += int(wb.get("def", 0))
 	return d
 
 
 func effective_max_hp() -> int:
 	var h := max_hp + soul_bonus_hp() + equip_bonus_hp()
-	if path_style == "iron":
-		h += 8 + level
+	var wb := weapon_class_bonuses()
+	h += int(wb.get("hp", 0))
 	return h
 
 
 func effective_crit() -> float:
 	var c := crit_rate + equip_bonus_crit()
-	if path_style == "soul":
-		c += 3.0 + float(level) * 0.15
-	if _equipped_weapon_line() == "soul" and path_style == "soul":
-		c += 2.0
+	var wb := weapon_class_bonuses()
+	c += float(wb.get("crit", 0))
 	return c
 
 
@@ -217,9 +217,10 @@ func xp_to_next() -> int:
 ## 加經驗；回傳 {gained, levels, messages}
 func add_xp(n: int) -> Dictionary:
 	var gained := maxi(0, n)
-	## 星途流派：戰鬥經驗略增
-	if path_style == "soul":
-		gained = int(round(float(gained) * 1.08))
+	## 法／弓流派：經驗略增；鎚：升級偏血
+	var pid := _migrate_path_style(path_style)
+	if pid in ["magic", "bow", "dart"]:
+		gained = int(round(float(gained) * 1.06))
 	xp += gained
 	var levels := 0
 	var msgs: PackedStringArray = []
@@ -236,12 +237,10 @@ func add_xp(n: int) -> Dictionary:
 			def_stat += 1
 		if level % 5 == 0:
 			crit_rate += 0.5
-		## 鐵骨：升級多一點血
-		if path_style == "iron":
+		if pid in ["hammer", "crystal"]:
 			max_hp += 2
 			hp = mini(effective_max_hp(), hp + 2)
-		## 劍道：偶數等再 +1 攻
-		if path_style == "sword" and level % 2 == 0:
+		if pid in ["sword", "axe", "gun"] and level % 2 == 0:
 			atk += 1
 		msgs.append("等級提升 → Lv%d（HP %d · 攻 %d · 防 %d）" % [level, max_hp, atk, def_stat])
 	return {"gained": gained, "levels": levels, "messages": msgs}
@@ -256,21 +255,72 @@ func power_score() -> int:
 	return s
 
 
-func path_display() -> String:
-	match path_style:
-		"sword":
-			return "劍道行者"
+func _migrate_path_style(p: String) -> String:
+	match p:
 		"soul":
-			return "星途觀測"
+			return "magic"
 		"iron":
-			return "鐵骨守護"
+			return "hammer"
 		_:
-			return "未選擇"
+			return p
+
+
+func path_display() -> String:
+	var id := _migrate_path_style(path_style)
+	if id == "":
+		return "未選武器流派"
+	if Engine.get_main_loop() is SceneTree:
+		var dt: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("DataTables")
+		if dt and dt.has_method("weapon_class_def"):
+			var d: Dictionary = dt.call("weapon_class_def", id)
+			if not d.is_empty():
+				return "%s·%s" % [str(d.get("name", id)), str(d.get("title", ""))]
+	match id:
+		"sword":
+			return "劍·劍士"
+		"bow":
+			return "弓·遊俠"
+		"magic":
+			return "法·星法"
+		"fist":
+			return "拳·拳師"
+		"axe":
+			return "斧·斧衛"
+		"hammer":
+			return "鎚·鎚守"
+		"spear":
+			return "槍·槍騎"
+		"gun":
+			return "火槍·火銃"
+		"dart":
+			return "鏢·影鏢"
+		"crystal":
+			return "水晶·晶使"
+		_:
+			return id
 
 
 func set_path_style(p: String) -> void:
-	if p in ["sword", "soul", "iron", ""]:
-		path_style = p
+	path_style = _migrate_path_style(p)
+
+
+func weapon_class_bonuses() -> Dictionary:
+	var id := _migrate_path_style(path_style)
+	var out := {"atk": 0, "def": 0, "hp": 0, "crit": 0.0, "speed": 0}
+	if id == "" or not (Engine.get_main_loop() is SceneTree):
+		return out
+	var dt: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("DataTables")
+	if dt == null or not dt.has_method("weapon_class_def"):
+		return out
+	var d: Dictionary = dt.call("weapon_class_def", id)
+	if d.is_empty():
+		return out
+	out.atk = int(d.get("atk", 0))
+	out.def = int(d.get("def", 0))
+	out.hp = int(d.get("hp", 0))
+	out.crit = float(d.get("crit", 0))
+	out.speed = int(d.get("speed", 0))
+	return out
 
 
 ## 敵強化倍率（NG0=1.0；1→1.15 … 上限約 1.30）
@@ -328,9 +378,7 @@ func from_dict(d: Dictionary) -> void:
 	player_name = str(d.get("player_name", "小白"))
 	level = int(d.get("level", 1))
 	xp = int(d.get("xp", 0))
-	path_style = str(d.get("path_style", ""))
-	if path_style not in ["sword", "soul", "iron", ""]:
-		path_style = ""
+	path_style = _migrate_path_style(str(d.get("path_style", "")))
 	gold = int(d.get("gold", 0))
 	max_hp = int(d.get("max_hp", 50))
 	hp = int(d.get("hp", max_hp))

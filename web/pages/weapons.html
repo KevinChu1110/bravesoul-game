@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>武器流派 — 翠嶺·兔勇者</title>
+  <meta name="description" content="十種武器流派：劍弓法拳斧鎚槍銃鏢晶。優缺點與玩法說明。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+  <script src="../config.js"></script>
+</head>
+<body data-page="weapons">
+  <header class="page-hero" style="--hero-img:url('../media/systems/class_select.jpg')">
+    <div class="container">
+      <div class="breadcrumb"><a href="../index.html">首頁</a> / 武器流派</div>
+      <h1>武器流派（10）</h1>
+      <p>選的是<strong>武器手感</strong>，不是鎖死職業。可與「器／魂／招」三重養成並存；同一角色能換流派，但主線養成會跟著偏科。</p>
+    </div>
+  </header>
+  <main class="page">
+    <div class="container">
+      <h2 class="section-h2"><span class="accent"></span><span>先分清楚</span></h2>
+      <p class="section-sub">以前官網的「劍道／星途／鐵骨」容易誤解——已改成真正的武器流派表。</p>
+      <div class="panel" style="margin-bottom:1.5rem">
+        <table>
+          <thead><tr><th>系統</th><th>是什麼</th><th>不是什麼</th></tr></thead>
+          <tbody>
+            <tr><td><strong>武器流派</strong></td><td>劍／弓／法／拳／斧／鎚／槍／火槍／鏢／水晶</td><td>不是完整職業樹（之後會加深技能線）</td></tr>
+            <tr><td><strong>器</strong></td><td>鐵匠鍛造、升階、裝備素質</td><td>不是抽卡</td></tr>
+            <tr><td><strong>魂（星途觀星）</strong></td><td>戰魂插件：偏科屬性，可拆換</td><td>不是付費轉蛋（足跡權重觀星）</td></tr>
+            <tr><td><strong>招</strong></td><td>技能習得與熟練升級</td><td>不是另一把武器</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="section-h2"><span class="accent"></span><span>十種流派 · 優缺點</span></h2>
+      <p class="section-sub">資料來源：遊戲表 <code>weapon_classes.json</code> · 遊戲內鍛造後可選</p>
+      <div class="weapon-grid" id="weapon-grid">
+        <p class="muted">載入中…</p>
+      </div>
+    </div>
+  </main>
+  <script src="../js/site.js"></script>
+  <script>
+    fetch("../data/weapon_classes.json")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var root = document.getElementById("weapon-grid");
+        root.innerHTML = "";
+        (data.classes || []).forEach(function (c) {
+          var card = document.createElement("article");
+          card.className = "weapon-card";
+          card.style.borderTop = "3px solid " + (c.color || "#c25e73");
+          var pros = (c.pros || []).map(function (p) { return "<li>" + p + "</li>"; }).join("");
+          var cons = (c.cons || []).map(function (p) { return "<li>" + p + "</li>"; }).join("");
+          card.innerHTML =
+            '<div class="icon-row">' +
+              '<div class="icon" style="background:' + (c.color || "#eee") + '22;display:grid;place-items:center;font-size:1.4rem;font-weight:800;color:' + (c.color || "#333") + '">' + (c.name || "?") + "</div>" +
+              "<div><h3>" + c.name + " · " + c.title + "</h3>" +
+              '<p class="tagline">' + (c.tagline || "") + "</p></div></div>" +
+            '<p class="muted" style="margin:0">玩法：' + (c.play || "") + "</p>" +
+            '<div class="split">' +
+              '<div><strong class="tag tag-pro">優點</strong><ul>' + pros + "</ul></div>" +
+              '<div><strong class="tag tag-con">缺點</strong><ul>' + cons + "</ul></div>" +
+            "</div>";
+          root.appendChild(card);
+        });
+      })
+      .catch(function () {
+        document.getElementById("weapon-grid").innerHTML =
+          '<p class="msg err">無法載入流派資料。請確認 <code>web/data/weapon_classes.json</code> 存在。</p>';
+      });
+  </script>
+</body>
+</html>

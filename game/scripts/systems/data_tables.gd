@@ -5,10 +5,12 @@ extends Node
 const COMBAT_PATH := "res://data/tables/combat.json"
 const EQUIP_PATH := "res://data/tables/equipment.json"
 const ITEMS_META_PATH := "res://data/tables/items_meta.json"
+const WEAPON_CLASS_PATH := "res://data/tables/weapon_classes.json"
 
 var combat: Dictionary = {}
 var equipment: Dictionary = {}
 var items_meta: Dictionary = {}
+var weapon_classes: Dictionary = {}
 var loaded: bool = false
 
 
@@ -20,9 +22,10 @@ func reload() -> void:
 	combat = _load_json(COMBAT_PATH)
 	equipment = _load_json(EQUIP_PATH)
 	items_meta = _load_json(ITEMS_META_PATH)
+	weapon_classes = _load_json(WEAPON_CLASS_PATH)
 	loaded = not combat.is_empty()
 	if loaded:
-		print("[DataTables] combat/equipment/items_meta loaded")
+		print("[DataTables] combat/equipment/items_meta/weapon_classes loaded")
 
 
 func _load_json(path: String) -> Dictionary:
@@ -63,6 +66,20 @@ func craft_recipes() -> Array:
 	if a is Array:
 		return a
 	return []
+
+
+func weapon_class_list() -> Array:
+	var a: Variant = weapon_classes.get("classes", [])
+	if a is Array:
+		return a
+	return []
+
+
+func weapon_class_def(id: String) -> Dictionary:
+	for c in weapon_class_list():
+		if str((c as Dictionary).get("id", "")) == id:
+			return c as Dictionary
+	return {}
 
 
 func warehouse_max() -> int:

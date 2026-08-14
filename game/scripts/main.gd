@@ -414,7 +414,7 @@ func _build_pause_layer() -> void:
 		_close_pause()
 		_go_online_panel()
 	)
-	_pause_btn(box, "流派／養成（%s）" % GameState.path_display(), func():
+	_pause_btn(box, "武器流派（%s）" % GameState.path_display(), func():
 		_close_pause()
 		_go_path_panel(false)
 	)
@@ -3308,7 +3308,7 @@ func _go_world_map() -> void:
 		buttons.append({"text": EventRuntime.title_button_label(), "cb": _go_event_panel})
 	if HuntSystem.is_unlocked():
 		buttons.append({"text": "星途獵場", "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
-	buttons.append({"text": "流派／養成", "cb": _go_path_panel})
+	buttons.append({"text": "武器流派", "cb": _go_path_panel})
 	buttons.append({"text": "返回當前", "cb": _hub_back})
 	_panel("世界地圖", body, buttons)
 
@@ -4224,7 +4224,7 @@ func _show_forge_panel() -> void:
 		buttons.append({"text": debt_label, "cb": _side_start_ding_debt})
 	if GameState.has_flag("c1_forged"):
 		buttons.append({"text": "職系武器／護具鍛造", "cb": _go_craft_panel})
-		buttons.append({"text": "流派／養成（%s）" % GameState.path_display(), "cb": _go_path_panel})
+		buttons.append({"text": "武器流派（%s）" % GameState.path_display(), "cb": _go_path_panel})
 	buttons.append({"text": "回到廣場", "cb": _go_c1_town})
 	_panel("鐵匠鋪 · 釘釘", body, buttons)
 
@@ -4270,36 +4270,39 @@ func _do_craft(recipe_index: int) -> void:
 
 
 func _go_path_panel(from_forge: bool = false) -> void:
-	var body := "流派決定「哪條養成長得快」，不是鎖死職業。\n"
-	body += "目前：%s · 戰力 %d · Lv%d（經驗 %d／%d）\n\n" % [
-		GameState.path_display(), GameState.power_score(), GameState.level, GameState.xp, GameState.xp_to_next()
+	var body := "【武器流派】選手感，不是鎖死職業。\n"
+	body += "【器／魂／招】另算：鐵匠鍛造 · 星讀觀星 · 技能熟練。\n\n"
+	body += "目前：%s · 戰力 %d · Lv%d\n\n" % [
+		GameState.path_display(), GameState.power_score(), GameState.level
 	]
-	body += "⚔ 劍道行者 — 攻擊／招式熟練↑\n"
-	body += "✦ 星途觀測 — 暴擊／經驗略↑ · 星芒技\n"
-	body += "🛡 鐵骨守護 — 血防↑ · 鐵骨吐息 · 鍛造更穩\n\n"
-	body += "鐵匠鍛造 · 星讀觀星 · 演武場練功 · 獵場 · 支線 都是養成，不必死卡主線。"
-	var buttons: Array = [
-		{"text": "選·劍道行者", "cb": func(): _set_path_and_back("sword", from_forge)},
-		{"text": "選·星途觀測", "cb": func(): _set_path_and_back("soul", from_forge)},
-		{"text": "選·鐵骨守護", "cb": func(): _set_path_and_back("iron", from_forge)},
-	]
+	body += "劍 弓 法 拳 斧 鎚 槍 火槍 鏢 水晶 — 詳見優缺點（官網「武器流派」頁）。"
+	var buttons: Array = []
+	for c in DataTables.weapon_class_list():
+		var id := str(c.get("id", ""))
+		var label := "%s·%s" % [c.get("name", id), c.get("title", "")]
+		var cid := id
+		buttons.append({"text": label, "cb": func(): _set_path_and_back(cid, from_forge)})
 	if from_forge:
 		buttons.append({"text": "稍後再選", "cb": _show_forge_panel})
 	else:
 		buttons.append({"text": "技能／招式", "cb": _go_skill_panel})
 		buttons.append({"text": "返回", "cb": _hub_back})
-	_panel("流派 · 三重養成", body, buttons)
+	_panel("武器流派（10）", body, buttons)
 
 
 func _set_path_and_back(p: String, from_forge: bool) -> void:
 	GameState.set_path_style(p)
-	## 流派技自動嘗試解鎖
-	for sid in ["star_pierce", "iron_guard", "blade_dance", "emergency_heal"]:
+	for sid in ["star_pierce", "iron_guard", "blade_dance", "emergency_heal", "slash"]:
 		SkillSystem.try_unlock(sid)
+	var d: Dictionary = DataTables.weapon_class_def(GameState.path_style)
+	var tip := str(d.get("play", ""))
+	var pros: Array = d.get("pros", [])
+	var pro0 := str(pros[0]) if pros.size() > 0 else ""
 	SaveManager.save_game()
 	_play_dialog([
-		{"speaker": "系統", "text": "你選定了【%s】。三軸仍可同養，這條只是長得更快。" % GameState.path_display()},
-		{"speaker": "系統", "text": "戰力 %d。不夠打就練功、鍛階、觀星——不必死卡一個門。" % GameState.power_score()},
+		{"speaker": "系統", "text": "選定武器流派【%s】。" % GameState.path_display()},
+		{"speaker": "系統", "text": "玩法：%s。%s" % [tip, pro0]},
+		{"speaker": "系統", "text": "星途觀星仍找星讀（戰魂）；不是職業名。戰力 %d。" % GameState.power_score()},
 	], func():
 		if from_forge:
 			_show_forge_panel()
@@ -4338,7 +4341,7 @@ func _try_forge() -> void:
 	var forge_rate := 0.70
 	if GameState.has_flag("meta.forge_debt_bonus"):
 		forge_rate = 0.88
-	if GameState.path_style == "iron":
+	if GameState.path_style in ["hammer", "crystal"]:
 		forge_rate = minf(0.95, forge_rate + 0.08)
 	## 消耗 1 鐵屑可提高成功率
 	var used_scrap := false

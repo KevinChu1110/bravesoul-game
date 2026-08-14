@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>帳號 — 翠嶺·兔勇者</title>
+  <meta name="description" content="註冊、登入、Google／GitHub OAuth。主線可不登入。" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+  <script src="../config.js"></script>
+</head>
+<body data-page="account">
+  <header class="page-hero" style="--hero-img:url('../media/hero_banner.jpg')">
+    <div class="container">
+      <div class="breadcrumb"><a href="../index.html">首頁</a> / 帳號</div>
+      <h1>星途帳號</h1>
+      <p>用於可選連線（市集、房間、殘影、雲存檔）。<strong>主線永遠可不登入通關。</strong></p>
+    </div>
+  </header>
+  <main class="page">
+    <div class="container" style="display:grid;gap:1.25rem;max-width:520px">
+      <div class="panel">
+        <h2 class="section-h2" style="font-size:1.05rem"><span class="accent"></span><span>第三方登入（OAuth）</span></h2>
+        <p class="section-sub">需在 Supabase Dashboard 開啟對應 Provider，並把此站網址加到 Redirect URLs。</p>
+        <div style="display:grid;gap:0.5rem">
+          <button type="button" class="btn btn-oauth" id="oauth-google">用 Google 繼續</button>
+          <button type="button" class="btn btn-oauth" id="oauth-github">用 GitHub 繼續</button>
+          <button type="button" class="btn btn-oauth" id="oauth-discord">用 Discord 繼續</button>
+        </div>
+        <p class="msg" id="oauth-msg" role="status"></p>
+        <p class="muted">回調網址建議：<code id="redirect-hint"></code></p>
+      </div>
+
+      <div class="panel">
+        <h2 class="section-h2" style="font-size:1.05rem"><span class="accent"></span><span>Email 註冊／登入</span></h2>
+        <form class="form-grid" id="reg-form" autocomplete="on">
+          <div>
+            <label for="reg-email">Email</label>
+            <input id="reg-email" type="email" required placeholder="you@example.com" />
+          </div>
+          <div>
+            <label for="reg-pass">密碼（至少 6 碼）</label>
+            <input id="reg-pass" type="password" required minlength="6" />
+          </div>
+          <div>
+            <label for="reg-pass2">再輸入一次（註冊時）</label>
+            <input id="reg-pass2" type="password" minlength="6" />
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.5rem">
+            <button type="submit" class="btn btn-primary" id="reg-btn">建立帳號</button>
+            <button type="button" class="btn btn-ghost" id="login-btn">改為登入</button>
+          </div>
+          <p class="msg" id="reg-msg" role="status"></p>
+        </form>
+        <p class="muted">註冊後請到遊戲內 Esc → 連線／帳號 用同一組 Email 登入。</p>
+      </div>
+
+      <div class="panel">
+        <h2 class="section-h2" style="font-size:1.05rem"><span class="accent"></span><span>遊戲下載</span></h2>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem">
+          <a class="btn btn-primary" id="itch-link" href="https://itch.io">itch（準備中）</a>
+          <a class="btn btn-ghost" id="repo-link" href="https://github.com/KevinChu1110/bravesoul-game">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="../js/site.js"></script>
+  <script>
+    (function () {
+      var cfg = window.BRAVESOUL || {};
+      var redirect = location.origin + location.pathname.replace(/[^/]+$/, "") + "account.html";
+      // if file:// preview
+      if (location.protocol === "file:") {
+        redirect = (cfg.pages || "https://kevinchu1110.github.io/bravesoul-game/") + "pages/account.html";
+      } else {
+        redirect = location.href.split("#")[0];
+      }
+      document.getElementById("redirect-hint").textContent = redirect;
+      if (cfg.repo) document.getElementById("repo-link").href = cfg.repo;
+      if (cfg.itch) document.getElementById("itch-link").href = cfg.itch;
+
+      function setMsg(id, text, ok) {
+        var el = document.getElementById(id);
+        el.textContent = text || "";
+        el.className = "msg " + (ok ? "ok" : (text ? "err" : ""));
+      }
+
+      function authUrl(path, query) {
+        var base = String(cfg.supabaseUrl || "").replace(/\/$/, "") + path;
+        if (query) base += (base.indexOf("?") >= 0 ? "&" : "?") + query;
+        return base;
+      }
+
+      function oauth(provider) {
+        var key = cfg.supabaseAnonKey || "";
+        if (!cfg.supabaseUrl || !key) {
+          setMsg("oauth-msg", "尚未設定 Supabase（config.js）", false);
+          return;
+        }
+        // Supabase GoTrue authorize
+        var q =
+          "provider=" + encodeURIComponent(provider) +
+          "&redirect_to=" + encodeURIComponent(redirect);
+        var url = authUrl("/auth/v1/authorize", q);
+        // apikey as header can't be set on navigation; Supabase accepts apikey query for authorize in some setups
+        url += "&apikey=" + encodeURIComponent(key);
+        setMsg("oauth-msg", "前往 " + provider + " …（若失敗請在 Dashboard 開啟 Provider 並加入 Redirect URL）", true);
+        location.href = url;
+      }
+
+      document.getElementById("oauth-google").onclick = function () { oauth("google"); };
+      document.getElementById("oauth-github").onclick = function () { oauth("github"); };
+      document.getElementById("oauth-discord").onclick = function () { oauth("discord"); };
+
+      // handle OAuth return hash tokens (optional toast)
+      if (location.hash && location.hash.indexOf("access_token") >= 0) {
+        setMsg("oauth-msg", "OAuth 回調成功。請回遊戲內登入或重新整理連線狀態。", true);
+      }
+
+      var mode = "signup";
+      var form = document.getElementById("reg-form");
+      document.getElementById("login-btn").onclick = function () {
+        mode = mode === "signup" ? "login" : "signup";
+        document.getElementById("reg-btn").textContent = mode === "signup" ? "建立帳號" : "登入";
+        document.getElementById("login-btn").textContent = mode === "signup" ? "改為登入" : "改回註冊";
+        setMsg("reg-msg", mode === "signup" ? "目前：註冊" : "目前：登入", true);
+      };
+
+      form.onsubmit = async function (ev) {
+        ev.preventDefault();
+        var email = document.getElementById("reg-email").value.trim();
+        var pass = document.getElementById("reg-pass").value;
+        var pass2 = document.getElementById("reg-pass2").value;
+        if (pass.length < 6) { setMsg("reg-msg", "密碼至少 6 碼", false); return; }
+        if (mode === "signup" && pass !== pass2) { setMsg("reg-msg", "兩次密碼不一致", false); return; }
+        var key = cfg.supabaseAnonKey || "";
+        if (!cfg.supabaseUrl || !key) { setMsg("reg-msg", "未設定後端", false); return; }
+        setMsg("reg-msg", "連線中…", true);
+        try {
+          var path = mode === "signup" ? "/auth/v1/signup" : "/auth/v1/token?grant_type=password";
+          var body = mode === "signup"
+            ? { email: email, password: pass, data: { app: "cuiling_bravesoul", source: "account_page" } }
+            : { email: email, password: pass };
+          var res = await fetch(String(cfg.supabaseUrl).replace(/\/$/, "") + path, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": key,
+              "Authorization": "Bearer " + key
+            },
+            body: JSON.stringify(body)
+          });
+          var data = {};
+          try { data = await res.json(); } catch (e) {}
+          if (!res.ok) throw new Error(data.error_description || data.msg || data.error || data.message || ("HTTP " + res.status));
+          setMsg("reg-msg", mode === "signup" ? "註冊成功！請到遊戲內登入。" : "登入成功（網頁測試）。", true);
+        } catch (e) {
+          var t = String(e.message || e);
+          if (/already|exists|registered/i.test(t)) t = "此 Email 已註冊。";
+          if (/Invalid login/i.test(t)) t = "帳號或密碼錯誤。";
+          setMsg("reg-msg", t, false);
+        }
+      };
+    })();
+  </script>
+</body>
+</html>

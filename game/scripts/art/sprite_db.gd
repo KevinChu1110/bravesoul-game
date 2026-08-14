@@ -151,6 +151,14 @@ static func explore_entity_path(entity_id: String) -> String:
 			return "%s/npcs/wind_ear.png" % ROOT
 		"tide_roar":
 			return "%s/npcs/tide_roar.png" % ROOT
+		"silk":
+			return "%s/npcs/silk.png" % ROOT
+		"amber":
+			return "%s/npcs/amber.png" % ROOT
+		"ronin":
+			return "%s/npcs/ronin.png" % ROOT
+		"knight_orphan":
+			return "%s/npcs/knight_orphan.png" % ROOT
 		# Boss markers
 		"wolf":
 			return "%s/bosses/wolf_icon.png" % ROOT
@@ -266,13 +274,13 @@ static func speaker_portrait(speaker: String) -> Texture2D:
 		"行商", "行商頭領", "caravan_chief":
 			id = "caravan_chief"
 		"絲絨", "silk":
-			id = "star"  ## 暫用星讀調色系半身；後補專圖
+			id = "silk"
 		"琥珀", "amber":
-			id = "caravan_chief"
+			id = "amber"
 		"黑焰浪人", "浪人", "ronin":
-			id = "scar_lord"  ## 暫用疤主影調；後補專圖
+			id = "ronin"
 		"遺孤少年", "knight_orphan":
-			id = "sprout"
+			id = "knight_orphan"
 		"系統", "旁白", "系統·教學":
 			return null
 		_:
