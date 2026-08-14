@@ -1,5 +1,10 @@
 # 勇者之魂 · Facebook 粉專設定與一週貼文
 
+## 已建立
+
+- **粉專**：https://www.facebook.com/people/%E5%8B%87%E8%80%85%E4%B9%8B%E9%AD%82-Brave-Soul/61593420116778/
+- 官網 `web/config.js` 的 `facebook` 已指向此頁（頁尾會顯示 Facebook 連結）
+
 ## 建立粉專（5 分鐘）
 
 1. 開 [Meta Business Suite](https://business.facebook.com/) 或 Facebook → 建立粉絲專頁  
