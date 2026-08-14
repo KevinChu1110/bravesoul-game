@@ -485,15 +485,18 @@ func _apply_map_art(id: String) -> void:
 				bg_tex = SpriteDB.map_bg(prefix if prefix != "mist" else "mist_village")
 				if bg_tex:
 					break
-	if bg_tex:
+	var has_scenic_bg := bg_tex != null
+	if has_scenic_bg:
+		## 完整顯示手繪底圖（舊版 0.55 透明度 + 不透明 tile 會蓋成「一片木地板」）
 		_floor.texture = bg_tex
-		_floor.modulate = Color(0.55, 0.55, 0.6, 0.55)
-		_floor_tint.color = Color(0, 0, 0, 0.08)
+		_floor.modulate = Color(1, 1, 1, 1)
+		_floor.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		_floor_tint.color = Color(0.05, 0.04, 0.08, 0.12)
 	else:
 		_floor.texture = null
 		_floor_tint.color = Color(0.12, 0.1, 0.1, 0.5)
 
-	_build_tilemap(art_id if art_id != "" else id)
+	_build_tilemap(art_id if art_id != "" else id, has_scenic_bg)
 
 	var banner_path := "res://assets/sprites/maps/%s_banner.png" % art_id
 	if not ResourceLoader.exists(banner_path):
@@ -535,10 +538,12 @@ func _get_or_make_tileset(kind: String) -> TileSet:
 	return ts
 
 
-func _build_tilemap(map_id_s: String) -> void:
+func _build_tilemap(map_id_s: String, scenic_bg: bool = false) -> void:
 	if _tile_map == null or _tile_host == null:
 		return
 	_tile_host.position = FLOOR_RECT.position
+	_map_cols = int(FLOOR_RECT.size.x / TILE_PX)
+	_map_rows = int(FLOOR_RECT.size.y / TILE_PX)
 	var kind := SpriteDB.map_tile_kind(map_id_s)
 	var ts := _get_or_make_tileset(kind)
 	if ts == null:
@@ -548,8 +553,8 @@ func _build_tilemap(map_id_s: String) -> void:
 		return
 	_tile_map.tile_set = ts
 	_tile_map.clear()
-	_map_cols = int(FLOOR_RECT.size.x / TILE_PX)
-	_map_rows = int(FLOOR_RECT.size.y / TILE_PX)
+	## 有風景底圖時：不再鋪滿 tile（那會蓋掉 Gemini 場景圖，變成「醜地板」）
+	## 只在邊角極淡點綴；無底圖時才滿鋪可走地面
 	var seed_n := map_id_s.hash()
 	var variants := 4
 	var src: TileSetSource = ts.get_source(0)
@@ -557,16 +562,34 @@ func _build_tilemap(map_id_s: String) -> void:
 		var atlas := src as TileSetAtlasSource
 		if atlas.texture:
 			variants = maxi(1, int(atlas.texture.get_width() / TILE_PX))
-	for y in _map_rows:
-		for x in _map_cols:
-			var n := int(abs(sin(float(x * 12 + y * 7 + seed_n)) * 1000.0))
-			var vi := n % variants
-			if map_id_s in ["town", "dojo"] and (y == _map_rows / 2 or y == _map_rows / 2 + 1):
-				vi = 0
-			if map_id_s == "road" and abs(y - _map_rows / 2) <= 1:
-				vi = mini(1, variants - 1)
-			_tile_map.set_cell(Vector2i(x, y), 0, Vector2i(vi, 0))
-	_tile_map.modulate = Color(1, 1, 1, 0.92)
+	if scenic_bg:
+		## 輕量邊緣碎石／路徑，幾乎透明
+		for y in _map_rows:
+			for x in _map_cols:
+				var edge := x <= 1 or y <= 1 or x >= _map_cols - 2 or y >= _map_rows - 2
+				var path := false
+				if map_id_s in ["town", "dojo"] and (y == _map_rows / 2 or y == _map_rows / 2 + 1):
+					path = true
+				if map_id_s == "road" and abs(y - _map_rows / 2) <= 1:
+					path = true
+				if not edge and not path:
+					continue
+				if edge and (x + y + seed_n) % 3 != 0:
+					continue
+				var n := int(abs(sin(float(x * 12 + y * 7 + seed_n)) * 1000.0))
+				_tile_map.set_cell(Vector2i(x, y), 0, Vector2i(n % variants, 0))
+		_tile_map.modulate = Color(1, 1, 1, 0.22)
+	else:
+		for y in _map_rows:
+			for x in _map_cols:
+				var n := int(abs(sin(float(x * 12 + y * 7 + seed_n)) * 1000.0))
+				var vi := n % variants
+				if map_id_s in ["town", "dojo"] and (y == _map_rows / 2 or y == _map_rows / 2 + 1):
+					vi = 0
+				if map_id_s == "road" and abs(y - _map_rows / 2) <= 1:
+					vi = mini(1, variants - 1)
+				_tile_map.set_cell(Vector2i(x, y), 0, Vector2i(vi, 0))
+		_tile_map.modulate = Color(1, 1, 1, 0.92)
 	## 牆層 tileset
 	var wall_ts := _get_or_make_tileset("wall")
 	if _wall_map and wall_ts:
