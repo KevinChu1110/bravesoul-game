@@ -24,8 +24,8 @@ func _ready() -> void:
 	anchor_right = 0
 	anchor_bottom = 0
 	## 初始置底中（之後可拖）
-	custom_minimum_size = Vector2(430, 58)
-	size = Vector2(430, 58)
+	custom_minimum_size = Vector2(408, 54)
+	size = Vector2(408, 54)
 	_build()
 	call_deferred("_place_default")
 	if Engine.get_main_loop() is SceneTree:
@@ -41,7 +41,7 @@ func _ready() -> void:
 
 func _place_default() -> void:
 	var vp := get_viewport().get_visible_rect().size
-	var fallback := Vector2((vp.x - size.x) * 0.5, vp.y - size.y - 10)
+	var fallback := Vector2((vp.x - size.x) * 0.5, vp.y - size.y - 14)
 	if Engine.get_main_loop() is SceneTree:
 		var ul: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("UiLayout")
 		if ul and ul.has_method("has_pos") and ul.call("has_pos", "hotbar"):
@@ -55,45 +55,36 @@ func _build() -> void:
 	_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_bar.mouse_filter = Control.MOUSE_FILTER_STOP
 	var bs := StyleBoxFlat.new()
-	bs.bg_color = Color(0.96, 0.93, 0.86, 0.94)
-	bs.border_color = UiStyle.WOOD_DARK
-	bs.set_border_width_all(3)
-	bs.set_corner_radius_all(3)
+	bs.bg_color = Color(1, 1, 1, 0.94)
+	bs.border_color = UiStyle.LINE
+	bs.set_border_width_all(1)
+	bs.set_corner_radius_all(10)
 	bs.content_margin_left = 8
 	bs.content_margin_right = 8
-	bs.content_margin_top = 5
-	bs.content_margin_bottom = 5
+	bs.content_margin_top = 6
+	bs.content_margin_bottom = 6
+	bs.shadow_color = Color(0.17, 0.16, 0.20, 0.12)
+	bs.shadow_size = 6
+	bs.shadow_offset = Vector2(0, 2)
 	_bar.add_theme_stylebox_override("panel", bs)
 	add_child(_bar)
 
 	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 2)
+	col.add_theme_constant_override("separation", 0)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_bar.add_child(col)
 
-	var tip := Label.new()
-	tip.text = "快捷欄 · 拖曳外框移動 · 1–8 使用"
-	tip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	tip.add_theme_font_size_override("font_size", 9)
-	tip.add_theme_color_override("font_color", UiStyle.INK_DIM)
-	tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.add_child(tip)
-
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 4)
+	row.add_theme_constant_override("separation", 5)
 	row.mouse_filter = Control.MOUSE_FILTER_STOP
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.add_child(row)
 
 	for i in SLOT_N:
 		var slot := PanelContainer.new()
 		slot.custom_minimum_size = SLOT_SIZE
 		slot.mouse_filter = Control.MOUSE_FILTER_STOP
-		var ss := StyleBoxFlat.new()
-		ss.bg_color = Color(0.88, 0.84, 0.76, 1)
-		ss.border_color = UiStyle.WOOD
-		ss.set_border_width_all(2)
-		ss.set_corner_radius_all(2)
-		slot.add_theme_stylebox_override("panel", ss)
+		slot.add_theme_stylebox_override("panel", UiStyle.slot_style())
 		row.add_child(slot)
 		_slots.append(slot)
 

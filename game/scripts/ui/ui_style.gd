@@ -1,170 +1,250 @@
 class_name UiStyle
 extends RefCounted
-## 楓之谷風小 UI：淺木框、米色紙、細黑邊、小字、緊湊按鈕（非現代玻璃）
+## Artale 風格 UI：粉紅主色 · 白底卡片 · 深墨字 · 細線陰影
+## 參考 artale.live 官網 token，適配 Godot 遊戲內 HUD／面板。
 
-## 木框／紙底
-const WOOD := Color(0.42, 0.28, 0.14, 1.0)
-const WOOD_DARK := Color(0.28, 0.18, 0.10, 1.0)
-const WOOD_LIGHT := Color(0.62, 0.45, 0.28, 1.0)
-const PAPER := Color(0.96, 0.93, 0.86, 0.96)
-const PAPER_SOFT := Color(0.93, 0.89, 0.80, 0.94)
-const INK := Color(0.18, 0.14, 0.10, 1.0)
-const INK_DIM := Color(0.40, 0.34, 0.28, 1.0)
-const CREAM := Color(0.18, 0.14, 0.10, 1.0)  ## 文字主色（深）
-const CREAM_DIM := Color(0.42, 0.36, 0.30, 1.0)
-const GOLD := Color(0.72, 0.52, 0.12, 1.0)
-const COPPER := Color(0.55, 0.38, 0.16, 1.0)  ## 兼容舊呼叫＝木褐
-const COPPER_DIM := Color(0.48, 0.34, 0.18, 0.95)
-const MIST := Color(0.35, 0.50, 0.70, 1.0)
-const DANGER := Color(0.78, 0.18, 0.18, 1.0)
-const GOOD := Color(0.20, 0.55, 0.28, 1.0)
-## 血條／藍條／經驗（楓式）
-const HP_FILL := Color(0.86, 0.22, 0.22, 1.0)
-const HP_BG := Color(0.35, 0.12, 0.12, 0.95)
-const MP_FILL := Color(0.22, 0.42, 0.82, 1.0)
-const MP_BG := Color(0.12, 0.18, 0.35, 0.95)
-const EXP_FILL := Color(0.92, 0.78, 0.18, 1.0)
-const EXP_BG := Color(0.30, 0.26, 0.10, 0.95)
-const RAGE_FILL := Color(0.95, 0.55, 0.12, 1.0)
+## ── Brand / Key（玫瑰粉）──
+const KEY := Color(0.894, 0.518, 0.612, 1.0)       ## #e4849c
+const KEY_STRONG := Color(0.761, 0.369, 0.451, 1.0) ## #c25e73
+const KEY_DEEP := Color(0.659, 0.243, 0.333, 1.0)   ## #a83e55
+const KEY_SOFT := Color(0.984, 0.890, 0.914, 1.0)   ## #fbe3e9
+const KEY_FAINT := Color(0.992, 0.949, 0.961, 1.0)  ## #fdf2f5
+
+## ── Surface / Wood dark ──
+const WOOD_DARKEST := Color(0.125, 0.110, 0.125, 1.0) ## #201c20
+const WOOD_DARK := Color(0.169, 0.149, 0.188, 1.0)    ## #2b2630
+const WOOD_MID := Color(0.231, 0.200, 0.235, 1.0)     ## #3b333c
+const WOOD := WOOD_DARK  ## 兼容舊呼叫
+const WOOD_LIGHT := Color(0.55, 0.48, 0.55, 1.0)
+
+## ── Paper / Ink ──
+const PAPER := Color(0.969, 0.965, 0.973, 0.98)  ## #f7f6f8
+const PAPER_SOFT := Color(1.0, 1.0, 1.0, 0.98)
+const CREAM := Color(0.149, 0.141, 0.165, 1.0)  ## 標題字色＝ink
+const CREAM_DIM := Color(0.42, 0.408, 0.439, 1.0)
+const INK := Color(0.149, 0.141, 0.165, 1.0)    ## #26242a
+const INK_DIM := Color(0.420, 0.408, 0.439, 1.0) ## #6b6870
+const INK_FAINT := Color(0.647, 0.635, 0.671, 1.0)
+const LINE := Color(0.863, 0.847, 0.878, 1.0)    ## #dcd8e0
+const LINE_SOFT := Color(0.902, 0.886, 0.918, 1.0)
+
+const GOLD := KEY_STRONG
+const COPPER := KEY
+const COPPER_DIM := KEY_STRONG
+const MIST := Color(0.45, 0.48, 0.62, 1.0)
+const DANGER := KEY_DEEP
+const GOOD := Color(0.243, 0.608, 0.420, 1.0)  ## #3e9b6b
+
+## 血／藍／經驗
+const HP_FILL := Color(0.86, 0.28, 0.32, 1.0)
+const HP_BG := Color(0.22, 0.12, 0.14, 0.95)
+const MP_FILL := Color(0.55, 0.42, 0.82, 1.0)  ## 星屑偏紫
+const MP_BG := Color(0.14, 0.12, 0.22, 0.95)
+const EXP_FILL := KEY
+const EXP_BG := Color(0.22, 0.14, 0.16, 0.95)
+const RAGE_FILL := Color(0.95, 0.55, 0.25, 1.0)
 
 
-static func panel_style(accent: Color = WOOD) -> StyleBoxFlat:
+static func panel_style(accent: Color = LINE) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
-	s.bg_color = PAPER
-	s.border_color = accent
-	s.set_border_width_all(3)
-	s.border_width_left = 3
-	s.border_width_top = 3
-	s.border_width_right = 3
-	s.border_width_bottom = 3
-	s.set_corner_radius_all(4)
-	s.content_margin_left = 12
-	s.content_margin_right = 12
-	s.content_margin_top = 10
-	s.content_margin_bottom = 10
-	s.shadow_color = Color(0, 0, 0, 0.35)
-	s.shadow_size = 4
-	s.shadow_offset = Vector2(2, 2)
+	s.bg_color = PAPER_SOFT
+	s.border_color = accent if accent != LINE else LINE
+	s.set_border_width_all(1)
+	s.set_corner_radius_all(10)
+	s.content_margin_left = 14
+	s.content_margin_right = 14
+	s.content_margin_top = 12
+	s.content_margin_bottom = 12
+	s.shadow_color = Color(0.17, 0.16, 0.20, 0.14)
+	s.shadow_size = 8
+	s.shadow_offset = Vector2(0, 3)
 	return s
 
 
 static func panel_style_dark() -> StyleBoxFlat:
-	## 半透明木底（疊在場景上）
-	var s := panel_style(WOOD_DARK)
-	s.bg_color = Color(0.96, 0.93, 0.86, 0.88)
-	return s
-
-
-static func dialogue_style() -> StyleBoxFlat:
-	var s := panel_style(WOOD)
-	s.bg_color = Color(0.98, 0.95, 0.88, 0.97)
-	s.set_corner_radius_all(3)
-	s.content_margin_left = 14
-	s.content_margin_right = 14
-	s.content_margin_top = 10
+	## HUD 浮層：白底半透明
+	var s := panel_style(LINE)
+	s.bg_color = Color(1, 1, 1, 0.94)
+	s.content_margin_left = 10
+	s.content_margin_right = 10
+	s.content_margin_top = 8
 	s.content_margin_bottom = 8
-	s.border_color = WOOD_DARK
-	s.set_border_width_all(3)
+	s.set_corner_radius_all(8)
+	s.shadow_size = 6
 	return s
 
 
-static func chip_style() -> StyleBoxFlat:
+static func header_style() -> StyleBoxFlat:
+	## 標題列（粉柔）
 	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.94, 0.90, 0.80, 0.95)
-	s.border_color = WOOD_LIGHT
-	s.set_border_width_all(2)
-	s.set_corner_radius_all(3)
-	s.content_margin_left = 8
+	s.bg_color = KEY_SOFT
+	s.border_color = Color(0.949, 0.788, 0.827, 1.0)
+	s.set_border_width_all(0)
+	s.border_width_bottom = 1
+	s.set_corner_radius_all(0)
+	s.corner_radius_top_left = 8
+	s.corner_radius_top_right = 8
+	s.content_margin_left = 10
 	s.content_margin_right = 8
-	s.content_margin_top = 3
-	s.content_margin_bottom = 3
-	return s
-
-
-static func button_normal() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.94, 0.88, 0.72, 1.0)
-	s.border_color = WOOD_DARK
-	s.set_border_width_all(2)
-	s.set_corner_radius_all(3)
-	s.content_margin_left = 14
-	s.content_margin_right = 14
 	s.content_margin_top = 6
 	s.content_margin_bottom = 6
 	return s
 
 
+static func dialogue_style() -> StyleBoxFlat:
+	var s := panel_style(LINE)
+	s.bg_color = Color(1, 1, 1, 0.97)
+	s.set_corner_radius_all(12)
+	s.content_margin_left = 16
+	s.content_margin_right = 16
+	s.content_margin_top = 12
+	s.content_margin_bottom = 10
+	s.border_color = LINE
+	s.set_border_width_all(1)
+	s.shadow_size = 12
+	return s
+
+
+static func chip_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(1, 1, 1, 0.94)
+	s.border_color = LINE
+	s.set_border_width_all(1)
+	s.set_corner_radius_all(6)
+	s.content_margin_left = 8
+	s.content_margin_right = 8
+	s.content_margin_top = 3
+	s.content_margin_bottom = 3
+	s.shadow_color = Color(0.17, 0.16, 0.20, 0.08)
+	s.shadow_size = 3
+	s.shadow_offset = Vector2(0, 1)
+	return s
+
+
+static func button_normal() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(1, 1, 1, 1.0)
+	s.border_color = LINE
+	s.set_border_width_all(1)
+	s.set_corner_radius_all(6)
+	s.content_margin_left = 14
+	s.content_margin_right = 14
+	s.content_margin_top = 8
+	s.content_margin_bottom = 8
+	return s
+
+
 static func button_hover() -> StyleBoxFlat:
 	var s := button_normal()
-	s.bg_color = Color(1.0, 0.95, 0.78, 1.0)
-	s.border_color = GOLD
+	s.bg_color = KEY_FAINT
+	s.border_color = KEY
 	return s
 
 
 static func button_pressed() -> StyleBoxFlat:
 	var s := button_normal()
-	s.bg_color = Color(0.82, 0.72, 0.52, 1.0)
-	s.border_color = WOOD
+	s.bg_color = KEY_SOFT
+	s.border_color = KEY_STRONG
 	return s
 
 
 static func button_disabled() -> StyleBoxFlat:
 	var s := button_normal()
-	s.bg_color = Color(0.75, 0.72, 0.68, 0.7)
-	s.border_color = Color(0.5, 0.45, 0.4, 0.6)
+	s.bg_color = Color(0.94, 0.93, 0.95, 0.75)
+	s.border_color = LINE_SOFT
+	return s
+
+
+static func button_primary() -> StyleBoxFlat:
+	## Artale 主按鈕：粉紅漸層感（平面近似）
+	var s := StyleBoxFlat.new()
+	s.bg_color = KEY_STRONG
+	s.border_color = KEY_DEEP
+	s.set_border_width_all(0)
+	s.border_width_bottom = 2
+	s.set_corner_radius_all(6)
+	s.content_margin_left = 16
+	s.content_margin_right = 16
+	s.content_margin_top = 9
+	s.content_margin_bottom = 9
+	s.shadow_color = Color(0.66, 0.24, 0.33, 0.28)
+	s.shadow_size = 4
+	s.shadow_offset = Vector2(0, 2)
+	return s
+
+
+static func button_primary_hover() -> StyleBoxFlat:
+	var s := button_primary()
+	s.bg_color = KEY
 	return s
 
 
 static func style_button(btn: Button, primary: bool = false) -> void:
-	var normal := button_normal()
 	if primary:
-		normal.bg_color = Color(0.55, 0.72, 0.95, 1.0)  ## 楓式藍鈕
-		normal.border_color = Color(0.20, 0.32, 0.55, 1.0)
-	btn.add_theme_stylebox_override("normal", normal)
-	btn.add_theme_stylebox_override("hover", button_hover())
-	btn.add_theme_stylebox_override("pressed", button_pressed())
-	btn.add_theme_stylebox_override("focus", button_hover())
-	btn.add_theme_stylebox_override("disabled", button_disabled())
-	btn.add_theme_color_override("font_color", INK)
-	btn.add_theme_color_override("font_hover_color", INK)
-	btn.add_theme_color_override("font_pressed_color", WOOD_DARK)
-	btn.add_theme_color_override("font_disabled_color", Color(0.5, 0.48, 0.45, 0.75))
+		btn.add_theme_stylebox_override("normal", button_primary())
+		btn.add_theme_stylebox_override("hover", button_primary_hover())
+		btn.add_theme_stylebox_override("pressed", button_primary())
+		btn.add_theme_stylebox_override("focus", button_primary_hover())
+		btn.add_theme_stylebox_override("disabled", button_disabled())
+		btn.add_theme_color_override("font_color", Color.WHITE)
+		btn.add_theme_color_override("font_hover_color", Color.WHITE)
+		btn.add_theme_color_override("font_pressed_color", Color(1, 1, 1, 0.9))
+	else:
+		btn.add_theme_stylebox_override("normal", button_normal())
+		btn.add_theme_stylebox_override("hover", button_hover())
+		btn.add_theme_stylebox_override("pressed", button_pressed())
+		btn.add_theme_stylebox_override("focus", button_hover())
+		btn.add_theme_stylebox_override("disabled", button_disabled())
+		btn.add_theme_color_override("font_color", INK)
+		btn.add_theme_color_override("font_hover_color", KEY_STRONG)
+		btn.add_theme_color_override("font_pressed_color", KEY_DEEP)
+	btn.add_theme_color_override("font_disabled_color", INK_FAINT)
 	btn.add_theme_font_size_override("font_size", 14)
-	btn.custom_minimum_size = Vector2(0, 32)
+	btn.custom_minimum_size = Vector2(0, 36)
 
 
 static func style_progress(bar: ProgressBar, fill: Color, bg: Color) -> void:
 	var bg_s := StyleBoxFlat.new()
 	bg_s.bg_color = bg
 	bg_s.set_border_width_all(1)
-	bg_s.border_color = WOOD_DARK
-	bg_s.set_corner_radius_all(2)
+	bg_s.border_color = LINE
+	bg_s.set_corner_radius_all(4)
 	var fill_s := StyleBoxFlat.new()
 	fill_s.bg_color = fill
-	fill_s.set_corner_radius_all(1)
+	fill_s.set_corner_radius_all(3)
 	bar.add_theme_stylebox_override("background", bg_s)
 	bar.add_theme_stylebox_override("fill", fill_s)
 	bar.show_percentage = false
 
 
-static func dim_rect(parent: Control, alpha: float = 0.35) -> ColorRect:
+static func dim_rect(parent: Control, alpha: float = 0.45) -> ColorRect:
 	var d := ColorRect.new()
 	d.set_anchors_preset(Control.PRESET_FULL_RECT)
-	d.color = Color(0.08, 0.06, 0.04, alpha)
+	d.color = Color(0.08, 0.07, 0.10, alpha)
 	d.mouse_filter = Control.MOUSE_FILTER_STOP
 	parent.add_child(d)
 	return d
 
 
 static func name_tag_style() -> StyleBoxFlat:
-	## 角色頭上小名牌
 	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.98, 0.95, 0.88, 0.9)
-	s.border_color = WOOD_DARK
+	s.bg_color = Color(1, 1, 1, 0.94)
+	s.border_color = LINE
 	s.set_border_width_all(1)
-	s.set_corner_radius_all(2)
+	s.set_corner_radius_all(5)
 	s.content_margin_left = 6
 	s.content_margin_right = 6
 	s.content_margin_top = 1
 	s.content_margin_bottom = 1
+	s.shadow_color = Color(0.17, 0.16, 0.20, 0.12)
+	s.shadow_size = 3
+	return s
+
+
+static func slot_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.97, 0.96, 0.98, 1)
+	s.border_color = LINE
+	s.set_border_width_all(1)
+	s.set_corner_radius_all(6)
 	return s

@@ -57,16 +57,7 @@ func _build() -> void:
 	## 標題列＝拖曳把手
 	var head := PanelContainer.new()
 	head.mouse_filter = Control.MOUSE_FILTER_STOP
-	var hs := StyleBoxFlat.new()
-	hs.bg_color = Color(0.90, 0.84, 0.70, 1)
-	hs.border_color = UiStyle.WOOD_DARK
-	hs.set_border_width_all(1)
-	hs.set_corner_radius_all(2)
-	hs.content_margin_left = 8
-	hs.content_margin_right = 6
-	hs.content_margin_top = 4
-	hs.content_margin_bottom = 4
-	head.add_theme_stylebox_override("panel", hs)
+	head.add_theme_stylebox_override("panel", UiStyle.header_style())
 	outer.add_child(head)
 
 	var head_row := HBoxContainer.new()
@@ -74,10 +65,10 @@ func _build() -> void:
 	head.add_child(head_row)
 
 	_title = Label.new()
-	_title.text = "物品欄  ·  拖曳此列移動"
+	_title.text = "物品欄"
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_title.add_theme_font_size_override("font_size", 14)
-	_title.add_theme_color_override("font_color", UiStyle.WOOD_DARK)
+	_title.add_theme_color_override("font_color", UiStyle.KEY_STRONG)
 	_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	head_row.add_child(_title)
 

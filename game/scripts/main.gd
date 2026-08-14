@@ -310,7 +310,7 @@ func _build_pause_layer() -> void:
 
 	var dim := ColorRect.new()
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim.color = Color(0.04, 0.03, 0.06, 0.72)
+	dim.color = Color(0.08, 0.07, 0.10, 0.55)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	_pause_layer.add_child(dim)
 
@@ -320,30 +320,45 @@ func _build_pause_layer() -> void:
 	_pause_layer.add_child(center)
 
 	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(340, 0)
+	card.custom_minimum_size = Vector2(380, 0)
 	card.add_theme_stylebox_override("panel", UiStyle.panel_style())
 	center.add_child(card)
 
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 10)
-	card.add_child(box)
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 0)
+	card.add_child(outer)
 
+	var head := PanelContainer.new()
+	head.add_theme_stylebox_override("panel", UiStyle.header_style())
+	outer.add_child(head)
 	var title := Label.new()
-	var week := "二周目·迴響×%d" % GameState.ng_plus if GameState.ng_plus > 0 else "一周目"
-	title.text = "功能選單 · %s" % week
+	var week := "迴響×%d" % GameState.ng_plus if GameState.ng_plus > 0 else "一周目"
+	title.text = "選單  ·  %s" % week
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 24)
-	title.add_theme_color_override("font_color", UiStyle.CREAM)
-	box.add_child(title)
+	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_color_override("font_color", UiStyle.KEY_STRONG)
+	head.add_child(title)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 420)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	outer.add_child(scroll)
+
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(box)
 
 	var sub := Label.new()
-	sub.text = "HP %d／%d · %s · 金 %d · 星屑 %d" % [
-		GameState.hp, GameState.effective_max_hp(), GameState.weapon_name, GameState.gold, GameState.stardust
+	sub.text = "Lv%d · 戰力%d · HP %d／%d\n%s · 金 %d · 星屑 %d" % [
+		GameState.level, GameState.power_score(),
+		GameState.hp, GameState.effective_max_hp(),
+		GameState.weapon_name, GameState.gold, GameState.stardust
 	]
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	sub.add_theme_font_size_override("font_size", 13)
-	sub.add_theme_color_override("font_color", UiStyle.CREAM_DIM)
+	sub.add_theme_font_size_override("font_size", 12)
+	sub.add_theme_color_override("font_color", UiStyle.INK_DIM)
 	box.add_child(sub)
 
 	_pause_btn(box, "繼續", func():
@@ -1986,7 +2001,7 @@ func _panel(title: String, body: String, buttons: Array) -> void:
 
 	var bg := ColorRect.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0.55, 0.62, 0.72, 1)  ## 楓式天空灰藍
+	bg.color = Color(0.969, 0.965, 0.973, 1)  ## Artale paper
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(bg)
 

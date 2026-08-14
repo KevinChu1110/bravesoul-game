@@ -3,6 +3,8 @@ extends Control
 ## 俯視可走場景（Control 座標，免物理）。WASD／方向鍵移動，靠近按 E 互動。
 ## 2D：地圖底圖 + TileMap 地磚 + 實心格碰撞 + 角色／NPC。
 
+const UiStyle = preload("res://scripts/ui/ui_style.gd")
+
 signal interacted(id: String)
 signal hint_changed(text: String)
 
@@ -397,52 +399,35 @@ func _build_chrome() -> void:
 	_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_title)
 	var title_chip := PanelContainer.new()
-	title_chip.position = Vector2(232, 6)
+	title_chip.position = Vector2(248, 12)
 	title_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var tcs := StyleBoxFlat.new()
-	tcs.bg_color = Color(0.96, 0.93, 0.86, 0.9)
-	tcs.border_color = Color(0.42, 0.28, 0.14, 1)
-	tcs.set_border_width_all(2)
-	tcs.set_corner_radius_all(2)
-	tcs.content_margin_left = 8
-	tcs.content_margin_right = 8
-	tcs.content_margin_top = 2
-	tcs.content_margin_bottom = 2
-	title_chip.add_theme_stylebox_override("panel", tcs)
+	title_chip.add_theme_stylebox_override("panel", UiStyle.chip_style())
 	add_child(title_chip)
 	## 把 title 掛在 chip 上
 	remove_child(_title)
 	title_chip.add_child(_title)
 	_title.position = Vector2.ZERO
+	_title.add_theme_color_override("font_color", UiStyle.INK)
+	_title.add_theme_font_size_override("font_size", 13)
 
 	_build_minimap_ui()
 
-	## 底部楓式小提示（居中窄條）
+	## 底部窄提示（不拉滿全寬）
 	var hint_bar := PanelContainer.new()
-	hint_bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	hint_bar.offset_top = -36
-	hint_bar.offset_bottom = -6
-	hint_bar.offset_left = 200
-	hint_bar.offset_right = -200
+	hint_bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	hint_bar.anchor_left = 0.5
+	hint_bar.anchor_right = 0.5
+	hint_bar.offset_left = -160
+	hint_bar.offset_right = 160
+	hint_bar.offset_top = -78
+	hint_bar.offset_bottom = -52
 	hint_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var hs := StyleBoxFlat.new()
-	hs.bg_color = Color(0.98, 0.95, 0.88, 0.92)
-	hs.border_color = Color(0.42, 0.28, 0.14, 1)
-	hs.set_border_width_all(2)
-	hs.set_corner_radius_all(2)
-	hs.content_margin_left = 10
-	hs.content_margin_right = 10
-	hs.content_margin_top = 3
-	hs.content_margin_bottom = 3
-	hint_bar.add_theme_stylebox_override("panel", hs)
+	hint_bar.add_theme_stylebox_override("panel", UiStyle.chip_style())
 	add_child(hint_bar)
 	_hint = Label.new()
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint.add_theme_font_size_override("font_size", 12)
-	_hint.add_theme_color_override("font_color", Color(0.22, 0.16, 0.12, 1))
-	_hint.add_theme_color_override("font_shadow_color", Color(1, 1, 1, 0.5))
-	_hint.add_theme_constant_override("shadow_offset_x", 1)
-	_hint.add_theme_constant_override("shadow_offset_y", 1)
+	_hint.add_theme_color_override("font_color", UiStyle.INK_DIM)
 	_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hint_bar.add_child(_hint)
 
@@ -461,24 +446,15 @@ func _build_chrome() -> void:
 	_player.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_world.add_child(_player)
 
-	## 楓式角色名牌（頭上）
+	## 角色名牌（頭上）
 	var name_tag := PanelContainer.new()
 	name_tag.name = "PlayerNameTag"
 	name_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var nts := StyleBoxFlat.new()
-	nts.bg_color = Color(0.98, 0.95, 0.88, 0.92)
-	nts.border_color = Color(0.28, 0.18, 0.1, 1)
-	nts.set_border_width_all(1)
-	nts.set_corner_radius_all(2)
-	nts.content_margin_left = 5
-	nts.content_margin_right = 5
-	nts.content_margin_top = 0
-	nts.content_margin_bottom = 0
-	name_tag.add_theme_stylebox_override("panel", nts)
+	name_tag.add_theme_stylebox_override("panel", UiStyle.name_tag_style())
 	var ntl := Label.new()
 	ntl.text = str(GameState.player_name) if str(GameState.player_name) != "" else "小白"
 	ntl.add_theme_font_size_override("font_size", 10)
-	ntl.add_theme_color_override("font_color", Color(0.2, 0.14, 0.1, 1))
+	ntl.add_theme_color_override("font_color", UiStyle.INK)
 	ntl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	name_tag.add_child(ntl)
 	_world.add_child(name_tag)
@@ -914,18 +890,7 @@ func _build_minimap_ui() -> void:
 	_minimap_root.custom_minimum_size = Vector2(180, 140)
 	_minimap_root.size = Vector2(180, 140)
 	_minimap_root.mouse_filter = Control.MOUSE_FILTER_STOP
-	var ps := StyleBoxFlat.new()
-	ps.bg_color = Color(0.96, 0.93, 0.86, 0.92)
-	ps.border_color = Color(0.42, 0.28, 0.14, 1)
-	ps.set_border_width_all(3)
-	ps.set_corner_radius_all(2)
-	ps.content_margin_left = 6
-	ps.content_margin_right = 6
-	ps.content_margin_top = 4
-	ps.content_margin_bottom = 4
-	ps.shadow_color = Color(0, 0, 0, 0.3)
-	ps.shadow_size = 3
-	_minimap_root.add_theme_stylebox_override("panel", ps)
+	_minimap_root.add_theme_stylebox_override("panel", UiStyle.panel_style_dark())
 	add_child(_minimap_root)
 	call_deferred("_place_minimap_default")
 
@@ -936,29 +901,22 @@ func _build_minimap_ui() -> void:
 
 	var head := PanelContainer.new()
 	head.mouse_filter = Control.MOUSE_FILTER_STOP
-	var hps := StyleBoxFlat.new()
-	hps.bg_color = Color(0.90, 0.84, 0.70, 1)
-	hps.set_corner_radius_all(2)
-	hps.content_margin_left = 4
-	hps.content_margin_right = 4
-	hps.content_margin_top = 1
-	hps.content_margin_bottom = 1
-	head.add_theme_stylebox_override("panel", hps)
+	head.add_theme_stylebox_override("panel", UiStyle.header_style())
 	v.add_child(head)
 	var head_row := HBoxContainer.new()
 	head_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	head.add_child(head_row)
 	var ht := Label.new()
-	ht.text = "小地圖 · 拖移"
+	ht.text = "小地圖"
 	ht.add_theme_font_size_override("font_size", 11)
-	ht.add_theme_color_override("font_color", Color(0.28, 0.18, 0.1, 1))
+	ht.add_theme_color_override("font_color", UiStyle.KEY_STRONG)
 	ht.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ht.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head_row.add_child(ht)
 	var tip := Label.new()
 	tip.text = "M"
 	tip.add_theme_font_size_override("font_size", 10)
-	tip.add_theme_color_override("font_color", Color(0.45, 0.35, 0.22, 1))
+	tip.add_theme_color_override("font_color", UiStyle.INK_FAINT)
 	tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	head_row.add_child(tip)
 	## 拖曳小地圖（位置寫入存檔）

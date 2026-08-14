@@ -42,7 +42,7 @@ func _ensure_dim() -> void:
 	_dim = ColorRect.new()
 	_dim.name = "Dim"
 	_dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_dim.color = Color(0.02, 0.02, 0.05, 0.45)
+	_dim.color = Color(0.08, 0.07, 0.10, 0.42)
 	_dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	_dim.z_index = -1
 	add_child(_dim)
@@ -58,24 +58,24 @@ func _apply_look() -> void:
 		panel.offset_left = 48.0
 		panel.offset_right = -48.0
 	if speaker_label:
-		speaker_label.add_theme_color_override("font_color", UiStyle.WOOD_DARK)
+		speaker_label.add_theme_color_override("font_color", UiStyle.KEY_STRONG)
 		speaker_label.add_theme_font_size_override("font_size", 15)
 	if body_label:
 		body_label.add_theme_color_override("default_color", UiStyle.INK)
 		body_label.add_theme_font_size_override("normal_font_size", 15)
 	if continue_hint:
-		continue_hint.add_theme_color_override("font_color", UiStyle.INK_DIM)
+		continue_hint.add_theme_color_override("font_color", UiStyle.INK_FAINT)
 		continue_hint.add_theme_font_size_override("font_size", 11)
 		continue_hint.text = "▼ Space / E"
 	if accent:
-		accent.color = UiStyle.WOOD
-		accent.custom_minimum_size = Vector2(3, 0)
+		accent.color = UiStyle.KEY_STRONG
+		accent.custom_minimum_size = Vector2(4, 0)
 	if portrait_frame:
 		var ps := StyleBoxFlat.new()
-		ps.bg_color = Color(0.94, 0.90, 0.82, 1.0)
-		ps.border_color = UiStyle.WOOD_DARK
-		ps.set_border_width_all(2)
-		ps.set_corner_radius_all(2)
+		ps.bg_color = Color(1, 1, 1, 1.0)
+		ps.border_color = UiStyle.LINE
+		ps.set_border_width_all(1)
+		ps.set_corner_radius_all(8)
 		portrait_frame.add_theme_stylebox_override("panel", ps)
 		portrait_frame.custom_minimum_size = Vector2(110, 130)
 	if portrait:
