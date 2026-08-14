@@ -286,6 +286,40 @@ code {
   border: 1px solid var(--line-soft);
 }
 
+/* 裝備圖鑑 */
+.equip-filters { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.5rem; }
+.chip {
+  border: 1px solid var(--line); background: #fff; color: var(--ink-soft);
+  border-radius: 999px; padding: 0.4rem 0.9rem; font: inherit; font-weight: 700;
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--key); color: var(--key-deep); }
+.chip.active {
+  background: linear-gradient(180deg, var(--key), var(--key-deep));
+  color: #fff; border-color: var(--key-deep);
+}
+.equip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.equip-grid.compact { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.equip-card {
+  background: var(--cream); border: 1px solid var(--line-soft);
+  border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card);
+  display: flex; flex-direction: column;
+}
+.equip-card .thumb {
+  aspect-ratio: 1; background: var(--wood-dark);
+  display: grid; place-items: center; padding: 0.75rem;
+}
+.equip-card .thumb img { width: 100%; height: 100%; object-fit: contain; }
+.equip-card .thumb.look { background: #2a2430; }
+.equip-card .body { padding: 0.85rem 0.95rem 1rem; }
+.equip-card h3 { margin: 0 0 0.4rem; font-size: 1.02rem; font-weight: 800; }
+.equip-card .meta-row { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.4rem; }
+.equip-card .stats { margin: 0; font-size: 0.86rem; color: var(--ink-soft); font-weight: 600; }
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

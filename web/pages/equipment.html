@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>裝備圖鑑 — 勇者之魂</title>
+  <meta name="description" content="勇者之魂裝備圖鑑：武器、防具、飾品與鍛造材料。" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+  <script src="../config.js"></script>
+</head>
+<body data-page="equipment">
+  <header class="page-hero" style="--hero-img:url('../media/gemini/keyart_forge.png')">
+    <div class="container">
+      <div class="breadcrumb"><a href="../index.html">首頁</a> / 裝備圖鑑</div>
+      <h1>裝備圖鑑</h1>
+      <p>武器 · 防具 · 飾品。品質會影響隨機數值；造型會反映在探索與戰鬥。</p>
+    </div>
+  </header>
+  <main class="page">
+    <div class="container">
+      <div class="panel" style="margin-bottom:1.25rem">
+        <p style="margin:0 0 0.5rem"><strong>部位</strong>：武器／防具／飾品可同時穿戴，數值相加。</p>
+        <p style="margin:0 0 0.5rem"><strong>品質</strong>：凡品 → 良品 → 上品 → 秘寶（掉落或鍛造時隨機，影響數值浮動）。</p>
+        <p style="margin:0"><strong>造型</strong>：裝備後角色會換武器疊層、防具外觀與飾品；與「武器流派」可並用。</p>
+      </div>
+
+      <div class="equip-filters" id="filters">
+        <button type="button" class="chip active" data-filter="all">全部</button>
+        <button type="button" class="chip" data-filter="weapon">武器</button>
+        <button type="button" class="chip" data-filter="armor">防具</button>
+        <button type="button" class="chip" data-filter="accessory">飾品</button>
+      </div>
+
+      <h2 class="section-h2" style="margin-top:1.25rem"><span class="accent"></span><span>圖鑑</span></h2>
+      <p class="section-sub" id="count-line">載入中…</p>
+      <div class="equip-grid" id="equip-grid"></div>
+
+      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>外觀對照</span></h2>
+      <p class="section-sub">探索時疊在角色身上的圖層</p>
+      <div class="equip-grid compact" id="look-grid">
+        <article class="equip-card">
+          <div class="thumb look"><img src="../media/equipment/weapons/sword.png" alt="劍" /></div>
+          <div class="body"><h3>武器疊層</h3><p class="muted">依裝備 line／流派：劍弓法拳斧鎚槍銃鏢晶</p></div>
+        </article>
+        <article class="equip-card">
+          <div class="thumb look"><img src="../media/equipment/armor/plate.png" alt="鐵甲" /></div>
+          <div class="body"><h3>鐵甲</h3><p class="muted">騎士殘甲、灰燼甲片等</p></div>
+        </article>
+        <article class="equip-card">
+          <div class="thumb look"><img src="../media/equipment/armor/veil.png" alt="披風" /></div>
+          <div class="body"><h3>星紗披風</h3><p class="muted">星途防具外觀</p></div>
+        </article>
+        <article class="equip-card">
+          <div class="thumb look"><img src="../media/equipment/armor/leather.png" alt="皮甲" /></div>
+          <div class="body"><h3>皮甲</h3><p class="muted">通用防具外觀</p></div>
+        </article>
+      </div>
+
+      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>鍛造配方</span></h2>
+      <p class="section-sub">材料行／野外掉落收集後，找鐵匠釘釘</p>
+      <div class="panel" style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr><th>成品</th><th>金幣</th><th>材料</th><th>需求</th><th>提示</th></tr>
+          </thead>
+          <tbody id="craft-body">
+            <tr><td colspan="5" class="muted">載入中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top:1.5rem">
+        <a class="btn btn-primary" href="weapons.html">武器流派</a>
+        <a class="btn btn-ghost" href="systems.html">器／魂／招</a>
+        <a class="btn btn-ghost" href="guide.html">遊戲指南</a>
+      </p>
+    </div>
+  </main>
+  <script src="../js/site.js"></script>
+  <script>
+    (function () {
+      var SLOT_LABEL = { weapon: "武器", armor: "防具", accessory: "飾品" };
+      var LINE_LABEL = {
+        sword: "劍", soul: "星途", iron: "鐵骨",
+        bow: "弓", magic: "法", fist: "拳", axe: "斧", hammer: "鎚",
+        spear: "槍", gun: "銃", dart: "鏢", crystal: "晶"
+      };
+      var allItems = [];
+      var craftList = [];
+      var filter = "all";
+      var nameById = {};
+
+      function statsLine(s) {
+        if (!s) return "";
+        var parts = [];
+        if (s.atk) parts.push("攻 " + s.atk);
+        if (s.def) parts.push("防 " + s.def);
+        if (s.hp) parts.push("血 " + s.hp);
+        if (s.crit) parts.push("暴 " + s.crit + "%");
+        if (s.crit_dmg) parts.push("暴傷 " + s.crit_dmg + "%");
+        return parts.join(" · ") || "—";
+      }
+
+      function render() {
+        var grid = document.getElementById("equip-grid");
+        grid.innerHTML = "";
+        var list = allItems.filter(function (it) {
+          return filter === "all" || it.slot === filter;
+        });
+        list.sort(function (a, b) {
+          if (a.slot !== b.slot) return a.slot.localeCompare(b.slot);
+          return (a.tier || 0) - (b.tier || 0);
+        });
+        document.getElementById("count-line").textContent =
+          "共 " + list.length + " 件" + (filter === "all" ? "" : "（" + (SLOT_LABEL[filter] || filter) + "）");
+        list.forEach(function (it) {
+          var card = document.createElement("article");
+          card.className = "equip-card";
+          card.innerHTML =
+            '<div class="thumb"><img src="' + it.icon + '" alt="' + it.name + '" loading="lazy" /></div>' +
+            '<div class="body">' +
+              "<h3>" + it.name + "</h3>" +
+              '<div class="meta-row">' +
+                '<span class="tag">' + (SLOT_LABEL[it.slot] || it.slot) + "</span>" +
+                '<span class="tag tag-guide">T' + it.tier + "</span>" +
+                (it.line ? '<span class="tag tag-update">' + (LINE_LABEL[it.line] || it.line) + "</span>" : "") +
+              "</div>" +
+              '<p class="stats">' + statsLine(it.stats) + "</p>" +
+            "</div>";
+          grid.appendChild(card);
+        });
+      }
+
+      function renderCraft() {
+        var tb = document.getElementById("craft-body");
+        if (!craftList.length) {
+          tb.innerHTML = '<tr><td colspan="5" class="muted">尚無公開配方</td></tr>';
+          return;
+        }
+        tb.innerHTML = craftList.map(function (r) {
+          var mats = r.mats || {};
+          var matStr = Object.keys(mats).map(function (k) {
+            return k + " ×" + mats[k];
+          }).join("、");
+          var name = nameById[r.base_id] || r.base_id;
+          return "<tr>" +
+            "<td><strong>" + name + "</strong></td>" +
+            "<td>" + (r.gold || 0) + "</td>" +
+            "<td>" + matStr + "</td>" +
+            "<td>武器階 ≥ " + (r.need_tier || 1) + "</td>" +
+            "<td class=\"muted\">" + (r.hint || "") + "</td>" +
+            "</tr>";
+        }).join("");
+      }
+
+      document.getElementById("filters").addEventListener("click", function (ev) {
+        var btn = ev.target.closest("[data-filter]");
+        if (!btn) return;
+        filter = btn.getAttribute("data-filter");
+        document.querySelectorAll("#filters .chip").forEach(function (c) {
+          c.classList.toggle("active", c === btn);
+        });
+        render();
+      });
+
+      fetch("../data/equipment.json")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          allItems = data.items || [];
+          craftList = data.craft || [];
+          allItems.forEach(function (it) { nameById[it.id] = it.name; });
+          render();
+          renderCraft();
+        })
+        .catch(function () {
+          document.getElementById("equip-grid").innerHTML =
+            '<p class="msg err">無法載入裝備資料。</p>';
+        });
+    })();
+  </script>
+</body>
+</html>

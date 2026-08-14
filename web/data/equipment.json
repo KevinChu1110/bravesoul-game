@@ -1,0 +1,401 @@
+{
+  "schema": "web_equipment_v1",
+  "qualities": {
+    "common": {
+      "label": "凡品",
+      "color": "#aaa",
+      "roll_bonus": 0.0,
+      "weight": 55
+    },
+    "uncommon": {
+      "label": "良品",
+      "color": "#6c6",
+      "roll_bonus": 0.08,
+      "weight": 28
+    },
+    "rare": {
+      "label": "上品",
+      "color": "#59f",
+      "roll_bonus": 0.16,
+      "weight": 12
+    },
+    "epic": {
+      "label": "秘寶",
+      "color": "#c6f",
+      "roll_bonus": 0.28,
+      "weight": 5
+    }
+  },
+  "items": [
+    {
+      "id": "rusty_blade",
+      "name": "鏽劍",
+      "slot": "weapon",
+      "tier": 1,
+      "line": "sword",
+      "stats": {
+        "atk": 4,
+        "def": 0,
+        "hp": 0,
+        "crit": 2,
+        "crit_dmg": 5
+      },
+      "icon": "../media/equipment/rusty_blade.png"
+    },
+    {
+      "id": "meager_edge",
+      "name": "微末之刃",
+      "slot": "weapon",
+      "tier": 2,
+      "line": "sword",
+      "stats": {
+        "atk": 9,
+        "def": 0,
+        "hp": 0,
+        "crit": 4,
+        "crit_dmg": 10
+      },
+      "icon": "../media/equipment/meager_edge.png"
+    },
+    {
+      "id": "knight_saber",
+      "name": "騎士軍刀",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "sword",
+      "stats": {
+        "atk": 14,
+        "def": 0,
+        "hp": 0,
+        "crit": 6,
+        "crit_dmg": 15
+      },
+      "icon": "../media/equipment/knight_saber.png"
+    },
+    {
+      "id": "gale_edge",
+      "name": "疾風刃",
+      "slot": "weapon",
+      "tier": 4,
+      "line": "sword",
+      "stats": {
+        "atk": 18,
+        "def": 0,
+        "hp": 0,
+        "crit": 8,
+        "crit_dmg": 18
+      },
+      "icon": "../media/equipment/gale_edge.png"
+    },
+    {
+      "id": "dawn_blade",
+      "name": "晨光長劍",
+      "slot": "weapon",
+      "tier": 5,
+      "line": "sword",
+      "stats": {
+        "atk": 24,
+        "def": 1,
+        "hp": 4,
+        "crit": 7,
+        "crit_dmg": 20
+      },
+      "icon": "../media/equipment/dawn_blade.png"
+    },
+    {
+      "id": "star_fang",
+      "name": "星牙短匕",
+      "slot": "weapon",
+      "tier": 2,
+      "line": "soul",
+      "stats": {
+        "atk": 8,
+        "def": 0,
+        "hp": 0,
+        "crit": 10,
+        "crit_dmg": 22
+      },
+      "icon": "../media/equipment/star_fang.png"
+    },
+    {
+      "id": "nebula_needle",
+      "name": "星雲細針",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "soul",
+      "stats": {
+        "atk": 12,
+        "def": 0,
+        "hp": 2,
+        "crit": 14,
+        "crit_dmg": 28
+      },
+      "icon": "../media/equipment/nebula_needle.png"
+    },
+    {
+      "id": "hunt_claw",
+      "name": "溢地獵爪",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "soul",
+      "stats": {
+        "atk": 13,
+        "def": 0,
+        "hp": 0,
+        "crit": 12,
+        "crit_dmg": 24
+      },
+      "icon": "../media/equipment/hunt_claw.png"
+    },
+    {
+      "id": "void_quill",
+      "name": "虛空羽鋒",
+      "slot": "weapon",
+      "tier": 5,
+      "line": "soul",
+      "stats": {
+        "atk": 20,
+        "def": 0,
+        "hp": 2,
+        "crit": 16,
+        "crit_dmg": 35
+      },
+      "icon": "../media/equipment/void_quill.png"
+    },
+    {
+      "id": "iron_cudgel",
+      "name": "鐵骨重棒",
+      "slot": "weapon",
+      "tier": 2,
+      "line": "iron",
+      "stats": {
+        "atk": 8,
+        "def": 2,
+        "hp": 8,
+        "crit": 2,
+        "crit_dmg": 8
+      },
+      "icon": "../media/equipment/iron_cudgel.png"
+    },
+    {
+      "id": "bastion_blade",
+      "name": "壁壘厚刃",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "iron",
+      "stats": {
+        "atk": 12,
+        "def": 4,
+        "hp": 12,
+        "crit": 3,
+        "crit_dmg": 10
+      },
+      "icon": "../media/equipment/bastion_blade.png"
+    },
+    {
+      "id": "anchor_axe",
+      "name": "錨心戰斧",
+      "slot": "weapon",
+      "tier": 4,
+      "line": "iron",
+      "stats": {
+        "atk": 16,
+        "def": 5,
+        "hp": 16,
+        "crit": 3,
+        "crit_dmg": 12
+      },
+      "icon": "../media/equipment/anchor_axe.png"
+    },
+    {
+      "id": "ash_mail",
+      "name": "灰燼甲片",
+      "slot": "armor",
+      "tier": 1,
+      "line": "iron",
+      "stats": {
+        "atk": 0,
+        "def": 3,
+        "hp": 12,
+        "crit": 0,
+        "crit_dmg": 0
+      },
+      "icon": "../media/equipment/ash_mail.png"
+    },
+    {
+      "id": "knight_plate",
+      "name": "騎士殘甲",
+      "slot": "armor",
+      "tier": 3,
+      "line": "iron",
+      "stats": {
+        "atk": 0,
+        "def": 7,
+        "hp": 22,
+        "crit": 0,
+        "crit_dmg": 0
+      },
+      "icon": "../media/equipment/knight_plate.png"
+    },
+    {
+      "id": "star_veil",
+      "name": "星紗披風",
+      "slot": "armor",
+      "tier": 3,
+      "line": "soul",
+      "stats": {
+        "atk": 1,
+        "def": 4,
+        "hp": 14,
+        "crit": 4,
+        "crit_dmg": 8
+      },
+      "icon": "../media/equipment/star_veil.png"
+    },
+    {
+      "id": "star_pendant",
+      "name": "星屑墜",
+      "slot": "accessory",
+      "tier": 1,
+      "line": "soul",
+      "stats": {
+        "atk": 1,
+        "def": 0,
+        "hp": 5,
+        "crit": 5,
+        "crit_dmg": 12
+      },
+      "icon": "../media/equipment/star_pendant.png"
+    },
+    {
+      "id": "oak_charm",
+      "name": "橡心符",
+      "slot": "accessory",
+      "tier": 2,
+      "line": "iron",
+      "stats": {
+        "atk": 0,
+        "def": 2,
+        "hp": 10,
+        "crit": 1,
+        "crit_dmg": 5
+      },
+      "icon": "../media/equipment/oak_charm.png"
+    },
+    {
+      "id": "blade_ring",
+      "name": "鋒勢指環",
+      "slot": "accessory",
+      "tier": 2,
+      "line": "sword",
+      "stats": {
+        "atk": 2,
+        "def": 0,
+        "hp": 2,
+        "crit": 4,
+        "crit_dmg": 10
+      },
+      "icon": "../media/equipment/blade_ring.png"
+    }
+  ],
+  "craft": [
+    {
+      "base_id": "knight_saber",
+      "gold": 80,
+      "mats": {
+        "knight_shard": 2,
+        "iron_scrap": 2
+      },
+      "need_tier": 2,
+      "hint": "劍道中階 · 騎士域材料"
+    },
+    {
+      "base_id": "gale_edge",
+      "gold": 140,
+      "mats": {
+        "knight_shard": 3,
+        "oak_resin": 2,
+        "iron_scrap": 2
+      },
+      "need_tier": 3,
+      "hint": "劍道高階"
+    },
+    {
+      "base_id": "star_fang",
+      "gold": 70,
+      "mats": {
+        "star_ore": 2,
+        "dust_crumb": 1
+      },
+      "need_tier": 2,
+      "hint": "星途入門刃"
+    },
+    {
+      "base_id": "nebula_needle",
+      "gold": 120,
+      "mats": {
+        "star_ore": 3,
+        "mist_shard": 2
+      },
+      "need_tier": 2,
+      "hint": "星途中階"
+    },
+    {
+      "base_id": "iron_cudgel",
+      "gold": 65,
+      "mats": {
+        "iron_scrap": 3
+      },
+      "need_tier": 2,
+      "hint": "鐵骨入門"
+    },
+    {
+      "base_id": "bastion_blade",
+      "gold": 110,
+      "mats": {
+        "iron_scrap": 4,
+        "wolf_fang": 2
+      },
+      "need_tier": 2,
+      "hint": "鐵骨中階"
+    },
+    {
+      "base_id": "knight_plate",
+      "gold": 90,
+      "mats": {
+        "iron_scrap": 3,
+        "knight_shard": 2
+      },
+      "need_tier": 1,
+      "hint": "防具"
+    },
+    {
+      "base_id": "star_pendant",
+      "gold": 45,
+      "mats": {
+        "star_ore": 1
+      },
+      "need_tier": 1,
+      "hint": "飾品"
+    },
+    {
+      "base_id": "blade_ring",
+      "gold": 55,
+      "mats": {
+        "wolf_fang": 2,
+        "iron_scrap": 1
+      },
+      "need_tier": 1,
+      "hint": "劍道飾品"
+    },
+    {
+      "base_id": "oak_charm",
+      "gold": 50,
+      "mats": {
+        "oak_resin": 2
+      },
+      "need_tier": 1,
+      "hint": "鐵骨飾品"
+    }
+  ]
+}

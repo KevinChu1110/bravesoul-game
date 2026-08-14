@@ -2,7 +2,7 @@
 window.BRAVESOUL = {
   name: "勇者之魂",
   nameEn: "Brave Soul",
-  version: "0.14.2",
+  version: "0.14.3",
   repo: "https://github.com/KevinChu1110/bravesoul-game",
   pages: "https://kevinchu1110.github.io/bravesoul-game/",
   itch: "https://itch.io", // 有專案後改成真實 itch URL
