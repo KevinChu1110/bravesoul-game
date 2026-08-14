@@ -9,9 +9,9 @@ signal interacted(id: String)
 signal hint_changed(text: String)
 
 const SPEED := 240.0
-const PLAYER_SIZE := Vector2(48, 64)
+const PLAYER_SIZE := Vector2(56, 72)
 ## 腳底碰撞盒（相對 player_pos）
-const PLAYER_HIT := Rect2(10, 44, 28, 16)
+const PLAYER_HIT := Rect2(12, 52, 32, 16)
 const INTERACT_DIST := 64.0
 const WALK_FPS := 8.0
 
