@@ -19,42 +19,86 @@ static func player_walk(frame: int) -> Texture2D:
 	return tex("%s/player/rabbit_walk_%d_x3.png" % [ROOT, i])
 
 
-## 裝備武器疊層（依流派或已裝備武器）
-static func player_weapon_class_id() -> String:
-	## 優先 path_style；否則從裝備 base 推
-	var ps := str(GameState.path_style)
-	if ps != "" and ps not in ["soul", "iron", "magic_old"]:
-		## 已遷移的流派 id
-		if ps in ["sword", "bow", "magic", "fist", "axe", "hammer", "spear", "gun", "dart", "crystal"]:
-			return ps
-	## 從裝備 weapon 推
+## 從裝備實例讀 base 定義（含 line）
+static func _equip_inst(slot: String) -> Dictionary:
+	if GameState.equip_slots == null:
+		return {}
+	var uid := str(GameState.equip_slots.get(slot, ""))
+	if uid == "" or not GameState.equip_worn.has(uid):
+		return {}
+	return GameState.equip_worn[uid] as Dictionary
+
+
+static func _equip_line(slot: String) -> String:
+	var inst := _equip_inst(slot)
+	if inst.is_empty():
+		return ""
+	## 實例上可能有 line；否則查表
+	var line := str(inst.get("line", ""))
+	if line != "":
+		return line
+	var base_id := str(inst.get("base_id", ""))
 	if Engine.get_main_loop() is SceneTree:
 		var es: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("EquipmentSystem")
-		if es and es.has_method("find_any"):
-			var uid := str(GameState.equip_slots.get("weapon", "")) if GameState.equip_slots else ""
-			if uid != "":
-				var inst: Dictionary = es.call("find_any", uid)
-				var base_id := str(inst.get("base_id", inst.get("id", "")))
-				if base_id.find("bow") >= 0 or base_id.find("arrow") >= 0:
-					return "bow"
-				if base_id.find("staff") >= 0 or base_id.find("wand") >= 0 or base_id.find("tome") >= 0:
-					return "magic"
-				if base_id.find("axe") >= 0:
-					return "axe"
-				if base_id.find("hammer") >= 0 or base_id.find("mace") >= 0:
-					return "hammer"
-				if base_id.find("spear") >= 0 or base_id.find("lance") >= 0:
-					return "spear"
-				if base_id.find("gun") >= 0 or base_id.find("rifle") >= 0:
-					return "gun"
-				if base_id.find("dart") >= 0 or base_id.find("kunai") >= 0:
-					return "dart"
-				if base_id.find("crystal") >= 0 or base_id.find("orb") >= 0:
-					return "crystal"
-				if base_id.find("fist") >= 0 or base_id.find("glove") >= 0:
-					return "fist"
-				if base_id.find("sword") >= 0 or base_id.find("blade") >= 0 or GameState.weapon_name != "空手":
-					return "sword"
+		if es and es.has_method("base_def"):
+			var def: Dictionary = es.call("base_def", base_id)
+			return str(def.get("line", ""))
+	return ""
+
+
+static func _line_to_weapon_visual(line: String) -> String:
+	match line:
+		"sword", "bow", "magic", "fist", "axe", "hammer", "spear", "gun", "dart", "crystal":
+			return line
+		"soul":
+			return "crystal"
+		"iron":
+			return "hammer"
+		_:
+			return ""
+
+
+## 裝備武器疊層（優先已裝備武器 → 流派）
+static func player_weapon_class_id() -> String:
+	## 1) 已裝備武器的 line / base_id
+	var wline := _equip_line("weapon")
+	var from_line := _line_to_weapon_visual(wline)
+	if from_line != "":
+		return from_line
+	var inst := _equip_inst("weapon")
+	if not inst.is_empty():
+		var base_id := str(inst.get("base_id", inst.get("id", ""))).to_lower()
+		var name_s := str(inst.get("name", "")).to_lower()
+		var blob := base_id + " " + name_s
+		if blob.find("bow") >= 0 or blob.find("弓") >= 0:
+			return "bow"
+		if blob.find("staff") >= 0 or blob.find("rod") >= 0 or blob.find("法") >= 0:
+			return "magic"
+		if blob.find("axe") >= 0 or blob.find("斧") >= 0:
+			return "axe"
+		if blob.find("hammer") >= 0 or blob.find("cudgel") >= 0 or blob.find("鎚") >= 0 or blob.find("棒") >= 0:
+			return "hammer"
+		if blob.find("spear") >= 0 or blob.find("槍") >= 0:
+			return "spear"
+		if blob.find("gun") >= 0 or blob.find("銃") >= 0:
+			return "gun"
+		if blob.find("dart") >= 0 or blob.find("鏢") >= 0 or blob.find("針") >= 0:
+			return "dart"
+		if blob.find("crystal") >= 0 or blob.find("orb") >= 0 or blob.find("星") >= 0:
+			return "crystal"
+		if blob.find("fist") >= 0 or blob.find("claw") >= 0 or blob.find("拳") >= 0 or blob.find("爪") >= 0:
+			return "fist"
+		if blob.find("sword") >= 0 or blob.find("blade") >= 0 or blob.find("saber") >= 0 \
+				or blob.find("edge") >= 0 or blob.find("劍") >= 0 or blob.find("刃") >= 0:
+			return "sword"
+	## 2) 流派
+	var ps := str(GameState.path_style)
+	var from_path := _line_to_weapon_visual(ps)
+	if from_path != "":
+		return from_path
+	if ps in ["sword", "bow", "magic", "fist", "axe", "hammer", "spear", "gun", "dart", "crystal"]:
+		return ps
+	## 3) 舊武器名
 	if GameState.weapon_name != "" and GameState.weapon_name != "空手":
 		return "sword"
 	return ""
@@ -67,33 +111,69 @@ static func player_weapon_overlay() -> Texture2D:
 	var t := tex("%s/player/weapons/%s.png" % [ROOT, wid])
 	if t:
 		return t
-	## 後備：通用劍
 	return tex("%s/player/weapons/sword.png" % ROOT)
 
 
-## 防具染色（穿上防具時身體色調變化）
-static func player_armor_modulate() -> Color:
-	var uid := ""
-	if GameState.equip_slots:
-		uid = str(GameState.equip_slots.get("armor", ""))
-	if uid == "" or not GameState.equip_worn.has(uid):
-		return Color(1, 1, 1, 1)
-	var inst: Dictionary = GameState.equip_worn[uid]
+## 防具種類：plate | leather | veil | cloth | ""
+static func player_armor_kind() -> String:
+	var line := _equip_line("armor")
+	var inst := _equip_inst("armor")
 	var base_id := str(inst.get("base_id", "")).to_lower()
-	var q := str(inst.get("quality", inst.get("quality_label", ""))).to_lower()
-	if base_id.find("cloth") >= 0 or base_id.find("robe") >= 0 or base_id.find("mage") >= 0:
-		return Color(0.85, 0.80, 1.05, 1)  ## 法袍偏紫
-	if base_id.find("leather") >= 0 or base_id.find("hide") >= 0:
-		return Color(1.08, 0.92, 0.78, 1)  ## 皮甲偏暖
-	if base_id.find("plate") >= 0 or base_id.find("mail") >= 0 or base_id.find("iron") >= 0 \
-			or base_id.find("steel") >= 0 or base_id.find("knight") >= 0:
-		return Color(0.82, 0.88, 1.05, 1)  ## 鐵甲偏冷藍
-	## 品質後備
-	if q.find("史詩") >= 0 or q.find("epic") >= 0:
-		return Color(0.92, 0.82, 1.08, 1)
-	if q.find("稀有") >= 0 or q.find("rare") >= 0:
-		return Color(0.85, 0.92, 1.1, 1)
-	return Color(1.02, 1.0, 0.95, 1)
+	var name_s := str(inst.get("name", "")).to_lower()
+	var blob := base_id + " " + name_s + " " + line
+	if blob.find("plate") >= 0 or blob.find("mail") >= 0 or blob.find("knight") >= 0 \
+			or blob.find("甲") >= 0 or line == "iron":
+		return "plate"
+	if blob.find("veil") >= 0 or blob.find("cloak") >= 0 or blob.find("披風") >= 0 \
+			or blob.find("紗") >= 0 or line == "soul":
+		return "veil"
+	if blob.find("leather") >= 0 or blob.find("hide") >= 0 or blob.find("皮") >= 0:
+		return "leather"
+	if blob.find("cloth") >= 0 or blob.find("robe") >= 0:
+		return "cloth"
+	if not inst.is_empty():
+		return "leather"  ## 有穿就至少皮甲感
+	return ""
+
+
+static func player_armor_overlay() -> Texture2D:
+	var kind := player_armor_kind()
+	if kind == "":
+		return null
+	return tex("%s/player/armor/%s.png" % [ROOT, kind])
+
+
+## 防具染色（疊在身體 modulate；外層 armor 貼圖另加）
+static func player_armor_modulate() -> Color:
+	var kind := player_armor_kind()
+	match kind:
+		"veil":
+			return Color(0.88, 0.84, 1.08, 1)
+		"leather":
+			return Color(1.06, 0.94, 0.82, 1)
+		"plate":
+			return Color(0.84, 0.90, 1.06, 1)
+		"cloth":
+			return Color(0.90, 1.02, 0.92, 1)
+		_:
+			return Color(1, 1, 1, 1)
+
+
+static func player_accessory_kind() -> String:
+	var inst := _equip_inst("accessory")
+	if inst.is_empty():
+		return ""
+	var blob := (str(inst.get("base_id", "")) + " " + str(inst.get("name", ""))).to_lower()
+	if blob.find("ring") >= 0 or blob.find("指環") >= 0 or blob.find("ring") >= 0:
+		return "ring"
+	return "pendant"  ## 預設墜飾
+
+
+static func player_accessory_overlay() -> Texture2D:
+	var kind := player_accessory_kind()
+	if kind == "":
+		return null
+	return tex("%s/player/accessories/%s.png" % [ROOT, kind])
 
 
 static func player_battle() -> Texture2D:

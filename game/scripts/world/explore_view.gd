@@ -22,7 +22,9 @@ var _bounds: Rect2 = Rect2(40, 80, 1200, 560)
 var _entities: Array = []  ## Dictionary id,pos,size,label,color,solid
 var _near_id: String = ""
 var _player: TextureRect
+var _player_armor: TextureRect  ## 防具疊層
 var _player_weapon: TextureRect  ## 裝備武器疊層
+var _player_accessory: TextureRect  ## 飾品
 var _player_shadow: ColorRect
 var _hint: Label
 var _title: Label
@@ -448,15 +450,35 @@ func _build_chrome() -> void:
 	_player.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_world.add_child(_player)
 
+	_player_armor = TextureRect.new()
+	_player_armor.name = "PlayerArmor"
+	_player_armor.size = PLAYER_SIZE
+	_player_armor.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_player_armor.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_player_armor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_player_armor.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_player_armor.visible = false
+	_world.add_child(_player_armor)
+
 	_player_weapon = TextureRect.new()
 	_player_weapon.name = "PlayerWeapon"
-	_player_weapon.size = Vector2(36, 36)
+	_player_weapon.size = Vector2(40, 40)
 	_player_weapon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_player_weapon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_player_weapon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_player_weapon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_player_weapon.visible = false
 	_world.add_child(_player_weapon)
+
+	_player_accessory = TextureRect.new()
+	_player_accessory.name = "PlayerAccessory"
+	_player_accessory.size = Vector2(22, 22)
+	_player_accessory.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_player_accessory.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_player_accessory.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_player_accessory.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_player_accessory.visible = false
+	_world.add_child(_player_accessory)
 
 	## 角色名牌（頭上）
 	var name_tag := PanelContainer.new()
@@ -715,30 +737,38 @@ func _scenic_blockers(mid: String) -> Array:
 	## 相對 FLOOR 的額外實心區（世界座標）。只擋主要不可走區，避免鎖死探索。
 	var o := FLOOR_RECT.position
 	var s := FLOOR_RECT.size
-	var out: Array = []
-	## 地圖上緣 12%：遠山／屋頂帶（常見畫在 bg 上方）
-	out.append(Rect2(o.x + s.x * 0.05, o.y, s.x * 0.9, s.y * 0.10))
+	var raw: Array = []
+	## 地圖上緣 10%：遠山／屋頂帶（略縮，避免鎖死北向）
+	raw.append(Rect2(o.x + s.x * 0.08, o.y, s.x * 0.84, s.y * 0.08))
 	match mid:
 		"dojo", "dojo_inner", "dojo_peak":
-			## 左側主建築群、右側竹林深帶
-			out.append(Rect2(o.x + s.x * 0.08, o.y + s.y * 0.12, s.x * 0.28, s.y * 0.38))
-			out.append(Rect2(o.x + s.x * 0.62, o.y + s.y * 0.10, s.x * 0.28, s.y * 0.35))
+			## 左上建築、右上竹林（避開中央院落）
+			raw.append(Rect2(o.x + s.x * 0.06, o.y + s.y * 0.10, s.x * 0.22, s.y * 0.32))
+			raw.append(Rect2(o.x + s.x * 0.70, o.y + s.y * 0.10, s.x * 0.22, s.y * 0.30))
 		"town", "town_keep", "town_market":
-			out.append(Rect2(o.x + s.x * 0.55, o.y + s.y * 0.08, s.x * 0.35, s.y * 0.32))
-			out.append(Rect2(o.x + s.x * 0.10, o.y + s.y * 0.10, s.x * 0.25, s.y * 0.28))
+			raw.append(Rect2(o.x + s.x * 0.58, o.y + s.y * 0.08, s.x * 0.30, s.y * 0.28))
+			raw.append(Rect2(o.x + s.x * 0.08, o.y + s.y * 0.08, s.x * 0.20, s.y * 0.24))
 		"forest", "forest_deep", "forest_lake", "forest_canopy":
-			## 左右密林
-			out.append(Rect2(o.x, o.y + s.y * 0.15, s.x * 0.12, s.y * 0.7))
-			out.append(Rect2(o.x + s.x * 0.88, o.y + s.y * 0.15, s.x * 0.12, s.y * 0.7))
+			raw.append(Rect2(o.x, o.y + s.y * 0.18, s.x * 0.10, s.y * 0.65))
+			raw.append(Rect2(o.x + s.x * 0.90, o.y + s.y * 0.18, s.x * 0.10, s.y * 0.65))
 		"mist_village", "mist_shrine":
-			out.append(Rect2(o.x + s.x * 0.15, o.y + s.y * 0.12, s.x * 0.25, s.y * 0.3))
+			raw.append(Rect2(o.x + s.x * 0.12, o.y + s.y * 0.10, s.x * 0.20, s.y * 0.26))
 		"coast", "coast_harbor", "coast_wreck":
-			## 下緣深水
-			out.append(Rect2(o.x + s.x * 0.05, o.y + s.y * 0.78, s.x * 0.9, s.y * 0.18))
+			raw.append(Rect2(o.x + s.x * 0.08, o.y + s.y * 0.82, s.x * 0.84, s.y * 0.14))
 		"tower_foyer", "tower_camp", "blackflame_scar":
-			out.append(Rect2(o.x + s.x * 0.35, o.y + s.y * 0.08, s.x * 0.3, s.y * 0.35))
+			raw.append(Rect2(o.x + s.x * 0.38, o.y + s.y * 0.08, s.x * 0.24, s.y * 0.30))
 		_:
 			pass
+	## 出生點周圍挖空，避免一進來就卡住
+	var spawn_safe := Rect2(player_pos - Vector2(80, 80), Vector2(160 + PLAYER_SIZE.x, 160 + PLAYER_SIZE.y))
+	var out: Array = []
+	for item in raw:
+		var r: Rect2 = item
+		if not r.intersects(spawn_safe):
+			out.append(r)
+			continue
+		## 簡單策略：與 spawn 重疊的 blocker 整塊丟掉（寧可少擋、勿卡死）
+		pass
 	return out
 
 
@@ -1230,21 +1260,49 @@ func _update_player_visual() -> void:
 		if idle:
 			_player.texture = idle
 	_player.modulate = SpriteDB.player_armor_modulate()
-	## 武器疊層（隨流派／已裝備武器）
+	var foot_y := player_pos.y + PLAYER_SIZE.y
+	## 防具疊層（貼在身體上）
+	if _player_armor:
+		var atex := SpriteDB.player_armor_overlay()
+		if atex:
+			_player_armor.visible = true
+			_player_armor.texture = atex
+			_player_armor.position = player_pos
+			_player_armor.pivot_offset = PLAYER_SIZE * 0.5
+			_player_armor.scale.x = -1.0 if _facing_left else 1.0
+			_player_armor.set_meta("sort_y", foot_y + 0.2)
+		else:
+			_player_armor.visible = false
+	## 武器疊層（隨已裝備武器／流派）
 	if _player_weapon:
 		var wtex := SpriteDB.player_weapon_overlay()
 		if wtex:
 			_player_weapon.visible = true
 			_player_weapon.texture = wtex
-			var hand := Vector2(PLAYER_SIZE.x * 0.55, PLAYER_SIZE.y * 0.42)
+			var hand := Vector2(PLAYER_SIZE.x * 0.52, PLAYER_SIZE.y * 0.38)
 			if _facing_left:
-				hand.x = PLAYER_SIZE.x * 0.15
+				hand.x = PLAYER_SIZE.x * 0.08
 			_player_weapon.position = player_pos + hand
 			_player_weapon.pivot_offset = _player_weapon.size * 0.5
 			_player_weapon.scale.x = -1.0 if _facing_left else 1.0
-			_player_weapon.set_meta("sort_y", player_pos.y + PLAYER_SIZE.y + 0.5)
+			_player_weapon.rotation_degrees = -25.0 if not _facing_left else 25.0
+			_player_weapon.set_meta("sort_y", foot_y + 0.5)
 		else:
 			_player_weapon.visible = false
+	## 飾品（胸前／頭側）
+	if _player_accessory:
+		var xtex := SpriteDB.player_accessory_overlay()
+		if xtex:
+			_player_accessory.visible = true
+			_player_accessory.texture = xtex
+			var ap := Vector2(PLAYER_SIZE.x * 0.35, PLAYER_SIZE.y * 0.28)
+			if _facing_left:
+				ap.x = PLAYER_SIZE.x * 0.35
+			_player_accessory.position = player_pos + ap
+			_player_accessory.scale.x = -1.0 if _facing_left else 1.0
+			_player_accessory.set_meta("sort_y", foot_y + 0.3)
+		else:
+			_player_accessory.visible = false
 	if _player_shadow:
 		_player_shadow.position = player_pos + Vector2(6, PLAYER_SIZE.y - 6)
 		_player_shadow.size = Vector2(PLAYER_SIZE.x - 12, 10)

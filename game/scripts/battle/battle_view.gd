@@ -666,6 +666,27 @@ func _apply_battle_weapon_overlay() -> void:
 		_battle_weapon.custom_minimum_size = Vector2(72, 72)
 		_battle_weapon.size = Vector2(72, 72)
 		slot.add_child(_battle_weapon)
+	## 戰鬥防具染色已在 body modulate；再疊一件縮小防具示意
+	var armor_node := slot.get_node_or_null("PlayerArmorOverlay") as TextureRect
+	if armor_node == null:
+		armor_node = TextureRect.new()
+		armor_node.name = "PlayerArmorOverlay"
+		armor_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		armor_node.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		armor_node.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		armor_node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		armor_node.custom_minimum_size = Vector2(160, 200)
+		armor_node.size = Vector2(160, 200)
+		slot.add_child(armor_node)
+	var atex := SpriteDB.player_armor_overlay()
+	if atex:
+		armor_node.texture = atex
+		armor_node.visible = true
+		armor_node.position = player_body.position + Vector2(20, 30)
+		armor_node.modulate = Color(1, 1, 1, 0.85)
+		armor_node.z_index = 1
+	else:
+		armor_node.visible = false
 	var wtex := SpriteDB.player_weapon_overlay()
 	if wtex:
 		_battle_weapon.texture = wtex
