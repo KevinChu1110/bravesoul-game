@@ -19,6 +19,83 @@ static func player_walk(frame: int) -> Texture2D:
 	return tex("%s/player/rabbit_walk_%d_x3.png" % [ROOT, i])
 
 
+## 裝備武器疊層（依流派或已裝備武器）
+static func player_weapon_class_id() -> String:
+	## 優先 path_style；否則從裝備 base 推
+	var ps := str(GameState.path_style)
+	if ps != "" and ps not in ["soul", "iron", "magic_old"]:
+		## 已遷移的流派 id
+		if ps in ["sword", "bow", "magic", "fist", "axe", "hammer", "spear", "gun", "dart", "crystal"]:
+			return ps
+	## 從裝備 weapon 推
+	if Engine.get_main_loop() is SceneTree:
+		var es: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("EquipmentSystem")
+		if es and es.has_method("find_any"):
+			var uid := str(GameState.equip_slots.get("weapon", "")) if GameState.equip_slots else ""
+			if uid != "":
+				var inst: Dictionary = es.call("find_any", uid)
+				var base_id := str(inst.get("base_id", inst.get("id", "")))
+				if base_id.find("bow") >= 0 or base_id.find("arrow") >= 0:
+					return "bow"
+				if base_id.find("staff") >= 0 or base_id.find("wand") >= 0 or base_id.find("tome") >= 0:
+					return "magic"
+				if base_id.find("axe") >= 0:
+					return "axe"
+				if base_id.find("hammer") >= 0 or base_id.find("mace") >= 0:
+					return "hammer"
+				if base_id.find("spear") >= 0 or base_id.find("lance") >= 0:
+					return "spear"
+				if base_id.find("gun") >= 0 or base_id.find("rifle") >= 0:
+					return "gun"
+				if base_id.find("dart") >= 0 or base_id.find("kunai") >= 0:
+					return "dart"
+				if base_id.find("crystal") >= 0 or base_id.find("orb") >= 0:
+					return "crystal"
+				if base_id.find("fist") >= 0 or base_id.find("glove") >= 0:
+					return "fist"
+				if base_id.find("sword") >= 0 or base_id.find("blade") >= 0 or GameState.weapon_name != "空手":
+					return "sword"
+	if GameState.weapon_name != "" and GameState.weapon_name != "空手":
+		return "sword"
+	return ""
+
+
+static func player_weapon_overlay() -> Texture2D:
+	var wid := player_weapon_class_id()
+	if wid == "":
+		return null
+	var t := tex("%s/player/weapons/%s.png" % [ROOT, wid])
+	if t:
+		return t
+	## 後備：通用劍
+	return tex("%s/player/weapons/sword.png" % ROOT)
+
+
+## 防具染色（穿上防具時身體色調變化）
+static func player_armor_modulate() -> Color:
+	var uid := ""
+	if GameState.equip_slots:
+		uid = str(GameState.equip_slots.get("armor", ""))
+	if uid == "" or not GameState.equip_worn.has(uid):
+		return Color(1, 1, 1, 1)
+	var inst: Dictionary = GameState.equip_worn[uid]
+	var base_id := str(inst.get("base_id", "")).to_lower()
+	var q := str(inst.get("quality", inst.get("quality_label", ""))).to_lower()
+	if base_id.find("cloth") >= 0 or base_id.find("robe") >= 0 or base_id.find("mage") >= 0:
+		return Color(0.85, 0.80, 1.05, 1)  ## 法袍偏紫
+	if base_id.find("leather") >= 0 or base_id.find("hide") >= 0:
+		return Color(1.08, 0.92, 0.78, 1)  ## 皮甲偏暖
+	if base_id.find("plate") >= 0 or base_id.find("mail") >= 0 or base_id.find("iron") >= 0 \
+			or base_id.find("steel") >= 0 or base_id.find("knight") >= 0:
+		return Color(0.82, 0.88, 1.05, 1)  ## 鐵甲偏冷藍
+	## 品質後備
+	if q.find("史詩") >= 0 or q.find("epic") >= 0:
+		return Color(0.92, 0.82, 1.08, 1)
+	if q.find("稀有") >= 0 or q.find("rare") >= 0:
+		return Color(0.85, 0.92, 1.1, 1)
+	return Color(1.02, 1.0, 0.95, 1)
+
+
 static func player_battle() -> Texture2D:
 	var idle := player_pose("idle")
 	if idle:
@@ -175,6 +252,10 @@ static func explore_entity_path(entity_id: String) -> String:
 		# Props
 		"sword":
 			return "%s/props/sword.png" % ROOT
+		"training_dummy", "dummy":
+			return "%s/props/dummy.png" % ROOT if ResourceLoader.exists("%s/props/dummy.png" % ROOT) else "%s/props/sign.png" % ROOT
+		"tea":
+			return "%s/props/tea.png" % ROOT
 		"fire":
 			return "%s/props/fire.png" % ROOT
 		"flag":

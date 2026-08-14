@@ -43,6 +43,7 @@ var _boss_art_key: String = ""
 var _pose_tween: Tween
 var _player_pose: String = "idle"
 var _player_pose_tween: Tween
+var _battle_weapon: TextureRect = null
 var _skill_banner: Label
 var _rage_ready: Label
 var _coach: Label
@@ -549,8 +550,9 @@ func _apply_battle_art(mode: String) -> void:
 	player_body.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	player_body.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	player_body.custom_minimum_size = Vector2(200, 250)
-	_player_base_mod = Color.WHITE
+	_player_base_mod = SpriteDB.player_armor_modulate()
 	player_body.modulate = _player_base_mod
+	_apply_battle_weapon_overlay()
 
 	_boss_art_key = mode
 	_boss_pose = "idle"
@@ -646,6 +648,32 @@ func _apply_battle_art(mode: String) -> void:
 	elif battle_bg:
 		battle_bg.texture = null
 		battle_bg.modulate = Color(0.12, 0.1, 0.16)
+
+
+func _apply_battle_weapon_overlay() -> void:
+	if player_body == null:
+		return
+	var slot := player_body.get_parent() as Control
+	if slot == null:
+		return
+	if _battle_weapon == null or not is_instance_valid(_battle_weapon):
+		_battle_weapon = TextureRect.new()
+		_battle_weapon.name = "PlayerWeaponOverlay"
+		_battle_weapon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_battle_weapon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		_battle_weapon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		_battle_weapon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		_battle_weapon.custom_minimum_size = Vector2(72, 72)
+		_battle_weapon.size = Vector2(72, 72)
+		slot.add_child(_battle_weapon)
+	var wtex := SpriteDB.player_weapon_overlay()
+	if wtex:
+		_battle_weapon.texture = wtex
+		_battle_weapon.visible = true
+		_battle_weapon.position = player_body.position + Vector2(120, 90)
+		_battle_weapon.z_index = 2
+	else:
+		_battle_weapon.visible = false
 
 
 func _ensure_temptation_ui() -> void:

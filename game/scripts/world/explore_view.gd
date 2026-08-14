@@ -22,6 +22,7 @@ var _bounds: Rect2 = Rect2(40, 80, 1200, 560)
 var _entities: Array = []  ## Dictionary id,pos,size,label,color,solid
 var _near_id: String = ""
 var _player: TextureRect
+var _player_weapon: TextureRect  ## 裝備武器疊層
 var _player_shadow: ColorRect
 var _hint: Label
 var _title: Label
@@ -438,6 +439,7 @@ func _build_chrome() -> void:
 	_world.add_child(_player_shadow)
 
 	_player = TextureRect.new()
+	_player.name = "PlayerBody"
 	_player.size = PLAYER_SIZE
 	_player.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_player.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -445,6 +447,16 @@ func _build_chrome() -> void:
 	_player.texture = SpriteDB.player_idle()
 	_player.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_world.add_child(_player)
+
+	_player_weapon = TextureRect.new()
+	_player_weapon.name = "PlayerWeapon"
+	_player_weapon.size = Vector2(36, 36)
+	_player_weapon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_player_weapon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_player_weapon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_player_weapon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_player_weapon.visible = false
+	_world.add_child(_player_weapon)
 
 	## 角色名牌（頭上）
 	var name_tag := PanelContainer.new()
@@ -459,6 +471,14 @@ func _build_chrome() -> void:
 	name_tag.add_child(ntl)
 	_world.add_child(name_tag)
 	name_tag.set_meta("is_player_tag", true)
+
+	## 裝備變更時刷新外觀
+	if EquipmentSystem and not EquipmentSystem.equipment_changed.is_connected(_on_equipment_visual_changed):
+		EquipmentSystem.equipment_changed.connect(_on_equipment_visual_changed)
+
+
+func _on_equipment_visual_changed() -> void:
+	_update_player_visual()
 
 
 func _apply_map_art(id: String) -> void:
@@ -487,11 +507,12 @@ func _apply_map_art(id: String) -> void:
 					break
 	var has_scenic_bg := bg_tex != null
 	if has_scenic_bg:
-		## 完整顯示手繪底圖（舊版 0.55 透明度 + 不透明 tile 會蓋成「一片木地板」）
+		## 完整顯示手繪底圖。必須 STRETCH_SCALE 對齊 FLOOR_RECT，
+		## 否則 COVERED 裁切會讓美術建築與 entity／碰撞座標錯位（看起來像穿模）。
 		_floor.texture = bg_tex
 		_floor.modulate = Color(1, 1, 1, 1)
-		_floor.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-		_floor_tint.color = Color(0.05, 0.04, 0.08, 0.12)
+		_floor.stretch_mode = TextureRect.STRETCH_SCALE
+		_floor_tint.color = Color(0.04, 0.03, 0.06, 0.10)
 	else:
 		_floor.texture = null
 		_floor_tint.color = Color(0.12, 0.1, 0.1, 0.5)
@@ -635,6 +656,8 @@ func _entity_is_solid(e: Dictionary) -> bool:
 		"barracks", "chapel", "stable", "hall", "throne_hall", "keep_well", "statue_knight",
 		"ravine", "windmill", "pond", "dorm", "tower_gate", "tent_a", "tent_b",
 		"refugee_fire", "altar", "beacon", "sign_board", "ruin_pillar", "falcon_nest_deep",
+		"training_dummy", "zen_pond", "scripture", "master_room", "bamboo_wall",
+		"peak_platform", "stone_garden", "tree", "pine", "gate", "hut",
 	]
 	return id in SOLIDS
 
@@ -653,17 +676,70 @@ func _rebuild_collision() -> void:
 	for y in _map_rows:
 		_set_solid(Vector2i(0, y), true, true)
 		_set_solid(Vector2i(_map_cols - 1, y), true, true)
-	## 2) 建築佔位（上半身，底部留互動縫）
+	## 2) 建築／大型 prop 佔位（上半身實心，腳邊可站可互動）
 	for e in _entities:
 		if not _entity_is_solid(e):
 			continue
 		var pos: Vector2 = e.pos
 		var sz: Vector2 = e.size
-		## 碰撞區：略縮、偏上，腳邊可站
-		var r := Rect2(pos.x + 6.0, pos.y + 4.0, maxf(8.0, sz.x - 12.0), maxf(8.0, sz.y * 0.55))
+		## 放大明顯建築的碰撞（entity 標記常比畫面建築小）
+		var scale_hit := _entity_collision_scale(str(e.get("id", "")))
+		var hit_w := maxf(24.0, sz.x * scale_hit.x)
+		var hit_h := maxf(20.0, sz.y * scale_hit.y)
+		var ox := pos.x + (sz.x - hit_w) * 0.5
+		var oy := pos.y + sz.y - hit_h  ## 對齊腳底
+		## 碰撞偏上：只擋軀幹，底部 12px 可站
+		var r := Rect2(ox + 4.0, oy + 4.0, maxf(12.0, hit_w - 8.0), maxf(12.0, hit_h * 0.62))
 		_stamp_solid_rect(r, true)
+	## 3) 風景圖額外結構擋塊（減少走進畫上的山／屋）
+	for r2 in _scenic_blockers(map_id):
+		_stamp_solid_rect(r2, false)
 	## 確保玩家出生點不在實心上
 	_unstuck_player()
+
+
+func _entity_collision_scale(id: String) -> Vector2:
+	## 回傳 (寬倍, 高倍) 相對於 catalog size
+	if id in ["hut_a", "hut_b", "hut_c", "inn", "dorm", "stable", "chapel", "treehouse", "market", "market_b", "barracks", "hall", "throne_hall"]:
+		return Vector2(2.4, 2.2)
+	if id in ["gate_arch", "tower_gate", "leo_gate", "trial_hall", "watch_tower", "tower", "peak_platform", "master_room"]:
+		return Vector2(2.0, 2.0)
+	if id in ["shrine", "shrine_stub", "well", "well_fog", "fountain", "forge_c5", "camp", "tent_a", "tent_b", "boat_wreck", "dock"]:
+		return Vector2(1.8, 1.6)
+	if id in ["scroll_wall", "bamboo_wall", "wall_notice", "fence_row", "ravine"]:
+		return Vector2(2.2, 1.4)
+	return Vector2(1.15, 1.1)
+
+
+func _scenic_blockers(mid: String) -> Array:
+	## 相對 FLOOR 的額外實心區（世界座標）。只擋主要不可走區，避免鎖死探索。
+	var o := FLOOR_RECT.position
+	var s := FLOOR_RECT.size
+	var out: Array = []
+	## 地圖上緣 12%：遠山／屋頂帶（常見畫在 bg 上方）
+	out.append(Rect2(o.x + s.x * 0.05, o.y, s.x * 0.9, s.y * 0.10))
+	match mid:
+		"dojo", "dojo_inner", "dojo_peak":
+			## 左側主建築群、右側竹林深帶
+			out.append(Rect2(o.x + s.x * 0.08, o.y + s.y * 0.12, s.x * 0.28, s.y * 0.38))
+			out.append(Rect2(o.x + s.x * 0.62, o.y + s.y * 0.10, s.x * 0.28, s.y * 0.35))
+		"town", "town_keep", "town_market":
+			out.append(Rect2(o.x + s.x * 0.55, o.y + s.y * 0.08, s.x * 0.35, s.y * 0.32))
+			out.append(Rect2(o.x + s.x * 0.10, o.y + s.y * 0.10, s.x * 0.25, s.y * 0.28))
+		"forest", "forest_deep", "forest_lake", "forest_canopy":
+			## 左右密林
+			out.append(Rect2(o.x, o.y + s.y * 0.15, s.x * 0.12, s.y * 0.7))
+			out.append(Rect2(o.x + s.x * 0.88, o.y + s.y * 0.15, s.x * 0.12, s.y * 0.7))
+		"mist_village", "mist_shrine":
+			out.append(Rect2(o.x + s.x * 0.15, o.y + s.y * 0.12, s.x * 0.25, s.y * 0.3))
+		"coast", "coast_harbor", "coast_wreck":
+			## 下緣深水
+			out.append(Rect2(o.x + s.x * 0.05, o.y + s.y * 0.78, s.x * 0.9, s.y * 0.18))
+		"tower_foyer", "tower_camp", "blackflame_scar":
+			out.append(Rect2(o.x + s.x * 0.35, o.y + s.y * 0.08, s.x * 0.3, s.y * 0.35))
+		_:
+			pass
+	return out
 
 
 func _set_solid(cell: Vector2i, solid: bool, paint_wall: bool = false) -> void:
@@ -750,6 +826,33 @@ func _unstuck_player() -> void:
 					return
 
 
+func _entity_display_size(e: Dictionary, tex: Texture2D) -> Vector2:
+	var base: Vector2 = e.size
+	var id := str(e.get("id", ""))
+	var tw := maxf(1.0, float(tex.get_width()))
+	var th := maxf(1.0, float(tex.get_height()))
+	var aspect := tw / th
+	## 建築類放大
+	var target_h := maxf(base.y, 56.0)
+	if id in ["hut_a", "hut_b", "hut_c", "inn", "dorm", "treehouse", "market", "chapel", "stable", "barracks"]:
+		target_h = maxf(base.y * 2.2, 110.0)
+	elif id in ["gate_arch", "tower", "watch_tower", "trial_hall", "leo_gate", "gate"]:
+		target_h = maxf(base.y * 2.0, 100.0)
+	elif id in ["well", "shrine", "forge_c5", "camp", "campfire", "boat", "dock"]:
+		target_h = maxf(base.y * 1.6, 72.0)
+	elif id in ["tree", "pine"]:
+		target_h = maxf(base.y * 2.5, 96.0)
+	elif SpriteDB.explore_entity_path(id).find("/npcs/") >= 0:
+		target_h = maxf(base.y, 64.0)
+	else:
+		target_h = maxf(base.y * 1.35, 52.0)
+	var target_w := target_h * aspect
+	## 上限避免遮滿畫面
+	target_h = minf(target_h, 160.0)
+	target_w = minf(target_w, 180.0)
+	return Vector2(target_w, target_h)
+
+
 func _rebuild_entities() -> void:
 	for k in _entity_nodes.keys():
 		var n: Node = _entity_nodes[k]
@@ -761,7 +864,6 @@ func _rebuild_entities() -> void:
 		root.position = e.pos
 		root.size = e.size
 		root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		root.set_meta("sort_y", e.pos.y + e.size.y)
 		_world.add_child(root)
 
 		## 底座陰影
@@ -774,6 +876,9 @@ func _rebuild_entities() -> void:
 
 		var tex := SpriteDB.explore_entity_tex(e.id)
 		if tex:
+			## 依貼圖比例放大顯示，避免 48px 框塞大建築圖卻仍像色塊
+			var disp := _entity_display_size(e, tex)
+			root.size = disp
 			var spr := TextureRect.new()
 			spr.set_anchors_preset(Control.PRESET_FULL_RECT)
 			spr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -782,12 +887,17 @@ func _rebuild_entities() -> void:
 			spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			spr.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			root.add_child(spr)
+			## 腳底對齊原 catalog 錨點底部
+			var foot_y: float = e.pos.y + e.size.y
+			root.position = Vector2(e.pos.x + e.size.x * 0.5 - disp.x * 0.5, foot_y - disp.y)
+			root.set_meta("sort_y", foot_y)
 		else:
 			var box := ColorRect.new()
 			box.set_anchors_preset(Control.PRESET_FULL_RECT)
 			box.color = e.color
 			box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			root.add_child(box)
+			root.set_meta("sort_y", e.pos.y + e.size.y)
 
 		var lab := Label.new()
 		lab.text = e.label
@@ -804,7 +914,7 @@ func _rebuild_entities() -> void:
 		var badge := Label.new()
 		badge.text = " E "
 		badge.visible = false
-		badge.position = Vector2(e.size.x * 0.5 - 12, -44)
+		badge.position = Vector2(root.size.x * 0.5 - 12, -44)
 		badge.add_theme_font_size_override("font_size", 14)
 		badge.add_theme_color_override("font_color", Color(0.12, 0.10, 0.08))
 		badge.add_theme_color_override("font_shadow_color", Color(0.95, 0.8, 0.4, 0.9))
@@ -815,7 +925,7 @@ func _rebuild_entities() -> void:
 		var badge_bg := ColorRect.new()
 		badge_bg.color = Color(0.92, 0.78, 0.35, 0.95)
 		badge_bg.size = Vector2(28, 20)
-		badge_bg.position = Vector2(e.size.x * 0.5 - 14, -46)
+		badge_bg.position = Vector2(root.size.x * 0.5 - 14, -46)
 		badge_bg.visible = false
 		badge_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		root.add_child(badge_bg)
@@ -899,8 +1009,8 @@ func _process(delta: float) -> void:
 	_update_camera()
 	_update_parallax()
 	_update_near()
-	if _moving:
-		_ysort_world()
+	## 每幀 Y 排序，減少走進建築前後穿模感
+	_ysort_world()
 
 
 func _build_minimap_ui() -> void:
@@ -1109,6 +1219,7 @@ func _update_player_visual() -> void:
 	_player.pivot_offset = PLAYER_SIZE * 0.5
 	_player.scale.x = -1.0 if _facing_left else 1.0
 	_player.set_meta("sort_y", player_pos.y + PLAYER_SIZE.y)
+	## 身體：步行幀 + 防具染色
 	if _moving:
 		var frame := int(_walk_t) % 4
 		var t := SpriteDB.player_walk(frame)
@@ -1118,6 +1229,22 @@ func _update_player_visual() -> void:
 		var idle := SpriteDB.player_idle()
 		if idle:
 			_player.texture = idle
+	_player.modulate = SpriteDB.player_armor_modulate()
+	## 武器疊層（隨流派／已裝備武器）
+	if _player_weapon:
+		var wtex := SpriteDB.player_weapon_overlay()
+		if wtex:
+			_player_weapon.visible = true
+			_player_weapon.texture = wtex
+			var hand := Vector2(PLAYER_SIZE.x * 0.55, PLAYER_SIZE.y * 0.42)
+			if _facing_left:
+				hand.x = PLAYER_SIZE.x * 0.15
+			_player_weapon.position = player_pos + hand
+			_player_weapon.pivot_offset = _player_weapon.size * 0.5
+			_player_weapon.scale.x = -1.0 if _facing_left else 1.0
+			_player_weapon.set_meta("sort_y", player_pos.y + PLAYER_SIZE.y + 0.5)
+		else:
+			_player_weapon.visible = false
 	if _player_shadow:
 		_player_shadow.position = player_pos + Vector2(6, PLAYER_SIZE.y - 6)
 		_player_shadow.size = Vector2(PLAYER_SIZE.x - 12, 10)
