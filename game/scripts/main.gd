@@ -2321,6 +2321,38 @@ func proof_close_inventory() -> void:
 	_refresh_hud()
 
 
+func proof_show_forge() -> void:
+	## 確保可開鐵匠
+	GameState.set_flag("c1_forged", true)
+	GameState.set_flag("c1_entered_city", true)
+	if GameState.weapon_tier < 2:
+		GameState.weapon_tier = 2
+		GameState.weapon_atk = maxi(GameState.weapon_atk, 9)
+		GameState.weapon_name = "微末之刃"
+	_go_c1_forge()
+
+
+func proof_show_paths() -> void:
+	GameState.set_flag("c1_forged", true)
+	_go_path_panel(false)
+
+
+func proof_show_battle(mode: String = "road_bandit") -> void:
+	GameState.set_flag("c1_forged", true)
+	GameState.set_flag("c1_entered_city", true)
+	if GameState.hp < 10:
+		GameState.hp = GameState.effective_max_hp()
+	_start_battle(mode)
+
+
+func proof_show_soul() -> void:
+	GameState.set_flag("c1_soul_intro", true)
+	GameState.set_flag("c1_entered_city", true)
+	if GameState.stardust < 5:
+		GameState.add_stardust(5)
+	_go_soul_panel()
+
+
 func _go_title() -> void:
 	if _paused:
 		_close_pause()
