@@ -1,0 +1,6 @@
+{
+  "offline_only": true,
+  "display_name": "星途旅人",
+  "supabase_url": "https://YOUR_PROJECT.supabase.co",
+  "supabase_anon_key": "YOUR_ANON_KEY"
+}

@@ -1,0 +1,55 @@
+{
+  "schema": "equipment_v1",
+  "version": 1,
+  "qualities": {
+    "common": { "label": "凡品", "color": "#aaa", "roll_bonus": 0.0, "weight": 55 },
+    "uncommon": { "label": "良品", "color": "#6c6", "roll_bonus": 0.08, "weight": 28 },
+    "rare": { "label": "上品", "color": "#59f", "roll_bonus": 0.16, "weight": 12 },
+    "epic": { "label": "秘寶", "color": "#c6f", "roll_bonus": 0.28, "weight": 5 }
+  },
+  "float_ranges": {
+    "atk": { "min_ratio": 0.85, "max_ratio": 1.15 },
+    "def": { "min_ratio": 0.85, "max_ratio": 1.15 },
+    "hp": { "min_ratio": 0.90, "max_ratio": 1.12 },
+    "crit": { "min_ratio": 0.70, "max_ratio": 1.30 },
+    "crit_dmg": { "min_ratio": 0.85, "max_ratio": 1.20 }
+  },
+  "bases": {
+    "rusty_blade": {
+      "name": "鏽劍",
+      "slot": "weapon",
+      "tier": 1,
+      "base": { "atk": 4, "def": 0, "hp": 0, "crit": 2, "crit_dmg": 5 }
+    },
+    "meager_edge": {
+      "name": "微末之刃",
+      "slot": "weapon",
+      "tier": 2,
+      "base": { "atk": 9, "def": 0, "hp": 0, "crit": 4, "crit_dmg": 10 }
+    },
+    "knight_saber": {
+      "name": "騎士軍刀",
+      "slot": "weapon",
+      "tier": 3,
+      "base": { "atk": 14, "def": 0, "hp": 0, "crit": 6, "crit_dmg": 15 }
+    },
+    "ash_mail": {
+      "name": "灰燼甲片",
+      "slot": "armor",
+      "tier": 1,
+      "base": { "atk": 0, "def": 3, "hp": 12, "crit": 0, "crit_dmg": 0 }
+    },
+    "star_pendant": {
+      "name": "星屑墜",
+      "slot": "accessory",
+      "tier": 1,
+      "base": { "atk": 1, "def": 0, "hp": 5, "crit": 5, "crit_dmg": 12 }
+    },
+    "hunt_claw": {
+      "name": "溢地獵爪",
+      "slot": "weapon",
+      "tier": 2,
+      "base": { "atk": 11, "def": 0, "hp": 0, "crit": 8, "crit_dmg": 18 }
+    }
+  }
+}

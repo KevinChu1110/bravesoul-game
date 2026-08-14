@@ -1,0 +1,34 @@
+{
+  "schema": "combat_v1",
+  "version": 1,
+  "description": "傷害／爆擊／命中基線，與 Formulas + BattleUnit 對齊",
+  "damage": {
+    "normal_def_factor": 0.35,
+    "skill_def_factor": 0.25,
+    "min_damage": 1,
+    "variance_default": 0.08,
+    "variance_min": 0.0,
+    "variance_max": 0.25
+  },
+  "crit": {
+    "base_player": 5.0,
+    "base_enemy": 3.0,
+    "base_crit_dmg": 50.0,
+    "rate_min": 0.0,
+    "rate_max": 75.0,
+    "resist_max": 50.0,
+    "dmg_min": 25.0,
+    "dmg_max": 200.0
+  },
+  "hit": {
+    "miss_cap": 95.0,
+    "base_hit": 0.0,
+    "base_eva": 0.0
+  },
+  "atb": {
+    "fill_base": 25.0,
+    "speed_scale": 0.04,
+    "speed_floor": 0.5,
+    "speed_ceil": 2.0
+  }
+}

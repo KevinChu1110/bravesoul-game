@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>翠嶺·兔勇者 — 官方</title>
+  <meta name="description" content="敘事優先的像素 RPG。主線永遠可離線通關；連線只加厚——殘影、市集、裂縫房與同屏連招。" />
+  <meta name="theme-color" content="#6b4423" />
+  <meta property="og:title" content="翠嶺·兔勇者" />
+  <meta property="og:description" content="一隻不慕強權的兔子，走過六域。像素敘事 RPG · 可連線。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_TW" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐇</text></svg>" />
+  <style>
+    :root {
+      --ink: #1c1610;
+      --paper: #f5f0e6;
+      --wood: #6b4423;
+      --mist: #5a7a9a;
+      --gold: #b8860b;
+      --dusk: #2a2430;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", "Songti TC", "Noto Serif TC", serif;
+      background: linear-gradient(165deg, #e8e0d4 0%, #c5d0dc 45%, var(--dusk) 100%);
+      background-attachment: fixed;
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.65;
+    }
+    header {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 1rem;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+    nav a {
+      color: var(--wood);
+      border-bottom-color: rgba(107, 68, 35, 0.35);
+    }
+    h1 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: 0.08em;
+      margin: 0 0 0.4rem;
+      color: var(--wood);
+    }
+    .tag { color: var(--mist); font-size: 1.05rem; margin: 0; }
+    .ver {
+      display: inline-block;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      color: rgba(28, 22, 16, 0.55);
+      border: 1px solid rgba(107, 68, 35, 0.25);
+      border-radius: 999px;
+      padding: 0.15rem 0.65rem;
+      background: rgba(245, 240, 230, 0.55);
+    }
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+      display: grid;
+      gap: 1.25rem;
+    }
+    section {
+      background: var(--paper);
+      border: 1px solid rgba(107, 68, 35, 0.25);
+      border-radius: 12px;
+      padding: 1.25rem 1.4rem;
+      box-shadow: 0 8px 24px rgba(20, 16, 12, 0.08);
+    }
+    h2 {
+      margin: 0 0 0.6rem;
+      font-size: 1.15rem;
+      color: var(--wood);
+      border-bottom: 1px solid rgba(107, 68, 35, 0.2);
+      padding-bottom: 0.35rem;
+    }
+    ul { margin: 0.4rem 0 0 1.1rem; padding: 0; }
+    li { margin: 0.25rem 0; }
+    a {
+      color: var(--mist);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(90, 122, 154, 0.4);
+    }
+    a:hover { color: var(--gold); }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.9rem; }
+    .cta {
+      display: inline-block;
+      margin-top: 0;
+      padding: 0.55rem 1.2rem;
+      background: var(--wood);
+      color: var(--paper) !important;
+      border: none;
+      border-radius: 6px;
+      border-bottom: none;
+      font-weight: 600;
+    }
+    .cta.secondary {
+      background: transparent;
+      color: var(--wood) !important;
+      border: 1px solid rgba(107, 68, 35, 0.45);
+    }
+    .cta:hover { filter: brightness(1.08); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.4rem 0.5rem;
+      border-bottom: 1px solid rgba(107, 68, 35, 0.12);
+    }
+    th { color: var(--wood); font-weight: 600; }
+    code {
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.88em;
+      background: rgba(0,0,0,0.06);
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem 1rem 3rem;
+      color: rgba(245, 240, 230, 0.72);
+      font-size: 0.9rem;
+    }
+    footer a { color: rgba(200, 210, 220, 0.95); border-bottom-color: rgba(200, 210, 220, 0.35); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>翠嶺·兔勇者</h1>
+    <p class="tag">像素敘事 RPG · 主線永遠可離線 · 連線只加厚</p>
+    <span class="ver" id="ver">v0.11</span>
+    <nav aria-label="本頁導覽">
+      <a href="#play">下載</a>
+      <a href="#controls">操作</a>
+      <a href="#online">連線</a>
+      <a href="#systems">系統</a>
+      <a href="#dev">開發</a>
+    </nav>
+  </header>
+  <main>
+    <section id="play">
+      <h2>一句話</h2>
+      <p>一隻不慕強權的兔子，走過六域、對話眾生，以即時戰鬥通過聖獸試煉——並在可選的星途連線裡與他人交會。</p>
+      <div class="cta-row">
+        <!-- 有 itch 專案後改成真實 URL -->
+        <a class="cta" href="https://itch.io" rel="noopener">下載遊戲（itch）</a>
+        <a class="cta secondary" href="https://github.com" rel="noopener" id="repo-link">GitHub 專案</a>
+      </div>
+      <p style="margin:0.85rem 0 0;font-size:0.9rem;opacity:0.75;">
+        主線無需帳號、無需連線。連線為可選加厚。
+      </p>
+    </section>
+
+    <section id="controls">
+      <h2>操作摘要</h2>
+      <table>
+        <thead>
+          <tr><th>鍵</th><th>作用</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>WASD / 方向鍵</td><td>移動</td></tr>
+          <tr><td>E / 空白</td><td>互動</td></tr>
+          <tr><td><strong>J</strong></td><td>格擋／躍出／雙星連招</td></tr>
+          <tr><td>K / L（同屏）</td><td>戰意／助攻（隊友）</td></tr>
+          <tr><td>Esc</td><td>選單 · 連線 · 裝備 · 倉庫 · 日誌</td></tr>
+          <tr><td>1–8 / I</td><td>快捷欄 · 物品欄</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="online">
+      <h2>帳號與連線</h2>
+      <ul>
+        <li>預設<strong>純單機</strong>，主線完整可通關</li>
+        <li>可選：Email 註冊／登入（Supabase）· 訪客上線</li>
+        <li>連線內容：殘影、留言、市集、裂縫／狩獵房、同屏操作</li>
+        <li>遊戲內：Esc → <strong>連線／帳號</strong> → 檢測健康 · 貼 URL／金鑰</li>
+      </ul>
+    </section>
+
+    <section id="systems">
+      <h2>系統一覽</h2>
+      <ul>
+        <li>裝備素質浮動 · 倉庫 · 冒險日誌</li>
+        <li>傷害浮動 · 爆擊率／爆傷</li>
+        <li>歲旅活動 · 稱號 · 黑焰裂縫 · NG+</li>
+        <li>多人：房主權威 · 雙星連招 · Realtime／輪詢</li>
+      </ul>
+    </section>
+
+    <section id="dev">
+      <h2>開發與文件</h2>
+      <ul>
+        <li>設計總覽：repo 內 <code>docs/GDD.md</code></li>
+        <li>連線說明：<code>docs/ONLINE.md</code> · <code>docs/ONLINE_SETUP.md</code></li>
+        <li>系統設計：<code>docs/SYSTEMS_CORE.md</code></li>
+        <li>本站原始碼：repo <code>web/</code> · GitHub Pages 自動部署</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    翠嶺大陸 · 黑焰未熄 · © bravesoul-game<br />
+    <a href="#play">回到頂部</a>
+  </footer>
+  <script>
+    // 專案頁（username.github.io/repo/）與使用者頁皆可用相對路徑
+    // 若從 repo 部署，可在此填真實 GitHub / itch 連結
+    (function () {
+      var repo = document.getElementById("repo-link");
+      // 推上 GitHub 後改成：repo.href = "https://github.com/你的帳號/bravesoul-game";
+      if (location.hostname.endsWith("github.io")) {
+        var parts = location.pathname.split("/").filter(Boolean);
+        if (parts.length) {
+          var user = location.hostname.replace(".github.io", "");
+          repo.href = "https://github.com/" + user + "/" + parts[0];
+          repo.textContent = "GitHub · " + parts[0];
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

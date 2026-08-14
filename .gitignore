@@ -1,0 +1,23 @@
+# itch builds / local exports
+dist/
+*.tpz
+.godot/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# secrets — never commit
+.env
+.env.*
+*.pem
+**/secrets/
+user://
+
+# local tooling
+screenshots/
+!screenshots/.gdignore
+.venv-asset/
+.agents/skills/asset-gen/tools/**/__pycache__/

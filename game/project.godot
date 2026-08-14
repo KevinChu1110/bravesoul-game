@@ -1,0 +1,81 @@
+; Engine configuration file.
+; Godot 4.7 — 翠嶺·兔勇者 vertical slice scaffold
+config_version=5
+
+[application]
+config/name="翠嶺·兔勇者"
+config/description="Story-first pixel RPG. Most battles breathe—boss battles remember."
+config/version="0.11.1"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+config/icon="res://icon.svg"
+
+[autoload]
+GameState="*res://scripts/autoload/game_state.gd"
+SaveManager="*res://scripts/autoload/save_manager.gd"
+AudioManager="*res://scripts/autoload/audio_manager.gd"
+Loc="*res://scripts/autoload/loc.gd"
+RiftSchedule="*res://scripts/systems/rift_schedule.gd"
+TitleCatalog="*res://scripts/systems/title_catalog.gd"
+SoulSystem="*res://scripts/systems/soul_system.gd"
+SkillSystem="*res://scripts/systems/skill_system.gd"
+QuestSystem="*res://scripts/systems/quest_system.gd"
+GuildSystem="*res://scripts/systems/guild_system.gd"
+TutorialSystem="*res://scripts/systems/tutorial_system.gd"
+InventorySystem="*res://scripts/systems/inventory_system.gd"
+DataTables="*res://scripts/systems/data_tables.gd"
+GameLog="*res://scripts/systems/game_log.gd"
+EquipmentSystem="*res://scripts/systems/equipment_system.gd"
+WarehouseSystem="*res://scripts/systems/warehouse_system.gd"
+UiLayout="*res://scripts/ui/ui_layout.gd"
+EventRuntime="*res://scripts/systems/event_runtime.gd"
+OnlineGate="*res://scripts/autoload/online_gate.gd"
+HuntSystem="*res://scripts/systems/hunt_system.gd"
+PartySystem="*res://scripts/systems/party_system.gd"
+MarketSystem="*res://scripts/systems/market_system.gd"
+RealtimeBridge="*res://scripts/autoload/realtime_bridge.gd"
+RoomSystem="*res://scripts/systems/room_system.gd"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+## keep：維持 16:9，多餘區域黑邊；expand 會把 UI 拉扁/拉怪
+window/stretch/aspect="keep"
+window/size/window_width_override=1280
+window/size/window_height_override=720
+## 可拖移的系統視窗（非全螢幕、有標題列、可縮放）
+window/size/mode=0
+window/size/resizable=true
+window/size/borderless=false
+window/size/always_on_top=false
+window/size/initial_position_type=1
+
+[input]
+interact={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":69,"key_label":0,"unicode":101,"location":0,"echo":false,"script":null)
+, Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":32,"key_label":0,"unicode":32,"location":0,"echo":false,"script":null)
+]
+}
+parry={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":74,"key_label":0,"unicode":106,"location":0,"echo":false,"script":null)
+, Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":75,"key_label":0,"unicode":107,"location":0,"echo":false,"script":null)
+, Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":1,"canceled":false,"pressed":false,"double_click":false,"script":null)
+]
+}
+ui_cancel={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194305,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+
+[rendering]
+textures/canvas_textures/default_texture_filter=0
+textures/vram_compression/import_etc2_astc=true
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
+[internationalization]
+locale/fallback="zh_TW"

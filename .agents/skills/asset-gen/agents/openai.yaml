@@ -1,0 +1,7 @@
+interface:
+  display_name: "Asset Generator"
+  short_description: "Generate game images, GLB 3D models, rigged characters, and animated sprites"
+  default_prompt: "Use $asset-gen to generate images, 3D models, or animated sprites for this game."
+
+policy:
+  allow_implicit_invocation: true

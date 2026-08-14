@@ -1,0 +1,15 @@
+{
+  "schema": "items_meta_v1",
+  "version": 1,
+  "warehouse": {
+    "max_slots": 60,
+    "stack_default": 99
+  },
+  "bag": {
+    "display_slots": 24
+  },
+  "log": {
+    "max_lines": 2000,
+    "path": "user://game_log.jsonl"
+  }
+}

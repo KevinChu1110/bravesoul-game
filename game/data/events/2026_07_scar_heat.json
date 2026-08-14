@@ -1,0 +1,96 @@
+{
+  "id": "2026_07_scar_heat",
+  "name": "疤裂",
+  "tagline": "黑焰疤地在盛夏跳動脈搏。",
+  "start": "2026-07-01",
+  "end": "2026-07-31",
+  "recurring_month": 7,
+  "force_active": false,
+  "daily_reward_cap": 3,
+  "entry_map": "blackflame_scar",
+  "entry_need_flag": "boss.abo_cleared",
+  "entry_deny": "先通過道場阿波。",
+  "currency_name": "疤穗",
+  "challenge_enemy": "scar_wisp",
+  "run_token": 3,
+  "run_gold": 18,
+  "token_to_gold": 2,
+  "title_flag": "title.event_07_scar_heat",
+  "title_name": "歲旅·疤裂",
+  "title_desc": "完成活動「疤裂」十日簿或專屬任務。",
+  "story": [
+    "行商：本期是【疤裂】。黑焰疤地在盛夏跳動脈搏。",
+    "行商：疤穗能換藥水與乾糧——主線用不到的，活動才給。",
+    "行商：過季收攤，剩幣可換成金幣。進度不罰。"
+  ],
+  "shop": [
+    {
+      "id": "hp_s",
+      "cost": 4,
+      "count": 1,
+      "name": "小紅水"
+    },
+    {
+      "id": "hp_m",
+      "cost": 10,
+      "count": 1,
+      "name": "中紅水"
+    },
+    {
+      "id": "bread",
+      "cost": 3,
+      "count": 2,
+      "name": "乾糧×2"
+    },
+    {
+      "id": "dust_crumb",
+      "cost": 6,
+      "count": 1,
+      "name": "星屑碎"
+    },
+    {
+      "id": "antidote",
+      "cost": 5,
+      "count": 1,
+      "name": "清焰露"
+    }
+  ],
+  "missions": [
+    {
+      "id": "first_run",
+      "name": "初試",
+      "desc": "完成 1 次有獎挑戰",
+      "need_runs": 1,
+      "token": 5,
+      "gold": 20,
+      "dust": 1
+    },
+    {
+      "id": "three_runs",
+      "name": "三日",
+      "desc": "累計 3 次有獎挑戰",
+      "need_runs": 3,
+      "token": 12,
+      "gold": 40,
+      "dust": 2
+    },
+    {
+      "id": "ten_runs",
+      "name": "十日簿",
+      "desc": "累計 10 次有獎挑戰",
+      "need_runs": 10,
+      "token": 25,
+      "gold": 80,
+      "dust": 4
+    },
+    {
+      "id": "scar_boss",
+      "name": "再踏疤主",
+      "desc": "戰勝黑焰疤主",
+      "need_flag": "boss.scar_lord_cleared",
+      "token": 20,
+      "gold": 50,
+      "dust": 3
+    }
+  ]
+}
