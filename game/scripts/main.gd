@@ -1732,7 +1732,7 @@ func _equip_slot_card(slot: String) -> Control:
 	icon.custom_minimum_size = Vector2(72, 72)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	if not inst.is_empty():
 		var t: Texture2D = SpriteDB.equip_icon_for_inst(inst)
 		if t:
