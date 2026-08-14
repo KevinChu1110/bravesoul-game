@@ -98,6 +98,13 @@ func set_chapter(c: String) -> void:
 	chapter_changed.emit(c)
 
 
+func _equipped_weapon_line() -> String:
+	var wuid := str(equip_slots.get("weapon", ""))
+	if wuid == "" or not equip_worn.has(wuid):
+		return ""
+	return str((equip_worn[wuid] as Dictionary).get("line", ""))
+
+
 func effective_atk() -> int:
 	var a := atk + weapon_atk
 	if stain_flame:
@@ -106,6 +113,10 @@ func effective_atk() -> int:
 	a += equip_bonus_atk()
 	if path_style == "sword":
 		a += 2 + level / 5
+	## 武器線與流派一致：額外契合
+	var wline := _equipped_weapon_line()
+	if wline != "" and wline == path_style:
+		a += 2
 	return a
 
 
@@ -127,6 +138,8 @@ func effective_crit() -> float:
 	var c := crit_rate + equip_bonus_crit()
 	if path_style == "soul":
 		c += 3.0 + float(level) * 0.15
+	if _equipped_weapon_line() == "soul" and path_style == "soul":
+		c += 2.0
 	return c
 
 

@@ -58,6 +58,13 @@ func float_ranges() -> Dictionary:
 	return equipment.get("float_ranges", {}) as Dictionary
 
 
+func craft_recipes() -> Array:
+	var a: Variant = equipment.get("craft_recipes", [])
+	if a is Array:
+		return a
+	return []
+
+
 func warehouse_max() -> int:
 	var w: Dictionary = items_meta.get("warehouse", {})
 	return int(w.get("max_slots", 60))

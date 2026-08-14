@@ -64,6 +64,7 @@ func roll_instance(base_id: String, quality: String = "", rng: RandomNumberGener
 		"name": str(def.get("name", base_id)),
 		"slot": str(def.get("slot", "weapon")),
 		"tier": int(def.get("tier", 1)),
+		"line": str(def.get("line", "")),
 		"quality": quality,
 		"quality_label": str(qdef.get("label", quality)),
 		"rolled": rolled,
@@ -239,6 +240,93 @@ func status_bbcode() -> String:
 	lines.append("")
 	lines.append("背包装備 %d 件" % GameState.equip_bag.size())
 	return "\n".join(lines)
+
+
+func line_display(line: String) -> String:
+	match line:
+		"sword":
+			return "劍道"
+		"soul":
+			return "星途"
+		"iron":
+			return "鐵骨"
+		_:
+			return "通用"
+
+
+func can_craft(recipe: Dictionary) -> Dictionary:
+	## {ok, msg}
+	var base_id := str(recipe.get("base_id", ""))
+	var def := base_def(base_id)
+	if def.is_empty():
+		return {"ok": false, "msg": "未知配方。"}
+	var need_tier := int(recipe.get("need_tier", 1))
+	if GameState.weapon_tier < need_tier and not GameState.has_flag("c1_forged"):
+		return {"ok": false, "msg": "先完成釘釘初鍛。"}
+	if GameState.weapon_tier < need_tier:
+		return {"ok": false, "msg": "器階不足（需 T%d+）" % need_tier}
+	var gold_n := int(recipe.get("gold", 0))
+	if GameState.gold < gold_n:
+		return {"ok": false, "msg": "金幣不足（需 %d）" % gold_n}
+	var mats: Dictionary = recipe.get("mats", {})
+	for mid in mats.keys():
+		var need := int(mats[mid])
+		if not InventorySystem.has_item(str(mid), need):
+			return {"ok": false, "msg": "缺材料：%s ×%d" % [InventorySystem.item_name(str(mid)), need]}
+	return {"ok": true, "msg": "可鍛"}
+
+
+func craft(recipe: Dictionary) -> Dictionary:
+	var chk := can_craft(recipe)
+	if not bool(chk.get("ok", false)):
+		return chk
+	var gold_n := int(recipe.get("gold", 0))
+	var mats: Dictionary = recipe.get("mats", {})
+	for mid in mats.keys():
+		if not InventorySystem.remove_item(str(mid), int(mats[mid])):
+			return {"ok": false, "msg": "扣材料失敗。"}
+	GameState.add_gold(-gold_n)
+	var base_id := str(recipe.get("base_id", ""))
+	## 流派對應線品質略升
+	var q := ""
+	var line := str(base_def(base_id).get("line", ""))
+	if line != "" and line == GameState.path_style and randf() < 0.35:
+		q = "uncommon"
+	var inst := roll_instance(base_id, q)
+	if inst.is_empty():
+		return {"ok": false, "msg": "鍛造失敗（定義錯誤）。"}
+	add_to_bag(inst)
+	## 自動裝備武器（若是武器槽）
+	var auto := ""
+	if str(inst.get("slot", "")) == "weapon":
+		var er := equip(str(inst.get("uid", "")))
+		if bool(er.get("ok", false)):
+			auto = " · 已裝備"
+	if Engine.get_main_loop() is SceneTree:
+		var qs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("QuestSystem")
+		if qs and qs.has_method("track_day"):
+			qs.call("track_day", "craft", 1)
+	SaveManager.save_game()
+	return {
+		"ok": true,
+		"inst": inst,
+		"msg": "鍛成【%s】%s" % [label(inst), auto],
+	}
+
+
+func recipe_line(recipe: Dictionary) -> String:
+	var base_id := str(recipe.get("base_id", ""))
+	var def := base_def(base_id)
+	var nm := str(def.get("name", base_id))
+	var line := line_display(str(def.get("line", "")))
+	var gold_n := int(recipe.get("gold", 0))
+	var mats: Dictionary = recipe.get("mats", {})
+	var parts: PackedStringArray = []
+	for mid in mats.keys():
+		parts.append("%s×%d" % [InventorySystem.item_name(str(mid)), int(mats[mid])])
+	var ok := bool(can_craft(recipe).get("ok", false))
+	var mark := "✓" if ok else "·"
+	return "%s [%s] %s  %d金 · %s  %s" % [mark, line, nm, gold_n, "、".join(parts), str(recipe.get("hint", ""))]
 
 
 ## 掉落：依機率 roll 裝備進背包

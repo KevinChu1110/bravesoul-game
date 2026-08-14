@@ -403,6 +403,10 @@ func _build_pause_layer() -> void:
 		_close_pause()
 		_go_path_panel(false)
 	)
+	_pause_btn(box, "材料行", func():
+		_close_pause()
+		_go_material_shop()
+	)
 	_pause_btn(box, "技能／招式", func():
 		_close_pause()
 		_go_skill_panel()
@@ -1717,20 +1721,32 @@ func _online_on_result(res: Dictionary) -> void:
 func _go_daily_panel() -> void:
 	QuestSystem.refresh_daily()
 	var body := "每天登入可領補給。連續簽到獎勵更高。\n"
-	body += "連續：%d 天\n\n" % int(GameState.get_flag(QuestSystem.DAILY_STREAK, 0))
+	body += "連續：%d 天 · 戰力 %d · Lv%d\n\n" % [
+		int(GameState.get_flag(QuestSystem.DAILY_STREAK, 0)), GameState.power_score(), GameState.level
+	]
 	if GameState.ng_plus > 0:
 		body += "二周目加成：每日略豐。\n\n"
+	body += QuestSystem.list_commissions_bbcode()
 	var buttons: Array = []
 	if QuestSystem.can_claim_daily():
-		buttons.append({"text": "領取今日獎勵", "cb": func():
+		buttons.append({"text": "領取今日簽到", "cb": func():
 			var r: Dictionary = QuestSystem.claim_daily()
 			_play_dialog([{"speaker": "系統", "text": str(r.get("msg", ""))}], _go_daily_panel)
 		})
 	else:
-		buttons.append({"text": "今日已領（明天再來）", "cb": _go_daily_panel})
+		buttons.append({"text": "簽到已領", "cb": _go_daily_panel})
+	for c in QuestSystem.COMMISSIONS:
+		var cid := str(c.get("id", ""))
+		if QuestSystem.commission_done(c) and not QuestSystem.commission_claimed(cid):
+			var id2 := cid
+			buttons.append({"text": "領委託：%s" % c.get("name", cid), "cb": func():
+				var r2: Dictionary = QuestSystem.claim_commission(id2)
+				_play_dialog([{"speaker": "系統", "text": str(r2.get("msg", ""))}], _go_daily_panel)
+			})
+	buttons.append({"text": "材料行（琥珀）", "cb": _go_material_shop})
 	buttons.append({"text": "長遠任務", "cb": _go_quest_panel})
 	buttons.append({"text": "返回", "cb": _hub_back})
-	_panel("每日獎勵", body, buttons)
+	_panel("每日 · 簽到與委託", body, buttons)
 
 
 func _go_quest_panel() -> void:
@@ -1746,9 +1762,55 @@ func _go_quest_panel() -> void:
 			})
 	if buttons.is_empty():
 		buttons.append({"text": "（暫無待領任務）", "cb": _go_quest_panel})
-	buttons.append({"text": "每日獎勵", "cb": _go_daily_panel})
+	buttons.append({"text": "每日／委託", "cb": _go_daily_panel})
 	buttons.append({"text": "返回", "cb": _hub_back})
 	_panel("長遠任務", body, buttons)
+
+
+func _go_material_shop() -> void:
+	## 琥珀材料行：買鍛材／耗材，賣材料
+	var body := "琥珀的材料行 · 金幣 %d\n\n" % GameState.gold
+	body += "持有：鐵屑%d 星砂%d 橡脂%d 騎士碎鐵%d 狼牙%d\n\n" % [
+		InventorySystem.count("iron_scrap"),
+		InventorySystem.count("star_ore"),
+		InventorySystem.count("oak_resin"),
+		InventorySystem.count("knight_shard"),
+		InventorySystem.count("wolf_fang"),
+	]
+	body += "循環：野外掉材料 → 賣金／鍛武器 → 不夠再買 → 再打。"
+	var buttons: Array = [
+		{"text": "買鐵屑（14金）", "cb": func(): _shop_buy("iron_scrap", 14)},
+		{"text": "買星砂礦（22金）", "cb": func(): _shop_buy("star_ore", 22)},
+		{"text": "買橡脂（18金）", "cb": func(): _shop_buy("oak_resin", 18)},
+		{"text": "買騎士碎鐵（28金）", "cb": func(): _shop_buy("knight_shard", 28)},
+		{"text": "買小紅水×1（12金）", "cb": func(): _shop_buy("hp_s", 12)},
+		{"text": "買乾糧×1（8金）", "cb": func(): _shop_buy("bread", 8)},
+		{"text": "一鍵賣出全部材料", "cb": _shop_sell_all},
+		{"text": "回每日／委託", "cb": _go_daily_panel},
+		{"text": "關閉", "cb": _hub_back},
+	]
+	_panel("琥珀 · 材料行", body, buttons)
+
+
+func _shop_buy(item_id: String, price: int) -> void:
+	if GameState.gold < price:
+		_play_dialog([{"speaker": "琥珀", "text": "金幣不夠。去打點雜魚或賣材料。"}], _go_material_shop)
+		return
+	GameState.add_gold(-price)
+	InventorySystem.add_item(item_id, 1)
+	QuestSystem.track_day("shop", 1)
+	SaveManager.save_game()
+	_play_dialog([
+		{"speaker": "琥珀", "text": "成交。別死外頭——我還想再賺你一次。"},
+		{"speaker": "系統", "text": "購入【%s】×1（-%d金）" % [InventorySystem.item_name(item_id), price]},
+	], _go_material_shop)
+
+
+func _shop_sell_all() -> void:
+	var r: Dictionary = InventorySystem.sell_all_materials()
+	_play_dialog([
+		{"speaker": "琥珀" if bool(r.get("ok", false)) else "系統", "text": str(r.get("msg", ""))},
+	], _go_material_shop)
 
 
 func _go_guild_panel() -> void:
@@ -2553,6 +2615,7 @@ func _side_training_do() -> void:
 	## 簡化練功：直接給經驗與熟練（也可改為真開 ash_rat）
 	var n := int(GameState.get_flag("meta.train_today", 0))
 	GameState.set_flag("meta.train_today", n + 1)
+	QuestSystem.track_day("train", 1)
 	var base_xp := 10 + GameState.level * 2
 	if GameState.path_style == "sword":
 		base_xp += 4
@@ -2564,16 +2627,20 @@ func _side_training_do() -> void:
 		SkillSystem.add_mastery("star_pierce", 5)
 	if SkillSystem.is_learned("iron_guard"):
 		SkillSystem.add_mastery("iron_guard", 4)
-	## 小幅回血
+	## 小幅回血；偶爾掉鐵屑
 	GameState.hp = mini(GameState.effective_max_hp(), GameState.hp + 3)
+	var mat_s := ""
+	if randf() < 0.35:
+		InventorySystem.add_item("iron_scrap", 1)
+		mat_s = " · 鐵屑×1"
 	SaveManager.save_game()
 	var msg := "練功結束。經驗 +%d" % int(xr.get("gained", base_xp))
 	if int(xr.get("levels", 0)) > 0:
 		msg += " · 升級至 Lv%d！" % GameState.level
-	msg += " · 招式熟練↑ · 今日 %d／8" % int(GameState.get_flag("meta.train_today", 0))
+	msg += " · 招式熟練↑ · 今日 %d／8%s" % [int(GameState.get_flag("meta.train_today", 0)), mat_s]
 	_play_dialog([
 		{"speaker": "系統", "text": msg},
-		{"speaker": "系統", "text": "戰力現為 %d。不夠就再練、鍛階、觀星，或去岔路獵場。" % GameState.power_score()},
+		{"speaker": "系統", "text": "戰力現為 %d。材料可拿去釘釘鍛武器，或賣給琥珀。" % GameState.power_score()},
 	])
 
 
@@ -2643,19 +2710,13 @@ func _side_amber() -> void:
 	if GameState.has_flag("item.true_letter") and not GameState.has_flag("side.fog_letter_done"):
 		_play_dialog([
 			{"speaker": "琥珀", "text": "喔？你手上那封……霧隱的印？交給頭領吧，我只收金幣不收心事。"},
-			{"speaker": "琥珀", "text": "市價：乾糧貴一點，傳聞免費——前提是你先活著回來。"},
-		])
-		return
-	if GameState.has_flag("boss.leo_cleared"):
-		_play_dialog([
-			{"speaker": "琥珀", "text": "獅子睡了？城裡金幣又肯轉了。要不要看看我的『合法二手貨』？"},
-			{"speaker": "琥珀", "text": "（笑）開玩笑的。我只賣乾糧——和一點不傷人的傳聞。"},
-		])
+			{"speaker": "琥珀", "text": "材料行照開——鍛造材、紅水，現貨。"},
+		], _go_material_shop)
 		return
 	_play_dialog([
-		{"speaker": "琥珀", "text": "六域的路我都算過帳。塔最近……門縫在漏光。"},
-		{"speaker": "琥珀", "text": "兔子旅人少見。要保重——死了就沒人結帳。"},
-	])
+		{"speaker": "琥珀", "text": "材料行開張。鐵屑、星砂、橡脂、騎士碎鐵——打怪掉的我收，缺的我賣。"},
+		{"speaker": "琥珀", "text": "循環懂吧？打→賣／鍛→不夠再買→再打。兔子也得會算帳。"},
+	], _go_material_shop)
 
 
 func _side_ronin() -> void:
@@ -3664,6 +3725,7 @@ func _on_world_battle_finished(won: bool) -> void:
 			xp_n = 80 + int(def.get("max_hp", 100) / 5)
 		var xr: Dictionary = GameState.add_xp(xp_n)
 		GameState.set_flag("meta.skirmish_wins", int(GameState.get_flag("meta.skirmish_wins", 0)) + 1)
+		QuestSystem.track_day("skirmish", 1)
 		var loot_s := InventorySystem.apply_drops(InventorySystem.roll_skirmish_loot(mode))
 		var eq_s := ""
 		if randf() < 0.12:
@@ -3777,7 +3839,10 @@ func _interact_town(id: String) -> void:
 		"wall_notice":
 			_play_dialog([{"speaker": "告示", "text": Loc.t("flavor.notice")}])
 		"market":
-			_play_dialog([{"speaker": "旁白", "text": Loc.t("flavor.market")}])
+			_play_dialog([
+				{"speaker": "旁白", "text": Loc.t("flavor.market")},
+				{"speaker": "系統", "text": "殘架旁有琥珀的告示：材料行在行商驛站；城內也可問攤位。"},
+			], _go_material_shop)
 		"forge_sign":
 			_play_dialog([{"speaker": "旁白", "text": Loc.t("flavor.forge_sign")}])
 		"fountain":
@@ -4099,6 +4164,14 @@ func _go_c1_forge() -> void:
 			GameState.weapon_tier = 2
 			GameState.set_flag("c1_forged", true)
 			GameState.set_flag("c1_ding_recognized_sword", true)
+			## 同步裝備實例（武器線起點）
+			if not GameState.has_flag("equip.starter_meager"):
+				var inst: Dictionary = EquipmentSystem.roll_instance("meager_edge", "uncommon")
+				if not inst.is_empty():
+					EquipmentSystem.add_to_bag(inst)
+					EquipmentSystem.equip(str(inst.get("uid", "")))
+				GameState.set_flag("equip.starter_meager", true)
+			InventorySystem.add_item("iron_scrap", 3)
 			SaveManager.save_game()
 			## 0.12：鍛造後選流派（養成起點）
 			if GameState.path_style == "":
@@ -4135,9 +4208,50 @@ func _show_forge_panel() -> void:
 			debt_label = "舊債進度（斷劍未取）"
 		buttons.append({"text": debt_label, "cb": _side_start_ding_debt})
 	if GameState.has_flag("c1_forged"):
+		buttons.append({"text": "職系武器／護具鍛造", "cb": _go_craft_panel})
 		buttons.append({"text": "流派／養成（%s）" % GameState.path_display(), "cb": _go_path_panel})
 	buttons.append({"text": "回到廣場", "cb": _go_c1_town})
 	_panel("鐵匠鋪 · 釘釘", body, buttons)
+
+
+func _go_craft_panel() -> void:
+	if not GameState.has_flag("c1_forged"):
+		_play_dialog([{"speaker": "釘釘", "text": "先讓我認你那把鏽鐵。"}], _show_forge_panel)
+		return
+	var body := "職系武器線 · 材料從野外掉落或琥珀商店買。\n"
+	body += "流派契合武器會額外加戰力。金幣 %d\n\n" % GameState.gold
+	body += "材料：鐵屑%d 星砂%d 橡脂%d 騎士碎鐵%d\n\n" % [
+		InventorySystem.count("iron_scrap"),
+		InventorySystem.count("star_ore"),
+		InventorySystem.count("oak_resin"),
+		InventorySystem.count("knight_shard"),
+	]
+	var recipes: Array = DataTables.craft_recipes()
+	var lines: PackedStringArray = []
+	for r in recipes:
+		lines.append(EquipmentSystem.recipe_line(r))
+	body += "\n".join(lines)
+	var buttons: Array = []
+	for i in mini(10, recipes.size()):
+		var rec: Dictionary = recipes[i]
+		var nm := str(EquipmentSystem.base_def(str(rec.get("base_id", ""))).get("name", "?"))
+		var idx := i
+		buttons.append({"text": "鍛：%s" % nm, "cb": func(): _do_craft(idx)})
+	buttons.append({"text": "回鐵匠主選單", "cb": _show_forge_panel})
+	_panel("釘釘 · 職系鍛造", body, buttons)
+
+
+func _do_craft(recipe_index: int) -> void:
+	var recipes: Array = DataTables.craft_recipes()
+	if recipe_index < 0 or recipe_index >= recipes.size():
+		_go_craft_panel()
+		return
+	var rec: Dictionary = recipes[recipe_index]
+	var r: Dictionary = EquipmentSystem.craft(rec)
+	_play_dialog([
+		{"speaker": "釘釘", "text": "……看火。" if bool(r.get("ok", false)) else "材料不夠就別佔爐。"},
+		{"speaker": "系統", "text": str(r.get("msg", ""))},
+	], _go_craft_panel)
 
 
 func _go_path_panel(from_forge: bool = false) -> void:
@@ -4211,12 +4325,20 @@ func _try_forge() -> void:
 		forge_rate = 0.88
 	if GameState.path_style == "iron":
 		forge_rate = minf(0.95, forge_rate + 0.08)
+	## 消耗 1 鐵屑可提高成功率
+	var used_scrap := false
+	if InventorySystem.has_item("iron_scrap", 1):
+		InventorySystem.remove_item("iron_scrap", 1)
+		forge_rate = minf(0.96, forge_rate + 0.12)
+		used_scrap = true
 	var ok := randf() < forge_rate or GameState.forge_fail_streak >= 3
+	QuestSystem.track_day("craft", 1)
 	if ok:
 		GameState.weapon_tier += 1
 		GameState.weapon_atk += 2
 		GameState.forge_fail_streak = 0
-		_play_dialog([{"speaker": "釘釘", "text": "成了。T%d。" % GameState.weapon_tier}], _show_forge_panel)
+		var scrap_s := "（耗鐵屑穩火）" if used_scrap else ""
+		_play_dialog([{"speaker": "釘釘", "text": "成了。T%d。%s" % [GameState.weapon_tier, scrap_s]}], _show_forge_panel)
 	else:
 		GameState.forge_fail_streak += 1
 		if GameState.forge_fail_streak >= 3:

@@ -5,6 +5,15 @@ const DAILY_KEY := "meta.daily_day"
 const DAILY_CLAIMED := "meta.daily_claimed"
 const DAILY_STREAK := "meta.daily_streak"
 
+## 每日委託（養成循環）：track 對應 track_day
+const COMMISSIONS: Array[Dictionary] = [
+	{"id": "d_train", "name": "演武三巡", "desc": "演武場練功 3 次", "track": "train", "need": 3, "gold": 30, "dust": 1, "xp": 25},
+	{"id": "d_skirmish", "name": "清道委託", "desc": "雜魚勝 3 場", "track": "skirmish", "need": 3, "gold": 35, "dust": 1, "xp": 30},
+	{"id": "d_mats", "name": "材料回收", "desc": "賣出材料累計 5 件", "track": "sell", "need": 5, "gold": 25, "dust": 1, "xp": 20},
+	{"id": "d_craft", "name": "爐邊功課", "desc": "鍛造升階或職系武器 1 次", "track": "craft", "need": 1, "gold": 40, "dust": 2, "xp": 35},
+	{"id": "d_shop", "name": "市集一遊", "desc": "在材料行購買 1 次", "track": "shop", "need": 1, "gold": 20, "dust": 1, "xp": 15},
+]
+
 ## 長遠任務表：id → 目標 flag／計數 key、需求、獎勵
 const MISSIONS: Array[Dictionary] = [
 	{"id": "m_first_boss", "name": "初試啼聲", "desc": "戰勝雷歐（或任一聖獸）", "kind": "flag", "key": "boss.leo_cleared", "need": 1, "gold": 50, "dust": 3},
@@ -53,6 +62,98 @@ func refresh_daily() -> void:
 		## 斷簽：間隔 >1 日清 streak（可選溫和）
 		if last >= 0 and today - last > 1:
 			GameState.set_flag(DAILY_STREAK, 0)
+		## 日計數歸零（委託進度）
+		for t in ["train", "skirmish", "sell", "craft", "shop", "hunt"]:
+			GameState.set_flag("day.%s" % t, 0)
+		## 委託領獎旗
+		for c in COMMISSIONS:
+			GameState.set_flag("quest.dayclaim.%s" % str(c.get("id", "")), false)
+		## 練功日計（與 main 共用）
+		GameState.set_flag("meta.train_today", 0)
+
+
+func track_day(track: String, n: int = 1) -> void:
+	refresh_daily()
+	if track == "":
+		return
+	var key := "day.%s" % track
+	GameState.set_flag(key, int(GameState.get_flag(key, 0)) + maxi(0, n))
+
+
+func day_count(track: String) -> int:
+	refresh_daily()
+	return int(GameState.get_flag("day.%s" % track, 0))
+
+
+func commission_progress(c: Dictionary) -> int:
+	return day_count(str(c.get("track", "")))
+
+
+func commission_done(c: Dictionary) -> bool:
+	return commission_progress(c) >= int(c.get("need", 1))
+
+
+func commission_claimed(id: String) -> bool:
+	return GameState.has_flag("quest.dayclaim.%s" % id)
+
+
+func claim_commission(id: String) -> Dictionary:
+	refresh_daily()
+	for c in COMMISSIONS:
+		if str(c.get("id", "")) != id:
+			continue
+		if commission_claimed(id):
+			return {"ok": false, "msg": "此委託今日已領。"}
+		if not commission_done(c):
+			return {"ok": false, "msg": "尚未完成：%s" % str(c.get("desc", ""))}
+		var gold_n := int(c.get("gold", 0))
+		var dust_n := int(c.get("dust", 0))
+		var xp_n := int(c.get("xp", 0))
+		GameState.add_gold(gold_n)
+		GameState.add_stardust(dust_n)
+		var xr: Dictionary = GameState.add_xp(xp_n)
+		GameState.set_flag("quest.dayclaim.%s" % id, true)
+		## 順手給一點鍛造材
+		if Engine.get_main_loop() is SceneTree:
+			var inv: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("InventorySystem")
+			if inv and inv.has_method("add_item"):
+				inv.call("add_item", "iron_scrap", 1)
+				if randf() < 0.5:
+					inv.call("add_item", "star_ore", 1)
+		SaveManager.save_game()
+		var lv_s := ""
+		if int(xr.get("levels", 0)) > 0:
+			lv_s = " · 升級！"
+		return {
+			"ok": true,
+			"msg": "委託「%s」：金 %d · 星屑 %d · 經驗 %d%s · 鐵屑×1" % [
+				c.get("name", id), gold_n, dust_n, int(xr.get("gained", xp_n)), lv_s
+			],
+		}
+	return {"ok": false, "msg": "找不到委託。"}
+
+
+func list_commissions_bbcode() -> String:
+	refresh_daily()
+	var lines: PackedStringArray = []
+	lines.append("[b]今日委託[/b]（養成循環 · 每日重置）")
+	for c in COMMISSIONS:
+		var id := str(c.get("id", ""))
+		var need := int(c.get("need", 1))
+		var prog := mini(need, commission_progress(c))
+		var mark := "✓" if commission_claimed(id) else ("●" if prog >= need else "·")
+		lines.append("%s [b]%s[/b]  %d/%d\n   %s" % [mark, c.get("name", id), prog, need, c.get("desc", "")])
+	return "\n".join(lines)
+
+
+func claimable_commissions() -> int:
+	refresh_daily()
+	var n := 0
+	for c in COMMISSIONS:
+		var id := str(c.get("id", ""))
+		if commission_done(c) and not commission_claimed(id):
+			n += 1
+	return n
 
 
 func can_claim_daily() -> bool:
@@ -168,6 +269,7 @@ func claimable_count() -> int:
 	var n := 0
 	if can_claim_daily():
 		n += 1
+	n += claimable_commissions()
 	for m in MISSIONS:
 		var id := str(m.get("id", ""))
 		if mission_done(m) and not mission_claimed(id):

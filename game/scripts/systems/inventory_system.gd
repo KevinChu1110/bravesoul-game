@@ -145,6 +145,47 @@ const CATALOG: Dictionary = {
 		"color": Color(0.85, 0.35, 0.55),
 		"glyph": "核",
 	},
+	## 0.12.1 鍛造材料循環
+	"iron_scrap": {
+		"name": "鐵屑",
+		"desc": "鍛造基礎材。鐵匠與商店都收。",
+		"kind": "material",
+		"stack": 99,
+		"sell": 6,
+		"buy": 14,
+		"color": Color(0.55, 0.55, 0.58),
+		"glyph": "鐵",
+	},
+	"star_ore": {
+		"name": "星砂礦",
+		"desc": "觀星／星途武器材料。",
+		"kind": "material",
+		"stack": 99,
+		"sell": 10,
+		"buy": 22,
+		"color": Color(0.55, 0.6, 0.95),
+		"glyph": "砂",
+	},
+	"oak_resin": {
+		"name": "橡脂",
+		"desc": "穩固與飾品材料。",
+		"kind": "material",
+		"stack": 99,
+		"sell": 8,
+		"buy": 18,
+		"color": Color(0.55, 0.45, 0.25),
+		"glyph": "脂",
+	},
+	"knight_shard": {
+		"name": "騎士碎鐵",
+		"desc": "騎士域鍛造碎片。可做軍刀線。",
+		"kind": "material",
+		"stack": 99,
+		"sell": 12,
+		"buy": 28,
+		"color": Color(0.65, 0.6, 0.5),
+		"glyph": "碎",
+	},
 }
 
 
@@ -287,6 +328,10 @@ func use_item(id: String) -> Dictionary:
 			if not remove_item(id, 1):
 				return {"ok": false, "msg": "賣出失敗。"}
 			GameState.add_gold(sell)
+			if Engine.get_main_loop() is SceneTree:
+				var qs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("QuestSystem")
+				if qs and qs.has_method("track_day"):
+					qs.call("track_day", "sell", 1)
 			var res2 := {
 				"ok": true,
 				"msg": "賣出【%s】· 金 +%d" % [str(def.get("name", id)), sell],
@@ -328,23 +373,77 @@ func roll_skirmish_loot(mode: String) -> Array:
 		drops.append({"id": "hp_s", "n": 1})
 	elif r < 0.65:
 		drops.append({"id": "bread", "n": 1})
+	## 鍛造材料常駐掉落（循環）
+	if randf() < 0.42:
+		drops.append({"id": "iron_scrap", "n": 1})
+	if randf() < 0.22:
+		drops.append({"id": "star_ore", "n": 1})
+	if randf() < 0.18:
+		drops.append({"id": "oak_resin", "n": 1})
 	match mode:
 		"ash_rat", "road_bandit":
 			if randf() < 0.5:
 				drops.append({"id": "wolf_fang", "n": 1})
+			if randf() < 0.35:
+				drops.append({"id": "knight_shard", "n": 1})
 		"fog_shade", "bamboo_spirit":
 			if randf() < 0.45:
 				drops.append({"id": "mist_shard", "n": 1})
+			if randf() < 0.3:
+				drops.append({"id": "star_ore", "n": 1})
 		"coast_raider", "sewer_slime":
 			if randf() < 0.45:
 				drops.append({"id": "sea_shell", "n": 1})
+			if randf() < 0.28:
+				drops.append({"id": "iron_scrap", "n": 2})
 		"scar_wisp", "forest_sprite":
 			if randf() < 0.4:
 				drops.append({"id": "scar_ember" if mode == "scar_wisp" else "dust_crumb", "n": 1})
+			if randf() < 0.25:
+				drops.append({"id": "oak_resin", "n": 1})
+		"black_ronin":
+			if randf() < 0.7:
+				drops.append({"id": "knight_shard", "n": 2})
+			if randf() < 0.5:
+				drops.append({"id": "iron_scrap", "n": 2})
 		_:
 			if randf() < 0.3:
 				drops.append({"id": "dust_crumb", "n": 1})
 	return drops
+
+
+func sell_all_materials() -> Dictionary:
+	## 一鍵賣出可賣材料。回傳 {ok, gold, count, msg}
+	ensure_hotbar()
+	var gold_n := 0
+	var cnt := 0
+	var ids: Array = GameState.inventory.keys().duplicate()
+	for id in ids:
+		var def: Dictionary = catalog(str(id))
+		if str(def.get("kind", "")) != "material":
+			continue
+		var sell: int = int(def.get("sell", 0))
+		if sell <= 0:
+			continue
+		var n := count(str(id))
+		if n <= 0:
+			continue
+		if remove_item(str(id), n):
+			gold_n += sell * n
+			cnt += n
+	if cnt <= 0:
+		return {"ok": false, "gold": 0, "count": 0, "msg": "沒有可賣的材料。"}
+	GameState.add_gold(gold_n)
+	if Engine.get_main_loop() is SceneTree:
+		var qs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("QuestSystem")
+		if qs and qs.has_method("track_day"):
+			qs.call("track_day", "sell", cnt)
+	return {
+		"ok": true,
+		"gold": gold_n,
+		"count": cnt,
+		"msg": "賣出材料 %d 件 · 金 +%d" % [cnt, gold_n],
+	}
 
 
 func apply_drops(drops: Array) -> String:
