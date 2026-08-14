@@ -111,6 +111,30 @@ const ENTRIES: Array[Dictionary] = [
 		"desc": "完成任一期活動的十日簿或專屬任務。",
 		"cond": "event_any",
 	},
+	{
+		"flag": "title.debt_smith",
+		"name": "還債的錘",
+		"desc": "替釘釘把舊主斷劍送回爐火。",
+		"cond": "ding_debt",
+	},
+	{
+		"flag": "title.true_post",
+		"name": "真信使",
+		"desc": "把霧隱的真信送到行商驛站。",
+		"cond": "fog_letter",
+	},
+	{
+		"flag": "title.ronin_path",
+		"name": "收刃之人",
+		"desc": "在岔路勸下（或戰勝）黑焰浪人。",
+		"cond": "ronin",
+	},
+	{
+		"flag": "title.lore_reader",
+		"name": "讀矛盾的人",
+		"desc": "讀完絲絨典籍架上的黑焰三說。",
+		"cond": "codex",
+	},
 ]
 
 
@@ -173,6 +197,14 @@ func _cond_met(cond: String) -> bool:
 			return WC != null and WC.chest_opened_count() >= 12
 		"event_any":
 			return GameState.has_flag("title.event_any")
+		"ding_debt":
+			return GameState.has_flag("side.ding_debt_done")
+		"fog_letter":
+			return GameState.has_flag("side.fog_letter_done")
+		"ronin":
+			return GameState.has_flag("side.ronin_done")
+		"codex":
+			return GameState.has_flag("lore.codex_read")
 		_:
 			## 活動稱號：title.event_* 由 EventRuntime 直接立 flag
 			if cond.begins_with("event_"):

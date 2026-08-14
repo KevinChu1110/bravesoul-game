@@ -23,6 +23,12 @@ static func enemy_def(mode: String) -> Dictionary:
 			return {"id": "coast_raider", "name": "潮襲海盜", "max_hp": 110, "atk": 13, "def": 7, "speed": 10.0, "is_boss": false, "art": "coast_raider", "art_fallback": "boar"}
 		"scar_wisp":
 			return {"id": "scar_wisp", "name": "疤地焰靈", "max_hp": 120, "atk": 14, "def": 6, "speed": 12.0, "is_boss": false, "art": "scar_wisp", "art_fallback": "wrath"}
+		## 支線：黑焰浪人（可戰可勸）
+		"black_ronin":
+			return {
+				"id": "black_ronin", "name": "黑焰浪人", "max_hp": 160, "atk": 14, "def": 7, "speed": 12.5,
+				"is_boss": false, "art": "black_ronin", "art_fallback": "road_bandit",
+			}
 		## 秘境小 Boss
 		"scar_lord":
 			return {

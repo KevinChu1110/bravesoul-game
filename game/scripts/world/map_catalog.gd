@@ -300,6 +300,7 @@ static func _town() -> Dictionary:
 		_e("star", 1700, 400, 48, 64, "星讀", Color(0.45, 0.5, 0.75)),
 		_e("bench", 1800, 560, 48, 36, "石凳", Color(0.45, 0.45, 0.48)),
 		_e("sprout", 1950, 700, 48, 64, "小芽", Color(0.55, 0.75, 0.45)),
+		_e("silk", 2100, 380, 48, 64, "絲絨·書吏", Color(0.55, 0.5, 0.65)),
 		_e("to_barracks_yard", 500, 1100, 64, 56, "演武場", Color(0.4, 0.38, 0.4)),
 		_e("barracks", 450, 1050, 72, 64, "舊兵營", Color(0.4, 0.38, 0.4), true),
 		_e("chapel", 900, 220, 64, 72, "小禮拜堂", Color(0.45, 0.42, 0.48), true),
@@ -324,6 +325,8 @@ static func _town_keep() -> Dictionary:
 		_e("keep_well", 950, 620, 48, 48, "內井", Color(0.4, 0.42, 0.48), true),
 		_e("statue_knight", 400, 700, 48, 64, "無名騎士像", Color(0.5, 0.48, 0.5), true),
 		_e("archive", 1600, 400, 56, 56, "檔案庫門", Color(0.42, 0.4, 0.45), true),
+		_e("silk", 1680, 480, 48, 64, "絲絨·書吏", Color(0.55, 0.5, 0.65)),
+		_e("codex_shelf", 1750, 350, 48, 48, "典籍架", Color(0.45, 0.4, 0.5), true),
 		_e("exit_wild_inner", 2100, 550, 72, 64, "側門·荒野", Color(0.35, 0.4, 0.3)),
 		_e("to_leo_court", 2300, 400, 64, 56, "內殿前院道", Color(0.5, 0.4, 0.3)),
 	]
@@ -363,14 +366,16 @@ static func _town_sewers() -> Dictionary:
 
 static func _barracks_yard() -> Dictionary:
 	var m := _base("騎士堡 · 演武場", Color(0.1, 0.1, 0.12), 2400, 1100, Vector2(200, 500), "barracks_yard")
+	var blade_lab := "空武器架" if GameState.has_flag("item.broken_blade") or GameState.has_flag("side.ding_debt_done") else "武器架（斷劍）"
 	m["entities"] = [
 		_e("back_from_barracks", 100, 480, 56, 56, "回廣場", Color(0.4, 0.4, 0.45)),
 		_e("training_ring", 700, 400, 100, 80, "圓形演武台", Color(0.45, 0.4, 0.35), true),
-		_e("weapon_rack", 500, 550, 48, 56, "武器架", Color(0.5, 0.45, 0.4), true),
+		_e("weapon_rack", 500, 550, 48, 56, blade_lab, Color(0.5, 0.45, 0.4), true),
 		_e("target_dummy", 1000, 500, 40, 56, "木靶", Color(0.45, 0.35, 0.28)),
 		_e("banner_stand", 1200, 300, 40, 64, "團旗架", Color(0.55, 0.4, 0.3), true),
 		_e("officer_desk", 1500, 450, 56, 48, "隊長桌", Color(0.4, 0.35, 0.3), true),
 		_e("sand_pit", 1800, 600, 80, 48, "沙坑", Color(0.5, 0.45, 0.35)),
+		_e("knight_orphan", 1600, 600, 48, 64, "遺孤少年", Color(0.5, 0.48, 0.55)),
 	]
 	return m
 
@@ -435,7 +440,7 @@ static func _wild_leo_court() -> Dictionary:
 
 static func _crossroads() -> Dictionary:
 	var m := _base("六域岔路 · 翠嶺之心道", Color(0.1, 0.12, 0.1), 3000, 1600, Vector2(1400, 750), "road")
-	m["entities"] = [
+	var ents: Array = [
 		_e("sign_board", 1400, 600, 64, 56, "六域路標", Color(0.45, 0.4, 0.3), true),
 		_e("camp_fire", 1250, 820, 48, 48, "旅人營火", Color(0.9, 0.4, 0.15), true),
 		_e("merchant", 1500, 850, 48, 64, "行商", Color(0.6, 0.5, 0.4)),
@@ -455,6 +460,12 @@ static func _crossroads() -> Dictionary:
 		_e("save_cross", 1100, 700, 48, 48, "存檔石", Color(0.4, 0.45, 0.5)),
 		_e("world_map_stone", 1600, 650, 56, 48, "世界輿圖石", Color(0.4, 0.5, 0.55)),
 	]
+	## 雷歐後、未完結前：岔路擋道的黑焰浪人
+	if GameState.has_flag("boss.leo_cleared") and not GameState.has_flag("side.ronin_done"):
+		ents.append(_e("ronin", 1750, 900, 52, 68, "黑焰浪人", Color(0.35, 0.2, 0.35)))
+	elif GameState.has_flag("side.ronin_spared"):
+		ents.append(_e("ronin", 1750, 900, 48, 64, "浪人（收刃）", Color(0.4, 0.35, 0.4)))
+	m["entities"] = ents
 	return m
 
 
@@ -486,11 +497,13 @@ static func _cross_east() -> Dictionary:
 
 static func _caravan_camp() -> Dictionary:
 	var m := _base("行商驛站 · 星途旅人落腳處", Color(0.1, 0.11, 0.12), 2400, 1100, Vector2(200, 500), "caravan_camp")
+	var letter_lab := "行商頭領" if not GameState.has_flag("item.true_letter") else "行商（待交信）"
 	m["entities"] = [
 		_e("back_cross", 100, 480, 56, 56, "回岔路", Color(0.45, 0.5, 0.4)),
 		_e("wagon_a", 500, 400, 72, 56, "篷車", Color(0.5, 0.4, 0.3), true),
 		_e("wagon_b", 800, 500, 72, 56, "篷車", Color(0.48, 0.38, 0.28), true),
-		_e("merchant", 1000, 450, 48, 64, "行商頭領", Color(0.6, 0.5, 0.4)),
+		_e("merchant", 1000, 450, 48, 64, letter_lab, Color(0.6, 0.5, 0.4)),
+		_e("amber", 1100, 520, 48, 64, "琥珀·商人", Color(0.75, 0.55, 0.3)),
 		_e("star_market", 1150, 380, 64, 56, "星途市集", Color(0.7, 0.55, 0.35)),
 		_e("camp_fire", 1200, 550, 48, 48, "營火", Color(0.9, 0.4, 0.15), true),
 		_e("goods_pile", 1500, 400, 56, 48, "貨堆", Color(0.45, 0.4, 0.35)),
@@ -867,7 +880,7 @@ static func _coast_wreck() -> Dictionary:
 
 static func _tower_camp() -> Dictionary:
 	var m := _base("法師之塔 · 塔下營地", Color(0.08, 0.07, 0.12), 2800, 1200, Vector2(300, 550), "tower")
-	m["entities"] = [
+	var ents: Array = [
 		_e("duanye", 500, 480, 48, 64, "斷頁", Color(0.55, 0.45, 0.65)),
 		_e("refugee_fire", 700, 620, 56, 48, "逃難營火", Color(0.9, 0.4, 0.15), true),
 		_e("tent_a", 400, 700, 64, 48, "帳棚", Color(0.4, 0.35, 0.4), true),
@@ -882,6 +895,10 @@ static func _tower_camp() -> Dictionary:
 		_e("exit_cross_t", 2500, 850, 72, 64, "六域岔路", Color(0.45, 0.5, 0.4)),
 		_e("path_back_wild", 150, 350, 56, 48, "回荒野", Color(0.35, 0.4, 0.3)),
 	]
+	## 勸降成功：塔下再見
+	if GameState.has_flag("side.ronin_spared"):
+		ents.append(_e("ronin", 1000, 520, 48, 64, "浪人（守營）", Color(0.4, 0.35, 0.42)))
+	m["entities"] = ents
 	return m
 
 

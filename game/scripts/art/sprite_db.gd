@@ -265,6 +265,14 @@ static func speaker_portrait(speaker: String) -> Texture2D:
 			id = "wreck_captain"
 		"行商", "行商頭領", "caravan_chief":
 			id = "caravan_chief"
+		"絲絨", "silk":
+			id = "star"  ## 暫用星讀調色系半身；後補專圖
+		"琥珀", "amber":
+			id = "caravan_chief"
+		"黑焰浪人", "浪人", "ronin":
+			id = "scar_lord"  ## 暫用疤主影調；後補專圖
+		"遺孤少年", "knight_orphan":
+			id = "sprout"
 		"系統", "旁白", "系統·教學":
 			return null
 		_:

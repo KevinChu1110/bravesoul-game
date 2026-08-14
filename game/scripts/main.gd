@@ -1785,11 +1785,14 @@ func _journey_summary() -> String:
 		["C1 鍛造", "c1_forged"],
 		["C1 雷歐", "boss.leo_cleared"],
 		["C1 小芽", "c1_sprout_done"],
+		["C1 舊債", "side.ding_debt_done"],
 		["C2 麥穗信", "c2_wheat_letter"],
+		["C2 家書", "side.fog_letter_done"],
 		["C2 白霧", "boss.white_fog_cleared"],
 		["C3 阿波", "boss.abo_cleared"],
 		["C4 疾影", "boss.shadowwind_cleared"],
 		["C5 石拳", "boss.stonefist_cleared"],
+		["岔路浪人", "side.ronin_done"],
 		["C6 魔王", "boss.demon_cleared"],
 		["通關", "game_cleared"],
 	]
@@ -2456,6 +2459,9 @@ func _on_explore_interact(id: String) -> void:
 	## 廣域：寶箱／雜魚／秘境小 Boss
 	if _handle_world_content(id):
 		return
+	## 支線掛點（舊債／家書／浪人／絲絨等）
+	if _handle_side_content(id):
+		return
 	var before := _current
 	match _current:
 		Screen.C0_VILLAGE:
@@ -2481,6 +2487,306 @@ func _on_explore_interact(id: String) -> void:
 	## 章節 handler 未消費的新分區物件 → 氛圍台詞（廣域探索）
 	if _current == before and not _dialogue.visible:
 		_flavor_world_object(id)
+
+
+func _handle_side_content(id: String) -> bool:
+	## 回傳 true 表示已消費互動
+	match id:
+		"silk", "codex_shelf":
+			_side_silk(id)
+			return true
+		"weapon_rack", "officer_desk":
+			if _side_try_pick_broken_blade(id):
+				return true
+			return false
+		"knight_orphan":
+			_side_knight_orphan()
+			return true
+		"ronin":
+			_side_ronin()
+			return true
+		"amber":
+			_side_amber()
+			return true
+		"guard_dog":
+			_play_dialog([{"speaker": "守車犬", "text": "汪。（尾巴一下，像在說：先付金幣。）"}])
+			return true
+		_:
+			return false
+
+
+func _side_silk(id: String) -> void:
+	if id == "codex_shelf":
+		var lines: Array = [
+			{"speaker": "典籍", "text": "《黑焰三說》抄本：野心為食；至弱至塔；鏡中無我。"},
+			{"speaker": "典籍", "text": "邊注（絲絨）：官方刪了『前任至弱者曾守護六域』。"},
+		]
+		if GameState.has_flag("c2_wheat_letter"):
+			lines.append({"speaker": "內心", "text": "信比卷軸真。絲絨說得對。"})
+		if not GameState.has_flag("lore.codex_read"):
+			lines.append({"speaker": "系統", "text": "讀畢。金幣＋10 · 星屑＋1。"})
+			_play_dialog(lines, func():
+				GameState.set_flag("lore.codex_read", true)
+				GameState.add_gold(10)
+				GameState.add_stardust(1)
+				SaveManager.save_game()
+			)
+		else:
+			_play_dialog(lines)
+		return
+	_play_dialog(NpcLines.silk())
+
+
+func _side_try_pick_broken_blade(id: String) -> bool:
+	## 釘釘舊債：演武場武器架撿斷劍
+	if not GameState.has_flag("side.ding_debt_asked"):
+		if id == "weapon_rack":
+			_play_dialog([{"speaker": "旁白", "text": "武器架空了大半。有一把斷劍半埋沙裡——刃口很舊。"}])
+			return true
+		return false
+	if GameState.has_flag("side.ding_debt_done") or GameState.has_flag("item.broken_blade"):
+		_play_dialog([{"speaker": "旁白", "text": "這裡已經沒有釘釘要的東西了。"}])
+		return true
+	_play_dialog([
+		{"speaker": "旁白", "text": "沙坑邊的武器架下，一把斷劍露出半截。刃上刻著舊騎士團章。"},
+		{"speaker": "內心", "text": "釘釘說的……舊主的鐵。"},
+		{"speaker": "系統", "text": "獲得【舊主斷劍】。拿回給釘釘。"},
+	], func():
+		GameState.set_flag("item.broken_blade", true)
+		SaveManager.save_game()
+		_player_bubble("撿到斷劍了")
+	)
+	return true
+
+
+func _side_knight_orphan() -> void:
+	if GameState.has_flag("side.ding_debt_done"):
+		_play_dialog([
+			{"speaker": "遺孤少年", "text": "鐵匠大叔後來不太罵人了。……還是會罵。但比較輕。"},
+		])
+		return
+	if GameState.has_flag("side.ding_debt_asked"):
+		_play_dialog([
+			{"speaker": "遺孤少年", "text": "斷劍？在武器架那邊。我不敢碰——怕鐵匠生氣。"},
+			{"speaker": "遺孤少年", "text": "我爹以前……也是團裡的。現在只剩沙。"},
+		])
+		return
+	_play_dialog([
+		{"speaker": "遺孤少年", "text": "演武場以前很吵。現在只剩風。"},
+		{"speaker": "遺孤少年", "text": "灰鬍子說：旗還掛著，人就不能先倒下。"},
+	])
+
+
+func _side_amber() -> void:
+	if GameState.has_flag("item.true_letter") and not GameState.has_flag("side.fog_letter_done"):
+		_play_dialog([
+			{"speaker": "琥珀", "text": "喔？你手上那封……霧隱的印？交給頭領吧，我只收金幣不收心事。"},
+			{"speaker": "琥珀", "text": "市價：乾糧貴一點，傳聞免費——前提是你先活著回來。"},
+		])
+		return
+	if GameState.has_flag("boss.leo_cleared"):
+		_play_dialog([
+			{"speaker": "琥珀", "text": "獅子睡了？城裡金幣又肯轉了。要不要看看我的『合法二手貨』？"},
+			{"speaker": "琥珀", "text": "（笑）開玩笑的。我只賣乾糧——和一點不傷人的傳聞。"},
+		])
+		return
+	_play_dialog([
+		{"speaker": "琥珀", "text": "六域的路我都算過帳。塔最近……門縫在漏光。"},
+		{"speaker": "琥珀", "text": "兔子旅人少見。要保重——死了就沒人結帳。"},
+	])
+
+
+func _side_ronin() -> void:
+	if GameState.has_flag("side.ronin_done"):
+		if GameState.has_flag("side.ronin_spared"):
+			if _current == Screen.C6_TOWER or _last_explore_map == "tower_camp":
+				_play_dialog([
+					{"speaker": "黑焰浪人", "portrait": "road_bandit", "text": "我在這裡守火。上去的人……別學我把焰當柴。"},
+					{"speaker": "黑焰浪人", "text": "你若倒下，我會把你拖回來。——只一次。"},
+				])
+			else:
+				_play_dialog(NpcLines.ronin())
+		else:
+			_play_dialog([{"speaker": "旁白", "text": "地上只剩燒過的靴印。浪人已不在。"}])
+		return
+	## 未完結：分岔
+	if not GameState.has_flag("boss.leo_cleared"):
+		_play_dialog([{"speaker": "黑焰浪人", "text": "……還太早。先去打你的獅子。"}])
+		return
+	GameState.set_flag("side.ronin_met", true)
+	var can_persuade := GameState.has_flag("c2_wheat_letter") \
+		or GameState.has_flag("c0_wheat_saved") \
+		or GameState.has_flag("c1_sprout_done")
+	var choices: Array = ["拔劍——解決你", "你走你的，我走我的"]
+	var replies: Array = [
+		"……好。讓我看看你的『強』有多重。",
+		"裝蒜？黑焰不吃這套。",
+	]
+	if can_persuade:
+		choices.append("焰會吃掉你——別再餵它")
+		replies.append("……閉嘴。你沒資格——……你有麥稈味。")
+	_play_dialog([
+		{"speaker": "黑焰浪人", "portrait": "road_bandit", "text": "站住。你也是來『變強』的？"},
+		{"speaker": "黑焰浪人", "text": "黑焰教我：心一軟，就被吃乾淨。我不會再軟。"},
+		{
+			"speaker": "黑焰浪人",
+			"text": "怎麼，兔子？要刀還是要滾？",
+			"choices": choices,
+			"replies": replies,
+		},
+	], func():
+		## choices 回調在 _play_dialog 後需靠 flag 或二次處理；用延遲選項面板更穩
+		_side_ronin_choice_panel(can_persuade)
+	)
+
+
+func _side_ronin_choice_panel(can_persuade: bool) -> void:
+	var buttons: Array = [
+		{"text": "拔劍應戰", "cb": _side_ronin_fight},
+		{"text": "轉身離開（稍後再說）", "cb": _side_ronin_leave},
+	]
+	if can_persuade:
+		buttons.insert(1, {"text": "勸他收刃（需：信／稈／小芽）", "cb": _side_ronin_persuade})
+	_panel("黑焰浪人 · 分岔", "岔路風很硬。他擋在東向的影子裡。\n\n【擊敗】或【勸降】都會結束這條支線。", buttons)
+
+
+func _side_ronin_leave() -> void:
+	_play_dialog([
+		{"speaker": "黑焰浪人", "text": "逃？也好。下次我不會讓路。"},
+	], func():
+		_open_explore(_last_explore_map if _last_explore_map != "" else "crossroads", _last_explore_screen)
+	)
+
+
+func _side_ronin_fight() -> void:
+	_play_dialog([
+		{"speaker": "黑焰浪人", "text": "來。讓焰決定誰該走。"},
+	], func(): _start_battle("black_ronin"))
+
+
+func _side_ronin_persuade() -> void:
+	_play_dialog([
+		{"speaker": "內心", "text": "我把麥穗的字、小芽的木劍、自己的傷——都攤開。"},
+		{"speaker": "黑焰浪人", "text": "……矯情。"},
+		{"speaker": "黑焰浪人", "text": "……可焰沒有因此更亮。奇怪。"},
+		{"speaker": "黑焰浪人", "text": "滾。我自己的路自己斷。你——去塔。"},
+		{"speaker": "系統", "text": "浪人收刃。金幣＋40 · 星屑＋3。稱號進度。"},
+	], func():
+		GameState.set_flag("side.ronin_spared", true)
+		GameState.set_flag("side.ronin_done", true)
+		GameState.add_gold(40)
+		GameState.add_stardust(3)
+		TitleCatalog.evaluate_all()
+		SaveManager.save_game()
+		_player_bubble("他收刃了")
+		_open_explore(_last_explore_map if _last_explore_map != "" else "crossroads", _last_explore_screen)
+	)
+
+
+func _side_finish_ronin_battle(won: bool) -> void:
+	if won:
+		_grant_boss_loot(55, 3, 0)
+		GameState.set_flag("side.ronin_defeated", true)
+		GameState.set_flag("side.ronin_done", true)
+		GameState.set_flag("meta.skirmish_wins", int(GameState.get_flag("meta.skirmish_wins", 0)) + 1)
+		TitleCatalog.evaluate_all()
+		SaveManager.save_game()
+		_play_dialog([
+			{"speaker": "黑焰浪人", "text": "……強……又如何……焰還是空的。"},
+			{"speaker": "系統", "text": "戰勝黑焰浪人。金 55 · 星屑 3。他倒下的地方，靴印不再燒。"},
+		], func():
+			_open_explore(_last_explore_map if _last_explore_map != "" else "crossroads", _last_explore_screen)
+		)
+	else:
+		GameState.hp = maxi(1, int(GameState.max_hp * 0.4))
+		SaveManager.save_game()
+		_play_dialog([
+			{"speaker": "黑焰浪人", "text": "回去練。別用『想變強』當藉口——那是我的台詞。"},
+		], func():
+			_open_explore(_last_explore_map if _last_explore_map != "" else "crossroads", _last_explore_screen)
+		)
+
+
+func _side_deliver_true_letter() -> void:
+	_play_dialog([
+		{"speaker": "行商", "portrait": "caravan_chief", "text": "這印……霧隱？假信我看過一百封。"},
+		{"speaker": "行商", "text": "……紙邊有火燎。是真的。我們會送到村外那戶。"},
+		{"speaker": "行商", "text": "謝了，兔子。路上少一層假，就少一場刀。"},
+		{"speaker": "系統", "text": "交付【真信】。金幣＋45 · 星屑＋3。"},
+	], func():
+		GameState.set_flag("item.true_letter", false)
+		GameState.set_flag("side.fog_letter_done", true)
+		GameState.add_gold(45)
+		GameState.add_stardust(3)
+		TitleCatalog.evaluate_all()
+		SaveManager.save_game()
+		_player_bubble("真信送達")
+	)
+
+
+func _side_start_ding_debt() -> void:
+	if GameState.has_flag("side.ding_debt_done"):
+		_play_dialog(NpcLines.ding(), _show_forge_panel)
+		return
+	if GameState.has_flag("item.broken_blade"):
+		_play_dialog([
+			{"speaker": "釘釘", "text": "……拿來。"},
+			{"speaker": "系統", "text": "釘釘把斷劍放進爐。第三錘很輕，像在對誰道歉。"},
+			{"speaker": "釘釘", "text": "舊主的鐵。我當年沒鍛完就跑了。"},
+			{"speaker": "釘釘", "text": "現在合上了。你——別學我丟下沒做完的東西。"},
+			{"speaker": "系統", "text": "舊債了結。金幣＋50 · 星屑＋3 · 下次升階成功率提升（暫）。"},
+		], func():
+			GameState.set_flag("item.broken_blade", false)
+			GameState.set_flag("side.ding_debt_done", true)
+			GameState.set_flag("meta.forge_debt_bonus", true)
+			GameState.add_gold(50)
+			GameState.add_stardust(3)
+			TitleCatalog.evaluate_all()
+			SaveManager.save_game()
+			_show_forge_panel()
+		)
+		return
+	if not GameState.has_flag("side.ding_debt_asked"):
+		_play_dialog([
+			{"speaker": "釘釘", "text": "……站住。爐邊有件事。"},
+			{"speaker": "釘釘", "text": "演武場武器架下，有一把斷劍。舊騎士團的。"},
+			{"speaker": "釘釘", "text": "我欠那鐵一個收場。你若撿回來——我當你付過一次人情。"},
+			{"speaker": "系統", "text": "【支線】鐵匠的舊債：去演武場取【舊主斷劍】。"},
+		], func():
+			GameState.set_flag("side.ding_debt_asked", true)
+			SaveManager.save_game()
+			_show_forge_panel()
+		)
+		return
+	_play_dialog([
+		{"speaker": "釘釘", "text": "斷劍還在演武場。別跟我扯廢話。"},
+	], _show_forge_panel)
+
+
+func _side_start_fog_letter() -> void:
+	if GameState.has_flag("side.fog_letter_done"):
+		_play_dialog(NpcLines.fog_hide())
+		return
+	if GameState.has_flag("item.true_letter"):
+		_play_dialog(NpcLines.fog_hide())
+		return
+	if not GameState.has_flag("c2_wheat_letter"):
+		_play_dialog(NpcLines.fog_hide())
+		return
+	## 讀完麥穗信後可接
+	if not GameState.has_flag("side.fog_letter_asked"):
+		_play_dialog([
+			{"speaker": "霧隱", "text": "假信滿天飛。我這裡有一封真的——要送到村外行商驛站。"},
+			{"speaker": "霧隱", "text": "假的給霧吃。真的，要人走。"},
+			{"speaker": "系統", "text": "【支線】霧中家書：將【真信】交給岔路行商驛站的頭領。"},
+		], func():
+			GameState.set_flag("side.fog_letter_asked", true)
+			GameState.set_flag("item.true_letter", true)
+			SaveManager.save_game()
+			_player_bubble("收下真信")
+		)
+		return
+	_play_dialog(NpcLines.fog_hide())
 
 
 func _flavor_world_object(id: String) -> void:
@@ -2535,6 +2841,30 @@ func _flavor_world_object(id: String) -> void:
 		"wagon_a": "篷車裡有乾糧味與遠方泥土。",
 		"map_table": "地圖桌標了六域。塔被畫得最大。",
 		"goods_pile": "貨堆用帆布蓋著。行商的規矩：先問價。",
+		"codex_shelf": "典籍架上積灰。絲絨的字跡比灰塵新。",
+		"knight_orphan": "少年抱著斷木槍。眼睛比槍尖還直。",
+		"armor": "空盔甲架。裡面沒有人，卻像還站著班。",
+		"hall": "騎士舊廳回音很大。榮譽兩個字被煙燻黃。",
+		"throne_hall": "議政廳門半掩。椅子比人多。",
+		"keep_well": "內井水深。倒影裡沒有旗。",
+		"statue_knight": "無名騎士像缺了半邊臉。另一半仍望著門。",
+		"spice_smell": "香料殘跡還在——像有人昨天剛走。",
+		"echo_drip": "滴水聲數到七就亂。下水道也不守規矩。",
+		"sealed_door": "封死鐵門。牆上有人用指甲刻：別開。",
+		"weapon_rack": "武器架空了大半。沙裡可能還埋著舊鐵。",
+		"target_dummy": "木靶胸口全是洞。有人練得很兇，然後停了。",
+		"banner_stand": "團旗架空著。布去了哪，沒人說。",
+		"officer_desk": "隊長桌上壓著未簽名的調防令。日期是三年前。",
+		"sand_pit": "沙坑還留著對練的腳印——一大一小。",
+		"mask_shop": "面具攤：每一張笑臉背後都是同一張空。",
+		"echo_well": "回聲井把你的名字還給你——慢半拍，像在猶豫。",
+		"bell_tower": "霧鐘樓沒有鐘舌。風替它敲。",
+		"kite_string": "斷線風箏纏在欄上。有人放，有人沒回來收。",
+		"incense": "香灰結塊。願還沒散完。",
+		"prayer_strip": "願條寫：願霧只騙敵人。字被淚暈過。",
+		"secret_panel": "暗板後是空的。有人比你早來過。",
+		"star_reader_camp": "星讀帳篷空著。星盤炭筆畫到一半。",
+		"night_bloom": "夜開花只在沒人看時開。你看了一眼——它仍開著。",
 	}
 	if flavors.has(id):
 		_play_dialog([{"speaker": "旁白", "text": str(flavors[id])}])
@@ -2687,6 +3017,10 @@ func _handle_world_travel(id: String) -> bool:
 			_touch_save_stone()
 			return true
 		"merchant", "event_stone":
+			## 霧中家書：先交真信
+			if id == "merchant" and GameState.has_flag("item.true_letter") and not GameState.has_flag("side.fog_letter_done"):
+				_side_deliver_true_letter()
+				return true
 			if id == "event_stone" or EventRuntime.has_active() or not EventRuntime.ended_with_tokens().is_empty():
 				var story: Array = []
 				if EventRuntime.has_active():
@@ -3195,6 +3529,8 @@ func _on_battle_finished(won: bool) -> void:
 				else:
 					_go_postgame_hub()
 			)
+	elif _battle_mode == "black_ronin":
+		_side_finish_ronin_battle(won)
 	elif WorldContent.is_world_battle(_battle_mode):
 		_on_world_battle_finished(won)
 
@@ -3351,6 +3687,8 @@ func _interact_town(id: String) -> void:
 			_go_c1_forge()
 		"star":
 			_c1_star()
+		"silk":
+			_side_silk("silk")
 		"flag":
 			if GameState.has_flag("c1_flag_paw"):
 				_play_dialog([{"speaker": "系統", "text": "旗上有炭筆歪扭兔爪。「有人用炭筆畫了兔子。耳朵不太對，勇氣很對。」"}])
@@ -3694,13 +4032,26 @@ func _show_forge_panel() -> void:
 	var body := "微末之刃 T%d · 攻擊 +%d\n連敗：%d（3 次釘釘發脾氣）\n金幣：%d（升階 50）" % [
 		GameState.weapon_tier, GameState.weapon_atk, GameState.forge_fail_streak, GameState.gold
 	]
+	if GameState.has_flag("meta.forge_debt_bonus"):
+		body += "\n舊債加成：升階更穩（一次人情）。"
 	if GameState.has_flag("c1_sprout_asked") and not GameState.has_flag("c1_sprout_done"):
 		body += "\n\n小芽想要練習木劍——可在此打一把（20 金）。"
+	if GameState.has_flag("side.ding_debt_asked") and not GameState.has_flag("side.ding_debt_done"):
+		if GameState.has_flag("item.broken_blade"):
+			body += "\n\n【舊債】斷劍已帶回——可交給釘釘。"
+		else:
+			body += "\n\n【舊債】斷劍在演武場武器架。"
 	var buttons: Array = [
 		{"text": "升器階", "cb": _try_forge},
 	]
 	if GameState.has_flag("c1_sprout_asked") and not GameState.has_flag("item.wood_sword") and not GameState.has_flag("c1_sprout_done"):
 		buttons.append({"text": "做木劍給小芽（20 金）", "cb": _forge_wood_sword})
+	## 舊債支線入口
+	if GameState.has_flag("c1_forged") and not GameState.has_flag("side.ding_debt_done"):
+		var debt_label := "舊債：交斷劍" if GameState.has_flag("item.broken_blade") else "打聽舊債"
+		if GameState.has_flag("side.ding_debt_asked") and not GameState.has_flag("item.broken_blade"):
+			debt_label = "舊債進度（斷劍未取）"
+		buttons.append({"text": debt_label, "cb": _side_start_ding_debt})
 	buttons.append({"text": "回到廣場", "cb": _go_c1_town})
 	_panel("鐵匠鋪 · 釘釘", body, buttons)
 
@@ -3732,7 +4083,10 @@ func _try_forge() -> void:
 		_play_dialog([{"speaker": "釘釘", "text": "金幣呢？出城晃兩下。"}], _show_forge_panel)
 		return
 	GameState.add_gold(-50)
-	var ok := randf() < 0.70 or GameState.forge_fail_streak >= 3
+	var forge_rate := 0.70
+	if GameState.has_flag("meta.forge_debt_bonus"):
+		forge_rate = 0.88
+	var ok := randf() < forge_rate or GameState.forge_fail_streak >= 3
 	if ok:
 		GameState.weapon_tier += 1
 		GameState.weapon_atk += 2
@@ -3920,7 +4274,7 @@ func _go_c2_mist() -> void:
 func _interact_mist(id: String) -> void:
 	match id:
 		"fog_hide":
-			_play_dialog(NpcLines.fog_hide())
+			_side_start_fog_letter()
 		"inn":
 			_c2_inn_letter()
 		"lantern":
@@ -4245,16 +4599,7 @@ func _go_c4_forest() -> void:
 func _interact_forest(id: String) -> void:
 	match id:
 		"wind_ear":
-			if GameState.has_flag("boss.shadowwind_cleared"):
-				_play_dialog([
-					{"speaker": "風耳", "text": "你追上了風……不，是風願意為你停一下。"},
-					{"speaker": "風耳", "text": "東岸的石還在吼。去或不去，看你。"},
-				])
-			else:
-				_play_dialog([
-					{"speaker": "風耳", "text": "疾影不會等你。但真身會——短短一瞬。"},
-					{"speaker": "風耳", "text": "別追殘影。等停拍，再射。地上的風道——預告後就閃。"},
-				])
+			_play_dialog(NpcLines.wind_ear_idle())
 		"treehouse":
 			_play_dialog([
 				{"speaker": "旁白", "text": "樹屋用藤索連著。風箏線纏在欄杆上，線頭還在顫。"},
@@ -4422,17 +4767,7 @@ func _go_c5_coast() -> void:
 func _interact_coast(id: String) -> void:
 	match id:
 		"tide_roar":
-			if GameState.has_flag("boss.stonefist_cleared"):
-				_play_dialog([
-					{"speaker": "潮吼", "text": "哈哈哈！站到最後的是你！"},
-					{"speaker": "潮吼", "text": "力氣有方向了。去塔吧——別把焰當柴燒。"},
-				])
-			else:
-				_play_dialog([
-					{"speaker": "潮吼", "text": "衝過來的時候別逃——迎上去。對撞。"},
-					{"speaker": "潮吼", "text": "岩甲一層一層剝。落岩亮區，蹲進去。"},
-					{"speaker": "潮吼", "text": "……怎麼，怕了？那滾回森林去。"},
-				])
+			_play_dialog(NpcLines.tide_roar_idle())
 		"dock":
 			_play_dialog([
 				{"speaker": "旁白", "text": "碼頭鎮幾乎空了。漁網乾在架上，像沒人敢出海。"},
@@ -4604,6 +4939,14 @@ func _c6_talk_duanye() -> void:
 		lines.append({"speaker": "斷頁", "text": "……信比卷軸真。記得回家的氣味。"})
 	if GameState.has_flag("c1_sprout_done"):
 		lines.append({"speaker": "斷頁", "text": "城裡有個孩子在練木劍。世界還肯長出明天。"})
+	if GameState.has_flag("side.ding_debt_done"):
+		lines.append({"speaker": "斷頁", "text": "鐵匠把舊債錘進爐了。人情也是一種封印。"})
+	if GameState.has_flag("side.fog_letter_done"):
+		lines.append({"speaker": "斷頁", "text": "真信比假卷軸稀。你送達過一封——我記在頁邊。"})
+	if GameState.has_flag("side.ronin_spared"):
+		lines.append({"speaker": "斷頁", "text": "營火邊多了一個收刃的人。他不說話，但火更穩。"})
+	elif GameState.has_flag("side.ronin_defeated"):
+		lines.append({"speaker": "斷頁", "text": "岔路的燒痕淡了。有人用強解決了強——也行。"})
 	if GameState.has_flag("boss.shadowwind_cleared") and GameState.has_flag("boss.stonefist_cleared"):
 		lines.append({"speaker": "斷頁", "text": "風與石都醒了。塔頂……會記得你。"})
 	_play_dialog(lines)
