@@ -176,6 +176,36 @@ static func player_accessory_overlay() -> Texture2D:
 	return tex("%s/player/accessories/%s.png" % [ROOT, kind])
 
 
+## 裝備圖鑑 icon（與官網 web/media/equipment 同源）
+static func equip_icon(base_id: String) -> Texture2D:
+	if base_id == "":
+		return null
+	var t := tex("%s/equipment/%s.png" % [ROOT, base_id])
+	if t:
+		return t
+	## 依 line 回退到武器疊層圖
+	return null
+
+
+static func equip_icon_for_inst(inst: Dictionary) -> Texture2D:
+	if inst.is_empty():
+		return null
+	var base_id := str(inst.get("base_id", ""))
+	var t := equip_icon(base_id)
+	if t:
+		return t
+	var line := str(inst.get("line", ""))
+	var vis := _line_to_weapon_visual(line)
+	if vis != "":
+		return tex("%s/player/weapons/%s.png" % [ROOT, vis])
+	var slot := str(inst.get("slot", ""))
+	if slot == "armor":
+		return player_armor_overlay()
+	if slot == "accessory":
+		return player_accessory_overlay()
+	return player_weapon_overlay()
+
+
 static func player_battle() -> Texture2D:
 	var idle := player_pose("idle")
 	if idle:
