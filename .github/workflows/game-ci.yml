@@ -29,11 +29,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Cache Godot binary
         id: cache-godot
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/godot-bin
           key: godot-${{ env.GODOT_VERSION }}-linux
@@ -55,7 +55,7 @@ jobs:
       ## 243MB 的美術資產首次 import 很慢，快取 .godot/imported 讓後續跑幾十秒就好。
       ## key 綁 assets 的內容雜湊：資產一改就重新 import。
       - name: Cache imported assets
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: game/.godot
           key: godot-import-${{ env.GODOT_VERSION }}-${{ hashFiles('game/assets/**', 'game/project.godot') }}
@@ -90,11 +90,11 @@ jobs:
     needs: test
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Cache Godot binary
         id: cache-godot
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/godot-bin
           key: godot-${{ env.GODOT_VERSION }}-linux
@@ -115,7 +115,7 @@ jobs:
 
       - name: Cache export templates
         id: cache-templates
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.local/share/godot/export_templates
           key: godot-templates-${{ env.GODOT_VERSION }}
@@ -152,7 +152,7 @@ jobs:
           ls -lhR dist
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bravesoul-builds
           path: dist/

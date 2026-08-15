@@ -1,5 +1,7 @@
 # 勇者之魂（Brave Soul）
 
+[![Game CI](https://github.com/KevinChu1110/bravesoul-game/actions/workflows/game-ci.yml/badge.svg)](https://github.com/KevinChu1110/bravesoul-game/actions/workflows/game-ci.yml)
+
 > 產品名：**勇者之魂** · 英文：Brave Soul  
 > Repo 工作名：`bravesoul-game`  
 > 類型：像素 2D · 敘事為主 · 即時自動戰鬥 · 可連線  
