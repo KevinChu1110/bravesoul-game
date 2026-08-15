@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>下載 — 勇者之魂</title>
+  <meta name="description" content="下載勇者之魂（Brave Soul）試玩。Windows / macOS / Linux。" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+  <script src="../config.js"></script>
+</head>
+<body data-page="download">
+  <header class="page-hero" style="--hero-img:url('../media/shots/proof_02_explore_town.png')">
+    <div class="container">
+      <div class="breadcrumb"><a href="../index.html">首頁</a> / 下載</div>
+      <h1>下載遊戲</h1>
+      <p>免費試玩 · 主線可離線 · 連線功能可選</p>
+    </div>
+  </header>
+  <main class="page">
+    <div class="container">
+      <div class="panel" style="margin-bottom:1.25rem">
+        <p style="margin:0 0 0.5rem">目前公開的是<strong>早期建置</strong>（封裝檔名仍為舊專案代號）。玩法與畫面以本站最新版本說明為準；完整 <span id="ver-label">v0.14</span> 出貨包準備中。</p>
+        <p class="muted" style="margin:0">系統需求：64 位元 · 約 200MB 磁碟 · 可連線亦可純單機。</p>
+      </div>
+
+      <h2 class="section-h2"><span class="accent"></span><span>選擇平台</span></h2>
+      <div class="card-grid" style="margin-top:0.75rem">
+        <div class="card" style="cursor:default">
+          <div class="thumb"><img src="../media/shots/proof_13_dojo.png" alt="Windows" /></div>
+          <div class="body">
+            <div class="title">Windows</div>
+            <div class="meta">.zip · 約 58MB（0.7 建置）</div>
+            <p style="margin:0.75rem 0 0">
+              <a class="btn btn-primary" id="dl-win" href="https://github.com/KevinChu1110/bravesoul-game/releases">前往 Releases</a>
+            </p>
+          </div>
+        </div>
+        <div class="card" style="cursor:default">
+          <div class="thumb"><img src="../media/shots/proof_06_forest.png" alt="macOS" /></div>
+          <div class="body">
+            <div class="title">macOS</div>
+            <div class="meta">.zip · Apple Silicon / Intel 視建置</div>
+            <p style="margin:0.75rem 0 0">
+              <a class="btn btn-primary" id="dl-mac" href="https://github.com/KevinChu1110/bravesoul-game/releases">前往 Releases</a>
+            </p>
+          </div>
+        </div>
+        <div class="card" style="cursor:default">
+          <div class="thumb"><img src="../media/shots/proof_19_harbor.png" alt="Linux" /></div>
+          <div class="body">
+            <div class="title">Linux</div>
+            <div class="meta">.x86_64 / .zip</div>
+            <p style="margin:0.75rem 0 0">
+              <a class="btn btn-primary" id="dl-linux" href="https://github.com/KevinChu1110/bravesoul-game/releases">前往 Releases</a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>其他取得方式</span></h2>
+      <div class="panel">
+        <ul style="margin:0;padding-left:1.15rem;color:var(--ink-soft)">
+          <li style="margin-bottom:0.4rem"><strong>itch.io</strong>：正式商店頁準備中（設定後會顯示於此）。</li>
+          <li style="margin-bottom:0.4rem"><strong>原始碼</strong>：<a id="repo-link" href="https://github.com/KevinChu1110/bravesoul-game">GitHub</a> · 需自行用 Godot 4.7 開啟 <code>game/</code>。</li>
+          <li><strong>帳號</strong>：下載後可不登入通關；連線功能見<a href="account.html">帳號頁</a>。</li>
+        </ul>
+        <p style="margin:1rem 0 0">
+          <a class="btn btn-ghost" id="itch-link" href="https://itch.io">itch（準備中）</a>
+          <a class="btn btn-ghost" href="guide.html">遊戲指南</a>
+          <a class="btn btn-ghost" href="gallery.html">實機畫面</a>
+        </p>
+      </div>
+
+      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>實機預覽</span></h2>
+      <p class="section-sub">0.14 風格鎖定後截圖</p>
+      <div class="gallery-grid">
+        <figure><img src="../media/shots/proof_02_explore_town.png" alt="騎士堡" loading="lazy" /><figcaption>騎士堡</figcaption></figure>
+        <figure><img src="../media/shots/proof_13_dojo.png" alt="道場" loading="lazy" /><figcaption>道場</figcaption></figure>
+        <figure><img src="../media/shots/proof_06_forest.png" alt="森林" loading="lazy" /><figcaption>遊俠森林</figcaption></figure>
+      </div>
+    </div>
+  </main>
+  <script src="../js/site.js"></script>
+  <script>
+    (function () {
+      var cfg = window.BRAVESOUL || {};
+      if (cfg.version) {
+        var el = document.getElementById("ver-label");
+        if (el) el.textContent = "v" + cfg.version;
+      }
+      var repo = cfg.repo || "https://github.com/KevinChu1110/bravesoul-game";
+      var rel = repo + "/releases";
+      ["dl-win", "dl-mac", "dl-linux"].forEach(function (id) {
+        var a = document.getElementById(id);
+        if (a) a.href = rel;
+      });
+      var r = document.getElementById("repo-link");
+      if (r) r.href = repo;
+      if (cfg.itch) {
+        var itch = document.getElementById("itch-link");
+        if (itch) itch.href = cfg.itch;
+      }
+    })();
+  </script>
+</body>
+</html>

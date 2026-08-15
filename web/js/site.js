@@ -11,6 +11,7 @@
     { href: depth + "/pages/systems.html", id: "systems", label: "養成" },
     { href: depth + "/pages/guide.html", id: "guide", label: "指南" },
     { href: depth + "/pages/gallery.html", id: "gallery", label: "畫面" },
+    { href: depth + "/pages/download.html", id: "download", label: "下載" },
     { href: depth + "/pages/account.html", id: "account", label: "帳號" },
   ];
   var active = document.body.getAttribute("data-page") || "home";
