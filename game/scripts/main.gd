@@ -2516,12 +2516,12 @@ func _side_amber() -> void:
 	if GameState.has_flag("item.true_letter") and not GameState.has_flag("side.fog_letter_done"):
 		_play_dialog([
 			{"speaker": "琥珀", "text": "喔？你手上那封……霧隱的印？交給頭領吧，我只收金幣不收心事。"},
-			{"speaker": "琥珀", "text": "材料行照開——鍛造材、紅水，現貨。"},
+			{"speaker": "琥珀", "text": "材料行照開。鍛造材、紅水，現貨都有。"},
 		], _go_material_shop)
 		return
 	_play_dialog([
-		{"speaker": "琥珀", "text": "材料行開張。鐵屑、星砂、橡脂、騎士碎鐵——打怪掉的我收，缺的我賣。"},
-		{"speaker": "琥珀", "text": "循環懂吧？打→賣／鍛→不夠再買→再打。兔子也得會算帳。"},
+		{"speaker": "琥珀", "text": "材料行開張。鐵屑、星砂、橡脂、騎士碎鐵，打怪掉的我收，缺的我賣。"},
+		{"speaker": "琥珀", "text": "算盤要會打：出去打，掉的賣我，換錢去鍛；不夠再跟我買，再出去打。兔子也得會算帳。"},
 	], _go_material_shop)
 
 
@@ -3689,8 +3689,8 @@ func _c1_star() -> void:
 		return
 	_play_dialog([
 		{"speaker": "星讀", "text": "你身上有煙味，和一點……尚未點名的星光。"},
-		{"speaker": "星讀", "text": "路上會撿到星屑。拿來觀星——不是賭博，是讓足迹凝成刃的性格。"},
-		{"speaker": "星讀", "text": "（教學）先送你一握星屑……星盤為你亮了一角。"},
+		{"speaker": "星讀", "text": "路上會撿到星屑。拿來觀星，走過的路會凝成刃的性格。"},
+		{"speaker": "星讀", "text": "先送你一握星屑。星盤為你亮了一角。"},
 		{"speaker": "系統", "text": "獲得星屑 ×5。凝出戰魂「凡·破軍」，已入魂槽。"},
 	], func():
 		GameState.add_stardust(5)
@@ -3745,16 +3745,16 @@ func _c1_sprout() -> void:
 	if GameState.has_flag("c1_sprout_done"):
 		if GameState.has_flag("boss.leo_cleared"):
 			_play_dialog([
-				{"speaker": "小芽", "text": "旗上的兔子是我畫的！……耳朵不太對，勇氣很對！"},
-				{"speaker": "小芽", "text": "我每天練木劍。長大要守門——像灰鬍子那樣凶，也像你這樣……不凶。"},
+				{"speaker": "小芽", "text": "旗上的兔子是我畫的！耳朵畫歪了啦，可是勇氣很對！"},
+				{"speaker": "小芽", "text": "我每天練木劍。長大要守門！要像灰鬍子那樣凶，可是也要像你一樣不凶。"},
 			])
 		else:
-			_play_dialog([{"speaker": "小芽", "text": "木劍超好揮！謝謝你！……獅子……你真的要去嗎？"}])
+			_play_dialog([{"speaker": "小芽", "text": "木劍超好揮！謝謝你！那個……獅子很大嗎？你真的要去？"}])
 		return
 	if not GameState.has_flag("c1_sprout_asked"):
 		_play_dialog([
-			{"speaker": "小芽", "text": "我以後要當騎士！比獅子還大！你那把劍……好沉喔。"},
-			{"speaker": "小芽", "text": "可是我沒有劍。木頭的也行……有人願意給我一把嗎？"},
+			{"speaker": "小芽", "text": "我以後要當騎士！比獅子還大！你那把劍好沉喔，我搬不動。"},
+			{"speaker": "小芽", "text": "可是我沒有劍。木頭的也可以！有沒有人要給我一把？"},
 			{"speaker": "系統", "text": "【支線】小芽想要練習木劍。可找釘釘做一把（20 金），或直接給她 30 金讓她去買。"},
 		], func():
 			GameState.set_flag("c1_sprout_asked", true)
@@ -3764,8 +3764,8 @@ func _c1_sprout() -> void:
 	## 已問過：有木劍 → 送；有 30 金 → 可選贊助；否則提醒
 	if GameState.has_flag("item.wood_sword"):
 		_play_dialog([
-			{"speaker": "小芽", "text": "那是……木劍？！給我嗎？"},
-			{"speaker": "小芽", "text": "哇啊啊——！我會每天練！你去打獅子的時候……我在旗下等你回來！"},
+			{"speaker": "小芽", "text": "那是木劍？！給我的嗎？！"},
+			{"speaker": "小芽", "text": "哇啊啊！我會每天練！你去打獅子那天，我在旗下等你回來！"},
 			{"speaker": "系統", "text": "交木劍。獲得星屑 ×3、金幣 ×15。"},
 		], func():
 			GameState.set_flag("item.wood_sword", false)
@@ -3789,8 +3789,8 @@ func _c1_sprout() -> void:
 		])
 		return
 	_play_dialog([
-		{"speaker": "小芽", "text": "木劍……釘釘也許能做（20 金）。或湊三十金直接給我。"},
-		{"speaker": "小芽", "text": "我不是貪心！是……想練給大家看。"},
+		{"speaker": "小芽", "text": "釘釘應該做得出來，好像要二十金。不然給我三十金，我自己去買也行！"},
+		{"speaker": "小芽", "text": "我不是貪心！我是想練給大家看！"},
 	])
 
 
@@ -3895,7 +3895,7 @@ func _soul_do_ritual() -> void:
 			SoulSystem.soul_display(soul), SoulSystem.soul_bonus_line(soul)
 		]
 		_play_dialog([
-			{"speaker": "星讀", "text": "成了。不是運氣——是你走過的路。"},
+			{"speaker": "星讀", "text": "成了。這不是運氣，是你走過的路。"},
 			{"speaker": "系統", "text": line},
 		], _go_soul_panel)
 	)
@@ -4350,7 +4350,7 @@ func _interact_mist(id: String) -> void:
 				_play_dialog([{"speaker": "系統", "text": "心神不寧。先回客棧。"}])
 			else:
 				_play_dialog([
-					{"speaker": "霧隱", "text": "（訓練）影子會騙人。真身會亮一下。記住那一下。"},
+					{"speaker": "霧隱", "text": "影子會騙人。真身會亮一下。記住那一下。"},
 					{"speaker": "系統", "text": "本體發白的那一瞬才打得中。用 Tab 或 1／2／3 換目標。"},
 				])
 		"fog_gate":
@@ -4520,11 +4520,11 @@ func _go_c3_enter_body() -> void:
 			{
 				"bg": "dojo",
 				"speaker": "阿茶",
-				"text": "客從霧裡來？宗師在試煉堂……他不先出手，他先問。",
+				"text": "客從霧裡來？宗師在試煉堂。他不先出手，他先問。",
 			},
 		], func():
 			_play_dialog([
-				{"speaker": "阿茶", "text": "客從霧裡來？宗師在試煉堂……他不先出手，他先問。"},
+				{"speaker": "阿茶", "text": "客從霧裡來？宗師在試煉堂。他不先出手，他先問。"},
 				{"speaker": "系統", "text": "道場可走。試煉堂挑戰阿波。"},
 			], _go_c3_dojo)
 		)
@@ -4564,7 +4564,7 @@ func _interact_dojo(id: String) -> void:
 			_play_dialog([{"speaker": "旁白", "text": "石子排成拳形。有人每天挪一顆——挪到心靜為止。"}])
 		"tea":
 			_play_dialog([
-				{"speaker": "阿茶", "text": "喝一口吧。苦盡才回甘——像你的路。"},
+				{"speaker": "阿茶", "text": "喝一口吧。今天火候壓得低，回甘慢。"},
 			], func():
 				GameState.hp = mini(GameState.max_hp, GameState.hp + 20)
 				SaveManager.save_game()
@@ -4604,7 +4604,7 @@ func _go_abo_win() -> void:
 	_play_dialog([
 		{"speaker": "阿波", "text": extra},
 		{"speaker": "阿波", "text": "（指尖在你眉心一點）最後的試煉在塔頂——去吧，別回頭。"},
-		{"speaker": "阿茶", "text": "（茶香）路上……記得回家的氣味。"},
+		{"speaker": "阿茶", "text": "（茶香）路上要是聞到這個味道，就是走對了。"},
 		{"speaker": "系統", "text": "金 90、星屑 5，體力上限多 10。毛裡泛出玉光。往塔的路開了。"},
 	], _c3_abo_clear_cut)
 
