@@ -2,7 +2,7 @@ extends SceneTree
 ## 貼圖路徑煙霧測：godot --headless -s res://scripts/art/test_art.gd
 
 
-func _init() -> void:
+func _initialize() -> void:
 	var ok := true
 	var checks: Array = [
 		["player", SpriteDB.player_idle()],
@@ -37,6 +37,22 @@ func _init() -> void:
 			ok = false
 		else:
 			print("OK sfx ", sfx)
+	## SpriteDB 必須在執行期查得到 GameState（不可在編譯期引用 autoload 識別字，
+	## 否則 -s 跑測試時會 Compile Error → 退回跑主場景 → 永遠不結束）
+	var gs = root.get_node_or_null("GameState")
+	if gs == null:
+		push_error("GameState autoload missing")
+		ok = false
+	else:
+		gs.reset_new_game()
+		gs.path_style = "sword"
+		var wid := SpriteDB.player_weapon_class_id()
+		if wid != "sword":
+			push_error("weapon class from path_style failed: got '%s' want 'sword'" % wid)
+			ok = false
+		else:
+			print("OK weapon_class_from_path sword")
+
 	if ok:
 		print("ART_OK")
 		quit(0)

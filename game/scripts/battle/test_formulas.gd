@@ -2,7 +2,7 @@ extends SceneTree
 ## 無頭驗證：godot --headless -s res://scripts/battle/test_formulas.gd
 
 
-func _init() -> void:
+func _initialize() -> void:
 	var ok := true
 	if Formulas.normal_damage(10, 5) < 1:
 		push_error("normal_damage failed")

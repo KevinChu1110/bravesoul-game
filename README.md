@@ -96,9 +96,24 @@
 
 ```bash
 cd game && godot .
-# Godogen 證明閘門
+
+# 無頭測試（9 個，CI 跑的是同一支）
+./tools/run_tests.sh
+./tools/run_tests.sh                     # 全部
+TEST_FILTER=formulas ./tools/run_tests.sh  # 只跑某一支
+
+# Godogen 證明閘門（import → smoke → 測試 → 截圖）
 ./tools/proof_run.sh
 ```
+
+### CI
+
+`.github/workflows/game-ci.yml`：
+
+| Job | 觸發 | 內容 |
+|-----|------|------|
+| `test` | 每次 push / PR（動到 `game/**`） | import → 開機無 script error → 9 個無頭測試 |
+| `export` | 手動觸發 或 發 release | 輸出 Windows／Linux（macOS best-effort），存成 artifact |
 
 ### 官網（GitHub Pages）
 

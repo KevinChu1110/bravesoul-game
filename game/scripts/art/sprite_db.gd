@@ -4,6 +4,17 @@ extends RefCounted
 
 const ROOT := "res://assets/sprites"
 
+## GameState 走執行期查找，不要在編譯期引用 autoload 識別字。
+## 原因：用 `godot --headless -s res://...` 跑測試腳本時，腳本的編譯早於 autoload 註冊，
+## 直接寫 `GameState.xxx` 會 Compile Error，接著 Godot 會退回去跑主場景而永遠不結束。
+## 同樣的寫法見 battle_sim.gd。
+static func _gs() -> Node:
+	var loop := Engine.get_main_loop()
+	if loop is SceneTree:
+		return (loop as SceneTree).root.get_node_or_null("GameState")
+	return null
+
+
 static func tex(path: String) -> Texture2D:
 	if path == "" or not ResourceLoader.exists(path):
 		return null
@@ -21,12 +32,13 @@ static func player_walk(frame: int) -> Texture2D:
 
 ## 從裝備實例讀 base 定義（含 line）
 static func _equip_inst(slot: String) -> Dictionary:
-	if GameState.equip_slots == null:
+	var gs := _gs()
+	if gs == null or gs.equip_slots == null:
 		return {}
-	var uid := str(GameState.equip_slots.get(slot, ""))
-	if uid == "" or not GameState.equip_worn.has(uid):
+	var uid := str(gs.equip_slots.get(slot, ""))
+	if uid == "" or not gs.equip_worn.has(uid):
 		return {}
-	return GameState.equip_worn[uid] as Dictionary
+	return gs.equip_worn[uid] as Dictionary
 
 
 static func _equip_line(slot: String) -> String:
@@ -92,14 +104,15 @@ static func player_weapon_class_id() -> String:
 				or blob.find("edge") >= 0 or blob.find("劍") >= 0 or blob.find("刃") >= 0:
 			return "sword"
 	## 2) 流派
-	var ps := str(GameState.path_style)
+	var gs := _gs()
+	var ps := str(gs.path_style) if gs else ""
 	var from_path := _line_to_weapon_visual(ps)
 	if from_path != "":
 		return from_path
 	if ps in ["sword", "bow", "magic", "fist", "axe", "hammer", "spear", "gun", "dart", "crystal"]:
 		return ps
 	## 3) 舊武器名
-	if GameState.weapon_name != "" and GameState.weapon_name != "空手":
+	if gs and gs.weapon_name != "" and gs.weapon_name != "空手":
 		return "sword"
 	return ""
 

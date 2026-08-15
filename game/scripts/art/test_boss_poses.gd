@@ -1,5 +1,5 @@
 extends SceneTree
-func _init() -> void:
+func _initialize() -> void:
 	var ok := true
 	for m in ["leo","fog","abo","demon","falcon","boar","wrath","tide","statue","chrono","wolf"]:
 		for p in ["idle","telegraph","attack","recover"]:

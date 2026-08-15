@@ -22,7 +22,11 @@ if grep -E "SCRIPT ERROR|Parse Error" /tmp/bravesoul_smoke.log; then
 fi
 echo "SMOKE OK"
 
-echo "== 3) proof capture (multi-stage) =="
+echo "== 3) headless tests =="
+## 跟 CI 跑的是同一支 runner（.github/workflows/game-ci.yml），本機先擋一次
+"$ROOT/tools/run_tests.sh"
+
+echo "== 4) proof capture (multi-stage) =="
 PROOF_ARGS=(--path "$GAME" --script res://scripts/dev/proof_capture.gd)
 ## 預設：本機有顯示器就用視窗截真畫面；CI / 無 GUI 才 headless
 USE_WINDOWED="${PROOF_WINDOWED:-}"
@@ -47,7 +51,7 @@ if [[ -d "$USER_DIR" ]]; then
   find "$USER_DIR" -name 'proof_*.png' -mtime -1 -print -exec cp -f {} "$OUT/" \; 2>/dev/null || true
 fi
 
-echo "== 4) screenshots =="
+echo "== 5) screenshots =="
 ls -la "$OUT" 2>/dev/null || true
 if [[ -f "$OUT/proof_manifest.txt" ]]; then
   echo "--- manifest ---"

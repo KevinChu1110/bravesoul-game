@@ -1,5 +1,5 @@
 extends SceneTree
-func _init() -> void:
+func _initialize() -> void:
 	var ok := true
 	for id in ["title","village","town","mist","dojo","forest","coast","wild","road","battle","boss","tower","ending"]:
 		var p := "res://assets/audio/bgm/%s.wav" % id

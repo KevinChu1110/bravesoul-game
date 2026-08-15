@@ -1,0 +1,159 @@
+## 勇者之魂 · 遊戲本體 CI
+##
+## test  : 每次 push / PR 都跑 — import → smoke → 9 個無頭測試
+## export: 手動或打 tag 才跑 — 需要 1GB 的 export templates，太慢不進 PR 流程
+name: Game CI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "game/**"
+      - "tools/run_tests.sh"
+      - ".github/workflows/game-ci.yml"
+  pull_request:
+    paths:
+      - "game/**"
+      - "tools/run_tests.sh"
+      - ".github/workflows/game-ci.yml"
+  workflow_dispatch:
+  release:
+    types: [published]
+
+env:
+  GODOT_VERSION: 4.7.1
+
+jobs:
+  test:
+    name: Import · Smoke · Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot binary
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux
+
+      - name: Download Godot ${{ env.GODOT_VERSION }}
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p ~/godot-bin
+          url="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl -fsSL -o /tmp/godot.zip "$url"
+          unzip -q /tmp/godot.zip -d ~/godot-bin
+          mv ~/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot-bin/godot
+          chmod +x ~/godot-bin/godot
+
+      - name: Add Godot to PATH
+        run: echo "$HOME/godot-bin" >> "$GITHUB_PATH"
+
+      ## 243MB 的美術資產首次 import 很慢，快取 .godot/imported 讓後續跑幾十秒就好。
+      ## key 綁 assets 的內容雜湊：資產一改就重新 import。
+      - name: Cache imported assets
+        uses: actions/cache@v4
+        with:
+          path: game/.godot
+          key: godot-import-${{ env.GODOT_VERSION }}-${{ hashFiles('game/assets/**', 'game/project.godot') }}
+          restore-keys: |
+            godot-import-${{ env.GODOT_VERSION }}-
+
+      - name: Import assets
+        run: |
+          set -euo pipefail
+          godot --path game --headless --import 2>&1 | tail -20
+
+      ## 開機 5 秒內不能有任何 SCRIPT ERROR / Parse Error。
+      ## 這關擋的是「autoload 或主場景在 CI 上載不起來」這類只在乾淨環境才現形的問題。
+      - name: Smoke (no script errors on boot)
+        run: |
+          set -uo pipefail
+          godot --path game --headless --quit-after 300 2>&1 | tee /tmp/smoke.log | tail -20
+          if grep -qE "SCRIPT ERROR|Parse Error|Compile Error" /tmp/smoke.log; then
+            echo "::error::開機期間出現 script error"
+            grep -E "SCRIPT ERROR|Parse Error|Compile Error" /tmp/smoke.log
+            exit 1
+          fi
+          echo "SMOKE OK"
+
+      - name: Headless tests
+        run: TEST_TIMEOUT=180 ./tools/run_tests.sh
+
+  export:
+    name: Export (win · mac · linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: test
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot binary
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux
+
+      - name: Download Godot ${{ env.GODOT_VERSION }}
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p ~/godot-bin
+          url="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          curl -fsSL -o /tmp/godot.zip "$url"
+          unzip -q /tmp/godot.zip -d ~/godot-bin
+          mv ~/godot-bin/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot-bin/godot
+          chmod +x ~/godot-bin/godot
+
+      - name: Add Godot to PATH
+        run: echo "$HOME/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Cache export templates
+        id: cache-templates
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: godot-templates-${{ env.GODOT_VERSION }}
+
+      - name: Download export templates
+        if: steps.cache-templates.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          url="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          curl -fsSL -o /tmp/templates.tpz "$url"
+          mkdir -p ~/.local/share/godot/export_templates
+          unzip -q /tmp/templates.tpz -d /tmp/tpl
+          mv /tmp/tpl/templates ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+
+      - name: Import assets
+        run: godot --path game --headless --import 2>&1 | tail -20
+
+      ## --export-release 對 preset 設定錯誤（缺 icon、路徑打錯、exclude_filter 語法問題）
+      ## 會直接失敗，這是唯一能在合併前抓到出貨設定壞掉的地方。
+      - name: Export all presets
+        run: |
+          set -euo pipefail
+          mkdir -p dist/windows dist/macos dist/linux
+          ## Windows / Linux 從 Linux 交叉輸出很穩，壞掉就是真的壞了 → 直接 fail
+          for p in "Windows Desktop" "Linux"; do
+            echo "== export: $p =="
+            godot --path game --headless --export-release "$p" 2>&1 | tail -20
+          done
+          ## macOS 從 Linux 輸出沒有簽章工具，失敗屬已知情況 → 只警告，出貨仍用本機 tools/export_itch.sh
+          echo "== export: macOS (best-effort) =="
+          if ! godot --path game --headless --export-release "macOS" 2>&1 | tail -20; then
+            echo "::warning::macOS 從 Linux 輸出失敗（預期內，請用本機 tools/export_itch.sh mac 出貨）"
+          fi
+          ls -lhR dist
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bravesoul-builds
+          path: dist/
+          retention-days: 14
