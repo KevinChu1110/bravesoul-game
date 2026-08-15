@@ -884,7 +884,7 @@ func panel_bbcode() -> String:
 			host = host.substr(0, 28) + "…"
 		lines.append("URL：%s" % host)
 	lines.append("")
-	lines.append("主線永遠可離線通關。連線加厚：雲存檔、殘影、留言、市集、裂縫房。")
+	lines.append("不連線也能走完整趟旅途。連上之後多了：雲端存檔、旅人殘影、留言石、市集、裂縫房。")
 	return "\n".join(lines)
 
 
