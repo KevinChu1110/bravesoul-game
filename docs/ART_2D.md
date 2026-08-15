@@ -3,6 +3,8 @@
 > 決策：遊戲改 **2D**（像素偏敘事 RPG）。  
 > **規則層不動**（BattleSim 事件）；換的是場景、角色、危險區表現。
 >
+> **0.14.8 風格鎖定**（小白錨）：主 NPC + 核心 map 全 chibi 重產。
+>
 > **0.14 視覺大修**：探索底圖不再被半透明 + 滿鋪 tile 蓋死；Gemini 重產 20 張核心 map bg + props/NPC。  
 > 批次腳本：`tools/regen_visuals_v014.py`（需 `GOOGLE_API_KEY`）。
 
