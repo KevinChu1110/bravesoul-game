@@ -3,11 +3,16 @@ extends Node
 
 const SFX_DIR := "res://assets/audio/sfx"
 const BGM_DIR := "res://assets/audio/bgm"
+## 循環起點（秒）。真配樂通常有一段不該重複的前奏，循環要從前奏之後開始。
+## 由 tools/import_bgm.py 產生，見 docs/MEDIA.md
+const BGM_LOOPS_PATH := "res://assets/audio/bgm/loops.json"
 const POOL_SIZE := 8
 const BGM_FADE := 0.7
 
 var _streams: Dictionary = {}  ## sfx id -> AudioStream
 var _bgm_streams: Dictionary = {}  ## bgm id -> AudioStream
+var _bgm_loops: Dictionary = {}  ## bgm id -> 循環起點（秒）
+var _bgm_sources: Dictionary = {}  ## bgm id -> "ogg" | "wav"
 var _pool: Array = []  ## AudioStreamPlayer
 var _pool_i: int = 0
 var _sfx_db: float = -4.0
@@ -68,35 +73,93 @@ func _preload_sfx() -> void:
 			_streams[n] = load(path)
 
 
-func _preload_bgm() -> void:
-	var names := [
+func bgm_ids() -> Array:
+	return [
 		"title", "village", "town", "mist", "dojo", "forest", "coast",
 		"wild", "road", "battle", "boss", "tower", "ending",
 	]
-	for n in names:
-		var path := "%s/%s.wav" % [BGM_DIR, n]
-		if not ResourceLoader.exists(path):
-			push_warning("BGM missing: %s" % path)
+
+
+## 哪些曲子已經換成真配樂（面板／測試用）
+func bgm_source(id: String) -> String:
+	return str(_bgm_sources.get(id, ""))
+
+
+func _load_bgm_loops() -> void:
+	_bgm_loops = {}
+	if not FileAccess.file_exists(BGM_LOOPS_PATH):
+		return
+	var f := FileAccess.open(BGM_LOOPS_PATH, FileAccess.READ)
+	if f == null:
+		return
+	var data: Variant = JSON.parse_string(f.get_as_text())
+	if typeof(data) != TYPE_DICTIONARY:
+		push_warning("BGM loops.json 格式不對，忽略")
+		return
+	for k in (data as Dictionary):
+		_bgm_loops[str(k)] = float((data as Dictionary)[k])
+
+
+func _preload_bgm() -> void:
+	_load_bgm_loops()
+	for n in bgm_ids():
+		var stream := _load_bgm_stream(str(n))
+		if stream == null:
+			push_warning("BGM missing: %s/%s.(ogg|wav)" % [BGM_DIR, n])
 			continue
-		var stream = load(path)
+		_bgm_streams[n] = stream
+
+
+## 真配樂（.ogg／.mp3）優先；程式合成的 .wav 是後備，所以換曲只要丟檔案不用改程式。
+## 兩種壓縮格式都收，是因為不是每台機器的 ffmpeg 都編得出 Vorbis。
+func _load_bgm_stream(id: String) -> AudioStream:
+	for ext in ["ogg", "mp3"]:
+		var path := "%s/%s.%s" % [BGM_DIR, id, ext]
+		if not ResourceLoader.exists(path):
+			continue
+		var s: Variant = load(path)
+		if s == null:
+			continue
+		_bgm_sources[id] = ext
+		var off := maxf(0.0, float(_bgm_loops.get(id, 0.0)))
 		## duplicate：避免改到匯入快取本體，循環設定才穩定
-		if stream is AudioStreamWAV:
-			var w := (stream as AudioStreamWAV).duplicate() as AudioStreamWAV
-			w.loop_mode = AudioStreamWAV.LOOP_FORWARD
-			w.loop_begin = 0
-			var bytes_per := 2  ## 16-bit PCM
-			if w.format == AudioStreamWAV.FORMAT_8_BITS:
-				bytes_per = 1
-			elif w.format == AudioStreamWAV.FORMAT_IMA_ADPCM:
-				bytes_per = 1
-			var ch := 2 if w.stereo else 1
-			var frames := 0
-			if bytes_per * ch > 0 and w.data.size() > 0:
-				frames = int(w.data.size() / (bytes_per * ch))
-			w.loop_end = maxi(1, frames)
-			_bgm_streams[n] = w
-		elif stream:
-			_bgm_streams[n] = stream
+		if s is AudioStreamOggVorbis:
+			var v := (s as AudioStreamOggVorbis).duplicate() as AudioStreamOggVorbis
+			v.loop = true
+			v.loop_offset = off
+			return v
+		if s is AudioStreamMP3:
+			var m := (s as AudioStreamMP3).duplicate() as AudioStreamMP3
+			m.loop = true
+			m.loop_offset = off
+			return m
+		if s is AudioStream:
+			return s
+
+	var wav_path := "%s/%s.wav" % [BGM_DIR, id]
+	if not ResourceLoader.exists(wav_path):
+		return null
+	var stream: Variant = load(wav_path)
+	if stream is AudioStreamWAV:
+		var w := (stream as AudioStreamWAV).duplicate() as AudioStreamWAV
+		w.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		w.loop_begin = 0
+		var bytes_per := 2  ## 16-bit PCM
+		if w.format == AudioStreamWAV.FORMAT_8_BITS:
+			bytes_per = 1
+		elif w.format == AudioStreamWAV.FORMAT_IMA_ADPCM:
+			bytes_per = 1
+		var ch := 2 if w.stereo else 1
+		var frames := 0
+		if bytes_per * ch > 0 and w.data.size() > 0:
+			frames = int(w.data.size() / (bytes_per * ch))
+		w.loop_end = maxi(1, frames)
+		_bgm_sources[id] = "wav"
+		return w
+	if stream is AudioStream:
+		_bgm_sources[id] = "wav"
+		return stream
+	return null
 
 
 func set_muted(v: bool) -> void:

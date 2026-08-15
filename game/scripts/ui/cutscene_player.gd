@@ -1,12 +1,16 @@
 class_name CutscenePlayer
 extends Control
-## 全屏過場：底圖淡入 → 立繪可選 → 字幕逐條 → 淡出回呼。
-## 用法：play([{bg, portrait, speaker, text, hold}, ...], after)
+## 全屏過場：底圖（或影片）淡入 → 立繪可選 → 字幕逐條 → 淡出回呼。
+## 用法：play([{bg, video, portrait, speaker, text, hold}, ...], after)
 
 signal finished
 
 const UiStyle = preload("res://scripts/ui/ui_style.gd")
 const SpriteDB = preload("res://scripts/art/sprite_db.gd")
+
+## 影片放這裡；只給檔名時自動補上這層路徑與 .ogv
+## Godot 內建只支援 Ogg Theora，轉檔用 tools/import_cutscene.py
+const VIDEO_DIR := "res://assets/video"
 
 var _slides: Array = []
 var _index: int = 0
@@ -14,6 +18,7 @@ var _after: Callable = Callable()
 var _busy: bool = false
 
 var _bg: TextureRect
+var _video: VideoStreamPlayer
 var _dim: ColorRect
 var _portrait: TextureRect
 var _caption_panel: PanelContainer
@@ -46,6 +51,15 @@ func _build() -> void:
 	_bg.modulate = Color(1, 1, 1, 0)
 	_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_bg)
+
+	## 疊在底圖之上、暗幕之下：有影片時蓋掉底圖，沒影片時完全透明不影響原本表現
+	_video = VideoStreamPlayer.new()
+	_video.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_video.expand = true
+	_video.visible = false
+	_video.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_video.finished.connect(_on_video_finished)
+	add_child(_video)
 
 	_dim = ColorRect.new()
 	_dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -114,6 +128,8 @@ func _build() -> void:
 
 ## slides: Array of Dictionary
 ##   bg: String map key or full res path (optional)
+##   video: String 影片檔名或完整 res 路徑（optional）；有影片時蓋過 bg，
+##          播完自動進下一張，玩家也可以隨時按鍵跳過
 ##   portrait: String speaker name for SpriteDB (optional)
 ##   speaker: String
 ##   text: String
@@ -144,6 +160,7 @@ func abort() -> void:
 	_busy = false
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_stop_video()
 	if _black:
 		_black.color.a = 1.0
 	if _bg:
@@ -152,6 +169,43 @@ func abort() -> void:
 		_portrait.modulate.a = 0.0
 	if _caption_panel:
 		_caption_panel.modulate.a = 0.0
+
+
+## 開始播影片；沒有影片或載不到就回 false，讓這張退回純底圖表現。
+## 刻意不讓缺影片變成硬錯誤——過場沒播出來，遊戲還是要能走下去。
+func _start_video(key: String) -> bool:
+	_stop_video()
+	if key == "":
+		return false
+	var path := key
+	if not path.begins_with("res://"):
+		path = "%s/%s.ogv" % [VIDEO_DIR, key]
+	if not ResourceLoader.exists(path):
+		push_warning("過場影片找不到：%s（用 tools/import_cutscene.py 轉檔）" % path)
+		return false
+	var st := load(path) as VideoStream
+	if st == null:
+		push_warning("過場影片載不進來：%s" % path)
+		return false
+	_video.stream = st
+	_video.visible = true
+	_video.play()
+	return true
+
+
+func _stop_video() -> void:
+	if _video == null:
+		return
+	if _video.is_playing():
+		_video.stop()
+	_video.visible = false
+	_video.stream = null
+
+
+func _on_video_finished() -> void:
+	## 影片自己播完＝這張講完了，直接進下一張
+	if visible and not _busy:
+		_advance()
 
 
 func _show_slide() -> void:
@@ -172,6 +226,8 @@ func _show_slide() -> void:
 			if tex == null and ResourceLoader.exists("res://assets/sprites/maps/%s.png" % bg_key):
 				tex = load("res://assets/sprites/maps/%s.png" % bg_key) as Texture2D
 	_bg.texture = tex
+	## video（有的話蓋過底圖）
+	var playing_video := _start_video(str(s.get("video", "")))
 	## portrait
 	var sp := str(s.get("speaker", ""))
 	var port_key := str(s.get("portrait", sp))
@@ -182,10 +238,14 @@ func _show_slide() -> void:
 	_body.text = str(s.get("text", ""))
 
 	var tw := create_tween()
-	## 有底圖才幾乎透黑；沒底圖保留暗幕，避免標題選單透出
-	var black_target := 0.12 if tex else 0.72
+	## 有底圖或影片才幾乎透黑；都沒有就保留暗幕，避免標題選單透出
+	var black_target := 0.72
+	if playing_video:
+		black_target = 0.0
+	elif tex:
+		black_target = 0.12
 	tw.tween_property(_black, "color:a", black_target, 0.35)
-	if tex:
+	if tex and not playing_video:
 		tw.parallel().tween_property(_bg, "modulate:a", 1.0, 0.45)
 	if ptex:
 		_portrait.modulate.a = 0.0
@@ -233,6 +293,7 @@ func _end_cutscene() -> void:
 	tw.tween_callback(func():
 		visible = false
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_stop_video()
 		_busy = false
 		var cb := _after
 		_after = Callable()

@@ -21,3 +21,6 @@ screenshots/
 !screenshots/.gdignore
 .venv-asset/
 .agents/skills/asset-gen/tools/**/__pycache__/
+
+## py_compile 產生的快取
+tools/__pycache__/
