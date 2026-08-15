@@ -1,0 +1,321 @@
+/* 完整攻略專用 · 與 site.css 並用 */
+.wt-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  padding-bottom: 4rem;
+}
+@media (max-width: 900px) {
+  .wt-layout { grid-template-columns: 1fr; }
+  .wt-toc { position: static !important; max-height: none !important; }
+}
+
+.wt-toc {
+  position: sticky;
+  top: 80px;
+  background: var(--cream);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 1rem 0.85rem;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+.wt-toc h2 {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 0 0.4rem;
+}
+.wt-toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: ch;
+}
+.wt-toc li { margin: 0; }
+.wt-toc a {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+.wt-toc a:hover { background: var(--key-faint); color: var(--key-deep); }
+.wt-toc a.active {
+  background: var(--key-soft);
+  color: var(--key-deep);
+}
+.wt-toc a .n {
+  flex: 0 0 1.4rem;
+  width: 1.4rem; height: 1.4rem;
+  border-radius: 999px;
+  background: var(--warm);
+  border: 1px solid var(--line-soft);
+  font-size: 0.72rem;
+  display: grid; place-items: center;
+  margin-top: 0.1rem;
+}
+.wt-toc a.active .n,
+.wt-toc a.done .n {
+  background: var(--key);
+  border-color: var(--key-deep);
+  color: #fff;
+}
+.wt-toc a.done { color: var(--ink); }
+.wt-progress {
+  margin: 0.75rem 0.4rem 0.25rem;
+  height: 6px;
+  background: var(--warm);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.wt-progress > i {
+  display: block; height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--key), var(--key-deep));
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+.wt-progress-label {
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+  font-weight: 700;
+  padding: 0 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.wt-main { min-width: 0; }
+.wt-chapter {
+  display: none;
+  animation: wtIn 0.28s ease;
+}
+.wt-chapter.active { display: block; }
+@keyframes wtIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.wt-chapter .ch-kicker {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--key-strong);
+  text-transform: uppercase;
+  margin: 0 0 0.35rem;
+}
+.wt-chapter h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.25;
+}
+.wt-lead {
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  margin: 0 0 1.25rem;
+}
+
+.wt-figure {
+  margin: 0 0 1.25rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-card);
+  background: var(--wood-dark);
+  cursor: zoom-in;
+}
+.wt-figure img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+.wt-figure figcaption {
+  background: var(--cream);
+  padding: 0.55rem 0.9rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.wt-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+@media (max-width: 700px) {
+  .wt-grid-2 { grid-template-columns: 1fr; }
+}
+
+.wt-callout {
+  border-left: 4px solid var(--key);
+  background: var(--key-faint);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.85rem 1rem;
+  margin: 1rem 0;
+}
+.wt-callout strong { color: var(--key-deep); }
+.wt-tip {
+  border-left: 4px solid var(--success);
+  background: #eef8f2;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.85rem 1rem;
+  margin: 1rem 0;
+}
+
+.wt-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line-soft);
+}
+
+/* 流派測驗 */
+.wt-quiz {
+  background: var(--cream);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  padding: 1.15rem 1.25rem;
+  margin: 1.25rem 0;
+  box-shadow: var(--shadow-card);
+}
+.wt-quiz h3 { margin: 0 0 0.75rem; font-size: 1.05rem; }
+.wt-q { margin-bottom: 1rem; }
+.wt-q p { margin: 0 0 0.5rem; font-weight: 700; }
+.wt-opts { display: grid; gap: 0.4rem; }
+.wt-opts label {
+  display: flex; gap: 0.55rem; align-items: flex-start;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: #fff;
+}
+.wt-opts label:hover { border-color: var(--key); }
+.wt-opts input { margin-top: 0.2rem; }
+.wt-opts label.picked {
+  border-color: var(--key-deep);
+  background: var(--key-faint);
+  color: var(--ink);
+}
+.wt-result {
+  display: none;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--key-soft), #fff);
+  border: 1px solid #f2c9d3;
+}
+.wt-result.show { display: block; }
+.wt-result h4 { margin: 0 0 0.35rem; color: var(--key-deep); font-size: 1.15rem; }
+
+/* 六域卡片 */
+.wt-realm {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 0.85rem;
+  padding: 0.85rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--cream);
+  margin-bottom: 0.75rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.wt-realm:hover { box-shadow: var(--shadow-card-hi); transform: translateY(-2px); }
+.wt-realm img {
+  width: 120px; height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--wood-dark);
+}
+.wt-realm h3 { margin: 0 0 0.25rem; font-size: 1rem; }
+.wt-realm p { margin: 0; font-size: 0.88rem; color: var(--ink-soft); }
+.wt-realm .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+@media (max-width: 560px) {
+  .wt-realm { grid-template-columns: 1fr; }
+  .wt-realm img { width: 100%; height: 140px; }
+}
+
+/* Boss 摺疊 */
+.wt-boss {
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--cream);
+  margin-bottom: 0.55rem;
+  overflow: hidden;
+}
+.wt-boss summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.85rem 1rem;
+  font-weight: 800;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+.wt-boss summary::-webkit-details-marker { display: none; }
+.wt-boss summary::after {
+  content: "+";
+  font-size: 1.2rem;
+  color: var(--key-strong);
+  font-weight: 400;
+}
+.wt-boss[open] summary::after { content: "−"; }
+.wt-boss .body {
+  padding: 0 1rem 1rem;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 0.75rem;
+}
+
+/* 快捷鍵表互動高亮 */
+.wt-keys td.k {
+  font-family: ui-monospace, Menlo, monospace;
+  font-weight: 800;
+  color: var(--key-deep);
+  white-space: nowrap;
+}
+.wt-keys tr.hl { background: var(--key-faint); }
+
+/* Lightbox */
+.wt-lb {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(20, 16, 22, 0.88);
+  display: none;
+  place-items: center;
+  padding: 1.5rem;
+  cursor: zoom-out;
+}
+.wt-lb.show { display: grid; }
+.wt-lb img {
+  max-width: min(1100px, 100%);
+  max-height: 90vh;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+}
+
+.wt-checklist label {
+  display: flex; gap: 0.5rem; align-items: flex-start;
+  padding: 0.4rem 0;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.wt-checklist input:checked + span {
+  text-decoration: line-through;
+  color: var(--ink-faint);
+}

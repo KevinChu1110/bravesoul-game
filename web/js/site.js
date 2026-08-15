@@ -9,6 +9,7 @@
     { href: depth + "/pages/weapons.html", id: "weapons", label: "流派" },
     { href: depth + "/pages/equipment.html", id: "equipment", label: "裝備" },
     { href: depth + "/pages/systems.html", id: "systems", label: "養成" },
+    { href: depth + "/pages/walkthrough.html", id: "walkthrough", label: "攻略" },
     { href: depth + "/pages/guide.html", id: "guide", label: "指南" },
     { href: depth + "/pages/gallery.html", id: "gallery", label: "畫面" },
     { href: depth + "/pages/download.html", id: "download", label: "下載" },

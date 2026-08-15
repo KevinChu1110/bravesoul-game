@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>完整攻略 — 勇者之魂</title>
+  <meta name="description" content="勇者之魂官方完整攻略：世界觀、操作、器魂招、十流派測驗、裝備鍛造、六域、Boss、支線與 FAQ。圖文互動、可追蹤閱讀進度。" />
+  <meta property="og:title" content="勇者之魂 · 完整攻略" />
+  <meta property="og:description" content="十二章圖文攻略：從出村到塔頂，含流派測驗與 Boss 摺疊攻略。" />
+  <meta property="og:image" content="../media/gemini/keyart_hero.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+  <link rel="stylesheet" href="../css/walkthrough.css" />
+  <script src="../config.js"></script>
+</head>
+<body data-page="walkthrough">
+  <header class="page-hero" style="--hero-img:url('../media/gemini/keyart_tower.png')">
+    <div class="container">
+      <div class="breadcrumb"><a href="../index.html">首頁</a> / <a href="guide.html">指南</a> / 完整攻略</div>
+      <h1>完整攻略</h1>
+      <p>十二章圖文互動 · 可追蹤進度 · 左右鍵翻頁 · 點圖放大</p>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container wt-layout">
+      <aside class="wt-toc" aria-label="章節目錄">
+        <h2>目錄</h2>
+        <div class="wt-progress" aria-hidden="true"><i></i></div>
+        <div class="wt-progress-label">已讀 0 / 12 章</div>
+        <ol>
+          <li><a href="#ch1" data-ch="1"><span class="n">1</span><span>世界觀：翠嶺與黑焰</span></a></li>
+          <li><a href="#ch2" data-ch="2"><span class="n">2</span><span>操作與介面</span></a></li>
+          <li><a href="#ch3" data-ch="3"><span class="n">3</span><span>前 30 分鐘</span></a></li>
+          <li><a href="#ch4" data-ch="4"><span class="n">4</span><span>器 · 魂 · 招</span></a></li>
+          <li><a href="#ch5" data-ch="5"><span class="n">5</span><span>十流派與測驗</span></a></li>
+          <li><a href="#ch6" data-ch="6"><span class="n">6</span><span>裝備與鍛造</span></a></li>
+          <li><a href="#ch7" data-ch="7"><span class="n">7</span><span>六域巡禮</span></a></li>
+          <li><a href="#ch8" data-ch="8"><span class="n">8</span><span>Boss 試煉</span></a></li>
+          <li><a href="#ch9" data-ch="9"><span class="n">9</span><span>戰鬥節奏</span></a></li>
+          <li><a href="#ch10" data-ch="10"><span class="n">10</span><span>支線與日常</span></a></li>
+          <li><a href="#ch11" data-ch="11"><span class="n">11</span><span>連線與帳號</span></a></li>
+          <li><a href="#ch12" data-ch="12"><span class="n">12</span><span>進階與 FAQ</span></a></li>
+        </ol>
+        <p style="margin:0.85rem 0.4rem 0;font-size:0.78rem;color:var(--ink-faint);font-weight:700">
+          快捷：← → 翻章 · Esc 關圖
+        </p>
+      </aside>
+
+      <div class="wt-main">
+
+        <!-- ========== 1 ========== -->
+        <article class="wt-chapter active" data-ch="1" id="ch1">
+          <p class="ch-kicker">Chapter 01</p>
+          <h1>世界觀：翠嶺大陸與黑焰</h1>
+          <p class="wt-lead">《勇者之魂》的舞台是<strong>翠嶺大陸</strong>——曾是安居樂土，如今被<strong>黑焰</strong>與封印的陰影籠罩。你扮演的，是一隻<strong>不慕強權的兔子</strong>，不是被選召的完美英雄，而是「總得有人站出來」的微末之白。</p>
+
+          <figure class="wt-figure">
+            <img src="../media/gemini/keyart_hero.png" alt="勇者之魂主視覺" />
+            <figcaption>主角小白 —— 風格錨點，也是整個旅途的視角</figcaption>
+          </figure>
+
+          <h2>世界一句話</h2>
+          <p>無名魔王以黑焰吞噬野心者為爪牙；五方聖獸以自身為錨將魔王封於中央<strong>法師之塔</strong>，分鎮五域，卻在千年後遭黑焰侵蝕成凶獸。預言說：唯<strong>不慕強權的至弱者</strong>能走到塔的盡頭。</p>
+
+          <div class="wt-callout">
+            <strong>核心規則</strong>：黑焰嗜野心——越強、越貪越易被侵蝕。這解釋了「為何是兔子」：無野心者黑焰難附；成長要靠<strong>心</strong>，不是變成下一個魔王。
+          </div>
+
+          <h2>六域結構</h2>
+          <p>地理上是「五柱＋中央塔」。旅途從騎士堡壘方向開始，再經六域岔路自由選序；終點始終是法師之塔。</p>
+          <div class="panel" style="font-family:ui-monospace,Menlo,monospace;font-size:0.85rem;line-height:1.7;white-space:pre;overflow-x:auto">
+        [遊俠森林 · 疾影]
+              |
+[維京海岸] — [法師之塔] — [騎士堡壘 · 雷歐]
+   石拳           |              |
+        [忍者村 · 白霧]
+              |
+        [武鬥道場 · 阿波]
+          </div>
+
+          <div class="wt-grid-2" style="margin-top:1.25rem">
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/shots/proof_02_explore_town.png" alt="騎士堡實機" />
+              <figcaption>騎士堡 · 榮譽與鏽劍的起點</figcaption>
+            </figure>
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/shots/proof_14_tower.png" alt="法師之塔" />
+              <figcaption>法師之塔 · 終焉與回憶層層</figcaption>
+            </figure>
+          </div>
+
+          <h2>你會遇見誰</h2>
+          <ul>
+            <li><strong>釘釘</strong> —— 鐵匠，養「器」的入口</li>
+            <li><strong>星讀</strong> —— 觀星人，養「魂」的入口</li>
+            <li>各域鎮民、商販、守塔學徒與殘存騎士</li>
+            <li>五方聖獸（Boss）：悲劇守護者，不是單純反派</li>
+          </ul>
+          <div class="wt-tip">
+            <strong>遊玩節奏</strong>：主線<strong>完全可離線</strong>。連線是加厚社交與雲存檔的選配，不是通關門檻。
+          </div>
+
+          <div class="wt-nav">
+            <span></span>
+            <button type="button" class="btn btn-primary" data-goto="2">下一章：操作與介面 →</button>
+          </div>
+        </article>
+
+        <!-- ========== 2 ========== -->
+        <article class="wt-chapter" data-ch="2" id="ch2">
+          <p class="ch-kicker">Chapter 02</p>
+          <h1>操作與介面</h1>
+          <p class="wt-lead">探索是俯視可捲動地圖；戰鬥為即時節奏。滑鼠移過下表列會高亮，方便對照鍵盤。</p>
+
+          <figure class="wt-figure">
+            <img src="../media/shots/proof_01_title.png" alt="標題畫面" />
+            <figcaption>標題畫面 · 從這裡開始或讀取存檔</figcaption>
+          </figure>
+
+          <h2>基本操作</h2>
+          <div class="panel">
+            <table class="wt-keys">
+              <thead><tr><th>鍵</th><th>作用</th><th>備註</th></tr></thead>
+              <tbody>
+                <tr><td class="k">WASD / 方向鍵</td><td>移動</td><td>探索與戰鬥通用</td></tr>
+                <tr><td class="k">E / 空白鍵</td><td>互動 · 對話 · 拾取</td><td>靠近 NPC／寶箱／路標</td></tr>
+                <tr><td class="k">J</td><td>格擋／躍出／連招</td><td><strong>Boss 高光鍵</strong>，務必熟</td></tr>
+                <tr><td class="k">Esc</td><td>選單 · 裝備 · 連線 · 顯示設定</td><td>暫停旅程</td></tr>
+                <tr><td class="k">I · 1–8</td><td>物品欄 · 快捷欄</td><td>藥水與道具</td></tr>
+                <tr><td class="k">F11</td><td>全螢幕切換</td><td>也可在顯示設定調整解析度／垂直同步</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="wt-grid-2">
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/shots/proof_03_inventory.png" alt="物品欄" />
+              <figcaption>物品欄與裝備外觀</figcaption>
+            </figure>
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/shots/proof_09_weapon_paths.png" alt="武器流派" />
+              <figcaption>流派選擇畫面（騎士堡後）</figcaption>
+            </figure>
+          </div>
+
+          <h2>選單裡值得常開的頁</h2>
+          <ul>
+            <li><strong>裝備</strong> —— 武器／防具／飾品；換裝會反映在探索立繪疊層</li>
+            <li><strong>戰魂</strong> —— 觀星後嵌入或拆下戰魂</li>
+            <li><strong>任務</strong> —— 主線與長遠任務進度</li>
+            <li><strong>顯示設定</strong> —— 全螢幕、解析度、垂直同步（存於本機）</li>
+          </ul>
+          <div class="wt-callout">
+            <strong>小白提示</strong>：第一次進騎士堡前，先在安全區多按幾次 <strong>J</strong> 感受節拍，之後打雷歐會輕鬆很多。
+          </div>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="1">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="3">下一章：前 30 分鐘 →</button>
+          </div>
+        </article>
+
+        <!-- ========== 3 ========== -->
+        <article class="wt-chapter" data-ch="3" id="ch3">
+          <p class="ch-kicker">Chapter 03</p>
+          <h1>前 30 分鐘：出村到初鍛</h1>
+          <p class="wt-lead">這半小時決定你對節奏的手感。照清單勾完，通常就能穩穩進六域岔路。</p>
+
+          <figure class="wt-figure">
+            <img src="../media/shots/proof_12_village.png" alt="翠谷村" />
+            <figcaption>翠谷村 · 旅途真正的起點</figcaption>
+          </figure>
+
+          <h2>建議流程</h2>
+          <ol>
+            <li><strong>翠谷拾劍</strong> —— 聽完開場、拿到第一把武器，熟悉移動與對話。</li>
+            <li><strong>荒路首戰</strong> —— 路上雜魚練普攻與閃避節奏；不必硬衝，可繞道。</li>
+            <li><strong>騎士堡 · 釘釘</strong> —— 初鍛一階，體感攻擊與耐久都會上來。</li>
+            <li><strong>選擇武器流派</strong> —— 十選一；不確定可先做第 5 章測驗。</li>
+            <li><strong>星讀 · 觀星</strong> —— 學會魂系統，之後星屑才有去處。</li>
+            <li><strong>演武場</strong> —— 安全練招與熟練，不必耗野外藥水。</li>
+            <li><strong>野外材料</strong> —— 為下一次鍛造存一點料；市集也可補。</li>
+            <li><strong>六域岔路</strong> —— 鍛造後可自由選下一域；Boss 依戰力自訂順序。</li>
+          </ol>
+
+          <div class="wt-quiz" style="margin-top:1.25rem">
+            <h3>起步核對清單（勾選會記住）</h3>
+            <div class="wt-checklist">
+              <label><input type="checkbox" data-id="s1" /><span>離開翠谷並通過荒路</span></label>
+              <label><input type="checkbox" data-id="s2" /><span>與釘釘完成至少一次鍛造</span></label>
+              <label><input type="checkbox" data-id="s3" /><span>選定武器流派</span></label>
+              <label><input type="checkbox" data-id="s4" /><span>與星讀完成觀星教學</span></label>
+              <label><input type="checkbox" data-id="s5" /><span>演武場練過一輪</span></label>
+              <label><input type="checkbox" data-id="s6" /><span>打開六域岔路／輿圖</span></label>
+              <label><input type="checkbox" data-id="s7" /><span>Esc 裡看過裝備與顯示設定</span></label>
+            </div>
+          </div>
+
+          <div class="wt-grid-2">
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/shots/proof_08_forge.png" alt="鍛造" />
+              <figcaption>釘釘的工坊</figcaption>
+            </figure>
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/shots/proof_05_crossroads.png" alt="岔路" />
+              <figcaption>六域岔路 · 自由選下一站</figcaption>
+            </figure>
+          </div>
+
+          <div class="wt-tip">
+            <strong>節奏建議</strong>：第一次打雷歐前，武器至少鍛過、招式熟練有一點等級、身上帶回復道具。不必刷到「全滿」——中位配置就能挑戰。
+          </div>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="2">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="4">下一章：器魂招 →</button>
+          </div>
+        </article>
+
+        <!-- ========== 4 ========== -->
+        <article class="wt-chapter" data-ch="4" id="ch4">
+          <p class="ch-kicker">Chapter 04</p>
+          <h1>器 · 魂 · 招：三重養成</h1>
+          <p class="wt-lead">這是《勇者之魂》的核心循環。<strong>武器流派 ≠ 三重養成</strong>：流派決定手感與被動；器／魂／招可疊在任何流派上，換武器後戰魂還能拆到新刃上。</p>
+
+          <div class="wt-grid-2">
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/gemini/keyart_forge.png" alt="鍛造意象" />
+              <figcaption>器 · 鍛造升階</figcaption>
+            </figure>
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/gemini/keyart_soul.png" alt="魂意象" />
+              <figcaption>魂 · 星途觀星</figcaption>
+            </figure>
+          </div>
+
+          <h2>器 · 鍛造</h2>
+          <p>找<strong>釘釘</strong>升武器階。材料來自野外掉落與<strong>琥珀材料行</strong>。失敗<strong>不會掉階</strong>——可以大膽嘗試，只是耗料。</p>
+          <ul>
+            <li>優先把<strong>主手武器</strong>養到當前章節約略同階</li>
+            <li>防具次之；飾品偏特殊效果，不必死磕</li>
+            <li>鎚流派對鍛造有隱性友善（適合穩紮路線）</li>
+          </ul>
+
+          <h2>魂 · 觀星</h2>
+          <p>路上收集<strong>星屑</strong>，找<strong>星讀</strong>舉行觀星，獲得可嵌可拆的<strong>戰魂</strong>，調整暴擊、攻防等傾向。</p>
+          <ul>
+            <li>遠距流派（弓／銃／法）常偏暴擊或技能向</li>
+            <li>近戰坦克（鎚／晶）常偏血防</li>
+            <li>秘境 Boss 有<strong>唯一魂器</strong>，已持有再打改掉星屑</li>
+          </ul>
+
+          <figure class="wt-figure">
+            <img src="../media/shots/proof_10_soul.png" alt="魂系統" />
+            <figcaption>戰魂／觀星相關介面</figcaption>
+          </figure>
+
+          <h2>招 · 技能熟練</h2>
+          <p>戰鬥與<strong>演武場</strong>累積熟練、自動升級。不同武器流派解鎖對應招式線；危急時有緊急恢復類招，後期則有高倍率怒氣技。</p>
+
+          <div class="wt-callout">
+            <strong>怎麼疊？</strong> 例：選<strong>弓</strong>（遠距）＋暴擊向戰魂＋鍛造升階＋招式熟練。之後若改槍，戰魂可拆到新武器——養成不會整組作廢。
+          </div>
+          <p><a class="btn btn-ghost" href="systems.html">官網養成頁</a></p>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="3">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="5">下一章：十流派 →</button>
+          </div>
+        </article>
+
+        <!-- ========== 5 ========== -->
+        <article class="wt-chapter" data-ch="5" id="ch5">
+          <p class="ch-kicker">Chapter 05</p>
+          <h1>十種武器流派 · 互動測驗</h1>
+          <p class="wt-lead">流派決定武器手感與被動，與器／魂／招正交。沒有廢流派；只有適不適合你現在的玩法與目標 Boss。</p>
+
+          <figure class="wt-figure">
+            <img src="../media/gemini/keyart_weapons.png" alt="武器意象" />
+            <figcaption>十刃各有脾氣 —— 先選「想怎麼打」</figcaption>
+          </figure>
+
+          <h2>速覽</h2>
+          <div class="panel">
+            <table>
+              <thead><tr><th>流派</th><th>定位</th><th>一句話</th></tr></thead>
+              <tbody>
+                <tr><td>劍 · 劍士</td><td>均衡</td><td>新手友善，裝備線最完整</td></tr>
+                <tr><td>弓 · 遊俠</td><td>遠距暴擊</td><td>保持距離，等破綻</td></tr>
+                <tr><td>法 · 星法</td><td>技能倍率</td><td>與觀星協同最佳</td></tr>
+                <tr><td>拳 · 拳師</td><td>攻速破防</td><td>貼身連打，適配阿波</td></tr>
+                <tr><td>斧 · 斧衛</td><td>重擊</td><td>一擊要有重量</td></tr>
+                <tr><td>鎚 · 鎚守</td><td>坦克</td><td>站到最後，鍛造穩</td></tr>
+                <tr><td>長槍 · 槍騎</td><td>中距迎擊</td><td>比劍更長的一步</td></tr>
+                <tr><td>火槍 · 火銃</td><td>爆發</td><td>一響定生死，容錯低</td></tr>
+                <tr><td>鏢 · 影鏢</td><td>高速看破</td><td>適配白霧節奏</td></tr>
+                <tr><td>水晶 · 晶使</td><td>防血輔助</td><td>護體與魂槽親和</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="wt-quiz" id="wt-quiz">
+            <h3>四題測出適合你的第一流派</h3>
+
+            <div class="wt-q">
+              <p>1. 你更想站在戰場的哪裡？</p>
+              <div class="wt-opts">
+                <label><input type="radio" name="q1" data-w="sword:2,spear:2,fist:1" /> 中距離，能打能守</label>
+                <label><input type="radio" name="q1" data-w="bow:2,gun:2,magic:2,dart:1" /> 遠遠地看清全場</label>
+                <label><input type="radio" name="q1" data-w="axe:2,fist:2,dart:1" /> 貼上去打到對方喘不過氣</label>
+                <label><input type="radio" name="q1" data-w="hammer:2,crystal:2,sword:1" /> 站在最前排當肉盾</label>
+              </div>
+            </div>
+
+            <div class="wt-q">
+              <p>2. 失手時你比較怕什麼？</p>
+              <div class="wt-opts">
+                <label><input type="radio" name="q2" data-w="hammer:2,crystal:2,sword:1" /> 被秒 —— 我要耐打</label>
+                <label><input type="radio" name="q2" data-w="bow:1,spear:2,sword:2" /> 節奏亂 —— 我要穩定循環</label>
+                <label><input type="radio" name="q2" data-w="gun:1,axe:1,magic:1" /> 傷害不夠 —— 我寧可賭爆發</label>
+                <label><input type="radio" name="q2" data-w="dart:2,fist:2,bow:1" /> 被壓著打 —— 我要速度與破防</label>
+              </div>
+            </div>
+
+            <div class="wt-q">
+              <p>3. 第一個想挑戰的聖獸感是？</p>
+              <div class="wt-opts">
+                <label><input type="radio" name="q3" data-w="sword:2,spear:1,hammer:1" /> 雷歐：格擋與王者節奏</label>
+                <label><input type="radio" name="q3" data-w="dart:2,bow:1,magic:1" /> 白霧：真假與看破</label>
+                <label><input type="radio" name="q3" data-w="fist:2,axe:1" /> 阿波：灌破防、拳理</label>
+                <label><input type="radio" name="q3" data-w="bow:2,gun:1,spear:1" /> 疾影：距離與停拍</label>
+                <label><input type="radio" name="q3" data-w="axe:2,hammer:2" /> 石拳：重甲與落岩</label>
+              </div>
+            </div>
+
+            <div class="wt-q">
+              <p>4. 養成你更享受？</p>
+              <div class="wt-opts">
+                <label><input type="radio" name="q4" data-w="hammer:2,sword:1,axe:1" /> 鐵匠爐邊一錘一錘</label>
+                <label><input type="radio" name="q4" data-w="magic:2,crystal:2,gun:1" /> 觀星嵌魂、調數值</label>
+                <label><input type="radio" name="q4" data-w="fist:2,dart:2,bow:1" /> 演武場刷熟練到手順</label>
+                <label><input type="radio" name="q4" data-w="sword:2,spear:1,bow:1" /> 均衡推進，什麼都沾一點</label>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem">
+              <button type="button" class="btn btn-primary" data-quiz-submit>看推薦</button>
+              <button type="button" class="btn btn-ghost" data-quiz-reset>重測</button>
+              <a class="btn btn-ghost" href="weapons.html">完整流派頁</a>
+            </div>
+            <div class="wt-result">
+              <h4>推薦結果</h4>
+              <p></p>
+            </div>
+          </div>
+
+          <div class="wt-tip">
+            <strong>可換嗎？</strong> 可以。流派不是永久鎖定人生；但招式熟練會跟著當前武器線走，建議主線中前期定一條主修，支線再玩第二把。
+          </div>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="4">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="6">下一章：裝備鍛造 →</button>
+          </div>
+        </article>
+
+        <!-- ========== 6 ========== -->
+        <article class="wt-chapter" data-ch="6" id="ch6">
+          <p class="ch-kicker">Chapter 06</p>
+          <h1>裝備、外觀與鍛造</h1>
+          <p class="wt-lead">裝備不只加數值——武器、防具、飾品會疊在小白身上，探索時就能看見「我變強了」的外觀回饋。</p>
+
+          <figure class="wt-figure">
+            <img src="../media/shots/proof_03_inventory.png" alt="裝備畫面" />
+            <figcaption>裝備面板 · 圖示格與疊層外觀</figcaption>
+          </figure>
+
+          <h2>部位概念</h2>
+          <div class="wt-grid-2">
+            <div class="panel">
+              <h3 style="margin-top:0">武器</h3>
+              <p>由流派決定起始武器；鍛造升階改傷害與 thr。探索時右手（或對應位置）會顯示對應武器圖層。</p>
+            </div>
+            <div class="panel">
+              <h3 style="margin-top:0">防具</h3>
+              <p>布／皮／板／紗等類型影響防禦與外觀色調。坦克向可優先板甲；法與弓常走輕甲換機動。</p>
+            </div>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0">飾品</h3>
+            <p>墜飾、戒指等補特殊傾向（暴擊、續航、抗性）。不必強求同階，有特效就先用。</p>
+          </div>
+
+          <h2>鍛造節奏</h2>
+          <ol>
+            <li>材料夠 → 釘釘嘗試升階</li>
+            <li>失敗不掉階 → 補料再試</li>
+            <li>大章節 Boss 前做一次「主手＋防具」檢查</li>
+            <li>秘境與寶箱會掉較稀有胚，記得對圖鑑</li>
+          </ol>
+
+          <div class="wt-grid-2">
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/equipment/meager_edge.png" alt="微末刃" style="object-fit:contain;aspect-ratio:1;background:var(--warm);padding:1rem" />
+              <figcaption>範例：微末刃（劍起始線）</figcaption>
+            </figure>
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/equipment/knight_plate.png" alt="騎士板甲" style="object-fit:contain;aspect-ratio:1;background:var(--warm);padding:1rem" />
+              <figcaption>範例：騎士板甲</figcaption>
+            </figure>
+          </div>
+
+          <div class="wt-callout">
+            <strong>圖鑑</strong>：官網有完整裝備圖鑑與篩選，可對照掉落與鍛造目標。
+            <p style="margin:0.5rem 0 0"><a class="btn btn-primary" href="equipment.html">打開裝備圖鑑</a></p>
+          </div>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="5">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="7">下一章：六域巡禮 →</button>
+          </div>
+        </article>
+
+        <!-- ========== 7 ========== -->
+        <article class="wt-chapter" data-ch="7" id="ch7">
+          <p class="ch-kicker">Chapter 07</p>
+          <h1>六域巡禮</h1>
+          <p class="wt-lead">每個主域都有風土、地標與對應聖獸氣味。鍛造後從岔路出發；順序可依流派與戰力自訂。</p>
+
+          <p>
+            <label for="wt-realm-filter" style="font-weight:800;margin-right:0.5rem">篩選</label>
+            <select id="wt-realm-filter" style="padding:0.4rem 0.65rem;border-radius:8px;border:1px solid var(--line);font-weight:700">
+              <option value="all">全部域</option>
+              <option value="knight">騎士堡壘</option>
+              <option value="mist">霧隱／忍者</option>
+              <option value="dojo">武鬥道場</option>
+              <option value="forest">遊俠森林</option>
+              <option value="coast">維京海岸</option>
+              <option value="tower">法師之塔</option>
+              <option value="hub">樞紐與秘境</option>
+            </select>
+          </p>
+
+          <div class="wt-realm" data-realm="knight">
+            <img src="../media/shots/proof_02_explore_town.png" alt="騎士堡" />
+            <div>
+              <h3>騎士堡壘 · 雷歐</h3>
+              <p>石城、榮譽、旗幟。門衛城、市集、演武場、內殿前院。主線早期必經，劍盾氣味濃。</p>
+              <div class="tags"><span class="tag tag-guide">聖獸：雷歐（獅）</span><span class="tag">鍛造／演武</span></div>
+            </div>
+          </div>
+
+          <div class="wt-realm" data-realm="mist">
+            <img src="../media/shots/proof_04_mist.png" alt="霧隱" />
+            <div>
+              <h3>霧隱村 · 白霧</h3>
+              <p>霧、影、真假。霧祠、鏡廊、霧崖。看破節奏的課堂；鏢與弓都很吃香。</p>
+              <div class="tags"><span class="tag tag-guide">聖獸：白霧（狐）</span><span class="tag">鏡廊秘境</span></div>
+            </div>
+          </div>
+
+          <div class="wt-realm" data-realm="dojo">
+            <img src="../media/shots/proof_13_dojo.png" alt="道場" />
+            <div>
+              <h3>武鬥道場 · 阿波</h3>
+              <p>山門、拳理、茶。竹林與山巔試煉。破防灌條與貼身連段的試金石。</p>
+              <div class="tags"><span class="tag tag-guide">聖獸：阿波（熊貓）</span><span class="tag">拳／斧友善</span></div>
+            </div>
+          </div>
+
+          <div class="wt-realm" data-realm="forest">
+            <img src="../media/shots/proof_06_forest.png" alt="森林" />
+            <div>
+              <h3>遊俠森林 · 疾影</h3>
+              <p>密林、風、箭道。樹冠、靜湖、遺址。遠距與「等停拍」的練習場。</p>
+              <div class="tags"><span class="tag tag-guide">聖獸：疾影（隼）</span><span class="tag">弓友善</span></div>
+            </div>
+          </div>
+
+          <div class="wt-realm" data-realm="coast">
+            <img src="../media/shots/proof_19_harbor.png" alt="深港" />
+            <div>
+              <h3>維京海岸 · 石拳</h3>
+              <p>浪、火、蠻勇。碼頭、潮汐洞、沉船灣。重擊與落岩安全區。</p>
+              <div class="tags"><span class="tag tag-guide">聖獸：石拳（豕）</span><span class="tag">沉船秘境</span></div>
+            </div>
+          </div>
+
+          <div class="wt-realm" data-realm="tower">
+            <img src="../media/shots/proof_14_tower.png" alt="塔" />
+            <div>
+              <h3>法師之塔 · 終焉</h3>
+              <p>黑焰、螺旋階、回憶層。塔下營地整備後再上；終局與誘惑並存。</p>
+              <div class="tags"><span class="tag tag-guide">魔王意志</span><span class="tag">通關向</span></div>
+            </div>
+          </div>
+
+          <div class="wt-realm" data-realm="hub">
+            <img src="../media/shots/proof_05_crossroads.png" alt="岔路" />
+            <div>
+              <h3>樞紐：岔路 · 行商 · 星落 · 疤地</h3>
+              <p>六域岔路連各域；行商驛站補貨；星落平原與黑焰疤地藏秘境與長遠任務。</p>
+              <div class="tags"><span class="tag">秘境 Boss ×3</span><span class="tag">寶箱／稱號</span></div>
+            </div>
+          </div>
+
+          <div class="wt-grid-2" style="margin-top:1rem">
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/shots/proof_17_starfall.png" alt="星落" />
+              <figcaption>星落平原</figcaption>
+            </figure>
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/shots/proof_16_blackflame.png" alt="黑焰疤地" />
+              <figcaption>黑焰疤地</figcaption>
+            </figure>
+          </div>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="6">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="8">下一章：Boss 試煉 →</button>
+          </div>
+        </article>
+
+        <!-- ========== 8 ========== -->
+        <article class="wt-chapter" data-ch="8" id="ch8">
+          <p class="ch-kicker">Chapter 08</p>
+          <h1>Boss 試煉攻略</h1>
+          <p class="wt-lead">雜魚多半靠走位與普攻即可；Boss 則要求<strong>讀招、格擋、選窗口</strong>。點開摺疊看詳細提示（會記住你展開過哪些）。</p>
+
+          <figure class="wt-figure">
+            <img src="../media/gemini/keyart_leo.png" alt="雷歐意象" />
+            <figcaption>聖獸試煉 —— 悲劇守護者的一戰</figcaption>
+          </figure>
+
+          <details class="wt-boss" data-boss="leo">
+            <summary>雷歐（獅）· 騎士堡</summary>
+            <div class="body">
+              <p><strong>記住</strong>：王者斬倒數時用 <strong>J 格擋</strong>。這是整作第一個「時機高光」，練會了後面都好說。</p>
+              <ul>
+                <li>建議：主手有鍛、身上有回復、先在演武場熱手</li>
+                <li>適配：劍、槍、鎚（容錯）；火槍需極熟距離</li>
+                <li>失敗了別灰心——機制比數值更重要</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="wt-boss" data-boss="mist">
+            <summary>白霧（狐）· 霧隱</summary>
+            <div class="body">
+              <p><strong>記住</strong>：分身與真假同色——<strong>等本體發白再打</strong>，亂砍會空招被反打。</p>
+              <ul>
+                <li>適配：鏢、弓、法（看破與距離）</li>
+                <li>鏡廊秘境可另練「殘影」手感</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="wt-boss" data-boss="apo">
+            <summary>阿波（熊貓）· 道場</summary>
+            <div class="body">
+              <p><strong>記住</strong>：用技能<strong>灌破防</strong>，別只普攻磨血皮。</p>
+              <ul>
+                <li>適配：拳、斧；鎚能硬吃但時間長</li>
+                <li>道場山巔空間較開，走位空間足夠</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="wt-boss" data-boss="gale">
+            <summary>疾影（隼）· 森林</summary>
+            <div class="body">
+              <p><strong>記住</strong>：<strong>等停拍，別追殘影</strong>。追風會被風打。</p>
+              <ul>
+                <li>適配：弓、槍、火槍（遠距點窗口）</li>
+                <li>近戰要預判落地點，而非黏著模型跑</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="wt-boss" data-boss="stone">
+            <summary>石拳（豕）· 海岸</summary>
+            <div class="body">
+              <p><strong>記住</strong>：對撞剝岩甲；落岩時進<strong>安全區</strong>。</p>
+              <ul>
+                <li>適配：斧、鎚、槍</li>
+                <li>血防不足時先鍛防具再戰</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="wt-boss" data-boss="secret">
+            <summary>秘境三王 · 疤主／鏡影／船長</summary>
+            <div class="body">
+              <p>非主線必打，但掉<strong>唯一魂器</strong>與稱號。</p>
+              <ul>
+                <li><strong>黑焰疤主</strong> → 疤焰心核（攻高）</li>
+                <li><strong>鏡廊殘影</strong> → 真影裂片（防血）</li>
+                <li><strong>沉船船長影</strong> → 船長潮骨（血高均衡）</li>
+                <li>已持有再打改掉星屑；入槽：Esc → 戰魂</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="wt-boss" data-boss="tower">
+            <summary>塔頂 · 終局提示（輕雷）</summary>
+            <div class="body">
+              <p>整備、回復、確認戰魂與招式。終局更考「心」與整輪旅途的成熟度——若卡關，回頭清秘境與鍛造通常比硬撞有效。</p>
+            </div>
+          </details>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="7">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="9">下一章：戰鬥節奏 →</button>
+          </div>
+        </article>
+
+        <!-- ========== 9 ========== -->
+        <article class="wt-chapter" data-ch="9" id="ch9">
+          <p class="ch-kicker">Chapter 09</p>
+          <h1>戰鬥節奏與招式</h1>
+          <p class="wt-lead">本作戰鬥是<strong>即時</strong>的：走位、普攻、技能與 J 鍵時機同一個呼吸裡完成。雜魚「自己會呼吸」；Boss 才要求你讀秒。</p>
+
+          <figure class="wt-figure">
+            <img src="../media/shots/proof_11_battle.png" alt="戰鬥" />
+            <figcaption>戰鬥畫面 · 保持冷靜比猛按有用</figcaption>
+          </figure>
+
+          <h2>通用循環</h2>
+          <ol>
+            <li><strong>靠近或拉開</strong> —— 依流派決定站位</li>
+            <li><strong>普攻填節奏</strong> —— 不要只站樁等大招</li>
+            <li><strong>技能穿插</strong> —— 破防、範圍、爆發看窗口</li>
+            <li><strong>J 應答</strong> —— 格擋／躍出／連招，Boss 紅字前預判</li>
+            <li><strong>危急回血</strong> —— 藥水或緊急恢復招，別存到死亡畫面</li>
+          </ol>
+
+          <div class="wt-grid-2">
+            <div class="panel">
+              <h3 style="margin-top:0">怒氣與高倍率技</h3>
+              <p>部分強技需要怒氣或長冷卻。雷歐後解鎖的路線常有「滿怒優先」的重擊——存滿再開，不要零碎放掉。</p>
+            </div>
+            <div class="panel">
+              <h3 style="margin-top:0">演武場的價值</h3>
+              <p>零風險練熟練、測新武器手感、練習 J 的時機。換流派後第一件事：回來打木人。</p>
+            </div>
+          </div>
+
+          <div class="wt-callout">
+            <strong>常見失誤</strong>
+            <ul style="margin:0.4rem 0 0;padding-left:1.2rem">
+              <li>追模型而不是預判落點（疾影）</li>
+              <li>Boss 前不鍛、不帶藥</li>
+              <li>遠距流派被貼身還硬站（該跑就跑）</li>
+              <li>把 J 當普通攻擊鍵狂按</li>
+            </ul>
+          </div>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="8">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="10">下一章：支線日常 →</button>
+          </div>
+        </article>
+
+        <!-- ========== 10 ========== -->
+        <article class="wt-chapter" data-ch="10" id="ch10">
+          <p class="ch-kicker">Chapter 10</p>
+          <h1>支線、秘境與日常</h1>
+          <p class="wt-lead">主線之外，翠嶺還有寶箱、長遠任務、狩獵與秘境。不必全清也能通關；想變強或收集稱號時再來。</p>
+
+          <div class="wt-grid-2">
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/shots/proof_21_hunt.png" alt="狩獵" />
+              <figcaption>狩獵相關場景</figcaption>
+            </figure>
+            <figure class="wt-figure" style="margin:0">
+              <img src="../media/shots/proof_24_caravan.png" alt="行商" />
+              <figcaption>行商驛站 · 補貨與情報</figcaption>
+            </figure>
+          </div>
+
+          <h2>值得做的事</h2>
+          <ul>
+            <li><strong>寶箱</strong> —— 古驛、沉船、市集、疤地等單次戰利，常有胚子與材料</li>
+            <li><strong>長遠任務</strong> —— 拾荒、漫遊、雜魚勝、三秘境等，任務面板可領</li>
+            <li><strong>稱號</strong> —— 疤地行者、破鏡之人、沉船終結者、翠嶺漫遊者、拾荒兔…</li>
+            <li><strong>市集／琥珀行</strong> —— 缺料時用金錢換進度</li>
+            <li><strong>對話</strong> —— 淨化聖獸後，該域 NPC 台詞與氣氛會變</li>
+          </ul>
+
+          <figure class="wt-figure">
+            <img src="../media/shots/proof_15_market.png" alt="市集" />
+            <figcaption>騎士堡市集</figcaption>
+          </figure>
+
+          <div class="wt-tip">
+            <strong>時間不夠時</strong>：主線優先 → 當前域寶箱 → 卡關再秘境魂器。不要為了「全收集」卡在序章。
+          </div>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="9">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="11">下一章：連線帳號 →</button>
+          </div>
+        </article>
+
+        <!-- ========== 11 ========== -->
+        <article class="wt-chapter" data-ch="11" id="ch11">
+          <p class="ch-kicker">Chapter 11</p>
+          <h1>連線、帳號與下載</h1>
+          <p class="wt-lead">主線<strong>永遠單人可完整體驗</strong>。帳號與連線是加厚：雲端進度、未來社交與社群身分——不是通關門票。</p>
+
+          <figure class="wt-figure">
+            <img src="../media/gemini/keyart_camp.png" alt="營地" />
+            <figcaption>旅途可以是一個人的；也可以在營火旁等多一位旅人</figcaption>
+          </figure>
+
+          <h2>你可以怎麼玩</h2>
+          <div class="wt-grid-2">
+            <div class="panel">
+              <h3 style="margin-top:0">純離線</h3>
+              <p>下載後直接玩。存檔在本機。適合地鐵、飛機、只想沈浸劇情的夜晚。</p>
+            </div>
+            <div class="panel">
+              <h3 style="margin-top:0">登入加厚</h3>
+              <p>官網帳號頁可登入。部分 OAuth 需營運完成後台設定；信箱魔法連結為主路徑之一。</p>
+            </div>
+          </div>
+
+          <h2>下載</h2>
+          <p>提供 Windows、macOS、Linux 打包。版本號以下載頁為準；更新後建議看一遍顯示設定（全螢幕／解析度）。</p>
+          <p style="display:flex;flex-wrap:wrap;gap:0.5rem">
+            <a class="btn btn-primary" href="download.html">前往下載</a>
+            <a class="btn btn-ghost" href="account.html">帳號</a>
+          </p>
+
+          <div class="wt-callout">
+            <strong>隱私與安全</strong>：不要在公開場合分享完整存檔若含個人暱稱；連線時使用你信任的網路。官方不會私訊要你的密碼。
+          </div>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="10">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="12">下一章：進階 FAQ →</button>
+          </div>
+        </article>
+
+        <!-- ========== 12 ========== -->
+        <article class="wt-chapter" data-ch="12" id="ch12">
+          <p class="ch-kicker">Chapter 12</p>
+          <h1>進階技巧與 FAQ</h1>
+          <p class="wt-lead">通關後或卡關時翻這章。若你的問題不在這裡，歡迎到社群回報——附版本號與截圖會更快。</p>
+
+          <figure class="wt-figure">
+            <img src="../media/shots/proof_20_mist_shrine.png" alt="霧祠" />
+            <figcaption>霧祠 —— 有時答案在重走一次舊路</figcaption>
+          </figure>
+
+          <h2>進階小技巧</h2>
+          <ul>
+            <li><strong>雙修思維</strong>：主修近戰清圖，切遠距打特定 Boss，再切回來（注意招式熟練分流）</li>
+            <li><strong>魂器輪換</strong>：依下一場 Boss 換暴擊／血防魂，不要一套用到塔頂</li>
+            <li><strong>岔路回補</strong>：每清一域回騎士堡鍛造＋星讀，比在野外裸奔有效</li>
+            <li><strong>顯示</strong>：筆電建議開垂直同步；打架飄忽時先查幀數與全螢幕</li>
+            <li><strong>存檔習慣</strong>：大 Boss 前手動確認；換裝置前若有雲端再登出</li>
+          </ul>
+
+          <h2>FAQ</h2>
+          <details class="wt-boss" data-boss="faq1">
+            <summary>卡關了，是不是一定要換流派？</summary>
+            <div class="body">多數情況是鍛造／藥水／機制不熟。先對第 8 章 Boss 提示打勾檢查，再考慮換刃。</div>
+          </details>
+          <details class="wt-boss" data-boss="faq2">
+            <summary>鍛造一直失敗？</summary>
+            <div class="body">失敗不掉階。補材料再試；鎚流派有隱性友善。也可以先升防具提高容錯再戰。</div>
+          </details>
+          <details class="wt-boss" data-boss="faq3">
+            <summary>畫面與小白比例怪／穿模？</summary>
+            <div class="body">請更新到官網標示的最新版。0.14 起地圖與角色以 chibi 風格鎖定；舊快取少見，重裝通常可解。</div>
+          </details>
+          <details class="wt-boss" data-boss="faq4">
+            <summary>一定要連線嗎？</summary>
+            <div class="body">不用。主線離線完整可玩。</div>
+          </details>
+          <details class="wt-boss" data-boss="faq5">
+            <summary>Mac 打不開？</summary>
+            <div class="body">若遇系統封鎖未簽名應用，可在系統設定中允許，或見下載頁說明。仍失敗請回報系統版本。</div>
+          </details>
+          <details class="wt-boss" data-boss="faq6">
+            <summary>進度條怎麼重置？</summary>
+            <div class="body">本攻略閱讀進度存在瀏覽器 localStorage。清站台資料即重置；不影響遊戲存檔。</div>
+          </details>
+
+          <h2>延伸閱讀</h2>
+          <div class="card-grid">
+            <a class="card" href="weapons.html"><div class="body"><div class="title">武器流派</div><div class="meta">十種優缺點</div></div></a>
+            <a class="card" href="equipment.html"><div class="body"><div class="title">裝備圖鑑</div><div class="meta">武器 · 防具 · 鍛造</div></div></a>
+            <a class="card" href="systems.html"><div class="body"><div class="title">器魂招</div><div class="meta">三重養成</div></div></a>
+            <a class="card" href="gallery.html"><div class="body"><div class="title">實機畫面</div><div class="meta">圖庫</div></div></a>
+            <a class="card" href="download.html"><div class="body"><div class="title">下載</div><div class="meta">Win · Mac · Linux</div></div></a>
+            <a class="card" href="guide.html"><div class="body"><div class="title">精簡指南</div><div class="meta">一頁速查</div></div></a>
+          </div>
+
+          <div class="wt-tip" style="margin-top:1.25rem">
+            <strong>你已走到攻略盡頭。</strong> 真正的塔在遊戲裡。祝旅途順利——記得，不慕強權，也是一種刃。
+          </div>
+
+          <div class="wt-nav">
+            <button type="button" class="btn btn-ghost" data-goto="11">← 上一章</button>
+            <button type="button" class="btn btn-primary" data-goto="1">回到第 1 章</button>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/site.js"></script>
+  <script src="../js/walkthrough.js"></script>
+</body>
+</html>
