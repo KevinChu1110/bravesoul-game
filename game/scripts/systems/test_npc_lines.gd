@@ -20,12 +20,15 @@ const GOLDEN: Array = [
 	{"npc": "ronin", "ng": 0, "flags": ["side.ronin_spared"], "n": 1, "first": "……刃收了。路還長。別學我把焰當柴。"},
 	{"npc": "tide_roar_idle", "ng": 0, "flags": ["c5_entered"], "n": 2, "first": "衝過來的時候別逃——迎上去。對撞。"},
 	{"npc": "silk", "ng": 0, "flags": ["c2_wheat_letter"], "n": 2, "first": "兔子？來找書的少，來找藉口的多。"},
+	{"npc": "knight_orphan", "ng": 0, "flags": ["side.ding_debt_asked"], "n": 2, "first": "斷劍？在武器架那邊。我不敢碰——怕鐵匠生氣。"},
+	{"npc": "knight_orphan", "ng": 0, "flags": [], "n": 2, "first": "演武場以前很吵。現在只剩風。"},
 ]
 
 ## 目前有資料檔的 NPC。新增 NPC 時把 id 加進來，測試才會涵蓋到。
 const NPCS: Array[String] = [
 	"greybeard", "ding", "maisui_village", "fog_hide", "silk",
 	"ronin", "acha", "star", "wind_ear_idle", "tide_roar_idle",
+	"knight_orphan",
 ]
 
 ## 預設規則刻意是空的，不算缺台詞：

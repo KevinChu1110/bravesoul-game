@@ -1531,6 +1531,29 @@ func _grant_boss_loot(gold_n: int, dust_n: int, hp_n: int = 0) -> void:
 	SaveManager.save_game()
 
 
+## 支線發獎樣板。原本這串動作在 9 支 _side_* 裡各抄一遍。
+##
+## 收成一支的理由：TitleCatalog.evaluate_all() 與 SaveManager.save_game() 漏了
+## 都不會報錯 —— 前者只是少了當下的稱號提示（稱號牆重新開啟時仍會評估到），
+## 後者則會讓獎勵在離線後消失。這種「忘了也沒人告訴你」的樣板就該只寫一次。
+func _grant_side_reward(r: Dictionary) -> void:
+	for f in r.get("flags", []):
+		GameState.set_flag(str(f), true)
+	for f in r.get("clear_flags", []):
+		GameState.set_flag(str(f), false)
+	var gold := int(r.get("gold", 0))
+	if gold != 0:
+		GameState.add_gold(gold)
+	var dust := int(r.get("stardust", 0))
+	if dust != 0:
+		GameState.add_stardust(dust)
+	TitleCatalog.evaluate_all()
+	SaveManager.save_game()
+	var bubble := str(r.get("bubble", ""))
+	if bubble != "":
+		_player_bubble(bubble)
+
+
 func _touch_save_stone(extra: String = "") -> void:
 	## 存檔石：存檔 + 回滿血
 	GameState.hp = GameState.effective_max_hp()
@@ -2376,7 +2399,7 @@ func _handle_side_content(id: String) -> bool:
 				return true
 			return false
 		"knight_orphan":
-			_side_knight_orphan()
+			_play_dialog(NpcLines.for_npc("knight_orphan"))
 			return true
 		"ronin":
 			_side_ronin()
@@ -2460,12 +2483,9 @@ func _side_silk(id: String) -> void:
 			lines.append({"speaker": "內心", "text": "信比卷軸真。絲絨說得對。"})
 		if not GameState.has_flag("lore.codex_read"):
 			lines.append({"speaker": "系統", "text": "讀畢。金幣＋10 · 星屑＋1。"})
-			_play_dialog(lines, func():
-				GameState.set_flag("lore.codex_read", true)
-				GameState.add_gold(10)
-				GameState.add_stardust(1)
-				SaveManager.save_game()
-			)
+			_play_dialog(lines, func(): _grant_side_reward({
+				"flags": ["lore.codex_read"], "gold": 10, "stardust": 1,
+			}))
 		else:
 			_play_dialog(lines)
 		return
@@ -2486,30 +2506,10 @@ func _side_try_pick_broken_blade(id: String) -> bool:
 		{"speaker": "旁白", "text": "沙坑邊的武器架下，一把斷劍露出半截。刃上刻著舊騎士團章。"},
 		{"speaker": "內心", "text": "釘釘說的……舊主的鐵。"},
 		{"speaker": "系統", "text": "獲得【舊主斷劍】。拿回給釘釘。"},
-	], func():
-		GameState.set_flag("item.broken_blade", true)
-		SaveManager.save_game()
-		_player_bubble("撿到斷劍了")
-	)
+	], func(): _grant_side_reward({
+		"flags": ["item.broken_blade"], "bubble": "撿到斷劍了",
+	}))
 	return true
-
-
-func _side_knight_orphan() -> void:
-	if GameState.has_flag("side.ding_debt_done"):
-		_play_dialog([
-			{"speaker": "遺孤少年", "text": "鐵匠大叔後來不太罵人了。……還是會罵。但比較輕。"},
-		])
-		return
-	if GameState.has_flag("side.ding_debt_asked"):
-		_play_dialog([
-			{"speaker": "遺孤少年", "text": "斷劍？在武器架那邊。我不敢碰——怕鐵匠生氣。"},
-			{"speaker": "遺孤少年", "text": "我爹以前……也是團裡的。現在只剩沙。"},
-		])
-		return
-	_play_dialog([
-		{"speaker": "遺孤少年", "text": "演武場以前很吵。現在只剩風。"},
-		{"speaker": "遺孤少年", "text": "灰鬍子說：旗還掛著，人就不能先倒下。"},
-	])
 
 
 func _side_amber() -> void:
@@ -2601,13 +2601,10 @@ func _side_ronin_persuade() -> void:
 		{"speaker": "黑焰浪人", "text": "滾。我自己的路自己斷。你——去塔。"},
 		{"speaker": "系統", "text": "浪人收刃。金幣＋40 · 星屑＋3。稱號進度。"},
 	], func():
-		GameState.set_flag("side.ronin_spared", true)
-		GameState.set_flag("side.ronin_done", true)
-		GameState.add_gold(40)
-		GameState.add_stardust(3)
-		TitleCatalog.evaluate_all()
-		SaveManager.save_game()
-		_player_bubble("他收刃了")
+		_grant_side_reward({
+			"flags": ["side.ronin_spared", "side.ronin_done"],
+			"gold": 40, "stardust": 3, "bubble": "他收刃了",
+		})
 		_open_explore(_last_explore_map if _last_explore_map != "" else "crossroads", _last_explore_screen)
 	)
 
@@ -2644,15 +2641,10 @@ func _side_deliver_true_letter() -> void:
 		{"speaker": "行商", "text": "……紙邊有火燎。是真的。我們會送到村外那戶。"},
 		{"speaker": "行商", "text": "謝了，兔子。路上少一層假，就少一場刀。"},
 		{"speaker": "系統", "text": "交付【真信】。金幣＋45 · 星屑＋3。"},
-	], func():
-		GameState.set_flag("item.true_letter", false)
-		GameState.set_flag("side.fog_letter_done", true)
-		GameState.add_gold(45)
-		GameState.add_stardust(3)
-		TitleCatalog.evaluate_all()
-		SaveManager.save_game()
-		_player_bubble("真信送達")
-	)
+	], func(): _grant_side_reward({
+		"flags": ["side.fog_letter_done"], "clear_flags": ["item.true_letter"],
+		"gold": 45, "stardust": 3, "bubble": "真信送達",
+	}))
 
 
 func _side_start_ding_debt() -> void:
@@ -2667,13 +2659,11 @@ func _side_start_ding_debt() -> void:
 			{"speaker": "釘釘", "text": "現在合上了。你——別學我丟下沒做完的東西。"},
 			{"speaker": "系統", "text": "舊債了結。金幣＋50 · 星屑＋3 · 下次升階成功率提升（暫）。"},
 		], func():
-			GameState.set_flag("item.broken_blade", false)
-			GameState.set_flag("side.ding_debt_done", true)
-			GameState.set_flag("meta.forge_debt_bonus", true)
-			GameState.add_gold(50)
-			GameState.add_stardust(3)
-			TitleCatalog.evaluate_all()
-			SaveManager.save_game()
+			_grant_side_reward({
+				"flags": ["side.ding_debt_done", "meta.forge_debt_bonus"],
+				"clear_flags": ["item.broken_blade"],
+				"gold": 50, "stardust": 3,
+			})
 			_show_forge_panel()
 		)
 		return
@@ -2684,8 +2674,7 @@ func _side_start_ding_debt() -> void:
 			{"speaker": "釘釘", "text": "我欠那鐵一個收場。你若撿回來——我當你付過一次人情。"},
 			{"speaker": "系統", "text": "【支線】鐵匠的舊債：去演武場取【舊主斷劍】。"},
 		], func():
-			GameState.set_flag("side.ding_debt_asked", true)
-			SaveManager.save_game()
+			_grant_side_reward({"flags": ["side.ding_debt_asked"]})
 			_show_forge_panel()
 		)
 		return
@@ -2710,12 +2699,10 @@ func _side_start_fog_letter() -> void:
 			{"speaker": "霧隱", "text": "假信滿天飛。我這裡有一封真的——要送到村外行商驛站。"},
 			{"speaker": "霧隱", "text": "假的給霧吃。真的，要人走。"},
 			{"speaker": "系統", "text": "【支線】霧中家書：將【真信】交給岔路行商驛站的頭領。"},
-		], func():
-			GameState.set_flag("side.fog_letter_asked", true)
-			GameState.set_flag("item.true_letter", true)
-			SaveManager.save_game()
-			_player_bubble("收下真信")
-		)
+		], func(): _grant_side_reward({
+			"flags": ["side.fog_letter_asked", "item.true_letter"],
+			"bubble": "收下真信",
+		}))
 		return
 	_play_dialog(NpcLines.for_npc("fog_hide"))
 
