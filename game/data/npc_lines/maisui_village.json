@@ -1,0 +1,29 @@
+{
+  "id": "maisui_village",
+  "speaker": "麥穗",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1
+      },
+      "lines": [
+        "……你又站在灰裡了。這次也記得跑。",
+        "信我寫過。氣味還在。走。"
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c2_wheat_letter"
+        ]
+      },
+      "lines": [
+        "（幻影般的記憶）我還在。不是因為預言。"
+      ]
+    },
+    {
+      "when": {},
+      "lines": []
+    }
+  ]
+}

@@ -2469,7 +2469,7 @@ func _side_silk(id: String) -> void:
 		else:
 			_play_dialog(lines)
 		return
-	_play_dialog(NpcLines.silk())
+	_play_dialog(NpcLines.for_npc("silk"))
 
 
 func _side_try_pick_broken_blade(id: String) -> bool:
@@ -2534,7 +2534,7 @@ func _side_ronin() -> void:
 					{"speaker": "黑焰浪人", "text": "你若倒下，我會把你拖回來。——只一次。"},
 				])
 			else:
-				_play_dialog(NpcLines.ronin())
+				_play_dialog(NpcLines.for_npc("ronin"))
 		else:
 			_play_dialog([{"speaker": "旁白", "text": "地上只剩燒過的靴印。浪人已不在。"}])
 		return
@@ -2657,7 +2657,7 @@ func _side_deliver_true_letter() -> void:
 
 func _side_start_ding_debt() -> void:
 	if GameState.has_flag("side.ding_debt_done"):
-		_play_dialog(NpcLines.ding(), _show_forge_panel)
+		_play_dialog(NpcLines.for_npc("ding"), _show_forge_panel)
 		return
 	if GameState.has_flag("item.broken_blade"):
 		_play_dialog([
@@ -2696,13 +2696,13 @@ func _side_start_ding_debt() -> void:
 
 func _side_start_fog_letter() -> void:
 	if GameState.has_flag("side.fog_letter_done"):
-		_play_dialog(NpcLines.fog_hide())
+		_play_dialog(NpcLines.for_npc("fog_hide"))
 		return
 	if GameState.has_flag("item.true_letter"):
-		_play_dialog(NpcLines.fog_hide())
+		_play_dialog(NpcLines.for_npc("fog_hide"))
 		return
 	if not GameState.has_flag("c2_wheat_letter"):
-		_play_dialog(NpcLines.fog_hide())
+		_play_dialog(NpcLines.for_npc("fog_hide"))
 		return
 	## 讀完麥穗信後可接
 	if not GameState.has_flag("side.fog_letter_asked"):
@@ -2717,7 +2717,7 @@ func _side_start_fog_letter() -> void:
 			_player_bubble("收下真信")
 		)
 		return
-	_play_dialog(NpcLines.fog_hide())
+	_play_dialog(NpcLines.for_npc("fog_hide"))
 
 
 func _flavor_world_object(id: String) -> void:
@@ -3692,7 +3692,7 @@ func _go_title_wall_from_town() -> void:
 
 func _c1_star() -> void:
 	if GameState.has_flag("c1_soul_intro"):
-		var lines: Array = NpcLines.star()
+		var lines: Array = NpcLines.for_npc("star")
 		if lines.is_empty():
 			lines = [{"speaker": "星讀", "text": "足迹會再交疊。星屑夠了就來觀星。"}]
 		var tut: Array = TutorialSystem.take("soul")
@@ -3819,7 +3819,7 @@ func _c1_greybeard() -> void:
 			_go_skill_panel()
 		)
 		return
-	var lines: Array = NpcLines.greybeard()
+	var lines: Array = NpcLines.for_npc("greybeard")
 	_play_dialog(lines, _go_skill_panel)
 
 
@@ -4553,7 +4553,7 @@ func _go_c3_dojo() -> void:
 func _interact_dojo(id: String) -> void:
 	match id:
 		"acha":
-			_play_dialog(NpcLines.acha())
+			_play_dialog(NpcLines.for_npc("acha"))
 		"gate_bell":
 			_play_dialog([{"speaker": "旁白", "text": "鐘響一聲。山谷把回音還給你：為何而戰？"}])
 		"training_dummy":
@@ -4706,7 +4706,7 @@ func _go_c4_forest() -> void:
 func _interact_forest(id: String) -> void:
 	match id:
 		"wind_ear":
-			_play_dialog(NpcLines.wind_ear_idle())
+			_play_dialog(NpcLines.for_npc("wind_ear_idle"))
 		"treehouse":
 			_play_dialog([
 				{"speaker": "旁白", "text": "樹屋用藤索連著。風箏線纏在欄杆上，線頭還在顫。"},
@@ -4873,7 +4873,7 @@ func _go_c5_coast() -> void:
 func _interact_coast(id: String) -> void:
 	match id:
 		"tide_roar":
-			_play_dialog(NpcLines.tide_roar_idle())
+			_play_dialog(NpcLines.for_npc("tide_roar_idle"))
 		"dock":
 			_play_dialog([
 				{"speaker": "旁白", "text": "碼頭鎮幾乎空了。漁網乾在架上，像沒人敢出海。"},

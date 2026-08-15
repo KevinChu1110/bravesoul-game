@@ -1,0 +1,33 @@
+{
+  "id": "tide_roar_idle",
+  "speaker": "潮吼",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "boss.stonefist_cleared"
+        ]
+      },
+      "lines": [
+        "哈哈哈！力氣有方向了。去塔吧！"
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c5_entered"
+        ]
+      },
+      "lines": [
+        "衝過來的時候別逃——迎上去。對撞。",
+        "岩甲一層一層剝。落岩亮區，蹲進去。"
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "岸風鹹。你的刃……還能再響一次嗎？"
+      ]
+    }
+  ]
+}

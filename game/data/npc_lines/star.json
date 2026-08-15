@@ -1,0 +1,38 @@
+{
+  "id": "star",
+  "speaker": "星讀",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1
+      },
+      "lines": [
+        "迴響層的星盤會抖。足迹疊厚了——觀星更準，也更貪。"
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ronin_spared"
+        ]
+      },
+      "lines": [
+        "岔路上有兩道足迹分開又並肩——有人沒把焰吞到底。"
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c1_soul_intro"
+        ]
+      },
+      "lines": [
+        "足迹會再交疊。星屑夠了就來觀星。"
+      ]
+    },
+    {
+      "when": {},
+      "lines": []
+    }
+  ]
+}
