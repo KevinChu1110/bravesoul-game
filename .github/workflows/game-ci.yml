@@ -113,13 +113,10 @@ jobs:
           echo "PGBIN=$bin" >> "$GITHUB_ENV"
           "$bin/initdb" --version
 
-      ## initdb 不肯用 root 跑，借 runner 上既有的 postgres 使用者
+      ## 步驟本來就以非 root 的 runner 身分執行，initdb 直接跑就好。
+      ## （別加 sudo -u postgres：那個使用者讀不到工作目錄裡的腳本。）
       - name: Economy guard scenarios
-        run: |
-          set -euo pipefail
-          sudo chmod -R a+rX "$GITHUB_WORKSPACE"
-          sudo -u postgres --preserve-env=PGBIN \
-            bash "$GITHUB_WORKSPACE/tools/test_economy_sql.sh"
+        run: bash tools/test_economy_sql.sh
 
   export:
     name: Export (win · mac · linux)
