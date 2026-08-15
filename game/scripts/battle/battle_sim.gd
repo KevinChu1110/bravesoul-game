@@ -1336,7 +1336,7 @@ func _step_tide(dt: float) -> void:
 		tide_phase_skill = not tide_phase_skill
 		_emit("tide_phase", {
 			"skill_half": tide_phase_skill,
-			"label": "技傷減半 · 用普攻" if tide_phase_skill else "普攻減半 · 用技能",
+			"label": "他在擋技能 · 改用普攻" if tide_phase_skill else "他在擋普攻 · 改用技能",
 		})
 	if tide_wave_active:
 		tide_wave_left -= dt

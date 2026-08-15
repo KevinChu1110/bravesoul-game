@@ -232,35 +232,35 @@ func setup(mode: String) -> void:
 			_append_log("[color=#9cf]同屏轉播中 · 隊友可操作（格擋／連招／助攻）[/color]")
 			parry_hint.text = "【J】格擋／連招　隊友同步按 J＝雙星連招"
 	if GameState.ng_plus > 0:
-		_append_log("[color=#c8f]黑焰迴響 ×%d · 敵強化 ×%.2f · 機制窗略短[/color]" % [
+		_append_log("[color=#c8f]黑焰迴響 ×%d · 敵人強了 ×%.2f · 出手空檔更窄[/color]" % [
 			GameState.ng_plus, ng_m
 		])
-		_flash_coach("二周目：敵更強 · 機制窗更短 · 一樣找綠格擋", 2.5)
+		_flash_coach("二周目：敵人更硬，空檔更窄。一樣等綠了再擋。", 2.5)
 	if GameState.stain_flame:
 		_append_log("[color=#a88]沾焰：刃上有一層不肯散的灰。攻擊略升。[/color]")
 	if mode == "leo":
 		_append_log("雷歐：渺小的兔子……也想挑戰騎士之王？")
-		_append_log("[color=#fa6]機制：王者斬格擋反擊 · 週期火圈（預告後按 J 躍出）[/color]")
+		_append_log("[color=#fa6]王者斬要擋，擋住就能反擊 · 火圈亮起後按 J 跳開[/color]")
 		parry_hint.text = "【J】倒數變綠＝格擋　·　火圈預告後＝躍出"
 	elif mode == "fog":
 		_append_log("白霧：嘻嘻～真的假的，你分得清嗎？")
-		_append_log("[color=#8cf]機制：多目標鎖定 · 本體看破窗才可傷 · 打幻影反噬+寒意減速[/color]")
+		_append_log("[color=#8cf]分身很多 · 只有本體發白時打得中 · 砍幻影會被反咬又變慢[/color]")
 		parry_hint.text = "【Tab/1-3】鎖目標　·　本體發白才輸出　·　別打幻影"
 	elif mode == "demon":
 		_append_log("魔王：那就來——用你的微末，撞我的千年。")
-		_append_log("[color=#c8f]機制：黑焰必殺格擋 · 控時時鐘（窗內按 J）· 血量階段「我拒絕」[/color]")
+		_append_log("[color=#c8f]黑焰必殺一定要擋 · 時鐘轉到時按 J · 血量掉到一半他會拒絕[/color]")
 		parry_hint.text = "【J】必殺格擋　·　時鐘窗　·　階段點「我拒絕」"
 	elif mode == "abo":
 		_append_log("阿波：來。打我的架勢——用拳，不是用嘴。")
-		_append_log("[color=#9c9]機制：攻擊灌破防條 · 破防後重創 · 破防中會出重拳需格擋[/color]")
-		parry_hint.text = "灌破防條　·　破防中輸出　·　重拳前搖【J】"
+		_append_log("[color=#9c9]打散他的架勢 · 散開後傷害吃滿 · 但他會出重拳，記得擋[/color]")
+		parry_hint.text = "打散架勢　·　趁散開輸出　·　重拳舉起時【J】"
 	elif mode == "falcon":
 		_append_log("疾影：你的眼睛……跟得上我嗎？")
-		_append_log("[color=#8f8]機制：真身停拍才全額傷害 · 風切預告後按 J[/color]")
+		_append_log("[color=#8f8]牠停下那一拍才吃滿傷害 · 風聲響起按 J[/color]")
 		parry_hint.text = "等【停拍】輸出　·　風切預告後【J】"
 	elif mode == "boar":
 		_append_log("石拳：哦？還站著？那就接下這一拳——")
-		_append_log("[color=#c96]機制：衝鋒時按 J 對撞剝岩甲 · 落岩時按 J 進安全區[/color]")
+		_append_log("[color=#c96]他衝來時按 J 硬碰，岩甲會裂 · 落石時按 J 躲開[/color]")
 		parry_hint.text = "衝鋒【J】對撞剝甲　·　落岩【J】進安全區"
 	elif mode == "wrath":
 		_append_log("無臉：…………（焰在顫）")
@@ -268,8 +268,8 @@ func setup(mode: String) -> void:
 		parry_hint.text = "密火圈按 J · 勿讓灼燒疊滿"
 	elif mode == "tide":
 		_append_log("潮聲：刺胞在裂縫裡孵化……")
-		_append_log("[color=#6cf]裂縫·潮噬：限時清刺胞 · 相位普攻／技能減半，換手段打本體[/color]")
-		parry_hint.text = "先清刺胞 · 看相位切普攻／技能"
+		_append_log("[color=#6cf]裂縫·潮噬：時間內解決刺胞 · 本體會輪流擋普攻或技能，看情況換手[/color]")
+		parry_hint.text = "先解決刺胞 · 看牠擋什麼就換另一種"
 	elif mode == "statue":
 		_append_log("石響：三尊輪流亮起。")
 		_append_log("[color=#ca8]裂縫·石像：只打發光石像 · 落岩 · 全滅後打本體[/color]")
@@ -468,7 +468,7 @@ func _mode_coach_intro(mode: String) -> String:
 		"fog":
 			return "提示：Tab 鎖本體 · 本體發白才砍 · 打錯幻影會痛"
 		"abo":
-			return "提示：用技能快速灌破防條 · 破防後全力輸出"
+			return "用技能打散架勢比較快 · 散開後全力打"
 		"falcon":
 			return "提示：別追殘影 · 等停拍再打 · 風切預告按 J"
 		"boar":
@@ -1055,8 +1055,8 @@ func _update_tide_hud() -> void:
 	else:
 		countdown.text = "技" if sim.tide_phase_skill else "普"
 		countdown.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
-		countdown_sub.text = "技傷減半 · 用普攻" if sim.tide_phase_skill else "普攻減半 · 用技能"
-		parry_hint.text = "相位輸出 · 刺胞會再孵"
+		countdown_sub.text = "他在擋技能 · 改用普攻" if sim.tide_phase_skill else "他在擋普攻 · 改用技能"
+		parry_hint.text = "趁現在打 · 刺胞還會再冒"
 		parry_hint.modulate = Color(0.8, 0.9, 1.0)
 	## 不在此覆寫攻擊幀；由 _set_boss_pose 管
 
@@ -1268,8 +1268,8 @@ func _update_abo_guard_hud() -> void:
 		countdown.text = "%d%%" % pct
 		countdown.add_theme_color_override("font_color", Color(0.95, 0.85, 0.4))
 		countdown_sub.visible = true
-		countdown_sub.text = "破防條 %d / %d（技能灌得快）" % [int(sim.abo_guard), int(BattleSim.ABO_GUARD_MAX)]
-		parry_hint.text = "架勢中 · 實傷很低 · 用攻擊灌破防條"
+		countdown_sub.text = "架勢 %d / %d（技能打得快）" % [int(sim.abo_guard), int(BattleSim.ABO_GUARD_MAX)]
+		parry_hint.text = "他架著 · 現在打不痛 · 先把架勢打散"
 		parry_hint.modulate = Color(1, 0.85, 0.5)
 		telegraph.visible = false
 		enemy_body.modulate = _enemy_base_mod
@@ -1984,7 +1984,7 @@ func _on_event(kind: String, data: Dictionary) -> void:
 			_shake = 0.3
 			_try_wheat_save(int(data.get("hp", 1)))
 		"tide_phase":
-			_append_log("[color=#8cf]相位：%s[/color]" % data.get("label"))
+			_append_log("[color=#8cf]%s[/color]" % data.get("label"))
 		"statue_active":
 			_append_log("[color=#fc8]石像 %s 亮起！[/color]" % data.get("id"))
 			enemy_body.modulate = Color(1.25, 1.15, 0.8)
