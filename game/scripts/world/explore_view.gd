@@ -436,6 +436,9 @@ func _build_chrome() -> void:
 	_hint.add_theme_font_size_override("font_size", 12)
 	_hint.add_theme_color_override("font_color", UiStyle.INK_DIM)
 	_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	## 這行原本沒有初始文字，而更新只在「靠近的物件換了」時發生，
+	## 所以進圖到第一次走近東西之前，畫面正下方掛著一塊空白白牌
+	_hint.text = "WASD／方向鍵移動 · 靠近後按 E 互動 · M 小地圖 · I 背包"
 	hint_bar.add_child(_hint)
 
 	_player_shadow = ColorRect.new()

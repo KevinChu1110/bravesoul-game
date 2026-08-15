@@ -89,6 +89,19 @@ static func atb_fill_per_sec(speed: float) -> float:
 	return fill * clampf(0.6 + speed * sc, lo, hi)
 
 
+## 出手命中累積的戰意。
+##
+## 原本戰意「只」在受傷時累積（見下面的 rage_from_damage），而那個公式要求
+## 累計承受 2.5 倍自身最大生命才會滿——玩家在 1.0 倍就死了。實測 3000 場模擬，
+## 單機玩家的技能施放次數一律是 0：七招、熟練度、灰鬚指點、演武場練功
+## 整條「旅途養招」的養成柱是死的，而教學還在教「怒氣滿了自動放招」。
+##
+## 改成出手也給，約七刀滿一次，雜魚戰放得出一次、Boss 戰放得出數次。
+## 只有 can_skill 的單位吃得到，而 can_skill 目前只有玩家會設。
+static func rage_from_strike() -> float:
+	return _tbl("rage.per_strike", 14.0)
+
+
 static func rage_from_damage(dmg: int, max_hp: int) -> int:
 	if max_hp <= 0:
 		return 0

@@ -439,6 +439,9 @@ func _resolve_strike(u: BattleUnit) -> void:
 	if statue_mode and u.team == BattleUnit.Team.PLAYER:
 		dmg = _statue_filter_damage(target, dmg)
 	var dealt := target.take_damage(dmg)
+	## 出手也累積戰意，否則戰意只能靠挨打累積，而挨到滿之前人就死了
+	if u.can_skill and dealt > 0:
+		u.rage = minf(RAGE_MAX, u.rage + Formulas.rage_from_strike())
 	_emit("hit", {
 		"attacker": u.id,
 		"defender": target.id,

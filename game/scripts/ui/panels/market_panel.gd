@@ -14,6 +14,14 @@ var _host: Node
 
 func _init(host: Node) -> void:
 	_host = host
+	## 連線購買的真正結果是非同步回來的，接住它才有得說
+	MarketSystem.purchase_settled.connect(_on_settled)
+
+
+func _on_settled(_ok: bool, msg: String) -> void:
+	if msg != "":
+		_host.ui_toast(msg)
+	refresh()
 
 
 func _goto(target: String) -> Callable:

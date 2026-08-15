@@ -313,16 +313,20 @@ func _apply_hud_chrome() -> void:
 	player_hp.custom_minimum_size.y = 14
 	enemy_hp.custom_minimum_size.y = 14
 	player_rage.custom_minimum_size.y = 8
+	## 戰鬥背景是暗的，所以這裡的字一律走淺色。
+	## 底下那幾個 if 曾經用 UiStyle.CREAM 覆寫回來——那個常數名字叫奶油色、
+	## 值卻是墨色 #26242a（改成白底風格時語意翻轉了），於是近黑字畫在近黑底上。
+	## 更麻煩的是後續狀態變化只改 modulate，而 modulate 是乘法，
+	## 近黑乘任何係數只會更黑，那行字沒有任何狀態救得回來。底色修好，狀態變化才有意義。
 	for lab in [player_name_l, enemy_name, player_hp_label, enemy_hp_label, parry_hint, banner]:
 		if lab:
-			lab.add_theme_font_size_override("font_size", 12 if lab != banner else 14)
+			lab.add_theme_font_size_override("font_size", 14 if lab != banner else 16)
 			lab.add_theme_color_override("font_color", Color(0.95, 0.93, 0.88))
 			lab.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
 			lab.add_theme_constant_override("shadow_offset_x", 1)
 			lab.add_theme_constant_override("shadow_offset_y", 1)
 
 	if player_name_l:
-		player_name_l.add_theme_color_override("font_color", UiStyle.CREAM)
 		player_name_l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
 		player_name_l.add_theme_constant_override("shadow_offset_x", 1)
 		player_name_l.add_theme_constant_override("shadow_offset_y", 1)
@@ -332,21 +336,20 @@ func _apply_hud_chrome() -> void:
 		enemy_name.add_theme_constant_override("shadow_offset_x", 1)
 		enemy_name.add_theme_constant_override("shadow_offset_y", 1)
 	if player_hp_label:
-		player_hp_label.add_theme_color_override("font_color", UiStyle.CREAM_DIM)
+		player_hp_label.add_theme_color_override("font_color", Color(0.88, 0.9, 0.86))
 	if enemy_hp_label:
 		enemy_hp_label.add_theme_color_override("font_color", Color(0.9, 0.7, 0.68))
 	if parry_hint:
-		parry_hint.add_theme_color_override("font_color", UiStyle.CREAM)
 		parry_hint.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
 		parry_hint.add_theme_constant_override("shadow_offset_x", 1)
 		parry_hint.add_theme_constant_override("shadow_offset_y", 1)
-		parry_hint.add_theme_font_size_override("font_size", 16)
+		## 這行寫著要按哪一顆鍵，是全場最該讀得到的字
+		parry_hint.add_theme_font_size_override("font_size", 18)
 	if countdown:
 		countdown.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
 		countdown.add_theme_constant_override("shadow_offset_x", 2)
 		countdown.add_theme_constant_override("shadow_offset_y", 2)
 	if countdown_sub:
-		countdown_sub.add_theme_color_override("font_color", UiStyle.CREAM)
 		countdown_sub.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
 		countdown_sub.add_theme_constant_override("shadow_offset_x", 1)
 		countdown_sub.add_theme_constant_override("shadow_offset_y", 1)
@@ -383,7 +386,9 @@ func _apply_hud_chrome() -> void:
 		log_label.offset_top = 0
 		log_label.offset_right = 0
 		log_label.offset_bottom = 0
-		log_label.add_theme_color_override("default_color", UiStyle.CREAM_DIM)
+		## 戰報是「打在幻影上，毫無作用」「無法逃離此戰」這些因果的唯一出口，
+		## 原本是深灰畫在近黑面板上，約 3.2:1
+		log_label.add_theme_color_override("default_color", Color(0.86, 0.84, 0.8))
 		log_label.add_theme_font_size_override("normal_font_size", 14)
 
 	## 中央橫幅

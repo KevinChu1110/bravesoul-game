@@ -2,6 +2,10 @@ extends Node
 ## 星途市集：非同步掛單。離線＝本地＋NPC 陰影；上線＝Supabase listings。
 ## Autoload：MarketSystem
 
+## 連線購買是非同步的：送出時只能說「結算中」，真正的結果晚幾百毫秒才回來。
+## 沒有這個訊號的話，失敗只會靜靜退款——玩家看到金幣自己跳回去，會以為被搶劫。
+signal purchase_settled(ok: bool, msg: String)
+
 const FEE_RATE := 0.08
 const MAX_OWN_LISTINGS := 8
 const LOCAL_KEY := "market.local_listings"
@@ -277,9 +281,18 @@ func buy_listing(listing: Dictionary) -> Dictionary:
 		if not bool(res.get("ok", false)):
 			GameState.add_gold(price)  ## 退款
 			SaveManager.save_game()
+			## 後端其實有回具體原因，別把它丟掉
+			var why := str(res.get("msg", "購買沒有成交"))
+			if OnlineGate.ledger_gold >= 0 and OnlineGate.ledger_gold < price:
+				why += "（連線可用 %d 金，先推一次雲存檔）" % OnlineGate.ledger_gold
+			purchase_settled.emit(false, "%s 金幣已退回。" % why)
 			return
 		InventorySystem.add_item(str(res.get("item_id", iid)), int(res.get("qty", qty)))
 		SaveManager.save_game()
+		purchase_settled.emit(true, "購入 %s×%d（-%d 金）" % [
+			InventorySystem.item_name(str(res.get("item_id", iid))),
+			int(res.get("qty", qty)), price,
+		])
 	)
 	return {"ok": true, "msg": "已送出購買（連線結算中）…"}
 

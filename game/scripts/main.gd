@@ -508,10 +508,6 @@ func _build_pause_layer() -> void:
 		_close_pause()
 		_go_soul_panel()
 	)
-	_pause_btn(box, "技能／招式", func():
-		_close_pause()
-		_go_skill_panel()
-	)
 	_pause_btn(box, "稱號一覽", func():
 		_show_pause_titles(box, sub)
 	)
@@ -2160,7 +2156,9 @@ func _go_title() -> void:
 	buttons.append({"text": online_lbl, "cb": _go_online_panel})
 	buttons.append({"text": "顯示設定 · %s" % DisplaySettings.mode_label(), "cb": _go_display_settings})
 	## 語言切換
-	var lang_label := "Language: English" if Loc.locale == "zh_TW" else "語言：繁體中文"
+	## 標成部分翻譯：en.json 只有 64 個 key，而程式裡有近 800 句硬編碼中文。
+	## 不標的話玩家切過去會以為遊戲壞了。
+	var lang_label := "Language: English (partial)" if Loc.locale == "zh_TW" else "語言：繁體中文"
 	buttons.append({"text": lang_label, "cb": _toggle_locale})
 	var ng_line := ""
 	if GameState.ng_plus > 0:

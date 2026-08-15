@@ -11,6 +11,7 @@ var _lv_l: Label
 var _hp_bar: ProgressBar
 var _mp_bar: ProgressBar
 var _exp_bar: ProgressBar
+var _hp_val: Label
 var _gold_l: Label
 var _tip_l: Label
 var _drag_handle: Control
@@ -83,6 +84,20 @@ func _build() -> void:
 	_hp_bar = _make_bar(12)
 	UiStyle.style_progress(_hp_bar, UiStyle.HP_FILL, UiStyle.HP_BG)
 	v.add_child(_hp_bar)
+	## 血量原本只寫在 tooltip，而條子是 MOUSE_FILTER_IGNORE，Godot 不會對它顯示 tooltip
+	## ——等於探索時唯一看得到 HP 數字的方法是按 Esc 開暫停選單。
+	## 三條 bar 也只靠顏色區分，紅色盲玩家分不出 HP 條與 EXP 條。
+	_hp_val = Label.new()
+	_hp_val.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_hp_val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hp_val.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_hp_val.add_theme_font_size_override("font_size", 10)
+	_hp_val.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
+	_hp_val.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.6))
+	_hp_val.add_theme_constant_override("shadow_offset_x", 1)
+	_hp_val.add_theme_constant_override("shadow_offset_y", 1)
+	_hp_val.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hp_bar.add_child(_hp_val)
 
 	_mp_bar = _make_bar(10)
 	UiStyle.style_progress(_mp_bar, UiStyle.MP_FILL, UiStyle.MP_BG)
@@ -130,6 +145,8 @@ func refresh() -> void:
 	_hp_bar.max_value = maxi(1, max_hp)
 	_hp_bar.value = hp
 	_hp_bar.tooltip_text = "HP %d / %d" % [hp, max_hp]
+	if _hp_val:
+		_hp_val.text = "%d / %d" % [hp, max_hp]
 
 	var dust: int = int(GameState.stardust)
 	var dust_cap: int = maxi(30, dust)

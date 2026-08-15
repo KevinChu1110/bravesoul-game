@@ -352,7 +352,9 @@ func use_hotbar_slot(slot: int) -> Dictionary:
 		return {"ok": false, "msg": ""}
 	var id := str(GameState.hotbar[slot])
 	if id == "":
-		return {"ok": false, "msg": ""}
+		## 靜默失敗會讓新玩家以為快捷欄根本沒作用——第一次嘗試就得到零回饋，
+		## 這個功能對他而言等於不存在
+		return {"ok": false, "msg": "第 %d 格是空的。開 I 背包指派道具。" % (slot + 1)}
 	return use_item(id)
 
 
