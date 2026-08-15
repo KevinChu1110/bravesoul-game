@@ -61,7 +61,7 @@ func deposit_equip(uid: String) -> Dictionary:
 	EquipmentSystem._ensure_state()
 	var inst := EquipmentSystem.find_bag(uid)
 	if inst.is_empty():
-		return {"ok": false, "msg": "背包装備中找不到。"}
+		return {"ok": false, "msg": "背包裝備中找不到。"}
 	if GameState.warehouse_equip.size() >= max_slots():
 		return {"ok": false, "msg": "倉庫裝備欄已滿。"}
 	EquipmentSystem._remove_from_bag(uid)

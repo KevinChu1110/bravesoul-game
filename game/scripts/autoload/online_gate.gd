@@ -340,7 +340,7 @@ func post_message(place: String, body_text: String, cb: Callable = Callable()) -
 
 func _cb_msg_post(cb: Callable, ok: bool, _b: Variant) -> void:
 	if ok:
-		_ok({"msg": "已留下足迹"}, cb)
+		_ok({"msg": "已留下足跡"}, cb)
 	else:
 		_fail(last_error if last_error != "" else "留言失敗", cb)
 

@@ -666,7 +666,7 @@ func _go_message_stone(from_id: String = "message_stone") -> void:
 	if from_id == "wall_notice":
 		place = "town_gate"
 	if not OnlineGate.is_online_enabled() or not OnlineGate.is_signed_in():
-		var lore := "石上有舊刻：\n「足迹會交疊。」——星讀\n「別走我的路。」——佚名\n\n（開啟連線並訪客上線後，可讀寫旅人留言。）"
+		var lore := "石上有舊刻：\n「足跡會交疊。」——星讀\n「別走我的路。」——佚名\n\n（開啟連線並訪客上線後，可讀寫旅人留言。）"
 		_panel("留言石", lore, [
 			{"text": "連線設定", "cb": _go_online_panel},
 			{"text": "返回", "cb": _hub_back},
@@ -680,7 +680,7 @@ func _go_message_stone(from_id: String = "message_stone") -> void:
 func _show_messages_panel(place: String, list: Array) -> void:
 	var body := "[b]留言石 · %s[/b]\n星途旅人留下的短句（最多 80 字）\n\n" % place
 	if list.is_empty():
-		body += "（尚無留言。做第一個足迹吧。）\n"
+		body += "（尚無留言。做第一個足跡吧。）\n"
 	else:
 		var n := 0
 		for row in list:
@@ -691,9 +691,9 @@ func _show_messages_panel(place: String, list: Array) -> void:
 			if n >= 12:
 				break
 	var buttons: Array = [
-		{"text": "留下足迹：還在啊", "cb": _msg_post.bind(place, "還在啊。")},
-		{"text": "留下足迹：氣味比預言近", "cb": _msg_post.bind(place, "氣味比預言近。")},
-		{"text": "留下足迹：微末也走到了", "cb": _msg_post.bind(place, "微末也走到了。")},
+		{"text": "留下足跡：還在啊", "cb": _msg_post.bind(place, "還在啊。")},
+		{"text": "留下足跡：氣味比預言近", "cb": _msg_post.bind(place, "氣味比預言近。")},
+		{"text": "留下足跡：微末也走到了", "cb": _msg_post.bind(place, "微末也走到了。")},
 		{"text": "刷新", "cb": func(): _go_message_stone("message_stone")},
 		{"text": "返回", "cb": _hub_back},
 	]
@@ -2947,7 +2947,7 @@ func _handle_world_travel(id: String) -> bool:
 						var spk := "行商" if id == "merchant" else "歲旅石"
 						story.append({"speaker": spk, "portrait": "caravan_chief", "text": str(s)})
 				else:
-					story.append({"speaker": "歲旅石", "text": "石上刻著十二個月的足迹。有的已熄，有的正亮。"})
+					story.append({"speaker": "歲旅石", "text": "石上刻著十二個月的足跡。有的已熄，有的正亮。"})
 				_play_dialog(story, _go_event_panel)
 				return true
 			## 無活動：普通行商
@@ -3215,7 +3215,7 @@ func _interact_village(id: String) -> void:
 		"shrine_stub":
 			_play_dialog([{"speaker": "小祠", "text": "香灰冷了。神也逃了嗎——還是人先走了？"}])
 		"field_west", "hut_c", "fence_row":
-			_play_dialog([{"speaker": "旁白", "text": "田埂與篱笆都被夜色咬過。世界比村子大——你才剛踏出第一步。"}])
+			_play_dialog([{"speaker": "旁白", "text": "田埂與籬笆都被夜色咬過。世界比村子大——你才剛踏出第一步。"}])
 		_:
 			pass
 
@@ -3681,7 +3681,7 @@ func _c1_star() -> void:
 	if GameState.has_flag("c1_soul_intro"):
 		var lines: Array = NpcLines.for_npc("star")
 		if lines.is_empty():
-			lines = [{"speaker": "星讀", "text": "足迹會再交疊。星屑夠了就來觀星。"}]
+			lines = [{"speaker": "星讀", "text": "足跡會再交疊。星屑夠了就來觀星。"}]
 		var tut: Array = TutorialSystem.take("soul")
 		for t in tut:
 			lines.append(t)
@@ -3878,7 +3878,7 @@ func _soul_do_ritual() -> void:
 	## 足跡連線簡演出
 	var footprint := "星圖暗昧。"
 	if GameState.has_flag("boss.leo_cleared"):
-		footprint = "騎士域的足迹亮起——勇與攻的線。"
+		footprint = "騎士域的足跡亮起——勇與攻的線。"
 	if GameState.has_flag("boss.white_fog_cleared"):
 		footprint += " 霧痕交疊。"
 	_play_dialog([

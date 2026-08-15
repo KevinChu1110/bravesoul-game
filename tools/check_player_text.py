@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""擋住「設計文件詞彙」洩漏到玩家面前。
+"""玩家面文字的守門員。
+
+檢查兩件事：
+  1. 設計文件／實作用語洩漏（SPEC_TERMS）
+  2. 簡體字混入（本作是 zh_TW）
+
 
 起因：遊戲對玩家講的第一句話曾經是「歡迎來到翠嶺。這是一則『故事優先』的旅途。」，
 行商 NPC 在 12 個活動檔裡說「進度不罰」。這些都是 README／docs 裡的開發用語，
@@ -11,8 +16,8 @@
   web/**/*.html         的可見文字
 
 用法：
-    python3 tools/check_spec_language.py          # 有洩漏就 exit 1
-    python3 tools/check_spec_language.py --list   # 只列出，不當成失敗
+    python3 tools/check_player_text.py          # 有問題就 exit 1
+    python3 tools/check_player_text.py --list   # 只列出，不當成失敗
 """
 
 import glob
@@ -44,6 +49,32 @@ ALLOW = [
     ("里程碑", "里程碑·"),     # 地圖上的路標地名
     ("里程碑", "里程碑上"),    # 同上，敘述文字
 ]
+
+# 簡體專用字 → 正體。只列「兩岸寫法不同」的，正簡同形字（走、向、台…）不列，
+# 否則會掃出上千個假警報。發現新的就往這裡加。
+SIMPLIFIED = {
+    "篱": "籬", "装": "裝", "迹": "跡", "别": "別", "东": "東", "极": "極",
+    "两": "兩", "为": "為", "会": "會", "传": "傳", "伤": "傷", "众": "眾",
+    "体": "體", "关": "關", "剑": "劍", "动": "動", "势": "勢", "单": "單",
+    "变": "變", "号": "號", "后": "後", "听": "聽", "国": "國", "声": "聲",
+    "处": "處", "备": "備", "头": "頭", "实": "實", "对": "對", "层": "層",
+    "岁": "歲", "币": "幣", "师": "師", "带": "帶", "开": "開", "张": "張",
+    "强": "強", "当": "當", "总": "總", "护": "護", "换": "換", "数": "數",
+    "断": "斷", "旧": "舊", "时": "時", "术": "術", "机": "機", "杀": "殺",
+    "条": "條", "来": "來", "样": "樣", "欢": "歡", "气": "氣", "没": "沒",
+    "灯": "燈", "灵": "靈", "热": "熱", "爱": "愛", "独": "獨", "狮": "獅",
+    "现": "現", "种": "種", "称": "稱", "稳": "穩", "简": "簡", "类": "類",
+    "线": "線", "练": "練", "结": "結", "给": "給", "绝": "絕", "续": "續",
+    "网": "網", "脑": "腦", "节": "節", "药": "藥", "获": "獲", "觉": "覺",
+    "认": "認", "让": "讓", "说": "說", "读": "讀", "货": "貨", "质": "質",
+    "费": "費", "车": "車", "转": "轉", "轻": "輕", "边": "邊", "过": "過",
+    "还": "還", "这": "這", "进": "進", "远": "遠", "连": "連", "选": "選",
+    "铁": "鐵", "错": "錯", "长": "長", "门": "門", "问": "問", "间": "間",
+    "队": "隊", "险": "險", "隐": "隱", "难": "難", "雾": "霧", "静": "靜",
+    "页": "頁", "预": "預", "领": "領", "题": "題", "风": "風", "飞": "飛",
+    "马": "馬", "验": "驗", "鱼": "魚", "鸟": "鳥", "鸡": "雞", "麦": "麥",
+    "黄": "黃", "齐": "齊", "龙": "龍",
+}
 
 # JSON 裡純給開發者看的欄位，不算玩家面
 DEV_JSON_KEYS = ("note", "_comment", "tagline_dev")
@@ -107,19 +138,36 @@ def main() -> None:
                 if term in line and not allowed(term, line):
                     hits.append((rel, term, line.strip()[:100]))
 
-    if not hits:
-        print("SPEC_LANGUAGE_OK：玩家面文字沒有設計文件用語")
+    simp = []
+    for path, body in collect():
+        rel = os.path.relpath(path, ROOT)
+        for line in body.split("\n"):
+            bad = sorted({c for c in line if c in SIMPLIFIED})
+            if bad:
+                fix = "、".join(f"{c}→{SIMPLIFIED[c]}" for c in bad)
+                simp.append((rel, fix, line.strip()[:100]))
+
+    if not hits and not simp:
+        print("PLAYER_TEXT_OK：沒有開發用語，也沒有簡體字")
         return
 
-    print(f"發現 {len(hits)} 處設計文件用語洩漏到玩家面：\n")
-    for rel, term, line in hits:
-        print(f"  {rel}")
-        print(f"    「{term}」 → {line}")
-    print(
-        "\n這些是我們規劃遊戲時的說法，不是玩家該讀到的話。"
-        "\n改寫成「玩家實際體驗到什麼」，或若確屬遊戲世界用語，"
-        "\n把它加進 tools/check_spec_language.py 的 ALLOW。"
-    )
+    if hits:
+        print(f"發現 {len(hits)} 處開發用語洩漏到玩家面：\n")
+        for rel, term, line in hits:
+            print(f"  {rel}")
+            print(f"    「{term}」 → {line}")
+        print(
+            "\n這些是我們規劃／實作時的說法，不是玩家該讀到的話。"
+            "\n改寫成「玩家實際體驗到什麼」，或若確屬遊戲世界用語，"
+            "\n把它加進 tools/check_player_text.py 的 ALLOW。\n"
+        )
+
+    if simp:
+        print(f"發現 {len(simp)} 處簡體字（本作是 zh_TW）：\n")
+        for rel, fix, line in simp:
+            print(f"  {rel}")
+            print(f"    [{fix}] {line}")
+
     if not list_only:
         sys.exit(1)
 

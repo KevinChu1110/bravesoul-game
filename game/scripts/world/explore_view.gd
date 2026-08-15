@@ -121,7 +121,7 @@ func show_player_bubble(text: String, secs: float = 2.0) -> void:
 
 
 func _request_presence() -> void:
-	## 星途殘影：有連線才拉；離線顯示本地「假足迹」氛圍
+	## 星途殘影：有連線才拉；離線顯示本地「假足跡」氛圍
 	_clear_ghosts()
 	if OnlineGate.is_online_enabled():
 		OnlineGate.fetch_presence(map_id, _on_presence_result)

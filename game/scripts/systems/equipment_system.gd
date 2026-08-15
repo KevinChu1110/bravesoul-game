@@ -238,7 +238,7 @@ func status_bbcode() -> String:
 		else:
 			lines.append("· %s：—" % name_s)
 	lines.append("")
-	lines.append("背包装備 %d 件" % GameState.equip_bag.size())
+	lines.append("背包裝備 %d 件" % GameState.equip_bag.size())
 	return "\n".join(lines)
 
 

@@ -11,14 +11,14 @@ on:
       - "game/**"
       - "web/**"
       - "tools/run_tests.sh"
-      - "tools/check_spec_language.py"
+      - "tools/check_player_text.py"
       - ".github/workflows/game-ci.yml"
   pull_request:
     paths:
       - "game/**"
       - "web/**"
       - "tools/run_tests.sh"
-      - "tools/check_spec_language.py"
+      - "tools/check_player_text.py"
       - ".github/workflows/game-ci.yml"
   workflow_dispatch:
   release:
@@ -90,7 +90,7 @@ jobs:
       ## 擋住 README／docs 的開發用語被當成文案貼進遊戲或官網。
       ## 玩家不該讀到我們怎麼規劃這款遊戲，只該讀到這款遊戲。
       - name: Spec-language check
-        run: python3 tools/check_spec_language.py
+        run: python3 tools/check_player_text.py
 
   export:
     name: Export (win · mac · linux)

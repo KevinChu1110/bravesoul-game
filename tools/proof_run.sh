@@ -28,7 +28,7 @@ echo "== 3) headless tests =="
 
 echo "== 4) spec-language check =="
 ## 擋開發用語洩漏到玩家面（CI 跑的是同一支）
-python3 "$ROOT/tools/check_spec_language.py"
+python3 "$ROOT/tools/check_player_text.py"
 
 echo "== 5) proof capture (multi-stage) =="
 PROOF_ARGS=(--path "$GAME" --script res://scripts/dev/proof_capture.gd)
