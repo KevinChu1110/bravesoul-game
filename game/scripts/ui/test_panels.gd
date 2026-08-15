@@ -36,12 +36,25 @@ const PANELS: Array = [
 		"min_buttons": 2,
 		"expect_buttons": ["加入", "返回"],
 	},
+	## 裝備面板也是自己畫：三部位槽 + 背包網格
+	{
+		"entry": "_go_equip_panel",
+		"title": "裝備",
+		"min_buttons": 2,
+		"expect_buttons": ["倉庫", "返回"],
+	},
+	{
+		"entry": "_go_warehouse_panel",
+		"title": "倉庫",
+		"min_buttons": 2,
+		"expect_buttons": ["裝備", "返回"],
+	},
 ]
 
 ## main.gd 必須提供給 scripts/ui/panels/* 的公開契約
 const HOST_API: Array = [
 	"ui_panel", "ui_toast", "ui_goto",
-	"ui_host", "ui_clear_host", "ui_reset_fade",
+	"ui_host", "ui_clear_host", "ui_reset_fade", "ui_refresh_hud",
 	"ui_room_spectate", "ui_room_host_start",
 ]
 

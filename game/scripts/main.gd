@@ -34,6 +34,8 @@ const CutscenePlayerScn = preload("res://scripts/ui/cutscene_player.gd")
 const NpcLines = preload("res://scripts/systems/npc_lines.gd")
 const MarketPanelScn = preload("res://scripts/ui/panels/market_panel.gd")
 const RoomPanelScn = preload("res://scripts/ui/panels/room_panel.gd")
+const EquipPanelScn = preload("res://scripts/ui/panels/equip_panel.gd")
+const WarehousePanelScn = preload("res://scripts/ui/panels/warehouse_panel.gd")
 var _dialogue: DialogueBox
 var _cutscene: Control  ## CutscenePlayer
 var _explore: Control  ## ExploreView
@@ -42,6 +44,8 @@ var _hotbar: Control  ## MapleHotbar
 var _inv_panel: Control  ## MapleInventory
 var _market_ui: RefCounted  ## MarketPanel
 var _room_ui: RefCounted  ## RoomPanel
+var _equip_ui: RefCounted  ## EquipPanel
+var _warehouse_ui: RefCounted  ## WarehousePanel
 var _toast: Label
 var _current: Screen = Screen.TITLE
 var _battle_mode: String = "wolf"
@@ -102,6 +106,8 @@ func _ready() -> void:
 		)
 	_market_ui = MarketPanelScn.new(self)
 	_room_ui = RoomPanelScn.new(self)
+	_equip_ui = EquipPanelScn.new(self)
+	_warehouse_ui = WarehousePanelScn.new(self)
 	_ensure_fade()
 	_go_title()
 
@@ -1288,293 +1294,15 @@ func _online_sign_in() -> void:
 	)
 
 
+## 面板本體在 scripts/ui/panels/{equip,warehouse}_panel.gd。
+## （原本這裡還有 _equip_debug_drop()，全專案零呼叫者，搬家時刪除。）
+
 func _go_equip_panel() -> void:
-	## 圖示化裝備面板（部位槽 + 背包格）
-	EquipmentSystem._ensure_state()
-	_clear_host()
-	_reset_fade()
-	var layer := Control.new()
-	layer.name = "EquipLayer"
-	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	host.add_child(layer)
-	var bg := ColorRect.new()
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0.969, 0.965, 0.973, 1)
-	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	layer.add_child(bg)
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	center.mouse_filter = Control.MOUSE_FILTER_STOP
-	layer.add_child(center)
-	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(520, 0)
-	card.add_theme_stylebox_override("panel", UiStyle.panel_style())
-	center.add_child(card)
-	var margin := MarginContainer.new()
-	for m in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
-		margin.add_theme_constant_override(m, 12 if m != "margin_top" else 10)
-	card.add_child(margin)
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 10)
-	margin.add_child(root)
-
-	var title := Label.new()
-	title.text = "裝備"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 18)
-	title.add_theme_color_override("font_color", UiStyle.KEY_STRONG)
-	root.add_child(title)
-
-	var b := EquipmentSystem.bonus_totals()
-	var sum := Label.new()
-	sum.text = "總加成  攻+%d  防+%d  血+%d  ·  暴擊 %.1f%%  暴傷 +%.0f%%" % [
-		int(b.atk), int(b.def), int(b.hp),
-		GameState.effective_crit(), GameState.effective_crit_dmg(),
-	]
-	sum.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sum.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	sum.add_theme_font_size_override("font_size", 12)
-	sum.add_theme_color_override("font_color", UiStyle.INK_DIM)
-	root.add_child(sum)
-
-	## 三部位槽
-	var slots_row := HBoxContainer.new()
-	slots_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	slots_row.add_theme_constant_override("separation", 12)
-	root.add_child(slots_row)
-	for s in EquipmentSystem.SLOTS:
-		slots_row.add_child(_equip_slot_card(s))
-
-	var bag_h := Label.new()
-	bag_h.text = "背包（點擊裝備）"
-	bag_h.add_theme_font_size_override("font_size", 13)
-	bag_h.add_theme_color_override("font_color", UiStyle.KEY_STRONG)
-	root.add_child(bag_h)
-
-	var bag_grid := GridContainer.new()
-	bag_grid.columns = 4
-	bag_grid.add_theme_constant_override("h_separation", 8)
-	bag_grid.add_theme_constant_override("v_separation", 8)
-	root.add_child(bag_grid)
-	var n := 0
-	for e in GameState.equip_bag:
-		if n >= 12:
-			break
-		bag_grid.add_child(_equip_bag_cell(e))
-		n += 1
-	if n == 0:
-		var empty := Label.new()
-		empty.text = "背包尚無裝備。野外掉落或找釘釘鍛造。"
-		empty.add_theme_font_size_override("font_size", 12)
-		empty.add_theme_color_override("font_color", UiStyle.INK_DIM)
-		root.add_child(empty)
-
-	var actions := HBoxContainer.new()
-	actions.alignment = BoxContainer.ALIGNMENT_CENTER
-	actions.add_theme_constant_override("separation", 8)
-	root.add_child(actions)
-	var btn_wh := Button.new()
-	btn_wh.text = "倉庫"
-	UiStyle.style_button(btn_wh, false)
-	btn_wh.pressed.connect(func():
-		AudioManager.play_ui()
-		_go_warehouse_panel()
-	)
-	actions.add_child(btn_wh)
-	var btn_back := Button.new()
-	btn_back.text = "返回"
-	UiStyle.style_button(btn_back, true)
-	btn_back.pressed.connect(func():
-		AudioManager.play_ui()
-		_hub_back()
-	)
-	actions.add_child(btn_back)
-	_refresh_hud()
-
-
-func _equip_slot_card(slot: String) -> Control:
-	var slot_name := "武器"
-	match slot:
-		"armor":
-			slot_name = "防具"
-		"accessory":
-			slot_name = "飾品"
-	var box := VBoxContainer.new()
-	box.custom_minimum_size = Vector2(140, 0)
-	box.add_theme_constant_override("separation", 4)
-	var lab := Label.new()
-	lab.text = slot_name
-	lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lab.add_theme_font_size_override("font_size", 12)
-	lab.add_theme_color_override("font_color", UiStyle.INK_DIM)
-	box.add_child(lab)
-	var cell := PanelContainer.new()
-	cell.custom_minimum_size = Vector2(120, 120)
-	var st := StyleBoxFlat.new()
-	st.bg_color = Color(0.94, 0.92, 0.95, 1)
-	st.border_color = UiStyle.WOOD
-	st.set_border_width_all(2)
-	st.set_corner_radius_all(8)
-	cell.add_theme_stylebox_override("panel", st)
-	box.add_child(cell)
-	var inner := VBoxContainer.new()
-	inner.alignment = BoxContainer.ALIGNMENT_CENTER
-	cell.add_child(inner)
-	var uid := str(GameState.equip_slots.get(slot, ""))
-	var inst: Dictionary = {}
-	if uid != "" and GameState.equip_worn.has(uid):
-		inst = GameState.equip_worn[uid]
-	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(72, 72)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	if not inst.is_empty():
-		var t: Texture2D = SpriteDB.equip_icon_for_inst(inst)
-		if t:
-			icon.texture = t
-	inner.add_child(icon)
-	var name_l := Label.new()
-	name_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	name_l.add_theme_font_size_override("font_size", 11)
-	if inst.is_empty():
-		name_l.text = "（空）"
-		name_l.add_theme_color_override("font_color", UiStyle.INK_DIM)
-	else:
-		name_l.text = str(inst.get("name", "?"))
-		name_l.add_theme_color_override("font_color", UiStyle.INK)
-	inner.add_child(name_l)
-	if not inst.is_empty():
-		var btn := Button.new()
-		btn.text = "卸下"
-		UiStyle.style_button(btn, false)
-		btn.pressed.connect(func():
-			AudioManager.play_ui()
-			_equip_unequip(slot)
-		)
-		box.add_child(btn)
-	return box
-
-
-func _equip_bag_cell(inst: Dictionary) -> Control:
-	var cell := PanelContainer.new()
-	cell.custom_minimum_size = Vector2(110, 110)
-	var st := StyleBoxFlat.new()
-	st.bg_color = Color(0.97, 0.95, 0.93, 1)
-	st.border_color = Color(0.76, 0.37, 0.45, 0.55)
-	st.set_border_width_all(2)
-	st.set_corner_radius_all(8)
-	cell.add_theme_stylebox_override("panel", st)
-	var btn := Button.new()
-	btn.flat = true
-	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	btn.mouse_filter = Control.MOUSE_FILTER_STOP
-	var uid := str(inst.get("uid", ""))
-	btn.tooltip_text = EquipmentSystem.label(inst)
-	btn.pressed.connect(func():
-		AudioManager.play_ui()
-		_equip_wear(uid)
-	)
-	cell.add_child(btn)
-	var col := VBoxContainer.new()
-	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	btn.add_child(col)
-	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(56, 56)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var t: Texture2D = SpriteDB.equip_icon_for_inst(inst)
-	if t:
-		icon.texture = t
-	col.add_child(icon)
-	var nl := Label.new()
-	nl.text = str(inst.get("name", "?"))
-	nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	nl.add_theme_font_size_override("font_size", 10)
-	nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.add_child(nl)
-	var ql := Label.new()
-	ql.text = str(inst.get("quality_label", ""))
-	ql.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ql.add_theme_font_size_override("font_size", 10)
-	ql.add_theme_color_override("font_color", UiStyle.KEY_STRONG)
-	ql.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.add_child(ql)
-	return cell
-
-
-func _equip_wear(uid: String) -> void:
-	var r: Dictionary = EquipmentSystem.equip(uid)
-	_show_toast(str(r.get("msg", "")))
-	_go_equip_panel()
-
-
-func _equip_unequip(slot: String) -> void:
-	var r: Dictionary = EquipmentSystem.unequip(slot)
-	_show_toast(str(r.get("msg", "")))
-	_go_equip_panel()
-
-
-func _equip_debug_drop() -> void:
-	var r: Dictionary = EquipmentSystem.try_drop_loot()
-	_show_toast(str(r.get("msg", "無")))
-	_go_equip_panel()
+	_equip_ui.open()
 
 
 func _go_warehouse_panel() -> void:
-	var body: String = WarehouseSystem.status_bbcode()
-	var buttons: Array = []
-	## 可存：背包有的材料
-	var shown := 0
-	for id in ["hunt_hide", "hunt_bone", "hunt_core", "hp_s", "bread", "wolf_fang", "dust_crumb"]:
-		if InventorySystem.count(id) > 0 and shown < 6:
-			buttons.append({"text": "存 %s" % InventorySystem.item_name(id), "cb": _wh_dep.bind(id)})
-			shown += 1
-	var wkeys: Array = GameState.warehouse.keys()
-	var wi := 0
-	for id2 in wkeys:
-		if wi >= 6:
-			break
-		buttons.append({"text": "取 %s" % InventorySystem.item_name(str(id2)), "cb": _wh_wd.bind(str(id2))})
-		wi += 1
-	for e in GameState.equip_bag:
-		if shown >= 10:
-			break
-		buttons.append({"text": "裝入庫 " + str(e.get("name", "")), "cb": _wh_dep_eq.bind(str(e.get("uid", "")))})
-		shown += 1
-	for e2 in GameState.warehouse_equip:
-		if wi >= 12:
-			break
-		buttons.append({"text": "裝取出 " + str(e2.get("name", "")), "cb": _wh_wd_eq.bind(str(e2.get("uid", "")))})
-		wi += 1
-	buttons.append({"text": "裝備", "cb": _go_equip_panel})
-	buttons.append({"text": "返回", "cb": _hub_back})
-	_panel("倉庫", body, buttons)
-
-
-func _wh_dep(id: String) -> void:
-	_show_toast(str(WarehouseSystem.deposit_item(id, 1).get("msg", "")))
-	_go_warehouse_panel()
-
-
-func _wh_wd(id: String) -> void:
-	_show_toast(str(WarehouseSystem.withdraw_item(id, 1).get("msg", "")))
-	_go_warehouse_panel()
-
-
-func _wh_dep_eq(uid: String) -> void:
-	_show_toast(str(WarehouseSystem.deposit_equip(uid).get("msg", "")))
-	_go_warehouse_panel()
-
-
-func _wh_wd_eq(uid: String) -> void:
-	_show_toast(str(WarehouseSystem.withdraw_equip(uid).get("msg", "")))
-	_go_warehouse_panel()
+	_warehouse_ui.open()
 
 
 func _go_game_log_panel() -> void:
@@ -1891,6 +1619,7 @@ func _clear_host() -> void:
 const UI_GOTO_TARGETS: Array[String] = [
 	"hub", "postgame_hub", "online", "party",
 	"room", "hunt_room", "hunt_recycle", "market",
+	"equip", "warehouse",
 ]
 
 
@@ -1914,6 +1643,8 @@ func ui_goto(target: String) -> bool:
 		"hunt_room": _go_hunt_room_panel()
 		"hunt_recycle": _go_hunt_recycle_panel()
 		"market": _go_market_panel()
+		"equip": _go_equip_panel()
+		"warehouse": _go_warehouse_panel()
 		_:
 			push_error("ui_goto: 未知去處 '%s'" % target)
 			return false
@@ -1932,6 +1663,10 @@ func ui_clear_host() -> void:
 
 func ui_reset_fade() -> void:
 	_reset_fade()
+
+
+func ui_refresh_hud() -> void:
+	_refresh_hud()
 
 
 ## 房間相關的「開戰」動作留在 main.gd —— 那是流程控制，不是面板的事。
