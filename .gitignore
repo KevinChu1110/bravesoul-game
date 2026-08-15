@@ -24,3 +24,23 @@ screenshots/
 
 ## py_compile 產生的快取
 tools/__pycache__/
+
+# ─── 生成的貼圖中間產物 ───────────────────────────────────────────
+# tools/regen_*.py、gen_*.py 產圖時的暫存與換版前的備份。出貨要用的那份
+# 一律被複製到 sprites/ 下的正式目錄（maps/、bosses/、portraits/…），
+# 這裡留的是「原始輸出」與「上一版存檔」，重跑工具就能再生，不必進版控。
+#
+# 三個地方共用同一套命名規則，改一邊記得改另外兩邊：
+#   .gitignore（這裡）／game/export_presets.cfg 的 exclude_filter／
+#   tools/compress_sprites.py 的 SKIP_PREFIXES
+#
+# 用 `目錄/**` 而不是 `目錄/`：git 無法把被排除目錄底下的檔案再放行，
+# 只排內容才留得住下面那行 .gdignore 的例外。
+game/assets/sprites/_gen*/**
+game/assets/sprites/**/_gen*/**
+game/assets/sprites/_backup*/**
+game/assets/sprites/**/_backup*/**
+
+# .gdignore 要進版控：它是叫 Godot 別去 import 這些目錄的開關，
+# 少了它每次開專案都要多吃三百多 MB 的匯入。
+!**/.gdignore

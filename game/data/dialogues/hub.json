@@ -1,0 +1,72 @@
+{
+  "hub.event_no_reward_runs": [
+    {
+      "speaker": "系統",
+      "text": "今日有獎次數已用完。"
+    }
+  ],
+  "hub.event_challenge_start": [
+    {
+      "speaker": "旁白",
+      "text": "【{event}】挑戰開始。"
+    }
+  ],
+  "hub.candle_need_online": [
+    {
+      "speaker": "系統",
+      "text": "請先在連線設定訪客上線，才能同步燭火。"
+    }
+  ],
+  "hub.candle_already_lit": [
+    {
+      "speaker": "旁白",
+      "text": "你已經點過了。火還在。"
+    }
+  ],
+  "hub.candle_lit": [
+    {
+      "speaker": "旁白",
+      "text": "火苗跳了一下。遠方好像有人同時看見。\n（全服：{total}）"
+    }
+  ],
+  "hub.hunt_abandoned": [
+    {
+      "speaker": "系統",
+      "text": "已放棄本場狩獵。"
+    }
+  ],
+  "hub.online_health_ok": [
+    {
+      "speaker": "系統",
+      "text": "連線健康：{msg}"
+    }
+  ],
+  "hub.online_health_fail": [
+    {
+      "speaker": "系統",
+      "text": "連線異常：{msg}"
+    }
+  ],
+  "shop.not_enough_gold": [
+    {
+      "speaker": "琥珀",
+      "text": "金幣不夠。去打點雜魚或賣材料。"
+    }
+  ],
+  "shop.bought": [
+    {
+      "speaker": "琥珀",
+      "text": "成交。別死外頭——我還想再賺你一次。"
+    },
+    {
+      "speaker": "系統",
+      "text": "購入【{item}】×1（-{price}金）"
+    }
+  ],
+  "hub.ng_plus_not_yet": [
+    {
+      "speaker": "系統",
+      "text": "還沒走完。先到晨光那裡。"
+    }
+  ]
+}

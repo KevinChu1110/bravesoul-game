@@ -1,0 +1,66 @@
+{
+  "world.inspect_object": [
+    {
+      "speaker": "旁白",
+      "text": "你端詳「{label}」。風從翠嶺某處吹來。"
+    }
+  ],
+  "world.miniboss_cleared": [
+    {
+      "speaker": "旁白",
+      "text": "這裡只剩清風。試煉已過。"
+    }
+  ],
+  "world.chest_empty": [
+    {
+      "speaker": "旁白",
+      "text": "空了。你已經拿過了。"
+    }
+  ],
+  "world.chest_open": [
+    {
+      "speaker": "旁白",
+      "text": "{found}"
+    },
+    {
+      "speaker": "系統",
+      "text": "獲得 金 {gold} · 星屑 {dust}{drop}"
+    }
+  ],
+  "world.skirmish_cleared": [
+    {
+      "speaker": "旁白",
+      "text": "這裡已經平靜了。"
+    }
+  ],
+  "world.warehouse_keep": [
+    {
+      "speaker": "倉庫官",
+      "text": "騎士堡管庫的。可堆疊物與裝備都能存。"
+    }
+  ],
+  "region.mist_locked": [
+    {
+      "speaker": "系統",
+      "text": "霧還太遠。先在騎士堡把劍養起來。"
+    }
+  ],
+  "region.dojo_warn": [
+    {
+      "speaker": "系統",
+      "text": "道場氣壓重。建議戰力 26+（你 {power}），或先走霧隱／升等練功。"
+    }
+  ],
+  "region.forest_warn": [
+    {
+      "speaker": "系統",
+      "text": "林風很急。建議戰力 30+（你 {power}）。可先道場／獵場練。"
+    }
+  ],
+  "region.coast_warn": [
+    {
+      "speaker": "系統",
+      "text": "岸浪重。建議戰力 30+（你 {power}）。"
+    }
+  ]
+}

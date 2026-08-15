@@ -6,6 +6,8 @@ extends Node
 signal status_changed
 signal save_conflict(local_updated: String, cloud_updated: String, cloud_payload: Dictionary)
 
+const SaveMigration = preload("res://scripts/autoload/save_migration.gd")
+
 const SETTINGS_PATH := "user://online_settings.json"
 const SESSION_PATH := "user://online_session.json"
 
@@ -297,7 +299,13 @@ func _cb_pull_save(cb: Callable, ok: bool, body: Variant) -> void:
 		_fail("雲存檔格式錯誤", cb)
 		return
 	var cloud_t := str(row.get("updated_at", ""))
-	GameState.from_dict(cloud_payload)
+	## 雲端那份可能是別台機器、更早的版本推上來的，跟本地檔一樣要先升級。
+	## 這裡漏掉的話，跨裝置同步會變成把舊格式直接灌進 GameState。
+	var res: Dictionary = SaveMigration.migrate(cloud_payload)
+	if not bool(res.get("ok", false)):
+		_fail("雲存檔來自更新的版本" if bool(res.get("future", false)) else "雲存檔格式錯誤", cb)
+		return
+	GameState.from_dict(res.get("data", {}))
 	SaveManager.save_game()
 	_ok({"msg": "已套用雲存檔", "updated_at": cloud_t}, cb)
 

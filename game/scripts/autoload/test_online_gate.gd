@@ -8,9 +8,18 @@ extends SceneTree
 ##   2. 伺服器錯誤不外洩 —— RPC 回的是 not enough gold 這種英文技術碼，
 ##      玩家面必須全部翻成中文。這裡窮舉伺服器會吐的每一種錯。
 ##   3. RPC 參數解析正確 —— 掛單 id 從字串轉成 bigint，轉錯就整個市集打不動。
+##
+## 第 2 點原本有個洞：下面那張表是手抄的，伺服器新增一種錯誤碼時，
+## 沒人抄過來這支測試也不會紅 —— 剛好那正是玩家會看到英文的時候。
+## 所以現在多一條 _check_error_list_complete()，直接去 SQL 檔裡把錯誤碼撈出來對表
+## （做法跟 test_telemetry 對事件名白名單一樣）。
+
+## 這幾支 SQL 定義了伺服器會回的錯誤碼
+const SQL_FILES: Array[String] = ["economy.sql", "schema.sql"]
 
 ## 伺服器（supabase/economy.sql）會回的每一種 error 字串。
-## 新增伺服器錯誤碼時要一起加進來，否則玩家會看到英文。
+## 新增伺服器錯誤碼時要一起加進來，否則玩家會看到英文
+## —— 忘了加會被 _check_error_list_complete() 擋下來。
 const SERVER_ERRORS: Array[String] = [
 	"not signed in",
 	"bad payload",
@@ -61,6 +70,7 @@ func _initialize() -> void:
 		return
 
 	_check_offline_safe(gate)
+	_check_error_list_complete()
 	_check_error_translation(gate)
 	_check_listing_id(gate)
 	_check_rpc_row(gate)
@@ -107,6 +117,60 @@ func _check_offline_safe(gate: Node) -> void:
 		_fail("純單機下餘額查詢應回 0，實際 %s" % str(ledger))
 		return
 	print("  ok 純單機下 7 支寫入 API 安全回失敗，餘額查詢回 0")
+
+
+## 上面那張表要涵蓋 SQL 裡真正會回的每一種錯誤碼。
+##
+## 手抄的清單有個特性：抄漏的那一條，剛好就是沒人想到的那一條。
+## 這裡直接去 SQL 檔裡撈，兩個方向都對：伺服器有而表上沒有＝玩家會看到英文；
+## 表上有而伺服器沒有＝那條錯誤碼已經改名或刪了，翻譯留著只是誤導。
+func _check_error_list_complete() -> void:
+	var in_sql: Array[String] = []
+	## 回應體裡的 'error', '碼'，以及直接 raise 出來的訊息
+	var re_ret := RegEx.create_from_string("'error',\\s*'([^']+)'")
+	var re_raise := RegEx.create_from_string("raise exception '([^']+)'")
+	for fname in SQL_FILES:
+		var sql := _read_sql(fname)
+		if sql == "":
+			_fail("讀不到 supabase/%s" % fname)
+			return
+		for m in re_ret.search_all(sql):
+			if not in_sql.has(m.get_string(1)):
+				in_sql.append(m.get_string(1))
+		for m2 in re_raise.search_all(sql):
+			var msg := m2.get_string(1)
+			## 測試檔自己的哨兵不算伺服器錯誤碼
+			if msg.begins_with("ECON_SQL_FAIL") or msg.begins_with("TELEMETRY_SQL_FAIL"):
+				continue
+			if not in_sql.has(msg):
+				in_sql.append(msg)
+
+	if in_sql.is_empty():
+		_fail("從 SQL 裡一個錯誤碼都撈不到 —— 這條檢查等於沒在檢查")
+		return
+
+	var missing: Array[String] = []
+	for code in in_sql:
+		if not SERVER_ERRORS.has(code):
+			missing.append(code)
+	if not missing.is_empty():
+		_fail("伺服器會回這些錯誤碼，但 SERVER_ERRORS 沒列到，玩家會看到英文：%s" % str(missing))
+		return
+
+	var stale: Array[String] = []
+	for listed in SERVER_ERRORS:
+		if not in_sql.has(listed):
+			stale.append(listed)
+	if not stale.is_empty():
+		_fail("SERVER_ERRORS 列了 SQL 裡已經沒有的錯誤碼：%s" % str(stale))
+		return
+	print("  ok SQL 裡的 %d 種錯誤碼跟 SERVER_ERRORS 完全對得上" % in_sql.size())
+
+
+func _read_sql(fname: String) -> String:
+	var path := ProjectSettings.globalize_path("res://").path_join("../supabase/").path_join(fname)
+	var f := FileAccess.open(path, FileAccess.READ)
+	return "" if f == null else f.get_as_text()
 
 
 ## 伺服器錯誤碼一律翻成中文，且不留英文技術詞

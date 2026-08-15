@@ -3,6 +3,12 @@
 --
 -- 每一段都對應一種「玩家把客戶端改掉之後會試的事」。
 -- 全部通過才印 ECON_SQL_OK。
+--
+-- ⚠ 比對錯誤碼一律用 `is distinct from`，不要用 `<>`。
+-- 這裡本來全部寫成 `if r->>'error' <> '...' then raise`，那是假斷言：
+-- 守門被拿掉的時候 RPC 會回成功，'error' 是 NULL，NULL <> '字串' 的結果是 NULL，
+-- 而 plpgsql 的 if 把 NULL 當 false —— 於是「這件事應該被擋下來」這類斷言，
+-- 剛好在沒擋下來的時候閉嘴。這是整份測試最容易全綠卻什麼都沒守的地方。
 
 -- Supabase 預設會把 public 的表權限開給 anon/authenticated，
 -- 這裡照做，測到的才是 RLS 那一層而不是 grant 那一層。
@@ -140,9 +146,18 @@ begin
   ------------------------------------------------------------------
   -- 6. 上架：影子帳沒有的東西掛不上去
   ------------------------------------------------------------------
+  -- 前一段（5b）會把額度補成貨，所以這裡得自己把貨清乾淨，
+  -- 不然「沒有的貨」其實手上有一堆，掛得上去是應該的，這段等於沒測。
+  -- 這個佈置漏掉了很久都沒被發現，因為斷言原本用 `<>` 比對 NULL（見檔頭）。
+  update public.player_econ set items = '{}'::jsonb where user_id = A;
+  select coalesce((items->>'hunt_core')::int, 0) into n
+    from public.player_econ where user_id = A;
+  if n <> 0 then
+    raise exception 'ECON_SQL_FAIL 6: 佈置失敗，影子帳還有 % 個 hunt_core', n;
+  end if;
   r := public.market_list_item('hunt_core', 10, 5000);
-  if r->>'error' <> 'not enough items' then
-    raise exception 'ECON_SQL_FAIL 6: 影子帳只有 % 個卻能掛 10 個，回應 %', n, r;
+  if r->>'error' is distinct from 'not enough items' then
+    raise exception 'ECON_SQL_FAIL 6: 影子帳一個都沒有卻掛得上去，回應 %', r;
   end if;
   raise notice '  ok 6  沒有的貨掛不上去';
   passed := passed + 1;
@@ -156,7 +171,7 @@ begin
 
   -- 基準價 60 × 10 個 × 20 倍 = 12000 上限
   r := public.market_list_item('hunt_core', 10, 999999);
-  if r->>'error' <> 'price out of range' then
+  if r->>'error' is distinct from 'price out of range' then
     raise exception 'ECON_SQL_FAIL 7: 天價掛單沒被擋，回應 %', r;
   end if;
 
@@ -177,7 +192,7 @@ begin
   -- 8. 不可交易的品項掛不上去
   ------------------------------------------------------------------
   r := public.market_list_item('key_rusty', 1, 10);
-  if r->>'error' <> 'item not tradeable' then
+  if r->>'error' is distinct from 'item not tradeable' then
     raise exception 'ECON_SQL_FAIL 8: 非交易品竟可上架，回應 %', r;
   end if;
   raise notice '  ok 8  非交易品擋下';
@@ -191,7 +206,7 @@ begin
         'gold', 100, 'inventory', '{}'::jsonb
       ), 1);
   r := public.market_buy(lid);
-  if r->>'error' <> 'not enough gold' then
+  if r->>'error' is distinct from 'not enough gold' then
     raise exception 'ECON_SQL_FAIL 9: 沒錢卻買得動，回應 %', r;
   end if;
   raise notice '  ok 9  影子帳沒錢就買不動';
@@ -224,7 +239,7 @@ begin
   -- 11. 同一筆掛單不能買第二次
   ------------------------------------------------------------------
   r := public.market_buy(lid);
-  if r->>'error' <> 'listing gone' then
+  if r->>'error' is distinct from 'listing gone' then
     raise exception 'ECON_SQL_FAIL 11: 掛單被買兩次，回應 %', r;
   end if;
   raise notice '  ok 11  掛單不能重複購買';
@@ -237,7 +252,7 @@ begin
   r := public.market_list_item('hunt_core', 5, 1000);
   lid2 := (r->>'id')::bigint;
   r := public.market_buy(lid2);
-  if r->>'error' <> 'cannot buy own' then
+  if r->>'error' is distinct from 'cannot buy own' then
     raise exception 'ECON_SQL_FAIL 12: 買到自己的單，回應 %', r;
   end if;
   raise notice '  ok 12  自己的單買不了';
@@ -257,7 +272,7 @@ begin
     raise exception 'ECON_SQL_FAIL 13: 下架沒退回 5 個';
   end if;
   r := public.market_cancel_listing(lid2);
-  if r->>'error' <> 'listing gone' then
+  if r->>'error' is distinct from 'listing gone' then
     raise exception 'ECON_SQL_FAIL 13: 下架兩次退兩次貨，回應 %', r;
   end if;
   raise notice '  ok 13  下架只退一次';
@@ -289,7 +304,7 @@ begin
     r := public.market_list_item('hunt_hide', 1, 100);
   end loop;
   r := public.market_list_item('hunt_hide', 1, 100);
-  if r->>'error' <> 'too many listings' then
+  if r->>'error' is distinct from 'too many listings' then
     raise exception 'ECON_SQL_FAIL 15: 掛單上限沒生效，回應 %', r;
   end if;
   raise notice '  ok 15  同時掛單上限 8 生效';
@@ -308,11 +323,11 @@ begin
     raise exception 'ECON_SQL_FAIL 16: 房主回報失敗，回應 %', r;
   end if;
   r := public.room_claim_reward(rid);
-  if r->>'error' <> 'already claimed' then
+  if r->>'error' is distinct from 'already claimed' then
     raise exception 'ECON_SQL_FAIL 16: 房主結算後還能再領，回應 %', r;
   end if;
   r := public.room_report_result(rid, 'win');
-  if r->>'error' <> 'already settled' then
+  if r->>'error' is distinct from 'already settled' then
     raise exception 'ECON_SQL_FAIL 16: 同一場可以結算兩次，回應 %', r;
   end if;
 
@@ -322,7 +337,7 @@ begin
     raise exception 'ECON_SQL_FAIL 16: 成員第一次領獎失敗，回應 %', r;
   end if;
   r := public.room_claim_reward(rid);
-  if r->>'error' <> 'already claimed' then
+  if r->>'error' is distinct from 'already claimed' then
     raise exception 'ECON_SQL_FAIL 16: 成員可以重複領獎，回應 %', r;
   end if;
   raise notice '  ok 16  共鬥獎一人一次';
@@ -352,7 +367,7 @@ begin
     raise exception 'ECON_SQL_FAIL 18: 較低分覆蓋了高分';
   end if;
   r := public.leaderboard_submit('rift_weekly', 999999999999);
-  if r->>'error' <> 'score out of range' then
+  if r->>'error' is distinct from 'score out of range' then
     raise exception 'ECON_SQL_FAIL 18: 天價分數沒被擋，回應 %', r;
   end if;
   raise notice '  ok 18  排行榜只進不退且有上限';

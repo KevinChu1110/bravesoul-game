@@ -42,6 +42,10 @@ func seen(key: String) -> bool:
 
 func mark(key: String) -> void:
 	GameState.set_flag("tut.v2.%s" % key, true)
+	## 從這裡回報而不是從呼叫端，教學步驟才不會漏掉哪一支
+	var tel: Node = _telemetry_node()
+	if tel:
+		tel.call("note_tutorial", key)
 
 
 func lines_for(key: String) -> Array:
@@ -60,3 +64,11 @@ func take(key: String) -> Array:
 	if not lines.is_empty():
 		mark(key)
 	return lines
+
+
+## autoload 之間用絕對路徑 get_node 在某些啟動時機會噴錯，一律從 SceneTree.root 走
+func _telemetry_node() -> Node:
+	var t := Engine.get_main_loop()
+	if t is SceneTree and (t as SceneTree).root != null:
+		return (t as SceneTree).root.get_node_or_null("Telemetry")
+	return null

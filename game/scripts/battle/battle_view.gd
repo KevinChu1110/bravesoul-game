@@ -79,6 +79,7 @@ func setup(mode: String) -> void:
 	_ended = false
 	_spectator = false
 	_room_broadcast = false
+	_telemetry_watch(mode)
 	_apply_hud_chrome()
 	banner.visible = false
 	countdown.visible = false
@@ -1613,6 +1614,23 @@ func _member_send(kind: String) -> void:
 
 
 ## 成員同屏（無本地 BattleSim；可操作則送 input）
+## 戰鬥的開始與結果從這裡回報，不從 main.gd。
+## 掛在 battle_finished 上而不是逐個 emit 點插一行，逃跑／中途結束才不會漏。
+func _telemetry_watch(mode: String) -> void:
+	var tel: Node = _telemetry_node()
+	if tel == null:
+		return
+	tel.call("battle_started", mode)
+	if not battle_finished.is_connected(_on_telemetry_battle_finished):
+		battle_finished.connect(_on_telemetry_battle_finished)
+
+
+func _on_telemetry_battle_finished(won: bool) -> void:
+	var tel: Node = _telemetry_node()
+	if tel:
+		tel.call("battle_finished", _mode, won)
+
+
 func setup_spectator(mode: String, coop: bool = true) -> void:
 	_mode = mode
 	_ended = false
@@ -2276,3 +2294,11 @@ func _grant_rift_rewards(mode: String) -> void:
 			var pb: Dictionary = pt2.call("grant_win_bonus")
 			if bool(pb.get("ok", false)):
 				_append_log("[color=#9cf]%s[/color]" % str(pb.get("msg", "")))
+
+
+## autoload 之間用絕對路徑 get_node 在某些啟動時機會噴錯，一律從 SceneTree.root 走
+func _telemetry_node() -> Node:
+	var t := Engine.get_main_loop()
+	if t is SceneTree and (t as SceneTree).root != null:
+		return (t as SceneTree).root.get_node_or_null("Telemetry")
+	return null

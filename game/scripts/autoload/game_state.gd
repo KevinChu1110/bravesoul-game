@@ -5,7 +5,8 @@ signal flags_changed(key: String, value: Variant)
 signal gold_changed(amount: int)
 signal chapter_changed(chapter: String)
 
-const VERSION := 2
+## 存檔版本。改動存檔結構就 +1，並在 save_migration.gd 補一支對應的升級步驟。
+const VERSION := 3
 
 ## 主線章節：title | c0 | c1 | c2 | c3 | c4 | c5 | c6 | cleared
 var chapter: String = "title"
@@ -17,6 +18,10 @@ var player_name: String = "小白"
 var level: int = 1
 var xp: int = 0
 var gold: int = 30
+
+## 累積遊玩秒數。由 SaveManager 逐幀累加，只算真的在旅途上的時間。
+## 存檔面板要靠它讓玩家分辨哪一格是自己投入比較久的那段。
+var play_time: float = 0.0
 
 ## 武器流派 id（見 data/tables/weapon_classes.json）；與器／魂／招正交
 ## 舊存檔 sword|soul|iron 會對應到 sword|magic|hammer
@@ -340,6 +345,7 @@ func to_dict() -> Dictionary:
 		"xp": xp,
 		"path_style": path_style,
 		"gold": gold,
+		"play_time": play_time,
 		"max_hp": max_hp,
 		"hp": hp,
 		"atk": atk,
@@ -372,14 +378,33 @@ func to_dict() -> Dictionary:
 	}
 
 
+## 存檔裡的集合欄位不保證是對的型別：手動改過的備份、別台機器推上來的雲存檔、
+## 寫到一半的檔，都可能讓某個 key 變成 null 或數字。直接 .duplicate() 會在
+## from_dict() 走到一半噴錯中斷，留下半新半舊的混血狀態（章節已經換了、背包還是上一格的），
+## 而且下一次自動存檔就把那份混血寫死。所以取集合一律先驗型別。
+func _dict_field(d: Dictionary, key: String, fallback: Dictionary = {}) -> Dictionary:
+	var v: Variant = d.get(key, fallback)
+	if typeof(v) != TYPE_DICTIONARY:
+		return fallback.duplicate(true)
+	return (v as Dictionary).duplicate(true)
+
+
+func _array_field(d: Dictionary, key: String, fallback: Array = []) -> Array:
+	var v: Variant = d.get(key, fallback)
+	if typeof(v) != TYPE_ARRAY:
+		return fallback.duplicate(true)
+	return (v as Array).duplicate(true)
+
+
 func from_dict(d: Dictionary) -> void:
 	chapter = str(d.get("chapter", "title"))
-	flags = d.get("flags", {}).duplicate(true)
+	flags = _dict_field(d, "flags")
 	player_name = str(d.get("player_name", "小白"))
 	level = int(d.get("level", 1))
 	xp = int(d.get("xp", 0))
 	path_style = _migrate_path_style(str(d.get("path_style", "")))
 	gold = int(d.get("gold", 0))
+	play_time = float(d.get("play_time", 0.0))
 	max_hp = int(d.get("max_hp", 50))
 	hp = int(d.get("hp", max_hp))
 	atk = int(d.get("atk", 10))
@@ -389,7 +414,7 @@ func from_dict(d: Dictionary) -> void:
 	weapon_atk = int(d.get("weapon_atk", 0))
 	weapon_tier = int(d.get("weapon_tier", 0))
 	skill_slash_lv = int(d.get("skill_slash_lv", 0))
-	skill_data = d.get("skill_data", {}).duplicate(true)
+	skill_data = _dict_field(d, "skill_data")
 	if skill_data.is_empty() and skill_slash_lv > 0:
 		skill_data["slash"] = {"lv": skill_slash_lv, "mastery": 0}
 	has_wheat_stalk = bool(d.get("has_wheat_stalk", false))
@@ -398,24 +423,20 @@ func from_dict(d: Dictionary) -> void:
 	ng_plus = int(d.get("ng_plus", 0))
 	stain_flame = bool(d.get("stain_flame", false))
 	stardust = int(d.get("stardust", 0))
-	souls = d.get("souls", []).duplicate(true)
-	soul_slots = d.get("soul_slots", []).duplicate()
-	inventory = d.get("inventory", {}).duplicate(true)
-	hotbar = d.get("hotbar", ["", "", "", "", "", "", "", ""]).duplicate()
+	souls = _array_field(d, "souls")
+	soul_slots = _array_field(d, "soul_slots")
+	inventory = _dict_field(d, "inventory")
+	hotbar = _array_field(d, "hotbar", ["", "", "", "", "", "", "", ""])
 	while hotbar.size() < 8:
 		hotbar.append("")
 	if hotbar.size() > 8:
 		hotbar.resize(8)
-	ui_layout = d.get("ui_layout", {}).duplicate(true)
-	if typeof(ui_layout) != TYPE_DICTIONARY:
-		ui_layout = {}
-	equip_bag = d.get("equip_bag", []).duplicate(true)
-	equip_worn = d.get("equip_worn", {}).duplicate(true)
-	equip_slots = d.get("equip_slots", {"weapon": "", "armor": "", "accessory": ""}).duplicate(true)
-	if typeof(equip_slots) != TYPE_DICTIONARY:
-		equip_slots = {"weapon": "", "armor": "", "accessory": ""}
-	warehouse = d.get("warehouse", {}).duplicate(true)
-	warehouse_equip = d.get("warehouse_equip", []).duplicate(true)
+	ui_layout = _dict_field(d, "ui_layout")
+	equip_bag = _array_field(d, "equip_bag")
+	equip_worn = _dict_field(d, "equip_worn")
+	equip_slots = _dict_field(d, "equip_slots", {"weapon": "", "armor": "", "accessory": ""})
+	warehouse = _dict_field(d, "warehouse")
+	warehouse_equip = _array_field(d, "warehouse_equip")
 	crit_rate = float(d.get("crit_rate", 5.0))
 	crit_dmg = float(d.get("crit_dmg", 50.0))
 	dmg_variance = float(d.get("dmg_variance", 0.08))

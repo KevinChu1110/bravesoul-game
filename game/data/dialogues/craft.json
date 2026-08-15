@@ -1,0 +1,118 @@
+{
+  "skill.learned": [
+    {
+      "speaker": "灰鬚",
+      "text": "成了。記住手感，別死記招名。"
+    },
+    {
+      "speaker": "系統",
+      "text": "習得【{skill}】"
+    }
+  ],
+  "skill.not_yet": [
+    {
+      "speaker": "灰鬚",
+      "text": "時機未到。"
+    }
+  ],
+  "skill.tutor_deny": [
+    {
+      "speaker": "灰鬚",
+      "text": "金幣，或你已經頂了。"
+    }
+  ],
+  "soul.equipped": [
+    {
+      "speaker": "系統",
+      "text": "戰魂入槽。刃的性格變了。"
+    }
+  ],
+  "soul.ritual_not_enough": [
+    {
+      "speaker": "星讀",
+      "text": "星屑還不夠點亮一角。"
+    }
+  ],
+  "soul.fused": [
+    {
+      "speaker": "星讀",
+      "text": "三顆同軌，併作一層更亮的星。"
+    },
+    {
+      "speaker": "系統",
+      "text": "合成 → {soul}"
+    }
+  ],
+  "soul.fuse_requirement": [
+    {
+      "speaker": "星讀",
+      "text": "要三顆同星、同品、同階，且未入魂。"
+    }
+  ],
+  "forge.need_rusty_first": [
+    {
+      "speaker": "釘釘",
+      "text": "先讓我認你那把鏽鐵。"
+    }
+  ],
+  "forge.path_chosen": [
+    {
+      "speaker": "系統",
+      "text": "選定武器流派【{path}】。"
+    },
+    {
+      "speaker": "系統",
+      "text": "玩法：{play}。{pro}"
+    },
+    {
+      "speaker": "系統",
+      "text": "戰魂還是去找星讀觀星。戰力 {power}。"
+    }
+  ],
+  "forge.wood_sword_no_gold": [
+    {
+      "speaker": "釘釘",
+      "text": "二十金。沒錢就別來佔爐。"
+    }
+  ],
+  "forge.wood_sword_owned": [
+    {
+      "speaker": "釘釘",
+      "text": "木劍？你不是拿過了。"
+    }
+  ],
+  "forge.tier_max": [
+    {
+      "speaker": "釘釘",
+      "text": "夠了，先去砍獅子。"
+    }
+  ],
+  "forge.no_gold": [
+    {
+      "speaker": "釘釘",
+      "text": "金幣呢？出城晃兩下。"
+    }
+  ],
+  "forge.success": [
+    {
+      "speaker": "釘釘",
+      "text": "成了。T{tier}。{scrap}"
+    }
+  ],
+  "forge.pity_break": [
+    {
+      "speaker": "釘釘",
+      "text": "（錘砸台面）夠了！鐵都比你有耐心！"
+    },
+    {
+      "speaker": "釘釘",
+      "text": "……消氣餅。滾。"
+    }
+  ],
+  "forge.failed": [
+    {
+      "speaker": "釘釘",
+      "text": "失敗。階還在。材料沒了。"
+    }
+  ]
+}

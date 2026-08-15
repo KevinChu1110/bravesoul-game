@@ -90,6 +90,10 @@ func show_guide_hint(text: String) -> void:
 
 func setup(p_map_id: String) -> void:
 	map_id = p_map_id
+	## 記住人在哪張圖，戰敗時才知道是在哪一段倒下的
+	var tel: Node = _telemetry_node()
+	if tel:
+		tel.call("set_place", p_map_id)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_build_chrome()
@@ -1387,3 +1391,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			show_entity_bubble(_near_id, lab, 1.6)
 		interacted.emit(_near_id)
 		get_viewport().set_input_as_handled()
+
+
+## autoload 之間用絕對路徑 get_node 在某些啟動時機會噴錯，一律從 SceneTree.root 走
+func _telemetry_node() -> Node:
+	var t := Engine.get_main_loop()
+	if t is SceneTree and (t as SceneTree).root != null:
+		return (t as SceneTree).root.get_node_or_null("Telemetry")
+	return null

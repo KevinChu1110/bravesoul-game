@@ -91,9 +91,15 @@ func _process(_delta: float) -> bool:
 			_fail("結束後仍在攔滑鼠")
 			return _finish()
 		print("  ok 結束後隱藏且不攔滑鼠")
-		## 播到一半硬中止
+		## 播到一半硬中止。
+		## 專案裡目前一支影片都還沒轉出來，所以「abort 要把影片收乾淨」這條
+		## 如果只是照常播一段沒有影片的過場，等於在驗一個本來就空的欄位——
+		## 變異測試證實過：把 abort() 裡的 _stop_video() 整行刪掉，測試照樣全綠。
+		## 所以這裡自己塞一個影片進去，逼 abort 真的動手收。
 		_finished = false
 		_cp.play([{"speaker": "旅人", "text": "中止測試", "hold": 0.0}])
+		_cp._video.stream = VideoStreamTheora.new()
+		_cp._video.visible = true
 		_cp.abort()
 		if _cp.visible:
 			_fail("abort() 之後還顯示著")

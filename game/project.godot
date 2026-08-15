@@ -36,6 +36,7 @@ PartySystem="*res://scripts/systems/party_system.gd"
 MarketSystem="*res://scripts/systems/market_system.gd"
 RealtimeBridge="*res://scripts/autoload/realtime_bridge.gd"
 RoomSystem="*res://scripts/systems/room_system.gd"
+Telemetry="*res://scripts/autoload/telemetry.gd"
 
 [display]
 window/size/viewport_width=1280

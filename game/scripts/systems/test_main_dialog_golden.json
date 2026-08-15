@@ -1,0 +1,1689 @@
+[
+ {
+  "key": "hub.event_no_reward_runs",
+  "src_line": 638,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "今日有獎次數已用完。"
+   }
+  ]
+ },
+ {
+  "key": "hub.event_challenge_start",
+  "src_line": 644,
+  "vars": {
+   "event": "«v0»"
+  },
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "【«v0»】挑戰開始。"
+   }
+  ]
+ },
+ {
+  "key": "hub.candle_need_online",
+  "src_line": 741,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "請先在連線設定訪客上線，才能同步燭火。"
+   }
+  ]
+ },
+ {
+  "key": "hub.candle_already_lit",
+  "src_line": 744,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "你已經點過了。火還在。"
+   }
+  ]
+ },
+ {
+  "key": "hub.candle_lit",
+  "src_line": 751,
+  "vars": {
+   "total": "«v0»"
+  },
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "火苗跳了一下。遠方好像有人同時看見。\n（全服：«v0»）"
+   }
+  ]
+ },
+ {
+  "key": "hub.hunt_abandoned",
+  "src_line": 828,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "已放棄本場狩獵。"
+   }
+  ]
+ },
+ {
+  "key": "hub.online_health_ok",
+  "src_line": 1131,
+  "vars": {
+   "msg": "«v0»"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "連線健康：«v0»"
+   }
+  ]
+ },
+ {
+  "key": "hub.online_health_fail",
+  "src_line": 1133,
+  "vars": {
+   "msg": "«v0»"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "連線異常：«v0»"
+   }
+  ]
+ },
+ {
+  "key": "shop.not_enough_gold",
+  "src_line": 1452,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "琥珀",
+    "text": "金幣不夠。去打點雜魚或賣材料。"
+   }
+  ]
+ },
+ {
+  "key": "shop.bought",
+  "src_line": 1458,
+  "vars": {
+   "item": "«v0»",
+   "price": "18"
+  },
+  "expect": [
+   {
+    "speaker": "琥珀",
+    "text": "成交。別死外頭——我還想再賺你一次。"
+   },
+   {
+    "speaker": "系統",
+    "text": "購入【«v0»】×1（-18金）"
+   }
+  ]
+ },
+ {
+  "key": "hub.ng_plus_not_yet",
+  "src_line": 2262,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "還沒走完。先到晨光那裡。"
+   }
+  ]
+ },
+ {
+  "key": "side.guard_dog",
+  "src_line": 2428,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "守車犬",
+    "text": "汪。（尾巴一下，像在說：先付金幣。）"
+   }
+  ]
+ },
+ {
+  "key": "side.training_need_weapon",
+  "src_line": 2437,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "演武台沙上還有舊腳印。先去釘釘把劍養好再練。"
+   }
+  ]
+ },
+ {
+  "key": "side.training_daily_cap",
+  "src_line": 2441,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "今日練功已達上限。去野外或獵場換換空氣。"
+   }
+  ]
+ },
+ {
+  "key": "side.training_result",
+  "src_line": 2484,
+  "vars": {
+   "msg": "«v0»",
+   "power": "18"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "«v0»"
+   },
+   {
+    "speaker": "系統",
+    "text": "戰力現為 18。材料可拿去釘釘鍛武器，或賣給琥珀。"
+   }
+  ]
+ },
+ {
+  "key": "side.weapon_rack_untasked",
+  "src_line": 2513,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "武器架空了大半。有一把斷劍半埋沙裡——刃口很舊。"
+   }
+  ]
+ },
+ {
+  "key": "side.broken_blade_gone",
+  "src_line": 2517,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "這裡已經沒有釘釘要的東西了。"
+   }
+  ]
+ },
+ {
+  "key": "side.amber_has_letter",
+  "src_line": 2531,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "琥珀",
+    "text": "喔？你手上那封……霧隱的印？交給頭領吧，我只收金幣不收心事。"
+   },
+   {
+    "speaker": "琥珀",
+    "text": "材料行照開。鍛造材、紅水，現貨都有。"
+   }
+  ]
+ },
+ {
+  "key": "side.amber_shop_open",
+  "src_line": 2536,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "琥珀",
+    "text": "材料行開張。鐵屑、星砂、橡脂、騎士碎鐵，打怪掉的我收，缺的我賣。"
+   },
+   {
+    "speaker": "琥珀",
+    "text": "算盤要會打：出去打，掉的賣我，換錢去鍛；不夠再跟我買，再出去打。兔子也得會算帳。"
+   }
+  ]
+ },
+ {
+  "key": "side.ronin_guard_fire",
+  "src_line": 2546,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "黑焰浪人",
+    "portrait": "road_bandit",
+    "text": "我在這裡守火。上去的人……別學我把焰當柴。"
+   },
+   {
+    "speaker": "黑焰浪人",
+    "text": "你若倒下，我會把你拖回來。——只一次。"
+   }
+  ]
+ },
+ {
+  "key": "side.ronin_gone",
+  "src_line": 2553,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "地上只剩燒過的靴印。浪人已不在。"
+   }
+  ]
+ },
+ {
+  "key": "side.ronin_too_early",
+  "src_line": 2557,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "黑焰浪人",
+    "text": "……還太早。先去打你的獅子。"
+   }
+  ]
+ },
+ {
+  "key": "side.ronin_defeated",
+  "src_line": 2636,
+  "vars": {
+   "xp": "7",
+   "level_up": "«v1»"
+  },
+  "expect": [
+   {
+    "speaker": "黑焰浪人",
+    "text": "……強……又如何……焰還是空的。"
+   },
+   {
+    "speaker": "系統",
+    "text": "戰勝黑焰浪人。金 55 · 星屑 3 · 經驗 7«v1»。他倒下的地方，靴印不再燒。"
+   }
+  ]
+ },
+ {
+  "key": "side.ding_debt_remind",
+  "src_line": 2695,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "釘釘",
+    "text": "斷劍還在演武場。別跟我扯廢話。"
+   }
+  ]
+ },
+ {
+  "key": "world.inspect_object",
+  "src_line": 2807,
+  "vars": {
+   "label": "«v0»"
+  },
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "你端詳「«v0»」。風從翠嶺某處吹來。"
+   }
+  ]
+ },
+ {
+  "key": "world.miniboss_cleared",
+  "src_line": 2820,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "這裡只剩清風。試煉已過。"
+   }
+  ]
+ },
+ {
+  "key": "world.chest_empty",
+  "src_line": 2833,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "空了。你已經拿過了。"
+   }
+  ]
+ },
+ {
+  "key": "world.chest_open",
+  "src_line": 2856,
+  "vars": {
+   "found": "«v0»",
+   "gold": "18",
+   "dust": "29",
+   "drop": "«v3»"
+  },
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "«v0»"
+   },
+   {
+    "speaker": "系統",
+    "text": "獲得 金 18 · 星屑 29«v3»"
+   }
+  ]
+ },
+ {
+  "key": "world.skirmish_cleared",
+  "src_line": 2869,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "這裡已經平靜了。"
+   }
+  ]
+ },
+ {
+  "key": "world.warehouse_keep",
+  "src_line": 2944,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "倉庫官",
+    "text": "騎士堡管庫的。可堆疊物與裝備都能存。"
+   }
+  ]
+ },
+ {
+  "key": "c6.refugee",
+  "src_line": 3113,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "逃難者",
+    "text": "塔門開了……我們不敢上去。你……是那隻兔子嗎？"
+   }
+  ]
+ },
+ {
+  "key": "c6.scroll_pile",
+  "src_line": 3115,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "卷軸",
+    "text": "「至弱者可至塔頂。卷未寫：若心慕強，焰先至。」"
+   }
+  ]
+ },
+ {
+  "key": "c6.tower_gate",
+  "src_line": 3117,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "塔門敞開。千年來第一次。黑焰在門縫裡呼吸。"
+   }
+  ]
+ },
+ {
+  "key": "c0.shrine_stub",
+  "src_line": 3230,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "小祠",
+    "text": "香灰冷了。神也逃了嗎——還是人先走了？"
+   }
+  ]
+ },
+ {
+  "key": "c0.field_west",
+  "src_line": 3232,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "田埂與籬笆都被夜色咬過。世界比村子大——你才剛踏出第一步。"
+   }
+  ]
+ },
+ {
+  "key": "c0.leave_without_sword",
+  "src_line": 3248,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "兩手空空。至少……撿起那柄劍。"
+   }
+  ]
+ },
+ {
+  "key": "c0.road_east",
+  "src_line": 3311,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "長路向東延伸。翠嶺比地圖上畫的更大。"
+   }
+  ]
+ },
+ {
+  "key": "battle.wolf_win",
+  "src_line": 3384,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "狼倒下時，紫焰散成灰。它看起來……比想像中瘦。"
+   },
+   {
+    "speaker": "內心",
+    "text": "這就是黑焰嗎。連野獸都……"
+   },
+   {
+    "speaker": "系統",
+    "text": "學會了【橫斬】。金 25、星屑 2。遠方，石牆立在晨光裡。"
+   }
+  ]
+ },
+ {
+  "key": "battle.wolf_lose",
+  "src_line": 3391,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "醒來時在路旁。有人用斗篷蓋過你——已不見人影。"
+   }
+  ]
+ },
+ {
+  "key": "battle.leo_lose",
+  "src_line": 3398,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "雷歐",
+    "text": "回去握草根吧。"
+   },
+   {
+    "speaker": "系統",
+    "text": "醒來時已經在城裡。想再去，隨時。"
+   }
+  ]
+ },
+ {
+  "key": "battle.fog_lose",
+  "src_line": 3406,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "白霧",
+    "text": "迷路了呀……再來一次？"
+   },
+   {
+    "speaker": "系統",
+    "text": "有人把你抬回霧隱村。下次等本體發白再出手。"
+   }
+  ]
+ },
+ {
+  "key": "battle.demon_lose",
+  "src_line": 3414,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "魔王",
+    "text": "還是太輕了……"
+   },
+   {
+    "speaker": "系統",
+    "text": "你倒在塔階上。從塔下再爬一次就是了。"
+   }
+  ]
+ },
+ {
+  "key": "battle.abo_lose",
+  "src_line": 3422,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "阿波",
+    "text": "拳裡還沒有道。再來。"
+   },
+   {
+    "speaker": "系統",
+    "text": "你被請出了試煉堂。門沒關。"
+   }
+  ]
+ },
+ {
+  "key": "battle.falcon_lose",
+  "src_line": 3430,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "疾影",
+    "text": "風把你帶走了……再等一次。"
+   },
+   {
+    "speaker": "系統",
+    "text": "醒來時在樹屋裡。下次等牠停拍再打。"
+   }
+  ]
+ },
+ {
+  "key": "battle.boar_lose",
+  "src_line": 3438,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "石拳",
+    "text": "力氣不夠。站穩再來。"
+   },
+   {
+    "speaker": "系統",
+    "text": "浪把你推回碼頭。下次迎上去撞，岩甲才會裂。"
+   }
+  ]
+ },
+ {
+  "key": "battle.rift_lose",
+  "src_line": 3463,
+  "vars": {
+   "tip": "«v0»"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "黑焰把你掀回塔下。«v0»"
+   }
+  ]
+ },
+ {
+  "key": "battle.world_win",
+  "src_line": 3555,
+  "vars": {
+   "enemy": "«v0»",
+   "gold": "18",
+   "extra": "«v2»"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "擊敗«v0»。金 18«v2»。"
+   }
+  ]
+ },
+ {
+  "key": "battle.world_flee",
+  "src_line": 3561,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "你掙脫了戰鬥。傷勢不輕——先找存檔石。"
+   }
+  ]
+ },
+ {
+  "key": "c1.flag_paw",
+  "src_line": 3641,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "旗上有炭筆歪扭兔爪。「有人用炭筆畫了兔子。耳朵不太對，勇氣很對。」"
+   }
+  ]
+ },
+ {
+  "key": "c1.flag_grey",
+  "src_line": 3643,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "灰旗低垂。城裡的人都在等一個不可能的奇蹟。"
+   }
+  ]
+ },
+ {
+  "key": "c1.outer_ward",
+  "src_line": 3664,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "外城比想像中廣。騎士域曾是翠嶺的脊樑——現在只剩石與風。"
+   }
+  ]
+ },
+ {
+  "key": "c1.save_stone",
+  "src_line": 3672,
+  "vars": {
+   "extra": "«v0»"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "進度已寫入存檔石。傷勢也穩了。«v0»"
+   },
+   {
+    "speaker": "系統",
+    "text": "（可翻稱號牆）"
+   }
+  ]
+ },
+ {
+  "key": "c1.sprout_after_leo",
+  "src_line": 3761,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "小芽",
+    "text": "旗上的兔子是我畫的！耳朵畫歪了啦，可是勇氣很對！"
+   },
+   {
+    "speaker": "小芽",
+    "text": "我每天練木劍。長大要守門！要像灰鬍子那樣凶，可是也要像你一樣不凶。"
+   }
+  ]
+ },
+ {
+  "key": "c1.sprout_thanks",
+  "src_line": 3766,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "小芽",
+    "text": "木劍超好揮！謝謝你！那個……獅子很大嗎？你真的要去？"
+   }
+  ]
+ },
+ {
+  "key": "c1.sprout_wish",
+  "src_line": 3805,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "小芽",
+    "text": "釘釘應該做得出來，好像要二十金。不然給我三十金，我自己去買也行！"
+   },
+   {
+    "speaker": "小芽",
+    "text": "我不是貪心！我是想練給大家看！"
+   }
+  ]
+ },
+ {
+  "key": "skill.learned",
+  "src_line": 3854,
+  "vars": {
+   "skill": "«v0»"
+  },
+  "expect": [
+   {
+    "speaker": "灰鬚",
+    "text": "成了。記住手感，別死記招名。"
+   },
+   {
+    "speaker": "系統",
+    "text": "習得【«v0»】"
+   }
+  ]
+ },
+ {
+  "key": "skill.not_yet",
+  "src_line": 3859,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "灰鬚",
+    "text": "時機未到。"
+   }
+  ]
+ },
+ {
+  "key": "skill.tutor_deny",
+  "src_line": 3865,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "灰鬚",
+    "text": "金幣，或你已經頂了。"
+   }
+  ]
+ },
+ {
+  "key": "soul.equipped",
+  "src_line": 3885,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "戰魂入槽。刃的性格變了。"
+   }
+  ]
+ },
+ {
+  "key": "soul.ritual_not_enough",
+  "src_line": 3890,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "星讀",
+    "text": "星屑還不夠點亮一角。"
+   }
+  ]
+ },
+ {
+  "key": "soul.fused",
+  "src_line": 3940,
+  "vars": {
+   "soul": "«v0»"
+  },
+  "expect": [
+   {
+    "speaker": "星讀",
+    "text": "三顆同軌，併作一層更亮的星。"
+   },
+   {
+    "speaker": "系統",
+    "text": "合成 → «v0»"
+   }
+  ]
+ },
+ {
+  "key": "soul.fuse_requirement",
+  "src_line": 3945,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "星讀",
+    "text": "要三顆同星、同品、同階，且未入魂。"
+   }
+  ]
+ },
+ {
+  "key": "forge.need_rusty_first",
+  "src_line": 4026,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "釘釘",
+    "text": "先讓我認你那把鏽鐵。"
+   }
+  ]
+ },
+ {
+  "key": "forge.path_chosen",
+  "src_line": 4094,
+  "vars": {
+   "path": "«v0»",
+   "play": "«v1»",
+   "pro": "«v2»",
+   "power": "40"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "選定武器流派【«v0»】。"
+   },
+   {
+    "speaker": "系統",
+    "text": "玩法：«v1»。«v2»"
+   },
+   {
+    "speaker": "系統",
+    "text": "戰魂還是去找星讀觀星。戰力 40。"
+   }
+  ]
+ },
+ {
+  "key": "forge.wood_sword_no_gold",
+  "src_line": 4108,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "釘釘",
+    "text": "二十金。沒錢就別來佔爐。"
+   }
+  ]
+ },
+ {
+  "key": "forge.wood_sword_owned",
+  "src_line": 4111,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "釘釘",
+    "text": "木劍？你不是拿過了。"
+   }
+  ]
+ },
+ {
+  "key": "forge.tier_max",
+  "src_line": 4127,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "釘釘",
+    "text": "夠了，先去砍獅子。"
+   }
+  ]
+ },
+ {
+  "key": "forge.no_gold",
+  "src_line": 4130,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "釘釘",
+    "text": "金幣呢？出城晃兩下。"
+   }
+  ]
+ },
+ {
+  "key": "forge.success",
+  "src_line": 4151,
+  "vars": {
+   "tier": "7",
+   "scrap": "«v1»"
+  },
+  "expect": [
+   {
+    "speaker": "釘釘",
+    "text": "成了。T7。«v1»"
+   }
+  ]
+ },
+ {
+  "key": "forge.pity_break",
+  "src_line": 4157,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "釘釘",
+    "text": "（錘砸台面）夠了！鐵都比你有耐心！"
+   },
+   {
+    "speaker": "釘釘",
+    "text": "……消氣餅。滾。"
+   }
+  ]
+ },
+ {
+  "key": "forge.failed",
+  "src_line": 4162,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "釘釘",
+    "text": "失敗。階還在。材料沒了。"
+   }
+  ]
+ },
+ {
+  "key": "c1.wild_need_forge",
+  "src_line": 4168,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "鏽劍捲刃了。先去找釘釘。"
+   }
+  ]
+ },
+ {
+  "key": "c1.burnt_field",
+  "src_line": 4180,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "焦麥田。風裡有黑焰的腥甜。你握緊微末之刃。"
+   }
+  ]
+ },
+ {
+  "key": "c1.tower_empty",
+  "src_line": 4189,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "哨塔空了。只剩風。"
+   }
+  ]
+ },
+ {
+  "key": "c1.wild_shrine",
+  "src_line": 4199,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "小祠",
+    "text": "「守的不是門。是門後那一點光。」"
+   },
+   {
+    "speaker": "內心",
+    "text": "……雷歐也該記得這個。"
+   }
+  ]
+ },
+ {
+  "key": "c1.crate_empty",
+  "src_line": 4205,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "箱子空了。"
+   }
+  ]
+ },
+ {
+  "key": "c1.leo_gate_cleared",
+  "src_line": 4219,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "聖獅已醒。內殿安靜下來。東南方霧道已開。"
+   }
+  ]
+ },
+ {
+  "key": "c1.leo_win",
+  "src_line": 4232,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "雷歐",
+    "text": "原來……真正的騎士，是即使渺小也不退縮的勇氣。"
+   },
+   {
+    "speaker": "雷歐",
+    "text": "去吧，兔子——堡壘的門，為你而開。"
+   },
+   {
+    "speaker": "雷歐",
+    "text": "黑焰要的不是你的命，是你的欲望。別餵它。"
+   },
+   {
+    "speaker": "系統",
+    "text": "金 80、星屑 4，體力上限多了 10。鬃毛透出金色。怒雷與反戈也跟著醒來。"
+   }
+  ]
+ },
+ {
+  "key": "c2.arrive",
+  "src_line": 4325,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "霧隱",
+    "text": "霧裡真假同色。你的眼睛，借我用用。"
+   },
+   {
+    "speaker": "霧隱",
+    "text": "先住一晚。走夜路的人，會先斷在自己心裡。"
+   },
+   {
+    "speaker": "系統",
+    "text": "客棧營火處……似乎有東西在等你。"
+   }
+  ]
+ },
+ {
+  "key": "c2.lantern",
+  "src_line": 4347,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "霧燈只照三步。再遠的路，要靠自己的眼睛。"
+   }
+  ]
+ },
+ {
+  "key": "c2.well_fog",
+  "src_line": 4349,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "井裡不是水——是更濃的霧。有人說掉下去會夢見自己。"
+   }
+  ]
+ },
+ {
+  "key": "c2.laundry",
+  "src_line": 4351,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "衣裳濕著，卻沒有人影。霧會替人晾衣服嗎？"
+   }
+  ]
+ },
+ {
+  "key": "c2.cat_shadow",
+  "src_line": 4353,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "影貓",
+    "text": "……喵？"
+   },
+   {
+    "speaker": "內心",
+    "text": "是真貓，還是霧學的叫聲？"
+   }
+  ]
+ },
+ {
+  "key": "c2.shrine",
+  "src_line": 4358,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "霧祠",
+    "text": "「真者一瞬。假者千層。」"
+   },
+   {
+    "speaker": "內心",
+    "text": "一瞬就夠。我只要那一瞬。"
+   }
+  ]
+ },
+ {
+  "key": "c2.train_need_letter",
+  "src_line": 4364,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "心神不寧。先回客棧。"
+   }
+  ]
+ },
+ {
+  "key": "c2.train_tip",
+  "src_line": 4366,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "霧隱",
+    "text": "影子會騙人。真身會亮一下。記住那一下。"
+   },
+   {
+    "speaker": "系統",
+    "text": "本體發白的那一瞬才打得中。用 Tab 或 1／2／3 換目標。"
+   }
+  ]
+ },
+ {
+  "key": "c2.letter_reread",
+  "src_line": 4384,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "信還在日誌裡。"
+   },
+   {
+    "speaker": "日誌",
+    "text": "「我還在。不是因為預言，是因為你還沒回來。」——麥穗"
+   }
+  ]
+ },
+ {
+  "key": "c2.fog_need_letter",
+  "src_line": 4411,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "霧隱",
+    "text": "心裡還欠一封信。先回客棧。"
+   }
+  ]
+ },
+ {
+  "key": "c2.fog_cleared",
+  "src_line": 4414,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "幻廊已靜。可回村或繼續旅程。"
+   }
+  ]
+ },
+ {
+  "key": "c2.fog_win",
+  "src_line": 4424,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "白霧",
+    "text": "看破了呀……真沒意思。"
+   },
+   {
+    "speaker": "白霧",
+    "text": "霧散了，路就在你眼前——走吧。"
+   },
+   {
+    "speaker": "系統",
+    "text": "金 70、星屑 4，體力上限多 8。皮毛染上霧色。山上傳來鐘聲……"
+   }
+  ]
+ },
+ {
+  "key": "region.mist_locked",
+  "src_line": 4484,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "霧還太遠。先在騎士堡把劍養起來。"
+   }
+  ]
+ },
+ {
+  "key": "region.dojo_warn",
+  "src_line": 4489,
+  "vars": {
+   "power": "7"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "道場氣壓重。建議戰力 26+（你 7），或先走霧隱／升等練功。"
+   }
+  ]
+ },
+ {
+  "key": "region.forest_warn",
+  "src_line": 4494,
+  "vars": {
+   "power": "7"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "林風很急。建議戰力 30+（你 7）。可先道場／獵場練。"
+   }
+  ]
+ },
+ {
+  "key": "region.coast_warn",
+  "src_line": 4499,
+  "vars": {
+   "power": "7"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "岸浪重。建議戰力 30+（你 7）。"
+   }
+  ]
+ },
+ {
+  "key": "c3.soft_warn",
+  "src_line": 4510,
+  "vars": {
+   "power": "7"
+  },
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "你尚未看破白霧也能上山——阿波不會因此手下留情。戰力 7。"
+   },
+   {
+    "speaker": "系統",
+    "text": "不夠的話，回城裡鍛造、觀星，或去演武場、星途獵場練練。"
+   }
+  ]
+ },
+ {
+  "key": "c3.arrive",
+  "src_line": 4540,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "阿茶",
+    "text": "客從霧裡來？宗師在試煉堂。他不先出手，他先問。"
+   },
+   {
+    "speaker": "系統",
+    "text": "道場可走。試煉堂挑戰阿波。"
+   }
+  ]
+ },
+ {
+  "key": "c3.gate_bell",
+  "src_line": 4559,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "鐘響一聲。山谷把回音還給你：為何而戰？"
+   }
+  ]
+ },
+ {
+  "key": "c3.dummy_done",
+  "src_line": 4562,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "木人樁上已有新拳印。你的。"
+   }
+  ]
+ },
+ {
+  "key": "c3.scroll_wall",
+  "src_line": 4573,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "拳譜",
+    "text": "「破勢在勤，不在怒。」"
+   },
+   {
+    "speaker": "拳譜",
+    "text": "「怒滿則拳散。散則勢破。」"
+   }
+  ]
+ },
+ {
+  "key": "c3.stone_garden",
+  "src_line": 4578,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "石子排成拳形。有人每天挪一顆——挪到心靜為止。"
+   }
+  ]
+ },
+ {
+  "key": "c3.abo_cleared",
+  "src_line": 4602,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "試煉堂空了。阿波坐在門檻上喝茶。"
+   }
+  ]
+ },
+ {
+  "key": "c4.arrive",
+  "src_line": 4693,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "風耳",
+    "text": "你若要見疾影——先學會等。風停的那一下，才是真的。"
+   },
+   {
+    "speaker": "系統",
+    "text": "遊俠森林可走。疾影巢在東。"
+   }
+  ]
+ },
+ {
+  "key": "c4.treehouse",
+  "src_line": 4712,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "樹屋用藤索連著。風箏線纏在欄杆上，線頭還在顫。"
+   },
+   {
+    "speaker": "孩童",
+    "text": "（遠遠）我的風箏……被風帶走了！"
+   }
+  ]
+ },
+ {
+  "key": "c4.kite_freed",
+  "src_line": 4718,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "風箏已還給孩子。線捲得整整齊齊。"
+   }
+  ]
+ },
+ {
+  "key": "c4.stream",
+  "src_line": 4730,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "溪水很清。水面映出葉影——沒有紫縫。難得。"
+   }
+  ]
+ },
+ {
+  "key": "c4.owl_post",
+  "src_line": 4732,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "貓頭鷹",
+    "text": "……"
+   },
+   {
+    "speaker": "內心",
+    "text": "牠在看風，不是看我。"
+   }
+  ]
+ },
+ {
+  "key": "c4.arrow_path_done",
+  "src_line": 4738,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "箭道安靜。偶爾仍有風切掠過草尖。"
+   }
+  ]
+ },
+ {
+  "key": "c4.watch_tower",
+  "src_line": 4748,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "碑文",
+    "text": "「疾影守風。風守行路之人。」"
+   },
+   {
+    "speaker": "碑文",
+    "text": "「若風狂了——等它記得，自己也曾為誰停過。」"
+   },
+   {
+    "speaker": "內心",
+    "text": "等……不是弱，是看清楚。"
+   }
+  ]
+ },
+ {
+  "key": "c4.herb_looted",
+  "src_line": 4755,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "藥草坡的露水已經收過。"
+   }
+  ]
+ },
+ {
+  "key": "c4.falcon_cleared",
+  "src_line": 4778,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "巢空了。只剩風，和一撮銀羽。"
+   }
+  ]
+ },
+ {
+  "key": "c4.falcon_win",
+  "src_line": 4789,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "疾影",
+    "text": "你追上了風……有趣的傢伙。"
+   },
+   {
+    "speaker": "疾影",
+    "text": "銀羽給你。不是獎賞——是記得：有人肯為你停。"
+   },
+   {
+    "speaker": "風耳",
+    "text": "（遠處）……走吧。海岸還在吼。"
+   },
+   {
+    "speaker": "系統",
+    "text": "金 85、星屑 4，體力上限多 8。毛色轉成風的灰。"
+   }
+  ]
+ },
+ {
+  "key": "c5.arrive",
+  "src_line": 4860,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "潮吼",
+    "text": "石拳不是為了砸碎你。它忘了力氣該往哪放。"
+   },
+   {
+    "speaker": "系統",
+    "text": "海岸可走。石拳崖在東。"
+   }
+  ]
+ },
+ {
+  "key": "c5.dock",
+  "src_line": 4879,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "碼頭鎮幾乎空了。漁網乾在架上，像沒人敢出海。"
+   },
+   {
+    "speaker": "系統",
+    "text": "有人用炭在板上寫：力氣若沒有方向，只是浪打空岸。"
+   }
+  ]
+ },
+ {
+  "key": "c5.boat_wreck",
+  "src_line": 4884,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "破船骸裡還有半袋鹽。鹽是乾的——浪沒有把它們帶走，是人先走了。"
+   }
+  ]
+ },
+ {
+  "key": "c5.net_rack",
+  "src_line": 4886,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "漁網結滿鹽晶。像誰把浪編織起來，又忘了收。"
+   }
+  ]
+ },
+ {
+  "key": "c5.runestone",
+  "src_line": 4888,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "符文石",
+    "text": "「力為護，不為炫。」"
+   },
+   {
+    "speaker": "內心",
+    "text": "……和潮吼說的一樣。"
+   }
+  ]
+ },
+ {
+  "key": "c5.forge_tip_done",
+  "src_line": 4894,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "潮吼",
+    "text": "（回音）斧意在刃上，不在嗓門。"
+   }
+  ]
+ },
+ {
+  "key": "c5.cliff_path",
+  "src_line": 4906,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "峭壁道上落石痕新舊交錯。地面曾亮過安全圈的燒痕。"
+   },
+   {
+    "speaker": "系統",
+    "text": "落石掉下來之前，地上會先亮起來。看到就按 J 躲開。"
+   }
+  ]
+ },
+ {
+  "key": "c5.boar_cleared",
+  "src_line": 4927,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "崖上安靜。只剩浪聲，像鼓掌。"
+   }
+  ]
+ },
+ {
+  "key": "c5.boar_win",
+  "src_line": 4938,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "石拳",
+    "text": "哈哈哈！站到最後的是你！"
+   },
+   {
+    "speaker": "石拳",
+    "text": "……力氣，是用來護岸的。多謝提醒。"
+   },
+   {
+    "speaker": "潮吼",
+    "text": "（大笑）好兔子！去塔吧！"
+   },
+   {
+    "speaker": "系統",
+    "text": "金 95、星屑 5，體力上限多 10。毛尖燒出一圈火色。"
+   }
+  ]
+ },
+ {
+  "key": "c6.bell_not_rung",
+  "src_line": 5000,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "山鐘未響。先上道場。"
+   }
+  ]
+ },
+ {
+  "key": "c6.path_not_open",
+  "src_line": 5002,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "路還未開。先走完眼前的試煉。"
+   }
+  ]
+ },
+ {
+  "key": "c6.floor_shadow",
+  "src_line": 5063,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "影之廊。牆上有人低語。"
+   },
+   {
+    "speaker": "幻聲",
+    "text": "變強就能救所有人。吞下焰，世界會安靜。"
+   },
+   {
+    "speaker": "內心",
+    "text": "……不。那不是安靜，是熄滅。"
+   },
+   {
+    "speaker": "系統",
+    "text": "你穿過影之廊，未拔劍。"
+   }
+  ]
+ },
+ {
+  "key": "c6.demon_win",
+  "src_line": 5118,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "魔王",
+    "text": "不可能……被一隻……兔子……"
+   },
+   {
+    "speaker": "前任",
+    "text": "……不。是應該的。"
+   },
+   {
+    "speaker": "前任",
+    "text": "下次……別走我的路。"
+   },
+   {
+    "speaker": "前任",
+    "text": "劍還你。或者——交給下一個跟我們一樣輕的人。"
+   },
+   {
+    "speaker": "系統",
+    "text": "金 150、星屑 8。五道星光升起，落在你的毛上。"
+   }
+  ]
+ },
+ {
+  "key": "post.rift_not_open",
+  "src_line": 5206,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "系統",
+    "text": "裂縫尚未溢出。先走完塔頂的試煉。"
+   }
+  ]
+ },
+ {
+  "key": "post.rift_win",
+  "src_line": 5331,
+  "vars": {
+   "mode": "«v0»",
+   "wins": "18",
+   "extra": "«v2»"
+  },
+  "expect": [
+   {
+    "speaker": "無臉",
+    "text": "…………"
+   },
+   {
+    "speaker": "系統",
+    "text": "「«v0»」暫熄。勝場：18。«v2»"
+   }
+  ]
+ }
+]

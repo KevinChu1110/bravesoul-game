@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-## 經濟守門 SQL 的本機驗證
+## 伺服器端 SQL 的本機驗證（經濟守門 + 體驗回報）
 ##
 ## 在本機起一個丟完即棄的 PostgreSQL，補上 Supabase 才有的 auth schema，
-## 依序跑 supabase/schema.sql + supabase/economy.sql，然後用
-## supabase/economy_test.sql 實際演一遍作弊情境。
+## 依序跑 schema.sql + economy.sql + telemetry.sql，然後用
+## telemetry_test.sql / economy_test.sql 實際演一遍作弊與灌爆情境。
 ##
 ## 為什麼要這樣做：這些規則的價值全在「擋不擋得住」，
 ## 光看 SQL 讀不出 least()/floor() 的邊界對不對，得真的跑。
@@ -69,12 +69,40 @@ if ! "${PSQL[@]}" -f "$ROOT/supabase/economy.sql" >"$TMP/economy.log" 2>&1; then
 fi
 echo "  ok"
 
-echo "== 重跑一次（確認可重複執行）=="
-if ! "${PSQL[@]}" -f "$ROOT/supabase/schema.sql" >"$TMP/schema2.log" 2>&1 \
-  || ! "${PSQL[@]}" -f "$ROOT/supabase/economy.sql" >"$TMP/economy2.log" 2>&1; then
-  echo "FAIL: 重跑失敗"; tail -30 "$TMP/schema2.log" "$TMP/economy2.log"; exit 1
+## Supabase 會對 public schema 的新表自動授權給 anon／authenticated。
+## telemetry.sql 的權限收斂就是在收這件事，所以要先把這個預設補上，
+## 否則測到的是「本機預設沒開」而不是「收斂有效」。
+"${PSQL[@]}" >"$TMP/defpriv.log" 2>&1 <<'SQL'
+alter default privileges in schema public grant all on tables to anon, authenticated;
+alter default privileges in schema public grant all on sequences to anon, authenticated;
+SQL
+
+echo "== 跑 telemetry.sql =="
+if ! "${PSQL[@]}" -f "$ROOT/supabase/telemetry.sql" >"$TMP/telemetry.log" 2>&1; then
+  echo "FAIL: telemetry.sql 有錯"; tail -40 "$TMP/telemetry.log"; exit 1
 fi
 echo "  ok"
+
+echo "== 重跑一次（確認可重複執行）=="
+if ! "${PSQL[@]}" -f "$ROOT/supabase/schema.sql" >"$TMP/schema2.log" 2>&1 \
+  || ! "${PSQL[@]}" -f "$ROOT/supabase/economy.sql" >"$TMP/economy2.log" 2>&1 \
+  || ! "${PSQL[@]}" -f "$ROOT/supabase/telemetry.sql" >"$TMP/telemetry2.log" 2>&1; then
+  echo "FAIL: 重跑失敗"; tail -30 "$TMP/schema2.log" "$TMP/economy2.log" "$TMP/telemetry2.log"; exit 1
+fi
+echo "  ok"
+
+## 遙測測試要在 economy_test 之前跑：economy_test 開頭會把 public 底下
+## 所有表都授權給 anon，跑在它後面就測不出遙測的權限收斂了。
+echo "== 演遙測情境 =="
+if ! "${PSQL[@]}" -f "$ROOT/supabase/telemetry_test.sql" 2>&1 | tee "$TMP/tel_test.log"; then
+  echo "FAIL: 遙測情境測試沒跑完"; exit 1
+fi
+if grep -q "TELEMETRY_SQL_FAIL" "$TMP/tel_test.log"; then
+  echo; echo "TESTS FAILED"; exit 1
+fi
+if ! grep -q "TELEMETRY_SQL_OK" "$TMP/tel_test.log"; then
+  echo; echo "FAIL: 遙測測試沒有印出結束哨兵"; exit 1
+fi
 
 echo "== 演作弊情境 =="
 if ! "${PSQL[@]}" -f "$ROOT/supabase/economy_test.sql" 2>&1 | tee "$TMP/test.log"; then

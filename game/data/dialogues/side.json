@@ -1,0 +1,101 @@
+{
+  "side.guard_dog": [
+    {
+      "speaker": "守車犬",
+      "text": "汪。（尾巴一下，像在說：先付金幣。）"
+    }
+  ],
+  "side.training_need_weapon": [
+    {
+      "speaker": "旁白",
+      "text": "演武台沙上還有舊腳印。先去釘釘把劍養好再練。"
+    }
+  ],
+  "side.training_daily_cap": [
+    {
+      "speaker": "系統",
+      "text": "今日練功已達上限。去野外或獵場換換空氣。"
+    }
+  ],
+  "side.training_result": [
+    {
+      "speaker": "系統",
+      "text": "{msg}"
+    },
+    {
+      "speaker": "系統",
+      "text": "戰力現為 {power}。材料可拿去釘釘鍛武器，或賣給琥珀。"
+    }
+  ],
+  "side.weapon_rack_untasked": [
+    {
+      "speaker": "旁白",
+      "text": "武器架空了大半。有一把斷劍半埋沙裡——刃口很舊。"
+    }
+  ],
+  "side.broken_blade_gone": [
+    {
+      "speaker": "旁白",
+      "text": "這裡已經沒有釘釘要的東西了。"
+    }
+  ],
+  "side.amber_has_letter": [
+    {
+      "speaker": "琥珀",
+      "text": "喔？你手上那封……霧隱的印？交給頭領吧，我只收金幣不收心事。"
+    },
+    {
+      "speaker": "琥珀",
+      "text": "材料行照開。鍛造材、紅水，現貨都有。"
+    }
+  ],
+  "side.amber_shop_open": [
+    {
+      "speaker": "琥珀",
+      "text": "材料行開張。鐵屑、星砂、橡脂、騎士碎鐵，打怪掉的我收，缺的我賣。"
+    },
+    {
+      "speaker": "琥珀",
+      "text": "算盤要會打：出去打，掉的賣我，換錢去鍛；不夠再跟我買，再出去打。兔子也得會算帳。"
+    }
+  ],
+  "side.ronin_guard_fire": [
+    {
+      "speaker": "黑焰浪人",
+      "portrait": "road_bandit",
+      "text": "我在這裡守火。上去的人……別學我把焰當柴。"
+    },
+    {
+      "speaker": "黑焰浪人",
+      "text": "你若倒下，我會把你拖回來。——只一次。"
+    }
+  ],
+  "side.ronin_gone": [
+    {
+      "speaker": "旁白",
+      "text": "地上只剩燒過的靴印。浪人已不在。"
+    }
+  ],
+  "side.ronin_too_early": [
+    {
+      "speaker": "黑焰浪人",
+      "text": "……還太早。先去打你的獅子。"
+    }
+  ],
+  "side.ronin_defeated": [
+    {
+      "speaker": "黑焰浪人",
+      "text": "……強……又如何……焰還是空的。"
+    },
+    {
+      "speaker": "系統",
+      "text": "戰勝黑焰浪人。金 55 · 星屑 3 · 經驗 {xp}{level_up}。他倒下的地方，靴印不再燒。"
+    }
+  ],
+  "side.ding_debt_remind": [
+    {
+      "speaker": "釘釘",
+      "text": "斷劍還在演武場。別跟我扯廢話。"
+    }
+  ]
+}
