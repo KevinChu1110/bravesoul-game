@@ -4,7 +4,11 @@
 
 1. 到 [Supabase](https://supabase.com) 建專案  
 2. SQL Editor 執行 repo 內 `supabase/schema.sql`  
-3. 複製 **Project URL** 與 **anon public** key  
+3. SQL Editor 再執行 `supabase/economy.sql`（經濟守門，**順序不能顛倒**）  
+4. 複製 **Project URL** 與 **anon public** key  
+
+> 兩個檔都可以重複執行。但 `schema.sql` 會把 `economy.sql` 移除的舊寫入權限加回來，
+> 所以每次重跑 `schema.sql` 之後都要接著再跑一次 `economy.sql`。
 
 ## 2. 本機設定（勿 commit key）
 
@@ -52,4 +56,43 @@ Dashboard → Authentication → Providers → **Email** 開啟。
 
 - 只用 **anon** key + RLS（schema 已寫）  
 - **service_role** 永不進客戶端  
-- itch 包體不內建 key；玩家可選填或你用私有渠道發  
+- itch 包體不內建 key；玩家可選填或你用私有渠道發
+
+### 4.1 經濟守門（`economy.sql`）
+
+單機模擬的遊戲，伺服器驗不出「這 300 金是不是真的打贏怪拿的」。所以不假裝驗得出來，
+改成分兩本帳：
+
+| 帳 | 內容 | 誰能寫 |
+|----|------|--------|
+| `saves.payload` | 玩家自己的存檔 | 玩家（經 `save_push`） |
+| `player_econ` | **可拿去跟別人交易**的金幣與物品 | 只有伺服器 |
+
+影子帳往下精確跟隨存檔（花掉就是花掉），往上只能按真實時間長：金幣每秒 60、
+物品全品項合計每小時 120 個，額度會結轉但有封頂。市集買賣、共鬥領獎一律動影子帳。
+
+結論：改客戶端最多把自己的存檔改壞，沒辦法對別人的經濟灌水。
+
+參數在 `public.econ_config` 單列表，直接改欄位即可調鬆緊。
+
+**驗證**：`bash tools/test_economy_sql.sh` 會在本機起一個丟完即棄的 PostgreSQL，
+跑完 schema + economy，再演 21 種作弊情境。改過 SQL 一定要跑這支。
+
+**巡查**：
+
+```sql
+select * from public.econ_audit order by created_at desc limit 50;
+select user_id, gold, strikes from public.player_econ order by strikes desc limit 20;
+```
+
+`strikes` 是「存檔報的數字被影子帳削掉」的次數。正常玩家偶爾會有（長時間離線後
+第一次上線），持續累積才值得看。確認濫用後手動停權：
+
+```sql
+update public.player_econ set blocked = true where user_id = '...';
+```
+
+### 4.2 升級注意
+
+`economy.sql` 跑完之後，**0.14.9 以前的客戶端會連不上市集與雲存檔**——它們直接寫表，
+現在會被擋成 42501。伺服器與客戶端要同版更新。  

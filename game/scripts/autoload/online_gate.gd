@@ -21,6 +21,8 @@ var last_status: String = "純單機"
 var last_health: String = "尚未檢測"
 var last_health_ok: bool = false
 var last_health_ms: int = -1
+## 伺服器認定的可交易金幣（影子帳）。市集買東西是扣這一筆，不是扣存檔裡的數字。
+var ledger_gold: int = -1
 var _http: HTTPRequest
 var _busy: bool = false
 var _pending: Callable = Callable()
@@ -143,6 +145,7 @@ func _load_session() -> void:
 func sign_out() -> void:
 	user_id = ""
 	access_token = ""
+	ledger_gold = -1
 	if FileAccess.file_exists(SESSION_PATH):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(SESSION_PATH))
 	last_error = ""
@@ -251,20 +254,23 @@ func push_cloud_save(cb: Callable = Callable()) -> void:
 		_fail("未上線", cb)
 		return
 	var payload: Dictionary = GameState.to_dict()
-	var body := {
-		"user_id": user_id,
-		"payload": payload,
-		"schema_version": int(payload.get("version", 1)),
-		"updated_at": Time.get_datetime_string_from_system(true),
-	}
-	_request("POST", "/rest/v1/saves", body, true, _cb_push_save.bind(cb), "resolution=merge-duplicates,return=minimal")
+	## 存檔只能經 save_push 進資料庫；伺服器同時更新可交易金幣／物品的帳
+	_request(
+		"POST",
+		"/rest/v1/rpc/save_push",
+		{"p_payload": payload, "p_schema_version": int(payload.get("version", 1))},
+		true,
+		_cb_push_save.bind(cb)
+	)
 
 
-func _cb_push_save(cb: Callable, ok: bool, _body: Variant) -> void:
-	if ok:
-		_ok({"msg": "雲存檔已推送"}, cb)
-	else:
-		_fail(last_error if last_error != "" else "推送失敗", cb)
+func _cb_push_save(cb: Callable, ok: bool, body: Variant) -> void:
+	var row := _rpc_row(body)
+	if not ok or str(row.get("error", "")) != "":
+		_fail(_rpc_error(ok, row, "推送失敗"), cb)
+		return
+	ledger_gold = int(row.get("ledger_gold", ledger_gold))
+	_ok({"msg": "雲存檔已推送", "ledger_gold": ledger_gold}, cb)
 
 
 func pull_cloud_save(cb: Callable = Callable()) -> void:
@@ -393,95 +399,68 @@ func market_create_listing(item_id: String, qty: int, price: int, cb: Callable =
 	if not is_signed_in():
 		_fail("未上線", cb)
 		return
-	var body := {
-		"seller_id": user_id,
-		"seller_name": display_name,
-		"item_id": item_id,
-		"qty": qty,
-		"price": price,
-		"status": "active",
-	}
-	_request("POST", "/rest/v1/market_listings", body, true, _cb_market_create.bind(cb), "return=representation")
+	_request(
+		"POST",
+		"/rest/v1/rpc/market_list_item",
+		{"p_item_id": item_id, "p_qty": qty, "p_price": price},
+		true,
+		_cb_market_create.bind(cb)
+	)
 
 
 func _cb_market_create(cb: Callable, ok: bool, body: Variant) -> void:
-	if ok:
-		_ok({"msg": "上架成功", "row": body}, cb)
-	else:
-		_fail(last_error if last_error != "" else "上架失敗", cb)
+	var row := _rpc_row(body)
+	if not ok or str(row.get("error", "")) != "":
+		_fail(_rpc_error(ok, row, "上架失敗"), cb)
+		return
+	_ok({"msg": "上架成功", "row": row}, cb)
 
 
 func market_cancel_listing(listing_id: String, cb: Callable = Callable()) -> void:
 	if not is_signed_in():
 		_fail("未上線", cb)
 		return
-	## 先取回內容再標 cancelled
+	## 下架與退貨在伺服器同一筆交易裡做完，不會退兩次
 	_request(
-		"GET",
-		"/rest/v1/market_listings?id=eq.%s&seller_id=eq.%s&status=eq.active&select=*" % [
-			listing_id.uri_encode(), user_id
-		],
-		null,
+		"POST",
+		"/rest/v1/rpc/market_cancel_listing",
+		{"p_listing_id": _as_listing_id(listing_id)},
 		true,
-		_cb_market_cancel_fetch.bind(listing_id, cb)
+		_cb_market_cancel_done.bind(cb)
 	)
 
 
-func _cb_market_cancel_fetch(listing_id: String, cb: Callable, ok: bool, body: Variant) -> void:
-	if not ok or not (body is Array) or (body as Array).is_empty():
-		_fail("找不到可下架的單", cb)
+func _cb_market_cancel_done(cb: Callable, ok: bool, body: Variant) -> void:
+	var row := _rpc_row(body)
+	if not ok or str(row.get("error", "")) != "":
+		_fail(_rpc_error(ok, row, "下架失敗"), cb)
 		return
-	var row: Dictionary = (body as Array)[0]
-	_request(
-		"PATCH",
-		"/rest/v1/market_listings?id=eq.%s&seller_id=eq.%s" % [listing_id.uri_encode(), user_id],
-		{"status": "cancelled"},
-		true,
-		_cb_market_cancel_done.bind(row, cb),
-		"return=minimal"
-	)
-
-
-func _cb_market_cancel_done(row: Dictionary, cb: Callable, ok: bool, _b: Variant) -> void:
-	if ok:
-		_ok({
-			"msg": "已下架",
-			"item_id": str(row.get("item_id", "")),
-			"qty": int(row.get("qty", 0)),
-		}, cb)
-	else:
-		_fail("下架失敗", cb)
+	_ok({
+		"msg": "已下架",
+		"item_id": str(row.get("item_id", "")),
+		"qty": int(row.get("qty", 0)),
+	}, cb)
 
 
 func market_buy(listing_id: String, cb: Callable = Callable()) -> void:
 	if not is_signed_in():
 		_fail("未上線", cb)
 		return
-	var pid: Variant = listing_id
-	if listing_id.is_valid_int():
-		pid = int(listing_id)
-	elif listing_id.is_valid_float():
-		pid = int(float(listing_id))
 	_request(
 		"POST",
 		"/rest/v1/rpc/market_buy",
-		{"p_listing_id": pid},
+		{"p_listing_id": _as_listing_id(listing_id)},
 		true,
 		_cb_market_buy.bind(cb)
 	)
 
 
 func _cb_market_buy(cb: Callable, ok: bool, body: Variant) -> void:
-	if not ok:
-		_fail(last_error if last_error != "" else "購買失敗", cb)
-		return
-	var row: Dictionary = {}
-	if body is Dictionary:
-		row = body
-	elif body is Array and not (body as Array).is_empty():
-		row = (body as Array)[0]
-	if row.is_empty() or str(row.get("error", "")) != "":
-		_fail(str(row.get("error", "購買被拒")), cb)
+	var row := _rpc_row(body)
+	if not ok or row.is_empty() or str(row.get("error", "")) != "":
+		if row.has("ledger_gold"):
+			ledger_gold = int(row.get("ledger_gold", ledger_gold))
+		_fail(_rpc_error(ok, row, "購買被拒"), cb)
 		return
 	_ok({
 		"item_id": str(row.get("item_id", "")),
@@ -708,33 +687,21 @@ func room_report_result(room_id: String, result: String, cb: Callable = Callable
 	if not is_signed_in():
 		_fail("未上線", cb)
 		return
-	var status := "closed" if result == "win" else "open"
+	## 結果與房主自己的領獎標記由伺服器一起蓋，避免重複結算
 	_request(
-		"PATCH",
-		"/rest/v1/rooms?id=eq.%s&host_id=eq.%s" % [room_id.uri_encode(), user_id],
-		{
-			"result": result,
-			"status": status,
-			"updated_at": Time.get_datetime_string_from_system(true),
-		},
+		"POST",
+		"/rest/v1/rpc/room_report_result",
+		{"p_room_id": room_id, "p_result": result},
 		true,
-		_cb_room_report.bind(room_id, result, cb),
-		"return=minimal"
+		_cb_room_report.bind(result, cb)
 	)
 
 
-func _cb_room_report(room_id: String, result: String, cb: Callable, ok: bool, _b: Variant) -> void:
-	if not ok:
-		_fail("回報失敗", cb)
+func _cb_room_report(result: String, cb: Callable, ok: bool, body: Variant) -> void:
+	var row := _rpc_row(body)
+	if not ok or str(row.get("error", "")) != "":
+		_fail(_rpc_error(ok, row, "回報失敗"), cb)
 		return
-	_request(
-		"PATCH",
-		"/rest/v1/room_members?room_id=eq.%s&user_id=eq.%s" % [room_id.uri_encode(), user_id],
-		{"reward_claimed": true},
-		true,
-		Callable(),
-		"return=minimal"
-	)
 	_ok({"msg": "結果已回報", "result": result}, cb)
 
 
@@ -742,31 +709,22 @@ func room_claim_reward(room_id: String, cb: Callable = Callable()) -> void:
 	if not is_signed_in():
 		_fail("未上線", cb)
 		return
+	## 「查完再標」中間有空隙可以連點兩次；改成伺服器一筆搞定
 	_request(
-		"GET",
-		"/rest/v1/room_members?room_id=eq.%s&user_id=eq.%s&select=*" % [room_id.uri_encode(), user_id],
-		null,
+		"POST",
+		"/rest/v1/rpc/room_claim_reward",
+		{"p_room_id": room_id},
 		true,
-		_cb_room_claim_fetch.bind(room_id, cb)
+		_cb_room_claim.bind(cb)
 	)
 
 
-func _cb_room_claim_fetch(room_id: String, cb: Callable, ok: bool, body: Variant) -> void:
-	if not ok or not (body is Array) or (body as Array).is_empty():
-		_fail("非房間成員", cb)
+func _cb_room_claim(cb: Callable, ok: bool, body: Variant) -> void:
+	var row := _rpc_row(body)
+	if not ok or str(row.get("error", "")) != "":
+		_fail(_rpc_error(ok, row, "領獎失敗"), cb)
 		return
-	var row: Dictionary = (body as Array)[0]
-	if bool(row.get("reward_claimed", false)):
-		_fail("已領過共鬥獎", cb)
-		return
-	_request(
-		"PATCH",
-		"/rest/v1/room_members?room_id=eq.%s&user_id=eq.%s" % [room_id.uri_encode(), user_id],
-		{"reward_claimed": true},
-		true,
-		_cb_simple_ok.bind("可領獎", "領獎標記失敗", cb),
-		"return=minimal"
-	)
+	_ok({"msg": "可領獎"}, cb)
 
 
 ## ── Realtime 事件（HTTP 推／拉；WS 見 RealtimeBridge）──
@@ -864,6 +822,89 @@ func _cb_simple_ok(ok_msg: String, fail_msg: String, cb: Callable, ok: bool, _b:
 		_fail(fail_msg, cb)
 
 
+## ── RPC 小工具 ──
+
+## RPC 回來的可能是物件、也可能是包一層的陣列
+func _rpc_row(body: Variant) -> Dictionary:
+	if body is Dictionary:
+		return body
+	if body is Array and not (body as Array).is_empty():
+		var first: Variant = (body as Array)[0]
+		if first is Dictionary:
+			return first
+	return {}
+
+
+func _rpc_error(http_ok: bool, row: Dictionary, fallback: String) -> String:
+	var e := str(row.get("error", ""))
+	if e != "":
+		return e
+	if not http_ok and last_error != "":
+		return last_error
+	return fallback
+
+
+func _as_listing_id(listing_id: String) -> Variant:
+	if listing_id.is_valid_int():
+		return int(listing_id)
+	if listing_id.is_valid_float():
+		return int(float(listing_id))
+	return listing_id
+
+
+## ── 排行榜／影子帳 ──
+
+func leaderboard_submit(board: String, score: int, cb: Callable = Callable()) -> void:
+	if not is_signed_in():
+		_fail("未上線", cb)
+		return
+	_request(
+		"POST",
+		"/rest/v1/rpc/leaderboard_submit",
+		{"p_board": board, "p_score": maxi(0, score)},
+		true,
+		_cb_leaderboard.bind(cb)
+	)
+
+
+func _cb_leaderboard(cb: Callable, ok: bool, body: Variant) -> void:
+	var row := _rpc_row(body)
+	if not ok or str(row.get("error", "")) != "":
+		_fail(_rpc_error(ok, row, "上榜失敗"), cb)
+		return
+	_ok({"msg": "已記錄", "score": int(row.get("score", 0))}, cb)
+
+
+func leaderboard_fetch(board: String, cb: Callable = Callable()) -> void:
+	if not is_online_enabled():
+		_ok({"list": []}, cb)
+		return
+	var path := "/rest/v1/leaderboard?board=eq.%s&order=score.desc&limit=50&select=*" % board.uri_encode()
+	_request("GET", path, null, true, _cb_list.bind(cb))
+
+
+## 查伺服器認定的可交易餘額（市集面板顯示用）
+func fetch_ledger(cb: Callable = Callable()) -> void:
+	if not is_signed_in():
+		_ok({"gold": 0, "items": {}}, cb)
+		return
+	_request("POST", "/rest/v1/rpc/econ_state", {}, true, _cb_ledger.bind(cb))
+
+
+func _cb_ledger(cb: Callable, ok: bool, body: Variant) -> void:
+	var row := _rpc_row(body)
+	if not ok or str(row.get("error", "")) != "":
+		_fail(_rpc_error(ok, row, "查詢餘額失敗"), cb)
+		return
+	ledger_gold = int(row.get("gold", 0))
+	var items: Variant = row.get("items", {})
+	_ok({
+		"gold": ledger_gold,
+		"items": items if items is Dictionary else {},
+		"seeded": bool(row.get("seeded", false)),
+	}, cb)
+
+
 func panel_bbcode() -> String:
 	var lines: PackedStringArray = []
 	lines.append("[b]連線／星途[/b]")
@@ -875,6 +916,8 @@ func panel_bbcode() -> String:
 		lines.append("延遲：約 %d ms" % last_health_ms)
 	if last_error != "":
 		lines.append("[color=#a55]最近錯誤：%s[/color]" % humanize_error(last_error))
+	if is_signed_in() and ledger_gold >= 0:
+		lines.append("市集可用金幣：%d" % ledger_gold)
 	lines.append("顯示名：%s" % display_name)
 	lines.append("純單機：%s" % ("是" if offline_only else "否"))
 	lines.append("後端：%s" % ("已設定" if is_configured() else "未設定"))
@@ -894,6 +937,53 @@ func humanize_error(raw: String) -> String:
 	if s == "":
 		return ""
 	var low := s.to_lower()
+	## 市集／共鬥的伺服器判定
+	if "not signed in" in low:
+		return "尚未登入，請先上線"
+	if "bad payload" in low:
+		return "存檔內容有問題，無法上傳"
+	if "bad result" in low:
+		return "戰果格式不對"
+	if "bad board" in low:
+		return "榜別不對"
+	if "score out of range" in low:
+		return "分數超出合理範圍"
+	if "not enough gold" in low:
+		return "可用金幣不足（市集認的是伺服器那筆餘額，先推一次雲存檔試試）"
+	if "not enough items" in low:
+		return "伺服器還沒認到這些材料，先推一次雲存檔再上架"
+	if "price out of range" in low:
+		return "訂價超出合理範圍，請調低一點"
+	if "item not tradeable" in low:
+		return "此物不可上架"
+	if "bad qty" in low:
+		return "數量不對"
+	if "too many listings" in low:
+		return "掛單已達上限，先下架幾筆"
+	if "daily listing limit" in low:
+		return "今天上架次數已達上限"
+	if "market blocked" in low:
+		return "此帳號的市集功能已停用"
+	if "listing gone" in low:
+		return "這筆掛單已被買走或下架"
+	if "cannot buy own" in low:
+		return "不能買自己的掛單"
+	if "already claimed" in low or "already settled" in low:
+		return "這份獎勵已經領過了"
+	if "no win yet" in low:
+		return "這場還沒打贏"
+	if "not a member" in low:
+		return "你不在這個房間裡"
+	if "not host" in low:
+		return "只有房主能回報結果"
+	if "room gone" in low:
+		return "房間已經不在了"
+	if "reward_claimed is server-managed" in low:
+		return "領獎狀態由伺服器管理，請用遊戲內的領獎鍵"
+	if "payload too large" in low:
+		return "存檔太大，無法上傳"
+	if "message rate limit" in low:
+		return "留言太頻繁，喘口氣再說"
 	if "anonymous_provider_disabled" in low or "anonymous sign-ins are disabled" in low:
 		return "訪客登入未開啟（請在 Supabase Auth 開啟 Anonymous）"
 	if "email_address_invalid" in low:

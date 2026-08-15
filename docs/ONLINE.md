@@ -93,9 +93,15 @@
 | 內容 | 權威 |
 |------|------|
 | 主線 flag、對話、單人戰鬥 | 客戶端 + 雲備份 |
+| **可交易的金幣與物品** | **伺服器影子帳 `player_econ`** |
+| 市集上架／購買／下架 | **伺服器**（`market_*` RPC） |
 | 活動有獎次數／排行／共鬥掉落 | **伺服器** |
 | 共鬥血量同步 | 房主（L2） |
 | 外觀展示 | 伺服器認可的 unlock 列表 |
+
+單機模擬驗不出玩家的金幣怎麼來的，所以不驗來源，改驗**成長速率**：影子帳往下
+精確跟隨存檔，往上只能按真實時間長。跟別人交易時看的是影子帳，不是存檔裡的數字。
+細節見 `supabase/economy.sql` 與 ONLINE_SETUP 的 4.1。
 
 ---
 
@@ -111,11 +117,14 @@ Base：`SUPABASE_URL` + `apikey`（anon key，RLS 保護）。
 ### 4.2 saves
 
 ```
-PUT /rest/v1/saves  { user_id, payload, schema_version, updated_at }
-GET /rest/v1/saves?user_id=eq.<id>&select=*
+POST /rest/v1/rpc/save_push  { p_payload, p_schema_version }
+GET  /rest/v1/saves?user_id=eq.<id>&select=*
 ```
 
-`payload` = `GameState.to_dict()` JSON。
+`p_payload` = `GameState.to_dict()` JSON。直接寫 `saves` 已被 RLS 擋掉——
+推送必須走 `save_push`，因為同一筆交易還要更新影子帳。
+
+回應 `{ ok, ledger_gold, seeded }`；`ledger_gold` 是伺服器認的可交易餘額。
 
 ### 4.3 presence
 
@@ -153,8 +162,35 @@ UPSERT event_progress { user_id, event_id, runs_total, token, updated_at }
 ### 4.7 leaderboard
 
 ```
-GET leaderboard?board=eq.rift_weekly&limit=50
+POST /rest/v1/rpc/leaderboard_submit  { p_board, p_score }
+GET  leaderboard?board=eq.rift_weekly&limit=50
 ```
+
+只進不退（低分不覆蓋高分），分數上限 1e8。直接寫表已擋掉。
+
+### 4.8 市集與影子帳
+
+```
+POST /rest/v1/rpc/market_list_item      { p_item_id, p_qty, p_price }
+POST /rest/v1/rpc/market_buy            { p_listing_id }
+POST /rest/v1/rpc/market_cancel_listing { p_listing_id }
+POST /rest/v1/rpc/market_claim_credit   {}
+POST /rest/v1/rpc/econ_state            {}
+GET  market_listings?status=eq.active&order=created_at.desc&limit=40
+```
+
+全部在伺服器單一交易內完成，所以下架不會退兩次貨、掛單不會被買兩次。
+上架會檢查影子帳有沒有這些貨、訂價有沒有超過「基準價 × 數量 × 20」。
+`econ_state` 給客戶端顯示「連線可用金幣」用。
+
+### 4.9 共鬥結算
+
+```
+POST /rest/v1/rpc/room_report_result  { p_room_id, p_result }
+POST /rest/v1/rpc/room_claim_reward   { p_room_id }
+```
+
+`reward_claimed` 由觸發器保護，客戶端改不動，所以獎勵一人一次。
 
 ---
 

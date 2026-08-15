@@ -25,6 +25,8 @@ const NPC_STOCK: Array[Dictionary] = [
 
 var _cache: Array = []  ## 最近拉到的上線掛單
 var _busy: bool = false
+## 伺服器認定的可交易餘額。連線交易看的是這一份，不是本地存檔的數字。
+var _ledger: Dictionary = {}
 
 
 func is_tradeable(item_id: String) -> bool:
@@ -285,6 +287,7 @@ func buy_listing(listing: Dictionary) -> Dictionary:
 func refresh_online(cb: Callable = Callable()) -> void:
 	if not online_mode():
 		_cache = []
+		_ledger = {}
 		if cb.is_valid():
 			cb.call({"ok": true, "list": browse_all()})
 		return
@@ -293,9 +296,31 @@ func refresh_online(cb: Callable = Callable()) -> void:
 		_busy = false
 		if bool(res.get("ok", false)):
 			_cache = res.get("list", [])
-		if cb.is_valid():
-			cb.call({"ok": true, "list": browse_all()})
+		OnlineGate.fetch_ledger(func(lg: Dictionary):
+			if bool(lg.get("ok", false)):
+				_ledger = lg
+			if cb.is_valid():
+				cb.call({"ok": true, "list": browse_all()})
+		)
 	)
+
+
+## 伺服器認的可用金幣；-1 代表還沒問到
+func ledger_gold() -> int:
+	if not online_mode() or _ledger.is_empty():
+		return -1
+	return int(_ledger.get("gold", 0))
+
+
+func ledger_seeded() -> bool:
+	return bool(_ledger.get("seeded", false))
+
+
+func ledger_qty(item_id: String) -> int:
+	var items: Variant = _ledger.get("items", {})
+	if items is Dictionary:
+		return int(items.get(item_id, 0))
+	return 0
 
 
 func browse_all() -> Array:
@@ -331,6 +356,11 @@ func status_bbcode() -> String:
 	lines.append("[b]星途市集[/b]")
 	lines.append("非同步掛單。手續費 %d%%（售出時從貨款扣）。" % int(FEE_RATE * 100))
 	lines.append("模式：%s" % ("連線市集" if online_mode() else "離線陰影（NPC＋本地掛單）"))
+	if online_mode():
+		if not ledger_seeded():
+			lines.append("[color=#c9a]連線交易的額度尚未建立：先推一次雲存檔，市集才認得你的家當。[/color]")
+		elif ledger_gold() >= 0:
+			lines.append("連線可用：%d 金（與別人交易只認這一筆）" % ledger_gold())
 	lines.append("待領貨款：%d 金" % pending_credit())
 	lines.append("可交易：狩獵材料、部分消耗品。")
 	lines.append("")

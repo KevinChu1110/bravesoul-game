@@ -12,14 +12,17 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+drop policy if exists "profiles_select_all" on public.profiles;
 create policy "profiles_select_all"
   on public.profiles for select
   using (true);
 
+drop policy if exists "profiles_upsert_own" on public.profiles;
 create policy "profiles_upsert_own"
   on public.profiles for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "profiles_update_own" on public.profiles;
 create policy "profiles_update_own"
   on public.profiles for update
   using (auth.uid() = user_id);
@@ -34,14 +37,17 @@ create table if not exists public.saves (
 
 alter table public.saves enable row level security;
 
+drop policy if exists "saves_select_own" on public.saves;
 create policy "saves_select_own"
   on public.saves for select
   using (auth.uid() = user_id);
 
+drop policy if exists "saves_insert_own" on public.saves;
 create policy "saves_insert_own"
   on public.saves for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "saves_update_own" on public.saves;
 create policy "saves_update_own"
   on public.saves for update
   using (auth.uid() = user_id);
@@ -61,14 +67,17 @@ create index if not exists presence_map_updated
 
 alter table public.presence enable row level security;
 
+drop policy if exists "presence_select_all" on public.presence;
 create policy "presence_select_all"
   on public.presence for select
   using (true);
 
+drop policy if exists "presence_upsert_own" on public.presence;
 create policy "presence_upsert_own"
   on public.presence for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "presence_update_own" on public.presence;
 create policy "presence_update_own"
   on public.presence for update
   using (auth.uid() = user_id);
@@ -87,10 +96,12 @@ create index if not exists messages_place_created
 
 alter table public.messages enable row level security;
 
+drop policy if exists "messages_select_all" on public.messages;
 create policy "messages_select_all"
   on public.messages for select
   using (true);
 
+drop policy if exists "messages_insert_own" on public.messages;
 create policy "messages_insert_own"
   on public.messages for insert
   with check (auth.uid() = user_id);
@@ -106,6 +117,7 @@ insert into public.candles (id, total) values (1, 0)
 
 alter table public.candles enable row level security;
 
+drop policy if exists "candles_select" on public.candles;
 create policy "candles_select"
   on public.candles for select
   using (true);
@@ -139,14 +151,17 @@ create table if not exists public.event_progress (
 
 alter table public.event_progress enable row level security;
 
+drop policy if exists "event_progress_select_own" on public.event_progress;
 create policy "event_progress_select_own"
   on public.event_progress for select
   using (auth.uid() = user_id);
 
+drop policy if exists "event_progress_upsert_own" on public.event_progress;
 create policy "event_progress_upsert_own"
   on public.event_progress for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "event_progress_update_own" on public.event_progress;
 create policy "event_progress_update_own"
   on public.event_progress for update
   using (auth.uid() = user_id);
@@ -166,14 +181,17 @@ create index if not exists leaderboard_board_score
 
 alter table public.leaderboard enable row level security;
 
+drop policy if exists "leaderboard_select_all" on public.leaderboard;
 create policy "leaderboard_select_all"
   on public.leaderboard for select
   using (true);
 
+drop policy if exists "leaderboard_upsert_own" on public.leaderboard;
 create policy "leaderboard_upsert_own"
   on public.leaderboard for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "leaderboard_update_own" on public.leaderboard;
 create policy "leaderboard_update_own"
   on public.leaderboard for update
   using (auth.uid() = user_id);
@@ -197,14 +215,17 @@ create index if not exists market_listings_active
 
 alter table public.market_listings enable row level security;
 
+drop policy if exists "market_select_active_or_own" on public.market_listings;
 create policy "market_select_active_or_own"
   on public.market_listings for select
   using (status = 'active' or seller_id = auth.uid() or buyer_id = auth.uid());
 
+drop policy if exists "market_insert_own" on public.market_listings;
 create policy "market_insert_own"
   on public.market_listings for insert
   with check (auth.uid() = seller_id);
 
+drop policy if exists "market_update_own_seller" on public.market_listings;
 create policy "market_update_own_seller"
   on public.market_listings for update
   using (auth.uid() = seller_id or auth.uid() = buyer_id);
@@ -217,6 +238,7 @@ create table if not exists public.market_credit (
 
 alter table public.market_credit enable row level security;
 
+drop policy if exists "market_credit_select_own" on public.market_credit;
 create policy "market_credit_select_own"
   on public.market_credit for select
   using (auth.uid() = user_id);

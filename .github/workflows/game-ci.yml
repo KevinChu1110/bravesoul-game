@@ -1,7 +1,8 @@
 ## 勇者之魂 · 遊戲本體 CI
 ##
-## test  : 每次 push / PR 都跑 — import → smoke → 9 個無頭測試
-## export: 手動或打 tag 才跑 — 需要 1GB 的 export templates，太慢不進 PR 流程
+## test        : 每次 push / PR 都跑 — import → smoke → 無頭測試 → 文字檢查
+## economy_sql : 每次 push / PR 都跑 — 起臨時 PostgreSQL，實演經濟守門的作弊情境
+## export      : 手動或打 tag 才跑 — 需要 1GB 的 export templates，太慢不進 PR 流程
 name: Game CI
 
 on:
@@ -12,6 +13,8 @@ on:
       - "web/**"
       - "tools/run_tests.sh"
       - "tools/check_player_text.py"
+      - "tools/test_economy_sql.sh"
+      - "supabase/**"
       - ".github/workflows/game-ci.yml"
   pull_request:
     paths:
@@ -19,6 +22,8 @@ on:
       - "web/**"
       - "tools/run_tests.sh"
       - "tools/check_player_text.py"
+      - "tools/test_economy_sql.sh"
+      - "supabase/**"
       - ".github/workflows/game-ci.yml"
   workflow_dispatch:
   release:
@@ -91,6 +96,30 @@ jobs:
       ## 玩家不該讀到我們怎麼規劃這款遊戲，只該讀到這款遊戲。
       - name: Spec-language check
         run: python3 tools/check_player_text.py
+
+  economy_sql:
+    name: Economy SQL guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      ## runner 內建 PostgreSQL，只是沒啟動；這裡不用它的服務，
+      ## 直接借它的執行檔起一個丟完即棄的叢集，跟本機跑法一致。
+      - name: Locate PostgreSQL
+        run: |
+          set -euo pipefail
+          bin="$(ls -d /usr/lib/postgresql/*/bin | sort -V | tail -1)"
+          echo "PGBIN=$bin" >> "$GITHUB_ENV"
+          "$bin/initdb" --version
+
+      ## initdb 不肯用 root 跑，借 runner 上既有的 postgres 使用者
+      - name: Economy guard scenarios
+        run: |
+          set -euo pipefail
+          sudo chmod -R a+rX "$GITHUB_WORKSPACE"
+          sudo -u postgres --preserve-env=PGBIN \
+            bash "$GITHUB_WORKSPACE/tools/test_economy_sql.sh"
 
   export:
     name: Export (win · mac · linux)
