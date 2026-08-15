@@ -10,7 +10,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 GAME="$ROOT/game"
 DIST="$ROOT/dist"
-VERSION="${VERSION:-0.7.0}"
+VERSION="${VERSION:-0.14.9}"
 GODOT="${GODOT:-godot}"
 
 TEMPLATES="$HOME/Library/Application Support/Godot/export_templates/4.7.1.stable"
@@ -38,7 +38,7 @@ export_one() {
 }
 
 zip_win() {
-  local out="$DIST/uploads/Cuiling-BraveSoul-${VERSION}-win.zip"
+  local out="$DIST/uploads/BraveSoul-${VERSION}-win.zip"
   rm -f "$out"
   (
     cd "$DIST/windows"
@@ -49,20 +49,20 @@ zip_win() {
 }
 
 zip_mac() {
-  local out="$DIST/uploads/Cuiling-BraveSoul-${VERSION}-mac.zip"
+  local out="$DIST/uploads/BraveSoul-${VERSION}-mac.zip"
   # Godot mac export 已是 zip；若產生 .app 再壓
-  if [[ -f "$DIST/macos/Cuiling-BraveSoul.zip" ]]; then
-    cp -f "$DIST/macos/Cuiling-BraveSoul.zip" "$out"
+  if [[ -f "$DIST/macos/BraveSoul.zip" ]]; then
+    cp -f "$DIST/macos/BraveSoul.zip" "$out"
     # 把 README 塞進 zip
     (
       cd "$DIST/macos"
       zip -9 "$out" README.txt 2>/dev/null || true
     )
-  elif [[ -d "$DIST/macos/Cuiling-BraveSoul.app" ]]; then
+  elif [[ -d "$DIST/macos/BraveSoul.app" ]]; then
     rm -f "$out"
     (
       cd "$DIST/macos"
-      zip -9 -ry "$out" "Cuiling-BraveSoul.app" README.txt
+      zip -9 -ry "$out" "BraveSoul.app" README.txt
     )
   else
     echo "WARN: macOS 產物未找到"
@@ -72,11 +72,11 @@ zip_mac() {
 }
 
 zip_linux() {
-  local out="$DIST/uploads/Cuiling-BraveSoul-${VERSION}-linux.zip"
+  local out="$DIST/uploads/BraveSoul-${VERSION}-linux.zip"
   rm -f "$out"
   (
     cd "$DIST/linux"
-    chmod +x Cuiling-BraveSoul.x86_64 2>/dev/null || true
+    chmod +x BraveSoul.x86_64 2>/dev/null || true
     zip -9 -r "$out" . -x "*.import" -x ".*"
   )
   echo "→ $out ($(du -h "$out" | cut -f1))"

@@ -20,8 +20,8 @@
   <main class="page">
     <div class="container">
       <div class="panel" style="margin-bottom:1.25rem">
-        <p style="margin:0 0 0.5rem">目前公開的是<strong>早期建置</strong>（封裝檔名仍為舊專案代號）。玩法與畫面以本站最新版本說明為準；完整 <span id="ver-label">v0.14</span> 出貨包準備中。</p>
-        <p class="muted" style="margin:0">系統需求：64 位元 · 約 200MB 磁碟 · 可連線亦可純單機。</p>
+        <p style="margin:0 0 0.5rem">最新建置 <strong id="ver-label">v0.14.9</strong> · 產品名<strong>勇者之魂</strong>（Brave Soul）。</p>
+        <p class="muted" style="margin:0">系統需求：64 位元 · 約 200～400MB 磁碟 · 可連線亦可純單機。macOS 首次若被擋：右鍵 → 打開。</p>
       </div>
 
       <h2 class="section-h2"><span class="accent"></span><span>選擇平台</span></h2>
@@ -30,9 +30,9 @@
           <div class="thumb"><img src="../media/shots/proof_13_dojo.png" alt="Windows" /></div>
           <div class="body">
             <div class="title">Windows</div>
-            <div class="meta">.zip · 約 58MB（0.7 建置）</div>
+            <div class="meta">BraveSoul-0.14.9-win.zip · 約 144MB</div>
             <p style="margin:0.75rem 0 0">
-              <a class="btn btn-primary" id="dl-win" href="https://github.com/KevinChu1110/bravesoul-game/releases">前往 Releases</a>
+              <a class="btn btn-primary" id="dl-win" href="https://github.com/KevinChu1110/bravesoul-game/releases/download/v0.14.9/BraveSoul-0.14.9-win.zip">下載 Windows</a>
             </p>
           </div>
         </div>
@@ -40,9 +40,9 @@
           <div class="thumb"><img src="../media/shots/proof_06_forest.png" alt="macOS" /></div>
           <div class="body">
             <div class="title">macOS</div>
-            <div class="meta">.zip · Apple Silicon / Intel 視建置</div>
+            <div class="meta">BraveSoul-0.14.9-mac.zip · universal · 約 165MB</div>
             <p style="margin:0.75rem 0 0">
-              <a class="btn btn-primary" id="dl-mac" href="https://github.com/KevinChu1110/bravesoul-game/releases">前往 Releases</a>
+              <a class="btn btn-primary" id="dl-mac" href="https://github.com/KevinChu1110/bravesoul-game/releases/download/v0.14.9/BraveSoul-0.14.9-mac.zip">下載 macOS</a>
             </p>
           </div>
         </div>
@@ -50,9 +50,9 @@
           <div class="thumb"><img src="../media/shots/proof_19_harbor.png" alt="Linux" /></div>
           <div class="body">
             <div class="title">Linux</div>
-            <div class="meta">.x86_64 / .zip</div>
+            <div class="meta">BraveSoul-0.14.9-linux.zip · 約 135MB</div>
             <p style="margin:0.75rem 0 0">
-              <a class="btn btn-primary" id="dl-linux" href="https://github.com/KevinChu1110/bravesoul-game/releases">前往 Releases</a>
+              <a class="btn btn-primary" id="dl-linux" href="https://github.com/KevinChu1110/bravesoul-game/releases/download/v0.14.9/BraveSoul-0.14.9-linux.zip">下載 Linux</a>
             </p>
           </div>
         </div>
@@ -90,11 +90,6 @@
         if (el) el.textContent = "v" + cfg.version;
       }
       var repo = cfg.repo || "https://github.com/KevinChu1110/bravesoul-game";
-      var rel = repo + "/releases";
-      ["dl-win", "dl-mac", "dl-linux"].forEach(function (id) {
-        var a = document.getElementById(id);
-        if (a) a.href = rel;
-      });
       var r = document.getElementById("repo-link");
       if (r) r.href = repo;
       if (cfg.itch) {
