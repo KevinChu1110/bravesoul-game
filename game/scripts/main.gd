@@ -4053,7 +4053,7 @@ func _go_path_panel(from_forge: bool = false) -> void:
 	body += "目前：%s · 戰力 %d · Lv%d\n\n" % [
 		GameState.path_display(), GameState.power_score(), GameState.level
 	]
-	body += "劍 弓 法 拳 斧 鎚 槍 火槍 鏢 水晶 — 詳見優缺點（官網「武器流派」頁）。"
+	body += "劍 弓 法 拳 斧 鎚 槍 火槍 鏢 水晶。各家脾氣不同，官網「武器流派」頁有詳細的長短處。"
 	var buttons: Array = []
 	for c in DataTables.weapon_class_list():
 		var id := str(c.get("id", ""))
@@ -4080,7 +4080,7 @@ func _set_path_and_back(p: String, from_forge: bool) -> void:
 	_play_dialog([
 		{"speaker": "系統", "text": "選定武器流派【%s】。" % GameState.path_display()},
 		{"speaker": "系統", "text": "玩法：%s。%s" % [tip, pro0]},
-		{"speaker": "系統", "text": "星途觀星仍找星讀（戰魂）；不是職業名。戰力 %d。" % GameState.power_score()},
+		{"speaker": "系統", "text": "戰魂還是去找星讀觀星。戰力 %d。" % GameState.power_score()},
 	], func():
 		if from_forge:
 			_show_forge_panel()
