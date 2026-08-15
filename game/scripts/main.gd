@@ -33,6 +33,7 @@ const MapleInventoryScn = preload("res://scripts/ui/maple_inventory.gd")
 const CutscenePlayerScn = preload("res://scripts/ui/cutscene_player.gd")
 const NpcLines = preload("res://scripts/systems/npc_lines.gd")
 const MarketPanelScn = preload("res://scripts/ui/panels/market_panel.gd")
+const RoomPanelScn = preload("res://scripts/ui/panels/room_panel.gd")
 var _dialogue: DialogueBox
 var _cutscene: Control  ## CutscenePlayer
 var _explore: Control  ## ExploreView
@@ -40,6 +41,7 @@ var _maple_hud: Control  ## MapleHud
 var _hotbar: Control  ## MapleHotbar
 var _inv_panel: Control  ## MapleInventory
 var _market_ui: RefCounted  ## MarketPanel
+var _room_ui: RefCounted  ## RoomPanel
 var _toast: Label
 var _current: Screen = Screen.TITLE
 var _battle_mode: String = "wolf"
@@ -99,6 +101,7 @@ func _ready() -> void:
 				_player_bubble(str(res.get("msg", "")))
 		)
 	_market_ui = MarketPanelScn.new(self)
+	_room_ui = RoomPanelScn.new(self)
 	_ensure_fade()
 	_go_title()
 
@@ -876,8 +879,8 @@ func _go_hunt_room_panel() -> void:
 		else:
 			buttons.append({"text": "標記就緒", "cb": _room_ready})
 			if RoomSystem.room_status() == "fighting":
-				buttons.append({"text": "同屏操作（可輸入）", "cb": _room_spectate})
-				buttons.append({"text": "僅觀戰", "cb": _room_spectate_watch})
+				buttons.append({"text": "同屏操作（可輸入）", "cb": _room_spectate.bind(true)})
+				buttons.append({"text": "僅觀戰", "cb": _room_spectate.bind(false)})
 			if str(RoomSystem.current_room.get("result", "")) == "win":
 				buttons.append({"text": "領取共獵獎", "cb": _hunt_room_claim})
 		var rt2 := RoomSystem.realtime_status()
@@ -1022,240 +1025,34 @@ func _go_market_panel() -> void:
 
 # ─── 裂縫房 ───
 
+## 面板本體在 scripts/ui/panels/room_panel.gd。
+## 這幾支留成委派：狩獵房面板（仍在 main.gd）也在用同一組房間操作。
+
 func _go_room_panel() -> void:
-	RoomSystem.filter_kind = "rift"
-	var body: String = RoomSystem.status_bbcode("rift")
-	var buttons: Array = []
-	if not RoomSystem.online_ready():
-		buttons.append({"text": "連線設定", "cb": _go_online_panel})
-		buttons.append({"text": "星途助戰（離線）", "cb": _go_party_panel})
-		buttons.append({"text": "返回", "cb": _go_postgame_hub})
-		_panel("裂縫房", body, buttons)
-		return
-	if RoomSystem.is_in_room():
-		if RoomSystem.is_hunt_room():
-			body += "\n\n[color=#c96]你目前在狩獵房。[/color]"
-			buttons.append({"text": "前往狩獵房", "cb": _go_hunt_room_panel})
-			buttons.append({"text": "離開當前房", "cb": _room_leave})
-			buttons.append({"text": "返回裂縫", "cb": _go_postgame_hub})
-			_panel("裂縫房", body, buttons)
-			return
-		buttons.append({"text": "刷新房間", "cb": _room_refresh})
-		if RoomSystem.is_host():
-			if RoomSystem.room_status() == "open":
-				buttons.append({"text": "開戰（房主）", "cb": _room_host_start})
-			elif RoomSystem.room_status() == "fighting":
-				buttons.append({"text": "繼續挑戰", "cb": _room_host_start})
-		else:
-			buttons.append({"text": "標記就緒", "cb": _room_ready})
-			if RoomSystem.room_status() == "fighting":
-				buttons.append({"text": "同屏操作（可輸入）", "cb": _room_spectate})
-				buttons.append({"text": "僅觀戰", "cb": _room_spectate_watch})
-			if str(RoomSystem.current_room.get("result", "")) == "win":
-				buttons.append({"text": "領取共鬥獎", "cb": _room_claim})
-		var rt := RoomSystem.realtime_status()
-		if rt != "":
-			body += "\n[color=#aaa]%s[/color]" % rt
-		if RoomSystem.is_host() and RoomSystem.estimated_rtt_ms > 0:
-			body += "\n輸入延遲估：約 %.0f ms" % RoomSystem.estimated_rtt_ms
-		body += "\n操作：J 格擋／連招 · K 戰意 · L 助攻"
-		buttons.append({"text": "離開房間", "cb": _room_leave})
-		buttons.append({"text": "返回裂縫", "cb": _go_postgame_hub})
-		_panel("裂縫房 · %s" % RoomSystem.room_code(), body, buttons)
-		return
-	buttons.append({"text": "刷新開放房", "cb": _room_list_open})
-	buttons.append({"text": "用代碼加入…", "cb": _go_room_join_code_panel})
-	for mode in RiftSchedule.MODES:
-		var m: String = mode
-		buttons.append({"text": "建房·%s" % RiftSchedule.mode_name(m), "cb": _room_create.bind(m)})
-	buttons.append({"text": "返回", "cb": _go_postgame_hub})
-	_panel("裂縫房", body, buttons)
-	RoomSystem.refresh_open_rooms(func(res: Dictionary):
-		_show_room_browser(res.get("list", []))
-	, "rift")
-
-
-func _show_room_browser(list: Array) -> void:
-	if RoomSystem.is_in_room() and RoomSystem.is_rift_room():
-		_go_room_panel()
-		return
-	var body: String = RoomSystem.status_bbcode("rift") + "\n\n[b]開放裂縫房[/b]\n"
-	var buttons: Array = []
-	var n := 0
-	for row in list:
-		if typeof(row) != TYPE_DICTIONARY:
-			continue
-		if n >= 8:
-			break
-		var d: Dictionary = row
-		var code := str(d.get("code", ""))
-		var mode := str(d.get("mode", "wrath"))
-		body += "· 代碼 [b]%s[/b] · %s\n" % [code, RiftSchedule.mode_name(mode)]
-		buttons.append({
-			"text": "加入 %s（%s）" % [code if code != "" else str(d.get("id", "")).substr(0, 6), RiftSchedule.mode_name(mode)],
-			"cb": _room_join.bind(str(d.get("id", ""))),
-		})
-		n += 1
-	if n == 0:
-		body += "（暫無開放房，可自建或用代碼加入）\n"
-	buttons.append({"text": "用代碼加入…", "cb": _go_room_join_code_panel})
-	for mode2 in RiftSchedule.MODES:
-		var m2: String = mode2
-		buttons.append({"text": "建房·%s" % RiftSchedule.mode_name(m2), "cb": _room_create.bind(m2)})
-	buttons.append({"text": "刷新", "cb": _room_list_open})
-	buttons.append({"text": "返回", "cb": _go_postgame_hub})
-	_panel("裂縫房", body, buttons)
+	_room_ui.open()
 
 
 func _go_room_join_code_panel() -> void:
-	_clear_host()
-	_reset_fade()
-	var layer := Control.new()
-	layer.name = "JoinCodeLayer"
-	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layer.mouse_filter = Control.MOUSE_FILTER_STOP
-	host.add_child(layer)
-	var bg := ColorRect.new()
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0.08, 0.07, 0.1, 0.92)
-	bg.mouse_filter = Control.MOUSE_FILTER_STOP
-	layer.add_child(bg)
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	layer.add_child(center)
-	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(440, 0)
-	card.add_theme_stylebox_override("panel", UiStyle.panel_style())
-	center.add_child(card)
-	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 16)
-	margin.add_theme_constant_override("margin_right", 16)
-	margin.add_theme_constant_override("margin_top", 12)
-	margin.add_theme_constant_override("margin_bottom", 14)
-	card.add_child(margin)
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 10)
-	margin.add_child(root)
-	var t := Label.new()
-	t.text = "用代碼加入房間"
-	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	t.add_theme_font_size_override("font_size", 18)
-	t.add_theme_color_override("font_color", UiStyle.WOOD_DARK)
-	root.add_child(t)
-	var hint := Label.new()
-	hint.text = "輸入房主顯示的 6 字代碼（不分大小寫）"
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.add_theme_font_size_override("font_size", 12)
-	hint.add_theme_color_override("font_color", UiStyle.CREAM_DIM)
-	root.add_child(hint)
-	var le := LineEdit.new()
-	le.placeholder_text = "例如 A3K9MP"
-	le.max_length = 8
-	le.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	le.add_theme_font_size_override("font_size", 22)
-	le.custom_minimum_size = Vector2(0, 40)
-	root.add_child(le)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	root.add_child(row)
-	var btn_ok := Button.new()
-	btn_ok.text = "加入"
-	btn_ok.custom_minimum_size = Vector2(120, 36)
-	row.add_child(btn_ok)
-	var btn_back := Button.new()
-	btn_back.text = "返回"
-	btn_back.custom_minimum_size = Vector2(100, 36)
-	row.add_child(btn_back)
-	var do_join := func():
-		var code := le.text.strip_edges().to_upper()
-		if code.length() < 4:
-			_show_toast("代碼太短")
-			return
-		RoomSystem.join_by_code(code, func(res: Dictionary):
-			_show_toast(str(res.get("msg", "")))
-			if bool(res.get("ok", false)):
-				if RoomSystem.is_hunt_room():
-					_go_hunt_room_panel()
-				else:
-					_go_room_panel()
-			else:
-				_go_room_join_code_panel()
-		)
-	btn_ok.pressed.connect(do_join)
-	le.text_submitted.connect(func(_t): do_join.call())
-	btn_back.pressed.connect(func():
-		if RoomSystem.filter_kind == "hunt":
-			_go_hunt_room_panel()
-		else:
-			_go_room_panel()
-	)
-	le.grab_focus()
-
-
-func _room_create(mode: String) -> void:
-	RoomSystem.create_room(mode, func(res: Dictionary):
-		_show_toast(str(res.get("msg", "")))
-		_go_room_panel()
-	)
-
-
-func _room_join(rid: String) -> void:
-	RoomSystem.join_room_id(rid, func(res: Dictionary):
-		_show_toast(str(res.get("msg", "")))
-		_go_room_panel()
-	)
-
-
-func _room_list_open() -> void:
-	RoomSystem.refresh_open_rooms(func(res: Dictionary):
-		_show_room_browser(res.get("list", []))
-	, "rift")
-
-
-func _room_refresh() -> void:
-	RoomSystem.poll_now()
-	_show_toast("已刷新")
-	_go_room_panel()
+	_room_ui.open_join_code()
 
 
 func _room_ready() -> void:
-	RoomSystem.set_ready(true, func(res: Dictionary):
-		_show_toast(str(res.get("msg", "就緒")))
-		_go_room_panel()
-	)
+	_room_ui.set_ready()
 
 
 func _room_leave() -> void:
-	RoomSystem.leave_room(func(_res: Dictionary):
-		_show_toast("已離開房間")
-		_go_room_panel()
-	)
+	_room_ui.leave()
 
 
-func _room_claim() -> void:
-	RoomSystem.claim_member_reward(func(res: Dictionary):
-		_show_toast(str(res.get("msg", "")))
-		_go_room_panel()
-	)
-
-
-func _room_spectate() -> void:
-	var r: Dictionary = RoomSystem.start_coop_control(true)
+## can_input=true 同屏操作／false 僅觀戰。原本是兩支幾乎一樣的函式，合併。
+func _room_spectate(can_input: bool) -> void:
+	var r: Dictionary = RoomSystem.start_coop_control(can_input)
+	var what := "同屏操作" if can_input else "觀戰"
 	if not bool(r.get("ok", false)):
-		_show_toast(str(r.get("msg", "無法同屏")))
+		_show_toast(str(r.get("msg", "無法%s" % what)))
 		return
-	_show_toast(str(r.get("msg", "同屏操作")))
-	_start_spectate_battle(str(r.get("mode", RoomSystem.room_mode())), true)
-
-
-func _room_spectate_watch() -> void:
-	var r: Dictionary = RoomSystem.start_coop_control(false)
-	if not bool(r.get("ok", false)):
-		_show_toast(str(r.get("msg", "無法觀戰")))
-		return
-	_show_toast(str(r.get("msg", "觀戰")))
-	_start_spectate_battle(str(r.get("mode", RoomSystem.room_mode())), false)
+	_show_toast(str(r.get("msg", what)))
+	_start_spectate_battle(str(r.get("mode", RoomSystem.room_mode())), can_input)
 
 
 func _room_host_start() -> void:
@@ -2086,6 +1883,16 @@ func _clear_host() -> void:
 # ─── 面板宿主介面 ───
 ## 給 scripts/ui/panels/* 用的公開契約。拆 main.gd 時，各面板只准碰這幾支，
 ## 不要直接呼叫底線開頭的私有方法 —— 那是為了讓面板能一塊一塊搬走而不互相黏死。
+##
+## 導覽一律走 ui_goto(target)，不要一個去處加一支方法。面板只說「我要去哪」，
+## main.gd 才是唯一知道「怎麼去」的地方；這樣再搬幾塊面板，這個介面也不會膨脹。
+
+## ui_goto 認得的去處。test_panels.gd 會逐一驗證都還接得到東西。
+const UI_GOTO_TARGETS: Array[String] = [
+	"hub", "postgame_hub", "online", "party",
+	"room", "hunt_room", "hunt_recycle", "market",
+]
+
 
 func ui_panel(title: String, body: String, buttons: Array) -> void:
 	_panel(title, body, buttons)
@@ -2095,12 +1902,45 @@ func ui_toast(msg: String) -> void:
 	_show_toast(msg)
 
 
-func ui_hub_back() -> void:
-	_hub_back()
+## 回傳是否認得這個去處 —— 讓 test_panels.gd 能逐一驗 UI_GOTO_TARGETS 都還接得到，
+## 打錯字或某支入口被改名時會當場紅燈，而不是等玩家點到才發現按鈕沒反應。
+func ui_goto(target: String) -> bool:
+	match target:
+		"hub": _hub_back()
+		"postgame_hub": _go_postgame_hub()
+		"online": _go_online_panel()
+		"party": _go_party_panel()
+		"room": _go_room_panel()
+		"hunt_room": _go_hunt_room_panel()
+		"hunt_recycle": _go_hunt_recycle_panel()
+		"market": _go_market_panel()
+		_:
+			push_error("ui_goto: 未知去處 '%s'" % target)
+			return false
+	return true
 
 
-func ui_open_hunt_recycle() -> void:
-	_go_hunt_recycle_panel()
+## 少數面板要自己畫（例如帶輸入框的加入代碼窗），才需要直接拿 host。
+## 一般面板請用 ui_panel()，不要碰這三支。
+func ui_host() -> Control:
+	return host
+
+
+func ui_clear_host() -> void:
+	_clear_host()
+
+
+func ui_reset_fade() -> void:
+	_reset_fade()
+
+
+## 房間相關的「開戰」動作留在 main.gd —— 那是流程控制，不是面板的事。
+func ui_room_spectate(can_input: bool) -> void:
+	_room_spectate(can_input)
+
+
+func ui_room_host_start() -> void:
+	_room_host_start()
 
 
 func _panel(title: String, body: String, buttons: Array) -> void:

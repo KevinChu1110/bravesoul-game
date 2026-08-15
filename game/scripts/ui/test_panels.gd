@@ -22,10 +22,28 @@ const PANELS: Array = [
 		"min_buttons": 3,
 		"expect_buttons": ["我要上架", "返回"],
 	},
+	## 未連線時的裂縫房：走 online_ready()==false 那條分支
+	{
+		"entry": "_go_room_panel",
+		"title": "裂縫房",
+		"min_buttons": 3,
+		"expect_buttons": ["連線設定", "星途助戰", "返回"],
+	},
+	## 帶輸入框的加入代碼窗（自己畫，不走 ui_panel）
+	{
+		"entry": "_go_room_join_code_panel",
+		"title": "用代碼加入房間",
+		"min_buttons": 2,
+		"expect_buttons": ["加入", "返回"],
+	},
 ]
 
 ## main.gd 必須提供給 scripts/ui/panels/* 的公開契約
-const HOST_API: Array = ["ui_panel", "ui_toast", "ui_hub_back", "ui_open_hunt_recycle"]
+const HOST_API: Array = [
+	"ui_panel", "ui_toast", "ui_goto",
+	"ui_host", "ui_clear_host", "ui_reset_fade",
+	"ui_room_spectate", "ui_room_host_start",
+]
 
 var _ok := true
 var _step := 0
@@ -73,6 +91,7 @@ func _process(_d: float) -> bool:
 			_wait = 0
 		1:
 			if _idx >= PANELS.size():
+				_check_goto_targets()
 				return _finish()
 			var p: Dictionary = PANELS[_idx]
 			var entry := str(p["entry"])
@@ -125,6 +144,23 @@ func _check_panel(p: Dictionary) -> void:
 			_fail("%s：找不到按鈕「%s」，實際有 %s" % [want_title, str(want), str(buttons)])
 			return
 	print("  ok panel %s（按鈕 %d 顆）" % [want_title, buttons.size()])
+
+
+## ui_goto 宣告認得的每個去處都要真的接得到；同時確認未知去處會回 false
+## （避免哪天 match 被改成 catch-all，測試就變成空的了）。
+func _check_goto_targets() -> void:
+	var targets = _main.get("UI_GOTO_TARGETS")
+	if targets == null or (targets as Array).is_empty():
+		_fail("main.gd 沒有 UI_GOTO_TARGETS")
+		return
+	for t in targets:
+		if not bool(_main.call("ui_goto", str(t))):
+			_fail("ui_goto('%s') 接不到" % str(t))
+			return
+	if bool(_main.call("ui_goto", "__不存在的去處__")):
+		_fail("ui_goto 對未知去處回了 true，等於沒在檢查")
+		return
+	print("  ok ui_goto 去處 %d 個全部接得到" % (targets as Array).size())
 
 
 func _collect(n: Node, labels: Array, buttons: Array) -> void:

@@ -4,11 +4,7 @@ extends RefCounted
 ## 從 main.gd 抽出來的第一塊。這裡只負責「組出 title／body／buttons」，
 ## 真正的畫面渲染仍走宿主的 ui_panel()，資料進出走 MarketSystem。
 ##
-## 宿主（main.gd）需提供的介面：
-##   ui_panel(title: String, body: String, buttons: Array) -> void
-##   ui_toast(msg: String) -> void
-##   ui_hub_back() -> void
-##   ui_open_hunt_recycle() -> void
+## 宿主介面見 main.gd 的「面板宿主介面」段落。導覽一律走 ui_goto()。
 ##
 ## 刻意不用 class_name：避免把「編譯期就會拉到 autoload」的腳本註冊進全域類別快取
 ## （見 AGENTS.md「寫測試的規矩」）。main.gd 用 preload 取用即可。
@@ -20,10 +16,14 @@ func _init(host: Node) -> void:
 	_host = host
 
 
+func _goto(target: String) -> Callable:
+	return Callable(_host, "ui_goto").bind(target)
+
+
 func open() -> void:
 	if not MarketSystem.is_unlocked():
 		_host.ui_panel("星途市集", "市集尚未開張。先進騎士堡。", [
-			{"text": "返回", "cb": Callable(_host, "ui_hub_back")},
+			{"text": "返回", "cb": _goto("hub")},
 		])
 		return
 	var body: String = MarketSystem.status_bbcode()
@@ -34,8 +34,8 @@ func open() -> void:
 	]
 	if MarketSystem.pending_credit() > 0:
 		buttons.append({"text": "領取貨款（%d）" % MarketSystem.pending_credit(), "cb": claim})
-	buttons.append({"text": "溢物回收（即時）", "cb": Callable(_host, "ui_open_hunt_recycle")})
-	buttons.append({"text": "返回", "cb": Callable(_host, "ui_hub_back")})
+	buttons.append({"text": "溢物回收（即時）", "cb": _goto("hunt_recycle")})
+	buttons.append({"text": "返回", "cb": _goto("hub")})
 	_host.ui_panel("星途市集", body, buttons)
 	MarketSystem.refresh_online(func(res: Dictionary):
 		_show_browse(res.get("list", MarketSystem.browse_all()))
@@ -81,7 +81,7 @@ func _show_browse(list: Array) -> void:
 	if MarketSystem.pending_credit() > 0:
 		buttons.append({"text": "領取貨款（%d）" % MarketSystem.pending_credit(), "cb": claim})
 	buttons.append({"text": "刷新", "cb": refresh})
-	buttons.append({"text": "返回", "cb": Callable(_host, "ui_hub_back")})
+	buttons.append({"text": "返回", "cb": _goto("hub")})
 	_host.ui_panel("星途市集", body, buttons)
 
 
