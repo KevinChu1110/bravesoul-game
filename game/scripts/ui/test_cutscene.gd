@@ -5,11 +5,15 @@ extends SceneTree
 ## 過場是主線的一部分，播不出來就卡在那裡的話，等於整個檔案報廢——
 ## 而缺影片這件事在出貨包裡特別容易發生（影片大，很容易漏進版控或漏進 export）。
 ##
-## 守四件事：
+## 守五件事：
 ##   1. 缺影片的 slide 要退回純底圖，不能中斷流程
-##   2. 過場一定要走到結尾並發出 finished
-##   3. abort() 之後要完全收乾淨（隱藏、不再攔滑鼠）
-##   4. 隱藏時絕不攔滑鼠——這是以前「標題卡選單」的元凶
+##   2. **缺過場插畫的 slide 要退回地圖底圖**，不能變成一片空白
+##   3. 過場一定要走到結尾並發出 finished
+##   4. abort() 之後要完全收乾淨（隱藏、不再攔滑鼠）
+##   5. 隱藏時絕不攔滑鼠——這是以前「標題卡選單」的元凶
+##
+## 第 2 點是這版最需要守的：十四段過場全部都掛了插畫 id，但插畫是一段一段慢慢補的，
+## 大多數時候檔案並不存在。退回機制一旦壞掉，十四段過場會同時變成空白畫面。
 
 const CutscenePlayerScript = preload("res://scripts/ui/cutscene_player.gd")
 
@@ -43,14 +47,25 @@ func _process(_delta: float) -> bool:
 			_fail("隱藏時仍在攔滑鼠（會讓底下的選單點不到）")
 			return _finish()
 		print("  ok 隱藏時不攔滑鼠")
-		## 三張：缺影片、純字幕、正常底圖；hold 都很短好讓它自己走完
+		## 三張：缺插畫＋缺影片、純字幕、正常底圖；hold 都很短好讓它自己走完
 		_cp.play([
-			{"video": "這支影片不存在", "speaker": "旅人", "text": "第一張", "hold": 0.05},
+			{
+				"art": "這張插畫還沒畫", "bg": "town", "video": "這支影片不存在",
+				"speaker": "旅人", "text": "第一張", "hold": 0.05,
+			},
 			{"speaker": "旅人", "text": "第二張", "hold": 0.05},
 			{"bg": "town", "speaker": "旅人", "text": "第三張", "hold": 0.05},
 		])
 		if not _cp.visible:
 			_fail("play() 之後過場沒有顯示")
+			return _finish()
+		## 第一張是同步顯示的，這裡就能驗退回機制
+		if _cp._bg.texture == null:
+			_fail("插畫不存在時沒有退回地圖底圖（畫面會是一片空白）")
+			return _finish()
+		print("  ok 插畫缺席時退回地圖底圖")
+		if _cp._art_texture("完全不存在的插畫") != null:
+			_fail("_art_texture 對不存在的插畫沒有回 null")
 			return _finish()
 		_stage = 1
 		return false

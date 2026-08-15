@@ -32,6 +32,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 import subprocess
 import sys
@@ -86,16 +87,26 @@ def duration_of(path: Path) -> float:
 
 
 def cmd_video(args) -> None:
-    if not has_encoder("libtheora"):
+    """
+    轉 Ogg Theora。優先用 ffmpeg 的 libtheora，沒有就用獨立的 ffmpeg2theora。
+
+    注意：homebrew-core 的 ffmpeg formula **依賴裡根本沒有 theora**，
+    所以 `brew reinstall ffmpeg` 不會解決問題（別再試了）。
+    正解是 `brew install ffmpeg2theora`。
+    """
+    use_ffmpeg = has_encoder("libtheora")
+    use_f2t = shutil.which("ffmpeg2theora") is not None
+    if not use_ffmpeg and not use_f2t:
         die(
-            "這台的 ffmpeg 沒有 libtheora，編不出 Godot 能播的 Ogg Theora。\n"
+            "這台編不出 Godot 能播的 Ogg Theora（Godot 4 內建影片只支援這個格式）。\n"
             "\n"
-            "  Godot 4 內建影片只支援 Ogg Theora，沒得選。三個辦法：\n"
-            "    1. 換一個帶 libtheora 的 ffmpeg：brew reinstall ffmpeg\n"
-            "       （裝完用 `ffmpeg -encoders | grep theora` 確認有 E 開頭那行）\n"
-            "    2. brew install ffmpeg2theora，再自己轉\n"
-            "    3. 改走靜態插畫：python3 tools/import_cutscene.py stills …\n"
-            "       —— 這條今天就能跑，而且對像素風的畫面一致性更友善"
+            "  修法：brew install ffmpeg2theora\n"
+            "\n"
+            "  註：homebrew-core 的 ffmpeg 依賴裡沒有 theora，\n"
+            "      `brew reinstall ffmpeg` 沒有用，別浪費時間。\n"
+            "\n"
+            "  或改走靜態插畫（不需要 theora，今天就能跑）：\n"
+            "      python3 tools/import_cutscene.py stills …"
         )
 
     VIDEO_DIR.mkdir(parents=True, exist_ok=True)
@@ -103,20 +114,28 @@ def cmd_video(args) -> None:
     dur = duration_of(args.source)
     print(f"── {args.source.name} → {dst.name}（{dur:.1f} 秒）")
 
-    cmd = [
-        "ffmpeg", "-y", "-v", "error", "-i", str(args.source),
-        "-vf", f"scale=-2:{VIDEO_HEIGHT}",
-        "-c:v", "libtheora", "-b:v", VIDEO_BITRATE,
-        "-c:a", "libvorbis", "-b:a", AUDIO_BITRATE,
-        str(dst),
-    ]
-    if args.mute:
-        cmd = [c for c in cmd if c not in ("-c:a", "libvorbis", "-b:a", AUDIO_BITRATE)]
-        cmd.insert(-1, "-an")
+    if use_ffmpeg:
+        cmd = [
+            "ffmpeg", "-y", "-v", "error", "-i", str(args.source),
+            "-vf", f"scale=-2:{VIDEO_HEIGHT}",
+            "-c:v", "libtheora", "-b:v", VIDEO_BITRATE,
+        ]
+        cmd += ["-an"] if args.mute else ["-c:a", "libvorbis", "-b:a", AUDIO_BITRATE]
+        cmd += [str(dst)]
+    else:
+        print("  （用 ffmpeg2theora；這台的 ffmpeg 沒有 libtheora）")
+        cmd = [
+            "ffmpeg2theora", str(args.source),
+            "-o", str(dst),
+            "--videoquality", "7",
+            "--max_size", f"x{VIDEO_HEIGHT}",
+        ]
+        if args.mute:
+            cmd.append("--noaudio")
 
     p = run(cmd)
     if p.returncode != 0 or not dst.exists():
-        die(f"轉檔失敗：{p.stderr.strip()[:400]}")
+        die(f"轉檔失敗：{(p.stderr or p.stdout).strip()[:400]}")
 
     size_mb = dst.stat().st_size / 1024 / 1024
     print(f"  寫入 {dst.relative_to(ROOT)}（{size_mb:.1f} MB）")
@@ -125,6 +144,62 @@ def cmd_video(args) -> None:
     print("\n用法：")
     print(f'  CutscenePlayer.play([{{"video": "{args.name}", "hold": 0}}])')
     print("接著跑：godot --path game --headless --import")
+
+
+def read_scenes() -> list[tuple[str, int, str]]:
+    """
+    從 main.gd 讀出每段過場的插畫 id、張數、目前用的地圖底圖。
+
+    刻意用讀的而不是在這裡寫一份表：表會過期，而過期的表比沒有表更糟——
+    照著它去生圖，生出來的檔名對不上就不會亮，還很難查。
+    """
+    main_gd = ROOT / "game" / "scripts" / "main.gd"
+    if not main_gd.exists():
+        die(f"找不到 {main_gd}")
+    lines = main_gd.read_text().splitlines()
+
+    out: list[tuple[str, int, str]] = []
+    for i, line in enumerate(lines):
+        m = re.search(r'_cutscene_art\("([^"]+)", \[', line)
+        if not m:
+            continue
+        depth = 0
+        close = i
+        for k in range(i, len(lines)):
+            depth += lines[k].count("[") - lines[k].count("]")
+            if depth <= 0:
+                close = k
+                break
+        seg = "\n".join(lines[i:close + 1])
+        n = len(re.findall(r'"speaker"\s*:', seg))
+        bgs = list(dict.fromkeys(re.findall(r'"bg"\s*:\s*"([^"]*)"', seg)))
+        out.append((m.group(1), n, "／".join(bgs)))
+    return out
+
+
+def cmd_scenes(_args) -> None:
+    scenes = read_scenes()
+    if not scenes:
+        die("main.gd 裡找不到任何過場（_cutscene_art 的寫法可能改了）")
+
+    done = 0
+    print(f"共 {len(scenes)} 段過場，{sum(n for _, n, _ in scenes)} 張插畫\n")
+    print(f"{'插畫 id':<18} {'張數':>4}  {'狀態':<10} 目前底圖")
+    print("─" * 62)
+    for sid, n, bgs in scenes:
+        have = sum(
+            1 for i in range(1, n + 1)
+            if (STILLS_DIR / f"{sid}_{i}.png").exists()
+        )
+        done += have
+        state = "全有" if have == n else ("尚無" if have == 0 else f"{have}/{n}")
+        print(f"{sid:<18} {n:>4}  {state:<10} {bgs}")
+    total = sum(n for _, n, _ in scenes)
+    print("─" * 62)
+    print(f"已完成 {done}/{total} 張\n")
+    print("生完某一段之後：")
+    print("  python3 tools/import_cutscene.py stills <影片> --name c0_open --count 4")
+    print("沒有插畫的段落會安靜退回地圖底圖，可以一段一段補。")
 
 
 def pick_times(dur: float, count: int) -> list[float]:
@@ -169,11 +244,22 @@ def cmd_stills(args) -> None:
         print(f"  {t:6.2f} 秒 → {dst.name}（{kb:.0f} KB）")
         written.append(dst)
 
-    print("\n用法（貼進過場定義，字幕自己填）：")
-    for dst in written:
-        rel = dst.relative_to(ROOT / "game")
-        print(f'  {{"bg": "res://{rel}", "speaker": "", "text": ""}},')
-    print("\n接著跑：godot --path game --headless --import")
+    scenes = {sid: n for sid, n, _ in read_scenes()}
+    if args.name in scenes:
+        want = scenes[args.name]
+        print(f"\n『{args.name}』這段過場需要 {want} 張，你給了 {len(written)} 張。")
+        if len(written) < want:
+            print(f"  少的 {want - len(written)} 張會退回地圖底圖，補齊再跑一次就好。")
+        elif len(written) > want:
+            print(f"  多的 {len(written) - want} 張不會用到（也不礙事）。")
+        print("接著跑：godot --path game --headless --import")
+        print("檔名對得上，遊戲會自動用——不用改任何程式。")
+    else:
+        print("\n這批圖不屬於任何一段過場，要用的話自己貼進過場定義：")
+        for dst in written:
+            rel = dst.relative_to(ROOT / "game")
+            print(f'  {{"bg": "res://{rel}", "speaker": "", "text": ""}},')
+        print("\n接著跑：godot --path game --headless --import")
 
 
 def main() -> None:
@@ -197,12 +283,27 @@ def main() -> None:
     s.add_argument("--at", help="指定時間點，逗號分隔的秒數")
     s.set_defaults(func=cmd_stills)
 
+    n = sub.add_parser("scenes", help="列出十四段過場的插畫 id 與完成度")
+    n.set_defaults(func=cmd_scenes)
+
     args = ap.parse_args()
+    if args.mode == "scenes":
+        args.func(args)
+        return
+
     need_ffmpeg()
     if not args.source.exists():
         die(f"找不到 {args.source}")
-    if args.mode == "stills" and args.count < 1:
-        die("--count 至少要 1")
+    if args.mode == "stills":
+        if args.count < 1:
+            die("--count 至少要 1")
+        known = {sid for sid, _, _ in read_scenes()}
+        if known and args.name not in known:
+            print(
+                f"提醒：`{args.name}` 不在過場清單裡，這批圖不會自動掛到任何一段。\n"
+                f"      清單看 `python3 tools/import_cutscene.py scenes`。\n"
+                f"      （只是要一批散圖的話，忽略這行即可。）\n"
+            )
     args.func(args)
 
 

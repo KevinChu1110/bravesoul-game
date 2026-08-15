@@ -112,6 +112,20 @@ func _ready() -> void:
 	_go_title()
 
 
+## 幫每張過場配一張專屬插畫：<scene_id>_1、<scene_id>_2⋯
+##
+## 插畫還沒畫的段落會安靜退回原本的地圖底圖，所以可以一段一段補——
+## 補到哪裡就好看到哪裡，不用等十四段全畫完才敢上。
+## 檔名規則跟 tools/import_cutscene.py stills --name <scene_id> 的輸出一致，
+## 所以產完直接丟進 assets/sprites/cutscenes 就會亮起來。
+func _cutscene_art(scene_id: String, slides: Array) -> Array:
+	for i in slides.size():
+		var s: Dictionary = slides[i]
+		if not s.has("art"):
+			s["art"] = "%s_%d" % [scene_id, i + 1]
+	return slides
+
+
 func _play_cutscene(slides: Array, after: Callable = Callable()) -> void:
 	if _paused:
 		_close_pause()
@@ -3111,7 +3125,7 @@ func _go_c0() -> void:
 	GameState.set_chapter("c0")
 	if not GameState.has_flag("c0_intro_cut"):
 		GameState.set_flag("c0_intro_cut", true)
-		_play_cutscene([
+		_play_cutscene(_cutscene_art("c0_open", [
 			{
 				"bg": "village",
 				"speaker": "旁白",
@@ -3134,7 +3148,7 @@ func _go_c0() -> void:
 				"portrait": "小白",
 				"text": Loc.t("c0.intro4"),
 			},
-		], func():
+		]), func():
 			SaveManager.save_game()
 			_open_explore_then("village", Screen.C0_VILLAGE, _maybe_show_tutorial)
 		)
@@ -3244,7 +3258,7 @@ func _c0_try_leave() -> void:
 
 
 func _c0_leave_cutscene() -> void:
-	_play_cutscene([
+	_play_cutscene(_cutscene_art("c0_leave", [
 		{
 			"bg": "village",
 			"speaker": "旁白",
@@ -3262,7 +3276,7 @@ func _c0_leave_cutscene() -> void:
 			"speaker": "內心",
 			"text": "鏽劍很沉。沉得剛好——讓你記得：還活著。",
 		},
-	], _go_c0_road)
+	]), _go_c0_road)
 
 
 func _go_c0_road() -> void:
@@ -3558,7 +3572,7 @@ func _hub_back_from_world_battle() -> void:
 
 
 func _c0_to_c1_cutscene() -> void:
-	_play_cutscene([
+	_play_cutscene(_cutscene_art("c1_arrive", [
 		{
 			"bg": "road",
 			"speaker": "旁白",
@@ -3575,7 +3589,7 @@ func _c0_to_c1_cutscene() -> void:
 			"speaker": "灰鬚",
 			"text": "……兔子。帶著煙味的兔子。",
 		},
-	], _go_c1_town)
+	]), _go_c1_town)
 
 
 func _go_c1_town() -> void:
@@ -4224,7 +4238,7 @@ func _go_leo_win() -> void:
 
 
 func _c1_leo_aftermath_cut() -> void:
-	_play_cutscene([
+	_play_cutscene(_cutscene_art("c1_leo_after", [
 		{
 			"bg": "wild",
 			"speaker": "旁白",
@@ -4248,7 +4262,7 @@ func _c1_leo_aftermath_cut() -> void:
 			"portrait": "小芽",
 			"text": "廣場旗揚起歪扭兔爪印。東南方，霧正升起。",
 		},
-	], _go_aftermath)
+	]), _go_aftermath)
 
 
 func _go_aftermath() -> void:
@@ -4289,7 +4303,7 @@ func _go_c2_enter_body() -> void:
 	GameState.set_chapter("c2")
 	if not GameState.has_flag("c2_entered"):
 		GameState.set_flag("c2_entered", true)
-		_play_cutscene([
+		_play_cutscene(_cutscene_art("c2_enter", [
 			{
 				"bg": "town",
 				"speaker": "旁白",
@@ -4307,7 +4321,7 @@ func _go_c2_enter_body() -> void:
 				"speaker": "霧隱",
 				"text": "……兔子。你的眼睛，借我用用。",
 			},
-		], func():
+		]), func():
 			_play_dialog([
 				{"speaker": "霧隱", "text": "霧裡真假同色。你的眼睛，借我用用。"},
 				{"speaker": "霧隱", "text": "先住一晚。走夜路的人，會先斷在自己心裡。"},
@@ -4415,7 +4429,7 @@ func _go_fog_win() -> void:
 
 
 func _c2_fog_clear_cut() -> void:
-	_play_cutscene([
+	_play_cutscene(_cutscene_art("c2_fog_clear", [
 		{
 			"bg": "mist_village",
 			"speaker": "旁白",
@@ -4433,7 +4447,7 @@ func _c2_fog_clear_cut() -> void:
 			"portrait": "阿茶",
 			"text": "遠山鐘響。茶煙升起——武鬥道場在召喚。",
 		},
-	], _go_c2_cleared_panel)
+	]), _go_c2_cleared_panel)
 
 
 func _go_c2_cleared_panel() -> void:
@@ -4505,7 +4519,7 @@ func _go_c3_enter_body() -> void:
 	GameState.set_chapter("c3")
 	if not GameState.has_flag("c3_entered"):
 		GameState.set_flag("c3_entered", true)
-		_play_cutscene([
+		_play_cutscene(_cutscene_art("c3_enter", [
 			{
 				"bg": "mist_village",
 				"speaker": "旁白",
@@ -4522,7 +4536,7 @@ func _go_c3_enter_body() -> void:
 				"speaker": "阿茶",
 				"text": "客從霧裡來？宗師在試煉堂。他不先出手，他先問。",
 			},
-		], func():
+		]), func():
 			_play_dialog([
 				{"speaker": "阿茶", "text": "客從霧裡來？宗師在試煉堂。他不先出手，他先問。"},
 				{"speaker": "系統", "text": "道場可走。試煉堂挑戰阿波。"},
@@ -4610,7 +4624,7 @@ func _go_abo_win() -> void:
 
 
 func _c3_abo_clear_cut() -> void:
-	_play_cutscene([
+	_play_cutscene(_cutscene_art("c3_abo_clear", [
 		{
 			"bg": "dojo",
 			"speaker": "旁白",
@@ -4628,7 +4642,7 @@ func _c3_abo_clear_cut() -> void:
 			"portrait": "小白",
 			"text": "西林有風，東岸有石——塔尖仍掛著不肯散的黑焰。",
 		},
-	], _go_c3_cleared_panel)
+	]), _go_c3_cleared_panel)
 
 
 func _go_c3_cleared_panel() -> void:
@@ -4658,7 +4672,7 @@ func _go_c4_enter() -> void:
 	GameState.set_chapter("c4")
 	if not GameState.has_flag("c4_entered"):
 		GameState.set_flag("c4_entered", true)
-		_play_cutscene([
+		_play_cutscene(_cutscene_art("c4_enter", [
 			{
 				"bg": "dojo",
 				"speaker": "旁白",
@@ -4675,7 +4689,7 @@ func _go_c4_enter() -> void:
 				"speaker": "風耳",
 				"text": "站住。追風的人，最後都會迷路。",
 			},
-		], func():
+		]), func():
 			_play_dialog([
 				{"speaker": "風耳", "text": "你若要見疾影——先學會等。風停的那一下，才是真的。"},
 				{"speaker": "系統", "text": "遊俠森林可走。疾影巢在東。"},
@@ -4781,7 +4795,7 @@ func _go_falcon_win() -> void:
 
 
 func _c4_falcon_clear_cut() -> void:
-	_play_cutscene([
+	_play_cutscene(_cutscene_art("c4_falcon_clear", [
 		{
 			"bg": "forest",
 			"speaker": "旁白",
@@ -4794,7 +4808,7 @@ func _c4_falcon_clear_cut() -> void:
 			"portrait": "石拳",
 			"text": "東岸有浪在吼——力氣，還要找方向。",
 		},
-	], _go_c4_cleared_panel)
+	]), _go_c4_cleared_panel)
 
 
 func _go_c4_cleared_panel() -> void:
@@ -4824,7 +4838,7 @@ func _go_c5_enter() -> void:
 	GameState.set_chapter("c5")
 	if not GameState.has_flag("c5_entered"):
 		GameState.set_flag("c5_entered", true)
-		_play_cutscene([
+		_play_cutscene(_cutscene_art("c5_enter", [
 			{
 				"bg": "forest",
 				"speaker": "旁白",
@@ -4842,7 +4856,7 @@ func _go_c5_enter() -> void:
 				"portrait": "潮吼",
 				"text": "哦？兔子？來比腕力——不，來聽浪。",
 			},
-		], func():
+		]), func():
 			_play_dialog([
 				{"speaker": "潮吼", "text": "石拳不是為了砸碎你。它忘了力氣該往哪放。"},
 				{"speaker": "系統", "text": "海岸可走。石拳崖在東。"},
@@ -4930,7 +4944,7 @@ func _go_boar_win() -> void:
 
 
 func _c5_boar_clear_cut() -> void:
-	_play_cutscene([
+	_play_cutscene(_cutscene_art("c5_boar_clear", [
 		{
 			"bg": "coast",
 			"speaker": "旁白",
@@ -4943,7 +4957,7 @@ func _c5_boar_clear_cut() -> void:
 			"portrait": "小白",
 			"text": "五柱中四柱已醒。塔門——千年來第一次，為你開了一縫。",
 		},
-	], _go_c5_cleared_panel)
+	]), _go_c5_cleared_panel)
 
 
 func _go_c5_cleared_panel() -> void:
@@ -4991,7 +5005,7 @@ func _go_c6_camp() -> void:
 		GameState.set_flag("c3_montage_done", true)
 	if not GameState.has_flag("c6_camp_cut"):
 		GameState.set_flag("c6_camp_cut", true)
-		_play_cutscene([
+		_play_cutscene(_cutscene_art("c6_camp", [
 			{
 				"bg": "tower",
 				"speaker": "旁白",
@@ -5009,7 +5023,7 @@ func _go_c6_camp() -> void:
 				"speaker": "斷頁",
 				"text": "兔子。你比預言輕……也比預言先到。",
 			},
-		], _show_c6_camp_panel)
+		]), _show_c6_camp_panel)
 	else:
 		_show_c6_camp_panel()
 
@@ -5111,7 +5125,7 @@ func _go_demon_win() -> void:
 
 
 func _c6_ending_cut() -> void:
-	_play_cutscene([
+	_play_cutscene(_cutscene_art("c6_ending", [
 		{
 			"bg": "tower",
 			"speaker": "旁白",
@@ -5130,7 +5144,7 @@ func _c6_ending_cut() -> void:
 			"portrait": "麥穗",
 			"text": "遠方，有人還在等。氣味比預言近。",
 		},
-	], _go_ending)
+	]), _go_ending)
 
 
 func _go_ending() -> void:

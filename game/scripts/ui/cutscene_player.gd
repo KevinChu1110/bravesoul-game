@@ -12,6 +12,10 @@ const SpriteDB = preload("res://scripts/art/sprite_db.gd")
 ## Godot 內建只支援 Ogg Theora，轉檔用 tools/import_cutscene.py
 const VIDEO_DIR := "res://assets/video"
 
+## 過場專屬插畫放這裡。有插畫就用插畫，沒有就退回 bg 指定的地圖底圖——
+## 這樣可以一段一段慢慢補，補到哪裡就好看到哪裡，不用等全部畫完才能上。
+const ART_DIR := "res://assets/sprites/cutscenes"
+
 var _slides: Array = []
 var _index: int = 0
 var _after: Callable = Callable()
@@ -128,7 +132,8 @@ func _build() -> void:
 
 ## slides: Array of Dictionary
 ##   bg: String map key or full res path (optional)
-##   video: String 影片檔名或完整 res 路徑（optional）；有影片時蓋過 bg，
+##   art: String 過場專屬插畫 id（optional）；找得到就蓋過 bg，找不到就安靜退回 bg
+##   video: String 影片檔名或完整 res 路徑（optional）；有影片時蓋過 art／bg，
 ##          播完自動進下一張，玩家也可以隨時按鍵跳過
 ##   portrait: String speaker name for SpriteDB (optional)
 ##   speaker: String
@@ -169,6 +174,16 @@ func abort() -> void:
 		_portrait.modulate.a = 0.0
 	if _caption_panel:
 		_caption_panel.modulate.a = 0.0
+
+
+## 取過場專屬插畫。刻意不警告：大多數段落本來就還沒畫，那是預期狀態不是錯誤。
+func _art_texture(art_key: String) -> Texture2D:
+	if art_key == "":
+		return null
+	var path := art_key if art_key.begins_with("res://") else "%s/%s.png" % [ART_DIR, art_key]
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
 
 
 ## 開始播影片；沒有影片或載不到就回 false，讓這張退回純底圖表現。
@@ -215,9 +230,10 @@ func _show_slide() -> void:
 	_busy = true
 	var s: Dictionary = _slides[_index]
 	## background
+	## 專屬插畫優先；沒畫到的段落自動退回地圖底圖，所以可以一段一段補
+	var tex: Texture2D = _art_texture(str(s.get("art", "")))
 	var bg_key := str(s.get("bg", ""))
-	var tex: Texture2D = null
-	if bg_key != "":
+	if tex == null and bg_key != "":
 		if bg_key.begins_with("res://"):
 			if ResourceLoader.exists(bg_key):
 				tex = load(bg_key) as Texture2D
