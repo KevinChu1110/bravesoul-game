@@ -149,6 +149,7 @@ create or replace function public.econ_set_item(p_items jsonb, p_item text, p_n 
 returns jsonb
 language sql
 immutable
+set search_path = pg_catalog
 as $$
   select case
     when p_n > 0 then p_items || jsonb_build_object(p_item, p_n)
@@ -577,6 +578,7 @@ drop policy if exists "market_update_own_seller" on public.market_listings;
 create or replace function public.room_members_guard()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   if new.reward_claimed is distinct from old.reward_claimed
@@ -763,7 +765,64 @@ create trigger messages_rate_guard_trg
 
 
 -- ══════════════════════════════════════════════════════════
--- 10. 收尾
+-- 10. 權限收斂
+-- ══════════════════════════════════════════════════════════
+-- PostgreSQL 預設把新函式的 execute 給 PUBLIC，而 anon 是 PUBLIC 的成員——
+-- 所以「只 grant 給 authenticated」並不會擋掉未登入者。每支函式內部都有
+-- auth.uid() 檢查，這裡收的是曝險面：沒登入就連呼叫都呼叫不到。
+-- 順序要緊：先 revoke PUBLIC，再 grant 回 authenticated。
+
+do $$
+declare
+  fn text;
+  player_fns text[] := array[
+    'public.save_push(jsonb, int)',
+    'public.market_list_item(text, int, int)',
+    'public.market_cancel_listing(bigint)',
+    'public.market_buy(bigint)',
+    'public.market_claim_credit()',
+    'public.room_claim_reward(uuid)',
+    'public.room_report_result(uuid, text)',
+    'public.leaderboard_submit(text, bigint)',
+    'public.econ_state()'
+  ];
+  -- 觸發器用的函式不該出現在 REST 上，誰都不給
+  internal_fns text[] := array[
+    'public.room_members_guard()',
+    'public.messages_rate_guard()',
+    'public.econ_set_item(jsonb, text, int)'
+  ];
+begin
+  foreach fn in array player_fns loop
+    execute format('revoke execute on function %s from public, anon', fn);
+    execute format('grant execute on function %s to authenticated', fn);
+  end loop;
+  foreach fn in array internal_fns loop
+    execute format('revoke execute on function %s from public, anon, authenticated', fn);
+  end loop;
+end $$;
+
+-- 點燈是刻意開放給未登入者的（官網也會顯示總數），但補上 search_path
+create or replace function public.candle_increment()
+returns bigint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_total bigint;
+begin
+  update public.candles set total = total + 1 where id = 1
+  returning total into new_total;
+  return new_total;
+end;
+$$;
+
+grant execute on function public.candle_increment() to anon, authenticated;
+
+
+-- ══════════════════════════════════════════════════════════
+-- 11. 收尾
 -- ══════════════════════════════════════════════════════════
 -- 舊版客戶端（0.14.9 以前）會直接 upsert saves／market_listings，本檔跑完後
 -- 那些寫入會被 RLS 擋下並回 42501。務必同版更新客戶端。

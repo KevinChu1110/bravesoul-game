@@ -443,6 +443,55 @@ begin
     raise exception 'ECON_SQL_FAIL 20: 只擋下 % 條側門，應為 4', blocked;
   end if;
   raise notice '  ok 20  存檔／掛單／排行榜／影子帳 4 條側門全部堵死';
+end $$;
+
+-- ── 曝險面：沒登入的 anon 連呼叫都不該呼叫得到 ──
+do $$
+declare
+  blocked int := 0;
+begin
+  set local role anon;
+  begin
+    perform public.save_push('{"gold": 1}'::jsonb, 1);
+    reset role;
+    raise exception 'ECON_SQL_FAIL 21: 未登入者可以呼叫存檔推送';
+  exception when insufficient_privilege then
+    blocked := blocked + 1;
+  when others then
+    if sqlerrm like 'ECON_SQL_FAIL%' then raise; end if;
+    blocked := blocked + 1;
+  end;
+
+  set local role anon;
+  begin
+    perform public.market_list_item('hunt_core', 1, 100);
+    reset role;
+    raise exception 'ECON_SQL_FAIL 21: 未登入者可以呼叫上架';
+  exception when insufficient_privilege then
+    blocked := blocked + 1;
+  when others then
+    if sqlerrm like 'ECON_SQL_FAIL%' then raise; end if;
+    blocked := blocked + 1;
+  end;
+
+  -- 觸發器用的函式不該被任何人當 API 呼叫
+  set local role authenticated;
+  begin
+    perform public.messages_rate_guard();
+    reset role;
+    raise exception 'ECON_SQL_FAIL 21: 觸發器函式被當成 API 呼叫得到';
+  exception when insufficient_privilege then
+    blocked := blocked + 1;
+  when others then
+    if sqlerrm like 'ECON_SQL_FAIL%' then raise; end if;
+    blocked := blocked + 1;
+  end;
+
+  reset role;
+  if blocked <> 3 then
+    raise exception 'ECON_SQL_FAIL 21: 只擋下 % 條，應為 3', blocked;
+  end if;
+  raise notice '  ok 21  未登入者與觸發器函式的呼叫權限已收乾淨';
   raise notice '';
   raise notice 'ECON_SQL_OK';
 end $$;
