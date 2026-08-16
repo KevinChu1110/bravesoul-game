@@ -14,6 +14,16 @@ const COMMISSIONS: Array[Dictionary] = [
 	{"id": "d_shop", "name": "市集一遊", "desc": "在材料行購買 1 次", "track": "shop", "need": 1, "gold": 20, "dust": 1, "xp": 15},
 ]
 
+## 里程碑任務的經驗＝金幣 × 這個倍率。
+##
+## 29 條里程碑原本只發金與星屑，經驗是 0 —— 通關終章、三域行者、六域漫遊
+## 這種橫跨整場遊戲的成就，對等級一點貢獻都沒有，而每天的小委託反而給 25。
+##
+## 不逐條手填是刻意的：金幣那一欄已經表達了「這件事有多大」，
+## 再開一欄手填經驗只會兩邊慢慢對不上。倍率 3 的結果是 29 條全領約 6500 點，
+## 佔 Lv1→Lv40 全程（31320）的兩成 —— 長期成就撐起五分之一，其餘仍靠打怪。
+const MISSION_XP_PER_GOLD := 3
+
 ## 長遠任務表：id → 目標 flag／計數 key、需求、獎勵
 const MISSIONS: Array[Dictionary] = [
 	{"id": "m_first_boss", "name": "初試啼聲", "desc": "戰勝雷歐（或任一聖獸）", "kind": "flag", "key": "boss.leo_cleared", "need": 1, "gold": 50, "dust": 3},
@@ -238,15 +248,20 @@ func claim_mission(id: String) -> Dictionary:
 			return {"ok": false, "msg": "條件尚未達成。"}
 		var gold_n := int(m.get("gold", 0))
 		var dust_n := int(m.get("dust", 0))
+		var xp_n := int(m.get("xp", gold_n * MISSION_XP_PER_GOLD))
 		GameState.add_gold(gold_n)
 		GameState.add_stardust(dust_n)
+		var xr: Dictionary = GameState.add_xp(xp_n)
 		GameState.set_flag("quest.claim.%s" % id, true)
 		if Engine.get_main_loop() is SceneTree:
 			var g: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GuildSystem")
 			if g and g.has_method("add_contrib"):
 				g.call("add_contrib", 15)
 		SaveManager.save_game()
-		return {"ok": true, "msg": "任務「%s」完成：金 %d · 星屑 %d" % [m.get("name", id), gold_n, dust_n]}
+		var lv_s := " · 升級！" if int(xr.get("levels", 0)) > 0 else ""
+		return {"ok": true, "msg": "任務「%s」完成：金 %d · 星屑 %d · 經驗 %d%s" % [
+			m.get("name", id), gold_n, dust_n, int(xr.get("gained", xp_n)), lv_s
+		]}
 	return {"ok": false, "msg": "找不到任務。"}
 
 
@@ -257,7 +272,11 @@ func list_missions_bbcode() -> String:
 		var need := int(m.get("need", 1))
 		var prog := mini(need, _mission_progress(m))
 		var mark := "✓" if mission_claimed(id) else ("●" if prog >= need else "·")
-		lines.append("%s [b]%s[/b]  %d/%d\n   %s" % [mark, m.get("name", id), prog, need, m.get("desc", "")])
+		var gold_n := int(m.get("gold", 0))
+		lines.append("%s [b]%s[/b]  %d/%d\n   %s\n   [color=#8a8070]金 %d · 星屑 %d · 經驗 %d[/color]" % [
+			mark, m.get("name", id), prog, need, m.get("desc", ""),
+			gold_n, int(m.get("dust", 0)), int(m.get("xp", gold_n * MISSION_XP_PER_GOLD)),
+		])
 	return "\n".join(lines)
 
 

@@ -3,7 +3,8 @@ extends Node
 ## Autoload：HuntSystem
 
 const DAILY_CAP := 5
-const PRACTICE_GOLD_MULT := 0.35
+## 練習場次（日 cap 用完後）的獎勵倍率：金、材料、經驗共用一個數字
+const PRACTICE_MULT := 0.35
 
 ## 三波敵人（WorldContent mode）
 const WAVES: Array[Dictionary] = [
@@ -69,11 +70,12 @@ func status_bbcode() -> String:
 		lines.append("（進入騎士堡後解鎖）")
 		return "\n".join(lines)
 	lines.append("今日有獎場次：%d／%d（剩餘 %d）" % [runs_today(), DAILY_CAP, daily_left()])
-	lines.append("每場：3 波雜魚。通關發材料與金。")
+	lines.append("每場：3 波雜魚。每波給經驗，通關再發材料與金。")
+	lines.append("有獎場次用完後仍可練習，但經驗與金都只剩三成五。")
 	if is_run_active():
 		lines.append("[color=#c96]進行中：第 %d／%d 波[/color]" % [current_wave() + 1, WAVES.size()])
 	lines.append("")
-	lines.append("掉落：溢皮、焰骨、溢核（可賣；未來市集可交易）")
+	lines.append("掉落：溢皮、焰骨、溢核（可在溢物回收換金）")
 	return "\n".join(lines)
 
 
@@ -122,18 +124,39 @@ func wave_mode(index: int = -1) -> String:
 
 
 ## 勝利一波：回傳 {ok, finished, next_mode?, next_label?, loot_msg, msg}
+## 打贏一波要給的經驗。
+##
+## 這裡本來是 0 —— 獵場整場打完三隻雜魚一點經驗都沒有，
+## 比在野外隨便打三隻還差，而面板上還寫著「只為鍛鍊與材料」。
+## 走 main.gd 雜魚收尾的同一條公式，讓同一隻怪在獵場跟在野外值一樣多；
+## 獵場多出來的是通關的金與材料，那才是它跟野外的差別。
+func wave_xp(mode: String, practice: bool) -> int:
+	var def: Dictionary = WorldContent.enemy_def(mode)
+	var xp_n := 12 + int(int(def.get("max_hp", 50)) / 10)
+	if practice:
+		xp_n = int(float(xp_n) * PRACTICE_MULT)
+	return maxi(0, xp_n)
+
+
 func on_wave_won() -> Dictionary:
 	if not is_run_active():
 		return {"ok": false, "msg": "沒有進行中的狩獵。"}
 	var w := current_wave()
+	var practice := is_practice()
 	var cleared := int(GameState.get_flag(_fk("waves_cleared"), 0)) + 1
 	GameState.set_flag(_fk("waves_cleared"), cleared)
+	## 這一波的經驗（先結，通關那波也算）
+	var xr: Dictionary = GameState.add_xp(wave_xp(wave_mode(w), practice))
+	var xp_got := int(xr.get("gained", 0))
+	var lv_up := int(xr.get("levels", 0)) > 0
 	## 波次小掉落
 	var mid_loot := _roll_wave_loot(false)
 	if w + 1 >= WAVES.size():
 		## 通關整場
 		var fin := _finish_run(true)
 		fin["wave_loot"] = mid_loot
+		fin["xp"] = xp_got
+		fin["level_up"] = lv_up
 		return fin
 	GameState.set_flag(_fk("wave"), w + 1)
 	SaveManager.save_game()
@@ -144,6 +167,8 @@ func on_wave_won() -> Dictionary:
 		"next_mode": wave_mode(nw),
 		"next_label": wave_label(nw),
 		"loot_msg": mid_loot,
+		"xp": xp_got,
+		"level_up": lv_up,
 		"msg": "擊破！%s" % wave_label(nw),
 	}
 
@@ -170,7 +195,7 @@ func _finish_run(full_clear: bool) -> Dictionary:
 		GameState.set_flag(_fk("clears_total"), int(GameState.get_flag(_fk("clears_total"), 0)) + 1)
 	var gold_n := 40 + int(GameState.get_flag(_fk("waves_cleared"), 0)) * 12
 	if practice:
-		gold_n = int(gold_n * PRACTICE_GOLD_MULT)
+		gold_n = int(gold_n * PRACTICE_MULT)
 	GameState.add_gold(gold_n)
 	var loot_msg := _roll_wave_loot(true)
 	if not practice and full_clear:

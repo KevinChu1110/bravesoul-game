@@ -651,18 +651,27 @@ func _on_hunt_battle_finished(won: bool) -> void:
 		_open_explore("hunting_grounds", Screen.C1_WILD)
 		return
 	if bool(r.get("finished", false)):
-		_play_dialog([{"speaker": "系統", "text": str(r.get("msg", "完成。"))}], func():
+		_play_dialog([{"speaker": "系統", "text": str(r.get("msg", "完成。")) + _hunt_xp_line(r)}], func():
 			_open_explore("hunting_grounds", Screen.C1_WILD)
 		)
 		return
 	## 下一波
 	var mid := str(r.get("loot_msg", ""))
-	var text := str(r.get("msg", "下一波"))
+	var text := str(r.get("msg", "下一波")) + _hunt_xp_line(r)
 	if mid != "":
 		text += "\n" + mid
 	_play_dialog([{"speaker": "系統", "text": text}], func():
 		_start_battle(str(r.get("next_mode", "ash_rat")))
 	)
+
+
+## 波次經驗要講出來。不講的話玩家看不出獵場跟野外的差別在哪，
+## 只會覺得「打完什麼都沒有」—— 這正是它以前真的什麼都沒給的時候給人的印象。
+func _hunt_xp_line(r: Dictionary) -> String:
+	var n := int(r.get("xp", 0))
+	if n <= 0:
+		return ""
+	return " · 經驗 %d%s" % [n, "（升級！）" if bool(r.get("level_up", false)) else ""]
 
 
 func _go_hunt_recycle_panel() -> void:

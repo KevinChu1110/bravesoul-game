@@ -179,11 +179,33 @@ static func minibosses() -> Dictionary:
 	}
 
 
+## autoload 不可以在這裡用識別字直接寫（例如 `GameState.has_flag(...)`）。
+##
+## 這支是 class_name 的靜態工具，會被 `godot --headless -s res://...` 那類
+## 測試腳本當成相依項在**自動載入還沒建立之前**編譯。那時候 GameState 這個
+## 識別字不存在，整支就 Compile Error，而錯誤只會冒出一句
+## 「Failed to compile depended scripts」—— 真正壞掉的地方在別的檔案裡，
+## 呼叫端拿到的是一個沒有任何方法的 GDScript，症狀是
+## 「Nonexistent function 'enemy_def'」，跟根因看起來毫無關係。
+##
+## 所以一律從 SceneTree.root 取，執行期才解析。
+static func _gs() -> Node:
+	var t := Engine.get_main_loop()
+	if t is SceneTree and (t as SceneTree).root != null:
+		return (t as SceneTree).root.get_node_or_null("GameState")
+	return null
+
+
+static func _has_flag(key: String) -> bool:
+	var gs := _gs()
+	return gs != null and bool(gs.call("has_flag", key))
+
+
 static func chest_opened_count() -> int:
 	var n := 0
 	for _k in chests().keys():
 		var c: Dictionary = chests()[_k]
-		if GameState.has_flag(str(c.get("flag", ""))):
+		if _has_flag(str(c.get("flag", ""))):
 			n += 1
 	return n
 
@@ -192,18 +214,22 @@ static func miniboss_cleared_count() -> int:
 	var n := 0
 	for _k in minibosses().keys():
 		var m: Dictionary = minibosses()[_k]
-		if GameState.has_flag(str(m.get("flag", ""))):
+		if _has_flag(str(m.get("flag", ""))):
 			n += 1
 	return n
 
 
 static func visit_count() -> int:
-	return int(GameState.get_flag("meta.maps_visited", 0))
+	var gs := _gs()
+	return int(gs.call("get_flag", "meta.maps_visited", 0)) if gs != null else 0
 
 
 static func mark_visit(map_id: String) -> void:
-	var key := "visit.%s" % map_id
-	if GameState.has_flag(key):
+	var gs := _gs()
+	if gs == null:
 		return
-	GameState.set_flag(key, true)
-	GameState.set_flag("meta.maps_visited", visit_count() + 1)
+	var key := "visit.%s" % map_id
+	if bool(gs.call("has_flag", key)):
+		return
+	gs.call("set_flag", key, true)
+	gs.call("set_flag", "meta.maps_visited", visit_count() + 1)
