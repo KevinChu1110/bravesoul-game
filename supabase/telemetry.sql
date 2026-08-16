@@ -388,8 +388,11 @@ grant execute on function public.telemetry_ingest(uuid, uuid, text, jsonb) to an
 -- ══════════════════════════════════════════════════════════
 -- 9. 收尾
 -- ══════════════════════════════════════════════════════════
--- 定期清理（Supabase → Database → Cron，每天一次）：
+-- 定期清理：正式專案已排程為 `telemetry-prune-daily`
+--   （Integrations → Cron，0 18 * * * GMT ＝台北 02:00）
 --   select public.telemetry_prune();
+-- 新專案要自己排：那頁得先按 Install integration 裝 pg_cron，
+-- 沒裝的話建 job 只會回 relation "cron.job" does not exist。
 --
 -- 看數字：
 --   select * from public.telemetry_chapter_funnel;

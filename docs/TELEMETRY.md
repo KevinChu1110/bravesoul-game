@@ -116,8 +116,13 @@ func _go_telemetry_consent() -> void:
 白名單外的事件名整筆丟掉、`player_name` 這種自由文字欄位被洗掉，
 留下的只有白名單裡的短 token 與數字。
 
-還沒設定的：`telemetry_prune()` 的每日排程（Supabase → Database → Cron）。
-不設也不會壞，只是資料會一直留著。
+**每日清理排程也設好了**（2026-08-16）：Integrations → Cron 的
+`telemetry-prune-daily`，`0 18 * * *`（GMT）＝台北 02:00，跑
+`select public.telemetry_prune();`。
+
+設之前要先在那頁按 **Install integration** 裝 `pg_cron`；沒裝的話按下
+「Create cron job」只會回 `relation "cron.job" does not exist`，
+而不是提示你去裝。
 
 | 物件 | 作用 |
 |---|---|
@@ -161,7 +166,7 @@ select * from public.telemetry_session_len;      -- 一次玩多久
 
 視圖都不開放給 `anon` / `authenticated`，只有 Dashboard（`service_role`）讀得到。
 
-定期清理（Supabase → Database → Cron，每天一次）：
+定期清理（已排程為 `telemetry-prune-daily`，Integrations → Cron，每天一次）：
 
 ```sql
 select public.telemetry_prune();
