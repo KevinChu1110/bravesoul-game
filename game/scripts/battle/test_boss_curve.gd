@@ -23,6 +23,14 @@ const DT := 0.1
 ## 到了建議等級，至少要贏這個比例
 const MIN_RATE := 55.0
 
+## 另一頭：比建議等級低這麼多的時候，不該打得贏。
+##
+## 只守下限的話會漏掉反方向的壞法：終章魔王在 Lv8 就有 61% 勝率、
+## 石拳（標 30+）在 Lv8 有 38% —— 六個章節的建議等級寫了等於沒寫，
+## 玩家一路輾過去，中後段的養成也就沒有意義。
+const EARLY_GAP := 10
+const MAX_EARLY_RATE := 15.0
+
 ## mode, 遊戲自己標的建議等級, 進戰前 main.gd 給的防禦加成
 const CURVE: Array = [
 	["leo", 10, 3],       ## C1 · 鍛造之後就會遇到
@@ -113,9 +121,18 @@ func _run(mode: String, lv: int, def_b: int, seed_i: int) -> bool:
 	while not sim.finished and n < 2500:
 		sim.step(DT)
 		n += 1
+		## 魔王的三次誘惑會把戰鬥整個暫停等玩家回答。不答的話 sim 永遠不會結束，
+		## 而「時限到了玩家還活著」如果算贏，這支測試就會把一場根本沒打完的仗
+		## 判成勝利 —— 實際踩過：魔王在 Lv8 顯示 100% 勝率，其實是卡在誘惑畫面。
+		if sim.sim_paused and sim.temptation_stage > 0:
+			sim.resolve_temptation(sim.temptation_stage, true)
+			continue
 		if sim.parry_window_open():
 			sim.try_react()
 	var p = sim.get_unit("player")
+	## 打不完＝沒贏。時限是 250 秒，正常的仗 40～90 秒就結束。
+	if not sim.finished:
+		return false
 	return p != null and p.is_alive()
 
 
@@ -131,8 +148,23 @@ func _initialize() -> void:
 		var rate := 100.0 * float(wins) / float(RUNS)
 		if rate < MIN_RATE:
 			_fail("%s 在建議等級 Lv%d 只贏 %.0f%% —— 玩家照著地圖來會撞牆" % [mode, lv, rate])
-		else:
-			print("  ok %-7s Lv%-3d 勝率 %3.0f%%" % [mode, lv, rate])
+			continue
+
+		## 反方向：低 EARLY_GAP 級不該打得贏
+		var early_lv: int = maxi(1, lv - EARLY_GAP)
+		var early_wins := 0
+		for i in RUNS:
+			if _run(mode, early_lv, def_b, 6000 + i):
+				early_wins += 1
+		var early_rate := 100.0 * float(early_wins) / float(RUNS)
+		if early_rate > MAX_EARLY_RATE:
+			_fail("%s 標建議 Lv%d，但 Lv%d 就有 %.0f%% 勝率 —— 建議等級寫了等於沒寫" % [
+				mode, lv, early_lv, early_rate
+			])
+			continue
+		print("  ok %-7s Lv%-3d 勝率 %3.0f%%　（Lv%d 只有 %.0f%%）" % [
+			mode, lv, rate, early_lv, early_rate
+		])
 	_finish()
 
 

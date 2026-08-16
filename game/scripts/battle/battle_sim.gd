@@ -1607,9 +1607,11 @@ static func make_boar_fight(player_stats: Dictionary) -> BattleSim:
 	b.display_name = "石拳"
 	b.team = BattleUnit.Team.ENEMY
 	b.is_boss = true
-	b.max_hp = 480
-	b.hp = 480
-	b.atk = 16
+	## 建議 30+，原本 Lv8 就有 38% 勝率
+	b.max_hp = 1150
+	b.hp = 1150
+	## 建議 30+；atk 16 時 Lv20 是 100% 勝率
+	b.atk = 26
 	b.defense = 14
 	b.speed = 7.5
 	b.windup_time = 0.35
@@ -1633,9 +1635,11 @@ static func make_wrath_fight(player_stats: Dictionary) -> BattleSim:
 	w.display_name = "無臉·怒火"
 	w.team = BattleUnit.Team.ENEMY
 	w.is_boss = true
-	w.max_hp = 520
-	w.hp = 520
-	w.atk = 15
+	## 通關後裂縫，原本 Lv12 就 100%
+	w.max_hp = 1200
+	w.hp = 1200
+	## 通關後裂縫；atk 15 時 Lv20 是 98% 勝率
+	w.atk = 21
 	w.defense = 11
 	w.speed = 10.0
 	w.windup_time = 0.28
@@ -1720,8 +1724,9 @@ static func make_statue_fight(player_stats: Dictionary) -> BattleSim:
 		s.display_name = "黑焰石像·%s" % ["甲", "乙", "丙"][i]
 		s.team = BattleUnit.Team.ENEMY
 		s.is_boss = false
-		s.max_hp = 120
-		s.hp = 120
+		## 三尊石像。原本各 120，Lv20 就 92% 勝率
+		s.max_hp = 300
+		s.hp = 300
 		s.atk = 10
 		s.defense = 12
 		s.speed = 7.0 + float(i)
@@ -1747,9 +1752,11 @@ static func make_chrono_fight(player_stats: Dictionary) -> BattleSim:
 	c.display_name = "無臉·時牢"
 	c.team = BattleUnit.Team.ENEMY
 	c.is_boss = true
-	c.max_hp = 500
-	c.hp = 500
-	c.atk = 14
+	## 通關後裂縫，原本 Lv12 就 100%
+	c.max_hp = 1150
+	c.hp = 1150
+	## 通關後裂縫；atk 14 時 Lv20 是 100% 勝率
+	c.atk = 20
 	c.defense = 11
 	c.speed = 9.5
 	c.windup_time = 0.3
@@ -1786,8 +1793,9 @@ static func make_abo_fight(player_stats: Dictionary) -> BattleSim:
 	abo.display_name = "阿波熊貓"
 	abo.team = BattleUnit.Team.ENEMY
 	abo.is_boss = true
-	abo.max_hp = 450
-	abo.hp = 450
+	## 建議 26+，原本 Lv16 就有 72% 勝率
+	abo.max_hp = 950
+	abo.hp = 950
 	abo.atk = 12
 	abo.defense = 18  ## 架勢中高防；破防後大降
 	abo.speed = 8.0
@@ -1819,9 +1827,14 @@ static func make_demon_fight(player_stats: Dictionary) -> BattleSim:
 	demon.display_name = "魔王"
 	demon.team = BattleUnit.Team.ENEMY
 	demon.is_boss = true
-	demon.max_hp = 520
-	demon.hp = 520
-	demon.atk = 16
+	## 終章魔王。原本 520 血，Lv8 的玩家 22 刀就砍完（每刀約 23）——
+	## 六章的建議等級形同虛設。血量對到 Lv30 的輸出：約 22 刀。
+	demon.max_hp = 1250
+	demon.hp = 1250
+	## 攻擊力也要對到建議等級。只加血量的話仗會變長但打不死人 ——
+	## 量過：血量翻倍之後 Lv20 仍然 100% 過關，因為玩家一路都在挨不痛的打。
+	## 終章魔王要比石拳再高一點，不然最後一戰比前一章還軟。
+	demon.atk = 28
 	demon.defense = 11
 	demon.speed = 10.0
 	demon.windup_time = 0.28
