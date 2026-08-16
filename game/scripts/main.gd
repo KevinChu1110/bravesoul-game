@@ -1409,10 +1409,36 @@ func _panel(title: String, body: String, buttons: Array) -> void:
 		b.custom_minimum_size = Vector2(380, 140)
 		b.scroll_active = true
 
+	## 按鈕列要能捲動。
+	##
+	## 原本是直接把 VBox 掛進卡片，按鈕多的時候卡片就長過螢幕；CenterContainer
+	## 置中之後上下都被切掉，「返回」被推出畫面外，Esc 只會疊暫停選單，
+	## 唯一出路是回標題 —— 玩家的進度沒了。684px 的可用高度只放得下 10 顆。
+	##
+	## 高度算法：可用高 = 視窗高 － 卡片其它東西（標題、分隔線、正文、間距、邊距）。
+	## 算出來若比實際需要的還多就不會出現捲軸，版面跟以前完全一樣；
+	## 只有真的放不下時才開始捲。所以這個改動對現有面板是零影響。
+	var btn_h := 30.0
+	var btn_gap := 6.0
+	var need_h := float(buttons.size()) * btn_h + maxf(0.0, float(buttons.size() - 1)) * btn_gap
+	## 卡片固定開銷：標題 26 + 分隔線 2 + 三段間距 36 + 上下邊距 18 + 保險 24，
+	## 另外留 40 給上下留白 —— 不留的話卡片會頂到螢幕邊，看起來像被切掉。
+	var chrome_h := 146.0
+	var body_h := 140.0 if body.length() > 280 else minf(140.0, ceilf(float(body.length()) / 26.0) * 20.0)
+	var avail_h := maxf(150.0, float(get_viewport_rect().size.y) - chrome_h - body_h)
+
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.custom_minimum_size = Vector2(0, minf(need_h, avail_h))
+	scroll.mouse_filter = Control.MOUSE_FILTER_STOP
+	root.add_child(scroll)
+
 	var row := VBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
+	row.add_theme_constant_override("separation", int(btn_gap))
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.mouse_filter = Control.MOUSE_FILTER_STOP
-	root.add_child(row)
+	scroll.add_child(row)
 
 	for i in buttons.size():
 		var item: Dictionary = buttons[i]

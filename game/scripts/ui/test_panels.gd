@@ -84,7 +84,10 @@ func _process(_d: float) -> bool:
 		1:
 			if _idx >= PANELS.size():
 				_check_goto_targets()
-				return _finish()
+				_main.call("ui_panel", OVERFLOW_TITLE, "測試用面板。", _overflow_buttons())
+				_step = 3
+				_wait = 0
+				return false
 			var p: Dictionary = PANELS[_idx]
 			var entry := str(p["entry"])
 			if not _main.has_method(entry):
@@ -102,7 +105,108 @@ func _process(_d: float) -> bool:
 			_idx += 1
 			_step = 1
 			_wait = 0
+		3:
+			if _wait < 8:
+				return false
+			if not _check_overflow_layout():
+				return _finish()
+			## 捲到底，下一步驗最後一顆按鈕真的到得了
+			if _overflow_scroll == null:
+				_fail("按鈕爆量：按鈕列沒有放進 ScrollContainer，捲不動")
+				return _finish()
+			_overflow_scroll.scroll_vertical = 100000
+			_step = 4
+			_wait = 0
+		4:
+			if _wait < 4:
+				return false
+			_check_overflow_reachable()
+			return _finish()
 	return false
+
+
+## 按鈕爆量時，最後一顆按鈕還是要在畫面裡。
+##
+## 為什麼特地測這個：按鈕列原本直接掛在卡片上，沒有捲動。按鈕一多，卡片就長過
+## 螢幕，而 CenterContainer 是置中的 —— 上下同時被切掉，「返回」被推出畫面外。
+## Esc 只會疊出暫停選單，玩家唯一的出路是回標題，那一趟的進度就沒了。
+## 這是「面板長得對」測不到的一類壞法：標題在、按鈕也都建出來了，
+## 只是玩家點不到。所以這裡驗的是**幾何**，不是節點數量。
+const OVERFLOW_TITLE := "按鈕爆量測試"
+const OVERFLOW_N := 24
+
+
+func _overflow_buttons() -> Array:
+	var out: Array = []
+	for i in OVERFLOW_N:
+		out.append({"text": "選項 %d" % (i + 1), "cb": Callable()})
+	out.append({"text": "返回", "cb": Callable()})
+	return out
+
+
+var _overflow_scroll: ScrollContainer = null
+var _overflow_last: Button = null
+
+
+func _check_overflow_layout() -> bool:
+	var host: Node = _main.get("host")
+	if host == null:
+		_fail("找不到 ScreenHost")
+		return false
+	var nodes: Array = []
+	_collect_nodes(host, nodes)
+	var btns: Array = []
+	_overflow_scroll = null
+	for n in nodes:
+		if n is Button:
+			btns.append(n)
+		elif n is ScrollContainer:
+			_overflow_scroll = n
+	if btns.size() < OVERFLOW_N + 1:
+		_fail("按鈕爆量：只建出 %d 顆，應有 %d 顆" % [btns.size(), OVERFLOW_N + 1])
+		return false
+	_overflow_last = btns[btns.size() - 1]
+
+	## 用主場景那顆 viewport 的實際大小。headless 下 root.size 不等於畫面大小
+	## （量到 64），拿它當螢幕高會把這條檢查變成亂報。
+	var vp: Vector2 = (_main as Node).get_viewport_rect().size
+	if vp.y < 100.0:
+		_fail("量到的畫面高只有 %.0f，這條檢查沒有意義" % vp.y)
+		return false
+
+	## 卡片不可以高過螢幕 —— 高過就代表按鈕列沒有被限高，
+	## 置中之後上下都會被切掉，玩家連捲都沒得捲。
+	var card_h := 0.0
+	for n in nodes:
+		if n is PanelContainer:
+			card_h = maxf(card_h, (n as PanelContainer).size.y)
+	if card_h > vp.y:
+		_fail("按鈕爆量：卡片高 %.0f 超過螢幕 %.0f，按鈕會被切掉" % [card_h, vp.y])
+		return false
+	print("  ok 按鈕爆量 %d 顆：卡片高 %.0f ≤ 螢幕 %.0f" % [btns.size(), card_h, vp.y])
+	return true
+
+
+func _check_overflow_reachable() -> void:
+	if _overflow_last == null or not is_instance_valid(_overflow_last):
+		_fail("按鈕爆量：捲動後找不到最後一顆按鈕")
+		return
+	var vp: Vector2 = (_main as Node).get_viewport_rect().size
+	var r := _overflow_last.get_global_rect()
+	if r.position.y < 0.0 or r.end.y > vp.y:
+		_fail("按鈕爆量：捲到底之後，最後一顆「%s」仍在 y=%.0f~%.0f，出畫面 0~%.0f" % [
+			_overflow_last.text, r.position.y, r.end.y, vp.y
+		])
+		return
+	print("  ok 捲到底之後最後一顆「%s」在畫面內（y=%.0f~%.0f）" % [
+		_overflow_last.text, r.position.y, r.end.y
+	])
+
+
+func _collect_nodes(n: Node, out: Array) -> void:
+	out.append(n)
+	for c in n.get_children():
+		_collect_nodes(c, out)
 
 
 func _check_panel(p: Dictionary) -> void:
