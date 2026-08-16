@@ -121,8 +121,8 @@ git status --short | grep '^??' | grep '\.png\.import$' \
 ### ✅ 歷史已重寫（2026-08-16）
 
 上面兩件事只讓**之後**的 clone 變小，歷史裡的 blob 還在。已用 `git filter-repo`
-把那 173 個路徑從全部歷史刪掉，`.git` 從 439 MB 降下來。細節與重跑指令見
-[REPO_HISTORY.md](REPO_HISTORY.md)。
+把那 173 個路徑從全部歷史刪掉，`.git` 從 **439 MB 降到 230.6 MB**（−48%）。
+指令、兩個會踩到的坑、以及其他 clone 怎麼跟上，見 [REPO_HISTORY.md](REPO_HISTORY.md)。
 
 ---
 
@@ -148,7 +148,10 @@ bit 級相同，不是有損。
 
 **目前刻意沒套用。** 重寫 247 個 PNG 會在 git 歷史裡多出約 77 MB 的新 blob，
 只為了讓 checkout 少 7 MB —— 對 repo 總大小是淨虧。
-這件事值得做，但要跟上面那個 `filter-repo` 重寫歷史併成同一次做。
+
+2026-08-16 的 `filter-repo` 是**只刪不改**（見 [REPO_HISTORY.md](REPO_HISTORY.md)），
+沒有順手把這件事併進去 —— 併進去等於同一次動作裡既刪 89.77 MB 又加 77 MB，
+出事時分不清是哪一邊造成的。下一次重寫歷史時再一起做。
 
 ### 槓桿 B：Godot 匯入壓縮模式（`--import-mode`）—— 已套用
 
