@@ -495,51 +495,17 @@ func humanize_error(raw: String) -> String:
 	if s == "":
 		return ""
 	var low := s.to_lower()
-	## 市集／共鬥的伺服器判定
+	## 伺服器判定（supabase/economy.sql 會回的每一種）
 	if "not signed in" in low:
 		return "尚未登入，請先上線"
 	if "bad payload" in low:
 		return "存檔內容有問題，無法上傳"
-	if "bad result" in low:
-		return "戰果格式不對"
+	if "payload too large" in low:
+		return "存檔太大，無法上傳"
 	if "bad board" in low:
 		return "榜別不對"
 	if "score out of range" in low:
 		return "分數超出合理範圍"
-	if "not enough gold" in low:
-		return "可用金幣不足（市集認的是伺服器那筆餘額，先推一次雲存檔試試）"
-	if "not enough items" in low:
-		return "伺服器還沒認到這些材料，先推一次雲存檔再上架"
-	if "price out of range" in low:
-		return "訂價超出合理範圍，請調低一點"
-	if "item not tradeable" in low:
-		return "此物不可上架"
-	if "bad qty" in low:
-		return "數量不對"
-	if "too many listings" in low:
-		return "掛單已達上限，先下架幾筆"
-	if "daily listing limit" in low:
-		return "今天上架次數已達上限"
-	if "market blocked" in low:
-		return "此帳號的市集功能已停用"
-	if "listing gone" in low:
-		return "這筆掛單已被買走或下架"
-	if "cannot buy own" in low:
-		return "不能買自己的掛單"
-	if "already claimed" in low or "already settled" in low:
-		return "這份獎勵已經領過了"
-	if "no win yet" in low:
-		return "這場還沒打贏"
-	if "not a member" in low:
-		return "你不在這個房間裡"
-	if "not host" in low:
-		return "只有房主能回報結果"
-	if "room gone" in low:
-		return "房間已經不在了"
-	if "reward_claimed is server-managed" in low:
-		return "領獎狀態由伺服器管理，請用遊戲內的領獎鍵"
-	if "payload too large" in low:
-		return "存檔太大，無法上傳"
 	if "message rate limit" in low:
 		return "留言太頻繁，喘口氣再說"
 	if "anonymous_provider_disabled" in low or "anonymous sign-ins are disabled" in low:

@@ -53,5 +53,16 @@
 （`save_migration.gd` 的 `_v3_to_v4`）。只刪欄位的話玩家的材料與裝備會安靜消失，
 存檔讀得出來、遊戲也不報錯，那是最難查的一種資料遺失。
 
-**沒有動的**：Supabase 上 `listings` / `rooms` 那幾張表與 `economy.sql` 的錯誤碼還留著。
-砍掉伺服器端要另外部署，那是分開的一次動作。`test_online_gate.gd` 照舊窮舉那些錯誤碼。
+**伺服器端也砍了**（2026-08-16 同日）：`market_listings`／`market_credit`／`rooms`／
+`room_members`／`room_events`／`room_inputs`／`event_progress` 七張表與
+`market_*`／`room_*` 七支 RPC 全部 drop（跑之前確認過七張表都是 0 列）。
+腳本是 `supabase/drop_market_rooms.sql`，`schema.sql` 與 `economy.sql` 也不再建它們。
+
+**唯一留下的是 `market_catalog`。** 名字有 market，但它現在的角色是
+`save_push` 用來限制「可交易物成長速率」的白名單 —— 刪掉存檔就推不上去了。
+沒有改名，因為改名要一路動到 `save_push` 與 `economy_test.sql`，
+跟這次的移除混在一起出事會分不清是哪一邊。
+
+跟著縮的還有 `SERVER_ERRORS`：24 種錯誤碼剩 6 種。
+`test_online_gate.gd` 的 `_check_error_list_complete()` 是雙向比對，
+SQL 裡砍掉的碼留在表上一樣會紅。

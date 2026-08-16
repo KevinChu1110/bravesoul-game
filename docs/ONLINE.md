@@ -61,8 +61,8 @@
 
 裂縫房／狩獵房整套移除。727 行在沒有後端時一行都不會執行，
 等於只有設定過 Supabase 的人看得到。伺服器上 `rooms` / `room_members` /
-`room_events` / `room_inputs` 那幾張表還在，但客戶端已經不再呼叫。
-理由見 [DECISIONS.md](DECISIONS.md)。
+`room_events` / `room_inputs` 四張表與對應 RPC 也一起 drop 了
+（`supabase/drop_market_rooms.sql`）。理由見 [DECISIONS.md](DECISIONS.md)。
 
 ### L3 · 以後
 

@@ -47,7 +47,8 @@ Dashboard → Authentication → Providers → **Email** 開啟。
 5. 通關蠟燭：通關後點祭壇 → 總數 +1
 
 市集與房間的驗證步驟已刪除 —— 那幾套在 2026-08-16 隨系統一起砍掉
-（見 [DECISIONS.md](DECISIONS.md)）。SQL 裡的表還在，只是沒有客戶端會用。
+（見 [DECISIONS.md](DECISIONS.md)）。伺服器端的表與 RPC 也一併 drop 掉了，
+已部署的專案跑 `supabase/drop_market_rooms.sql` 退掉它們。
 
 ## 4. 安全
 

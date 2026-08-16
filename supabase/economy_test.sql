@@ -144,219 +144,12 @@ begin
   passed := passed + 1;
 
   ------------------------------------------------------------------
-  -- 6. 上架：影子帳沒有的東西掛不上去
+  -- 6～17（市集上架／買賣／下架／領款／共鬥領獎）：2026-08-16 隨系統一起刪掉
+  --
+  -- 那 12 段測的是 market_* 與 room_* RPC，函式已經不存在了。
+  -- 編號沒有往前補：舊 commit 裡的「第 9 段」指的是哪件事，不該因為後來
+  -- 刪了幾段就改變意思。
   ------------------------------------------------------------------
-  -- 前一段（5b）會把額度補成貨，所以這裡得自己把貨清乾淨，
-  -- 不然「沒有的貨」其實手上有一堆，掛得上去是應該的，這段等於沒測。
-  -- 這個佈置漏掉了很久都沒被發現，因為斷言原本用 `<>` 比對 NULL（見檔頭）。
-  update public.player_econ set items = '{}'::jsonb where user_id = A;
-  select coalesce((items->>'hunt_core')::int, 0) into n
-    from public.player_econ where user_id = A;
-  if n <> 0 then
-    raise exception 'ECON_SQL_FAIL 6: 佈置失敗，影子帳還有 % 個 hunt_core', n;
-  end if;
-  r := public.market_list_item('hunt_core', 10, 5000);
-  if r->>'error' is distinct from 'not enough items' then
-    raise exception 'ECON_SQL_FAIL 6: 影子帳一個都沒有卻掛得上去，回應 %', r;
-  end if;
-  raise notice '  ok 6  沒有的貨掛不上去';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 7. 補足庫存後可以上架，且訂價有上限
-  ------------------------------------------------------------------
-  update public.player_econ
-    set items = jsonb_build_object('hunt_core', 20), last_push = now() - interval '2 hours'
-    where user_id = A;
-
-  -- 基準價 60 × 10 個 × 20 倍 = 12000 上限
-  r := public.market_list_item('hunt_core', 10, 999999);
-  if r->>'error' is distinct from 'price out of range' then
-    raise exception 'ECON_SQL_FAIL 7: 天價掛單沒被擋，回應 %', r;
-  end if;
-
-  r := public.market_list_item('hunt_core', 10, 5000);
-  if (r->>'ok')::boolean is not true then
-    raise exception 'ECON_SQL_FAIL 7: 正常掛單失敗，回應 %', r;
-  end if;
-  lid := (r->>'id')::bigint;
-  select coalesce((items->>'hunt_core')::int, 0) into n
-    from public.player_econ where user_id = A;
-  if n <> 10 then
-    raise exception 'ECON_SQL_FAIL 7: 上架後影子帳應剩 10，實際 %', n;
-  end if;
-  raise notice '  ok 7  天價擋下、正常掛單扣帳正確';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 8. 不可交易的品項掛不上去
-  ------------------------------------------------------------------
-  r := public.market_list_item('key_rusty', 1, 10);
-  if r->>'error' is distinct from 'item not tradeable' then
-    raise exception 'ECON_SQL_FAIL 8: 非交易品竟可上架，回應 %', r;
-  end if;
-  raise notice '  ok 8  非交易品擋下';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 9. 沒錢買不了（買方付的是影子帳，不是存檔裡自己寫的數字）
-  ------------------------------------------------------------------
-  perform set_config('test.uid', B::text, true);
-  r := public.save_push(jsonb_build_object(
-        'gold', 100, 'inventory', '{}'::jsonb
-      ), 1);
-  r := public.market_buy(lid);
-  if r->>'error' is distinct from 'not enough gold' then
-    raise exception 'ECON_SQL_FAIL 9: 沒錢卻買得動，回應 %', r;
-  end if;
-  raise notice '  ok 9  影子帳沒錢就買不動';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 10. 有錢就買得成，錢貨兩訖、賣家入待領款
-  ------------------------------------------------------------------
-  update public.player_econ set gold = 8000 where user_id = B;
-  r := public.market_buy(lid);
-  if (r->>'ok')::boolean is not true then
-    raise exception 'ECON_SQL_FAIL 10: 正常購買失敗，回應 %', r;
-  end if;
-  select gold, coalesce((items->>'hunt_core')::int, 0) into g, n
-    from public.player_econ where user_id = B;
-  if g <> 3000 then
-    raise exception 'ECON_SQL_FAIL 10: 買方應剩 3000，實際 %', g;
-  end if;
-  if n <> 10 then
-    raise exception 'ECON_SQL_FAIL 10: 買方應收到 10 個，實際 %', n;
-  end if;
-  -- 手續費 8%：5000 → 賣家 4600
-  if (select pending_gold from public.market_credit where user_id = A) <> 4600 then
-    raise exception 'ECON_SQL_FAIL 10: 賣家待領款不對';
-  end if;
-  raise notice '  ok 10  錢貨兩訖，手續費 8%% 正確';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 11. 同一筆掛單不能買第二次
-  ------------------------------------------------------------------
-  r := public.market_buy(lid);
-  if r->>'error' is distinct from 'listing gone' then
-    raise exception 'ECON_SQL_FAIL 11: 掛單被買兩次，回應 %', r;
-  end if;
-  raise notice '  ok 11  掛單不能重複購買';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 12. 不能買自己的單
-  ------------------------------------------------------------------
-  perform set_config('test.uid', A::text, true);
-  r := public.market_list_item('hunt_core', 5, 1000);
-  lid2 := (r->>'id')::bigint;
-  r := public.market_buy(lid2);
-  if r->>'error' is distinct from 'cannot buy own' then
-    raise exception 'ECON_SQL_FAIL 12: 買到自己的單，回應 %', r;
-  end if;
-  raise notice '  ok 12  自己的單買不了';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 13. 下架退貨一次，下架兩次不會退兩次
-  ------------------------------------------------------------------
-  select coalesce((items->>'hunt_core')::int, 0) into n
-    from public.player_econ where user_id = A;
-  r := public.market_cancel_listing(lid2);
-  if (r->>'ok')::boolean is not true then
-    raise exception 'ECON_SQL_FAIL 13: 下架失敗，回應 %', r;
-  end if;
-  if (select coalesce((items->>'hunt_core')::int, 0)
-        from public.player_econ where user_id = A) <> n + 5 then
-    raise exception 'ECON_SQL_FAIL 13: 下架沒退回 5 個';
-  end if;
-  r := public.market_cancel_listing(lid2);
-  if r->>'error' is distinct from 'listing gone' then
-    raise exception 'ECON_SQL_FAIL 13: 下架兩次退兩次貨，回應 %', r;
-  end if;
-  raise notice '  ok 13  下架只退一次';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 14. 領貨款：進影子帳，且領完歸零
-  ------------------------------------------------------------------
-  select gold into g from public.player_econ where user_id = A;
-  r := public.market_claim_credit();
-  if (r->>'gold')::bigint <> 4600 then
-    raise exception 'ECON_SQL_FAIL 14: 領款金額不對，回應 %', r;
-  end if;
-  if (select gold from public.player_econ where user_id = A) <> g + 4600 then
-    raise exception 'ECON_SQL_FAIL 14: 貨款沒進影子帳';
-  end if;
-  r := public.market_claim_credit();
-  if (r->>'gold')::bigint <> 0 then
-    raise exception 'ECON_SQL_FAIL 14: 貨款可以領第二次';
-  end if;
-  raise notice '  ok 14  貨款進影子帳且只能領一次';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 15. 掛單數量上限
-  ------------------------------------------------------------------
-  update public.player_econ set items = jsonb_build_object('hunt_hide', 99) where user_id = A;
-  for n in 1..8 loop
-    r := public.market_list_item('hunt_hide', 1, 100);
-  end loop;
-  r := public.market_list_item('hunt_hide', 1, 100);
-  if r->>'error' is distinct from 'too many listings' then
-    raise exception 'ECON_SQL_FAIL 15: 掛單上限沒生效，回應 %', r;
-  end if;
-  raise notice '  ok 15  同時掛單上限 8 生效';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 16. 共鬥領獎：房主結算後不能再領，成員只能領一次
-  ------------------------------------------------------------------
-  insert into public.rooms (host_id, mode, status) values (A, 'wrath', 'open')
-    returning id into rid;
-  insert into public.room_members (room_id, user_id, display_name) values
-    (rid, A, '甲旅人'), (rid, B, '乙旅人');
-
-  r := public.room_report_result(rid, 'win');
-  if (r->>'ok')::boolean is not true then
-    raise exception 'ECON_SQL_FAIL 16: 房主回報失敗，回應 %', r;
-  end if;
-  r := public.room_claim_reward(rid);
-  if r->>'error' is distinct from 'already claimed' then
-    raise exception 'ECON_SQL_FAIL 16: 房主結算後還能再領，回應 %', r;
-  end if;
-  r := public.room_report_result(rid, 'win');
-  if r->>'error' is distinct from 'already settled' then
-    raise exception 'ECON_SQL_FAIL 16: 同一場可以結算兩次，回應 %', r;
-  end if;
-
-  perform set_config('test.uid', B::text, true);
-  r := public.room_claim_reward(rid);
-  if (r->>'ok')::boolean is not true then
-    raise exception 'ECON_SQL_FAIL 16: 成員第一次領獎失敗，回應 %', r;
-  end if;
-  r := public.room_claim_reward(rid);
-  if r->>'error' is distinct from 'already claimed' then
-    raise exception 'ECON_SQL_FAIL 16: 成員可以重複領獎，回應 %', r;
-  end if;
-  raise notice '  ok 16  共鬥獎一人一次';
-  passed := passed + 1;
-
-  ------------------------------------------------------------------
-  -- 17. 直接改領獎旗標會被擋
-  ------------------------------------------------------------------
-  begin
-    update public.room_members set reward_claimed = false
-      where room_id = rid and user_id = B;
-    raise exception 'ECON_SQL_FAIL 17: 領獎旗標可以直接被改回去';
-  exception when others then
-    if sqlerrm like 'ECON_SQL_FAIL%' then
-      raise;
-    end if;
-  end;
-  raise notice '  ok 17  領獎旗標改不動';
-  passed := passed + 1;
 
   ------------------------------------------------------------------
   -- 18. 排行榜：只進不退，且分數有上限
@@ -413,12 +206,16 @@ begin
     blocked := blocked + 1;
   end;
 
+  -- 市集砍掉後，market_catalog 變成 save_push 用來限制成長速率的白名單。
+  -- 玩家能改它就能自己開一種「基準價很高、上限很大」的道具，等於繞過整套守門。
+  -- （原本這格測的是掛單表擋不擋得住；那張表已經 drop 了，
+  --  留著會變成「表不存在所以擋下來」的假綠燈。）
   set local role authenticated;
   begin
-    insert into public.market_listings (seller_id, item_id, qty, price)
-      values (A, 'hunt_core', 99, 999999);
+    insert into public.market_catalog (item_id, base_price, max_stack)
+      values ('cheat_item', 1, 9999);
     reset role;
-    raise exception 'ECON_SQL_FAIL 20: 掛單還能被直接寫入';
+    raise exception 'ECON_SQL_FAIL 20: 可交易物清單還能被玩家寫入';
   exception when insufficient_privilege then
     blocked := blocked + 1;
   when others then
@@ -457,7 +254,7 @@ begin
   if blocked <> 4 then
     raise exception 'ECON_SQL_FAIL 20: 只擋下 % 條側門，應為 4', blocked;
   end if;
-  raise notice '  ok 20  存檔／掛單／排行榜／影子帳 4 條側門全部堵死';
+  raise notice '  ok 20  存檔／可交易物清單／排行榜／影子帳 4 條側門全部堵死';
 end $$;
 
 -- ── 曝險面：沒登入的 anon 連呼叫都不該呼叫得到 ──
@@ -479,9 +276,9 @@ begin
 
   set local role anon;
   begin
-    perform public.market_list_item('hunt_core', 1, 100);
+    perform public.leaderboard_submit('rift_weekly', 100);
     reset role;
-    raise exception 'ECON_SQL_FAIL 21: 未登入者可以呼叫上架';
+    raise exception 'ECON_SQL_FAIL 21: 未登入者可以呼叫上榜';
   exception when insufficient_privilege then
     blocked := blocked + 1;
   when others then

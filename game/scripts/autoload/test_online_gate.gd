@@ -18,38 +18,22 @@ extends SceneTree
 const SQL_FILES: Array[String] = ["economy.sql", "schema.sql"]
 
 ## 伺服器（supabase/economy.sql）會回的每一種 error 字串。
-## 市集與房間已從遊戲移除，但 SQL 還留著那幾張表與錯誤碼，所以這張表照舊窮舉——
-## 少列一條，_check_error_list_complete() 會紅。
 ## 新增伺服器錯誤碼時要一起加進來，否則玩家會看到英文
-## —— 忘了加會被 _check_error_list_complete() 擋下來。
+## —— 忘了加會被 _check_error_list_complete() 擋下來；
+## 反過來，SQL 裡砍掉的碼留在這裡也會被同一條檢查抓出來。
+## 市集與房間那 18 種碼就是這樣一起退場的（2026-08-16）。
 const SERVER_ERRORS: Array[String] = [
 	"not signed in",
 	"bad payload",
 	"payload too large",
-	"item not tradeable",
-	"bad qty",
-	"price out of range",
-	"market blocked",
-	"too many listings",
-	"daily listing limit",
-	"not enough items",
-	"not enough gold",
-	"listing gone",
-	"cannot buy own",
-	"room gone",
-	"no win yet",
-	"not a member",
-	"already claimed",
-	"not host",
-	"already settled",
-	"bad result",
 	"bad board",
 	"score out of range",
-	"reward_claimed is server-managed",
 	"message rate limit",
 ]
 
 ## 翻完之後不該還留著的字。ASCII 技術詞漏到玩家面就是 bug。
+## 這張表刻意比 SERVER_ERRORS 寬：擋的是「翻譯裡不准出現英文技術詞」，
+## 不是「這些碼還存在」，所以不用跟著錯誤碼一起縮。
 const LEAK_WORDS: Array[String] = [
 	"gold", "item", "listing", "room", "board", "payload",
 	"claimed", "host", "member", "qty", "score", "rate limit",
