@@ -50,18 +50,6 @@ var _coach: Label
 var _coach_timer: float = 0.0
 var _hud_styled: bool = false
 var _log_panel: PanelContainer
-var _spectator: bool = false
-var _coop_input: bool = false  ## 成員可操作
-var _snap_acc: float = 0.0
-var _room_broadcast: bool = false
-var _sync_banner: Label
-var _sync_sub: Label
-var _mp_hooked: bool = false
-var _sync_ui_open: bool = false
-var _sync_ui_left: float = 0.0
-var _sync_host_ready: bool = false
-var _sync_member_ready: bool = false
-var _input_ack: String = ""
 
 
 func _is_world_mode(mode: String) -> bool:
@@ -77,8 +65,6 @@ func _is_world_miniboss(mode: String) -> bool:
 func setup(mode: String) -> void:
 	_mode = mode
 	_ended = false
-	_spectator = false
-	_room_broadcast = false
 	_telemetry_watch(mode)
 	_apply_hud_chrome()
 	banner.visible = false
@@ -119,18 +105,6 @@ func setup(mode: String) -> void:
 				stats[k] = patch[k]
 			if mode == "wolf":
 				stats["can_skill"] = true
-		## 星途助戰（離線組隊原型）
-		var pt: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("PartySystem")
-		if pt and pt.has_method("apply_stats_to_dict"):
-			stats = pt.call("apply_stats_to_dict", stats)
-			if pt.has_method("is_party_battle_active") and bool(pt.call("is_party_battle_active")):
-				_append_log("[color=#9cf]星途助戰同行[/color]")
-		## 真多人房人數加成
-		var rm: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-		if rm and rm.has_method("apply_stats_to_dict"):
-			stats = rm.call("apply_stats_to_dict", stats)
-			if rm.has_method("is_in_room") and bool(rm.call("is_in_room")) and int(rm.call("member_count")) > 1:
-				_append_log("[color=#9cf]裂縫房共鬥 · %d 人[/color]" % int(rm.call("member_count")))
 	if mode == "leo":
 		GameState.hp = GameState.max_hp
 		stats["hp"] = GameState.max_hp
@@ -222,16 +196,6 @@ func setup(mode: String) -> void:
 	AudioManager.battle_start(_mode)
 	_append_log("[color=#b8a88a]%s[/color]" % Loc.t("battle.start"))
 	_flash_coach(_mode_coach_intro(mode), 3.2)
-	## 房主同屏轉播 + 收成員輸入
-	if Engine.get_main_loop() is SceneTree:
-		var rs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-		if rs and rs.has_method("should_broadcast") and bool(rs.call("should_broadcast")):
-			_room_broadcast = true
-			if rs.has_method("broadcast_start"):
-				rs.call("broadcast_start", mode)
-			_hook_mp_host(rs)
-			_append_log("[color=#9cf]同屏轉播中 · 隊友可操作（格擋／連招／助攻）[/color]")
-			parry_hint.text = "【J】格擋／連招　隊友同步按 J＝雙星連招"
 	if GameState.ng_plus > 0:
 		_append_log("[color=#c8f]黑焰迴響 ×%d · 敵人強了 ×%.2f · 出手空檔更窄[/color]" % [
 			GameState.ng_plus, ng_m
@@ -811,95 +775,18 @@ func _hide_size_compare() -> void:
 
 func _process(delta: float) -> void:
 	_tick_coach(delta)
-	_tick_sync_ui(delta)
 	if _shake > 0.0:
 		_shake = maxf(0.0, _shake - delta)
 		arena.position = Vector2(randf_range(-4, 4), randf_range(-3, 3)) * (_shake * 8.0)
 		if _shake <= 0.0:
 			arena.position = Vector2.ZERO
-	if _spectator:
-		return
 	if sim == null or _ended:
 		return
 	sim.step(delta)
-	## 房主：連招窗狀態同步到 HUD
-	if _room_broadcast and sim.mp_sync_open:
-		_sync_ui_open = true
-		_sync_ui_left = sim.mp_sync_timer
-		_sync_host_ready = sim.mp_host_sync
-		_sync_member_ready = sim.mp_member_sync
-	elif _room_broadcast and not sim.mp_sync_open and _sync_ui_open and _sync_ui_left > 0.0:
-		## 關閉由事件處理
-		pass
 	_refresh_hud()
-	if _room_broadcast:
-		_snap_acc += delta
-		if _snap_acc >= 0.5:
-			_snap_acc = 0.0
-			_push_room_snap()
-
-
-func _hook_mp_host(rs: Node) -> void:
-	if _mp_hooked:
-		return
-	if rs.has_signal("room_event"):
-		if not rs.room_event.is_connected(_on_mp_room_event):
-			rs.room_event.connect(_on_mp_room_event)
-		_mp_hooked = true
-
-
-func _on_mp_room_event(kind: String, data: Dictionary) -> void:
-	if not _room_broadcast or sim == null or _ended:
-		return
-	if kind != "remote_input":
-		return
-	var ik := str(data.get("kind", ""))
-	var who := str(data.get("who", "旅人"))
-	var rtt := float(data.get("rtt_ms", -1.0))
-	var res: Dictionary = {}
-	if ik in ["parry", "sync", "react"]:
-		## 先登記連招（遠端 grace），再套用格擋
-		var sync_r: Dictionary = sim.note_sync_press(false, who, true)
-		res = sim.apply_remote_input("parry", true, who, rtt)
-		if bool(sync_r.get("sync", false)):
-			res = sync_r
-		elif not bool(res.get("ok", false)):
-			res = sync_r
-	else:
-		res = sim.apply_remote_input(ik, true, who, rtt)
-	_append_log("[color=#9cf]%s[/color]" % str(res.get("msg", "")))
-	if bool(res.get("ok", false)) or bool(res.get("sync", false)):
-		_shake = 0.2
-		_flash(player_body, Color(0.7, 0.9, 1.0))
-	_push_room_action("mp", str(res.get("msg", "")), res)
-	_push_room_snap()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	## 成員同屏操作
-	if _spectator and _coop_input and not _ended:
-		if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE):
-			_end_spectator(false)
-			get_viewport().set_input_as_handled()
-			return
-		if event.is_action_pressed("parry") or (event is InputEventKey and event.pressed and event.keycode == KEY_J):
-			_member_send("sync")
-			get_viewport().set_input_as_handled()
-			return
-		if event is InputEventKey and event.pressed and not event.echo:
-			match event.keycode:
-				KEY_K:
-					_member_send("skill")
-					get_viewport().set_input_as_handled()
-				KEY_L:
-					_member_send("assist")
-					get_viewport().set_input_as_handled()
-		return
-	if _spectator:
-		if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE):
-			_end_spectator(false)
-			get_viewport().set_input_as_handled()
-		return
 	if sim == null or _ended:
 		return
 	if sim.sim_paused:
@@ -926,20 +813,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_append_log("鎖定：幻影乙")
 				get_viewport().set_input_as_handled()
 	if event.is_action_pressed("parry"):
-		## 房主：登記連招窗 + 立即格擋（單人不受影響）
-		if _room_broadcast:
-			var sr: Dictionary = sim.note_sync_press(true, GameState.player_name)
-			if bool(sr.get("waiting", false)):
-				_append_log("[color=#fc8]%s[/color]" % str(sr.get("msg", "")))
-			if bool(sr.get("sync", false)):
-				_append_log("[color=#6f6]雙星連招！[/color]")
-				_shake = 0.35
-				_flash(player_body, Color(1, 0.95, 0.5))
-			elif sim.try_react():
-				_shake = 0.3
-				_flash(player_body, Color(1, 0.95, 0.5))
-			_push_room_snap()
-		elif sim.try_react():
+		if sim.try_react():
 			_shake = 0.3
 			_flash(player_body, Color(1, 0.95, 0.5))
 		get_viewport().set_input_as_handled()
@@ -1460,165 +1334,6 @@ func _primary_enemy() -> BattleUnit:
 	return null
 
 
-func _push_room_snap(log_line: String = "") -> void:
-	if not _room_broadcast or Engine.get_main_loop() is not SceneTree:
-		return
-	var rs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-	if rs == null or not rs.has_method("broadcast_snap"):
-		return
-	var p: BattleUnit = sim.get_unit("player") if sim else null
-	var e: BattleUnit = _primary_enemy() if sim else null
-	var php := int(p.hp) if p else 0
-	var pmax := int(p.max_hp) if p else 1
-	var ehp := int(e.hp) if e else 0
-	var emax := int(e.max_hp) if e else 1
-	var en := e.display_name if e else "敵"
-	rs.call("broadcast_snap", php, pmax, ehp, emax, en, log_line)
-
-
-func _push_room_action(action: String, text: String, extra: Dictionary = {}) -> void:
-	if not _room_broadcast or Engine.get_main_loop() is not SceneTree:
-		return
-	var rs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-	if rs and rs.has_method("broadcast_action"):
-		rs.call("broadcast_action", action, text, extra)
-
-
-func _ensure_sync_ui() -> void:
-	if _sync_banner != null:
-		return
-	_sync_banner = Label.new()
-	_sync_banner.name = "SyncComboBanner"
-	_sync_banner.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_sync_banner.offset_top = 96
-	_sync_banner.offset_bottom = 140
-	_sync_banner.offset_left = -280
-	_sync_banner.offset_right = 280
-	_sync_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_sync_banner.add_theme_font_size_override("font_size", 36)
-	_sync_banner.add_theme_color_override("font_color", Color(1.0, 0.92, 0.35))
-	_sync_banner.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
-	_sync_banner.add_theme_constant_override("shadow_offset_x", 2)
-	_sync_banner.add_theme_constant_override("shadow_offset_y", 2)
-	_sync_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_sync_banner.visible = false
-	add_child(_sync_banner)
-	_sync_sub = Label.new()
-	_sync_sub.name = "SyncComboSub"
-	_sync_sub.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_sync_sub.offset_top = 138
-	_sync_sub.offset_bottom = 168
-	_sync_sub.offset_left = -300
-	_sync_sub.offset_right = 300
-	_sync_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_sync_sub.add_theme_font_size_override("font_size", 16)
-	_sync_sub.add_theme_color_override("font_color", Color(0.95, 0.9, 0.75))
-	_sync_sub.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
-	_sync_sub.add_theme_constant_override("shadow_offset_x", 1)
-	_sync_sub.add_theme_constant_override("shadow_offset_y", 1)
-	_sync_sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_sync_sub.visible = false
-	add_child(_sync_sub)
-
-
-func _tick_sync_ui(delta: float) -> void:
-	_ensure_sync_ui()
-	if not _sync_ui_open:
-		if _sync_banner:
-			_sync_banner.visible = false
-		if _sync_sub:
-			_sync_sub.visible = false
-		return
-	_sync_ui_left = maxf(0.0, _sync_ui_left - delta)
-	var t := _sync_ui_left
-	var pulse := 1.0 + 0.06 * sin(Time.get_ticks_msec() * 0.012)
-	_sync_banner.visible = true
-	_sync_banner.scale = Vector2(pulse, pulse)
-	_sync_banner.pivot_offset = Vector2(280, 22)
-	if t > 0.55:
-		_sync_banner.add_theme_color_override("font_color", Color(1.0, 0.95, 0.4))
-		_sync_banner.text = "雙星連招  %.1f" % t
-	elif t > 0.0:
-		_sync_banner.add_theme_color_override("font_color", Color(0.45, 1.0, 0.55))
-		_sync_banner.text = "快按 J！  %.1f" % t
-	else:
-		_sync_banner.text = "雙星連招"
-	var h := "✓" if _sync_host_ready else "·"
-	var m := "✓" if _sync_member_ready else "·"
-	_sync_sub.visible = true
-	_sync_sub.text = "房主 %s　隊友 %s　　%s" % [h, m, _input_ack]
-	if t <= 0.0 and not (_sync_host_ready and _sync_member_ready):
-		## 逾時關閉 UI（成功時由 success 事件關）
-		if not _room_broadcast or sim == null or not sim.mp_sync_open:
-			_sync_ui_open = false
-
-
-func _open_sync_ui(left: float = 1.05) -> void:
-	_ensure_sync_ui()
-	_sync_ui_open = true
-	_sync_ui_left = left
-	_sync_host_ready = false
-	_sync_member_ready = false
-	AudioManager.play("warn", 1.05, -2.0)
-	_append_log("[color=#fc8]✦ 雙星連招窗！與隊友同時按 J[/color]")
-
-
-func _close_sync_ui(success: bool) -> void:
-	_ensure_sync_ui()
-	if success:
-		_sync_banner.visible = true
-		_sync_banner.text = "雙星連招！"
-		_sync_banner.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25))
-		_sync_sub.visible = true
-		_sync_sub.text = "合拍成功"
-		AudioManager.play("parry", 1.15, 0.0)
-		AudioManager.play("clash", 0.95, -4.0)
-		_shake = 0.45
-		_flash(player_body, Color(1.0, 0.9, 0.4))
-		_flash(enemy_body, Color(1.0, 0.6, 0.3))
-		get_tree().create_timer(0.85).timeout.connect(func():
-			if is_instance_valid(self):
-				_sync_ui_open = false
-				if _sync_banner:
-					_sync_banner.visible = false
-				if _sync_sub:
-					_sync_sub.visible = false
-		)
-	else:
-		_sync_ui_open = false
-		if _sync_banner:
-			_sync_banner.visible = false
-		if _sync_sub:
-			_sync_sub.visible = false
-
-
-func _member_send(kind: String) -> void:
-	if Engine.get_main_loop() is not SceneTree:
-		return
-	var rs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-	if rs == null or not rs.has_method("send_member_input"):
-		return
-	var r: Dictionary = rs.call("send_member_input", kind, {})
-	_append_log("[color=#9cf]%s[/color]" % str(r.get("msg", kind)))
-	if bool(r.get("ok", false)):
-		_flash(player_body, Color(0.6, 0.85, 1.0))
-		_shake = 0.08
-		AudioManager.play("ui", 1.1, -6.0)
-		var lab := str(r.get("kind", kind))
-		match lab:
-			"sync", "parry", "react":
-				_input_ack = "已送出格擋 · 等待房主"
-				if _sync_ui_open:
-					_sync_member_ready = true
-			"skill":
-				_input_ack = "已送出戰意"
-			"assist":
-				_input_ack = "已送出助攻"
-			_:
-				_input_ack = "已送出"
-
-
-## 成員同屏（無本地 BattleSim；可操作則送 input）
 ## 戰鬥的開始與結果從這裡回報，不從 main.gd。
 ## 掛在 battle_finished 上而不是逐個 emit 點插一行，逃跑／中途結束才不會漏。
 func _telemetry_watch(mode: String) -> void:
@@ -1636,193 +1351,8 @@ func _on_telemetry_battle_finished(won: bool) -> void:
 		tel.call("battle_finished", _mode, won)
 
 
-func setup_spectator(mode: String, coop: bool = true) -> void:
-	_mode = mode
-	_ended = false
-	_spectator = true
-	_coop_input = coop
-	_room_broadcast = false
-	sim = null
-	_apply_hud_chrome()
-	banner.visible = false
-	countdown.visible = false
-	countdown_sub.visible = false
-	if hazard_fx:
-		hazard_fx.visible = false
-	_apply_battle_art(mode)
-	if btn_flee:
-		btn_flee.text = "離開同屏"
-	player_name_l.text = "房主隊伍"
-	enemy_name.text = "…"
-	if coop:
-		parry_hint.text = "【J】格擋／連招　【K】戰意　【L】助攻　· Esc 離開"
-		_append_log("[color=#9cf]同屏操作開始。你的輸入會送到房主模擬器。[/color]")
-		_append_log("[color=#fc8]雙人連招：綠窗時與房主同時按 J！[/color]")
-	else:
-		parry_hint.text = "同屏觀戰 · Esc 離開"
-		_append_log("[color=#9cf]同屏觀戰開始。等待房主戰鬥同步…[/color]")
-	var live := ""
-	if Engine.get_main_loop() is SceneTree:
-		var rs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-		if rs:
-			if rs.has_signal("spectate_event") and not rs.spectate_event.is_connected(_on_spectate_event):
-				rs.spectate_event.connect(_on_spectate_event)
-			if rs.has_signal("spectate_ended") and not rs.spectate_ended.is_connected(_on_spectate_ended_signal):
-				rs.spectate_ended.connect(_on_spectate_ended_signal)
-			if rs.has_method("realtime_status"):
-				live = str(rs.call("realtime_status"))
-			if rs.get("last_snap") is Dictionary and not (rs.get("last_snap") as Dictionary).is_empty():
-				_on_spectate_event("snap", rs.get("last_snap"))
-	if live != "":
-		_append_log("[color=#aaa]%s[/color]" % live)
-	AudioManager.battle_start(mode)
-
-
-func _on_spectate_event(kind: String, payload: Dictionary) -> void:
-	if not _spectator or _ended:
-		return
-	match kind:
-		"battle_start":
-			var m := str(payload.get("mode", _mode))
-			_mode = m
-			_apply_battle_art(m)
-			player_name_l.text = str(payload.get("host", "房主"))
-			_append_log("[color=#9cf]房主開戰 · %s · %s 人[/color]" % [m, str(payload.get("members", 1))])
-		"snap":
-			_apply_snap(payload)
-		"action":
-			var t := str(payload.get("text", ""))
-			if t != "":
-				_append_log(t)
-			var act := str(payload.get("action", ""))
-			if act in ["hit", "skill", "parry", "mp"]:
-				_shake = 0.12
-				_flash(player_body, Color(1, 0.5, 0.4))
-		"mp_sync_window", "sync_window":
-			if Engine.get_main_loop() is SceneTree:
-				var rs4: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-				if rs4 and rs4.has_method("set_sync_window_hot"):
-					rs4.call("set_sync_window_hot", bool(payload.get("open", false)))
-			if bool(payload.get("open", false)):
-				_open_sync_ui(float(payload.get("left", 1.05)))
-			elif bool(payload.get("success", false)):
-				_close_sync_ui(true)
-				_append_log("[color=#6f6]雙人連招成功！[/color]")
-			else:
-				_close_sync_ui(false)
-		"mp_sync_press":
-			_sync_host_ready = bool(payload.get("host", false))
-			_sync_member_ready = bool(payload.get("member", false))
-			if _sync_ui_open and payload.has("left"):
-				_sync_ui_left = float(payload.get("left", _sync_ui_left))
-			var who := str(payload.get("who", ""))
-			if who != "":
-				_input_ack = "%s 已按" % who
-				AudioManager.play("step", 1.3, -8.0)
-		"end":
-			_on_spectate_ended_signal(bool(payload.get("won", false)))
-
-
-func _apply_snap(payload: Dictionary) -> void:
-	var pmax := maxi(1, int(payload.get("pmax", 100)))
-	var emax := maxi(1, int(payload.get("emax", 100)))
-	var php := clampi(int(payload.get("php", 0)), 0, pmax)
-	var ehp := clampi(int(payload.get("ehp", 0)), 0, emax)
-	player_hp.max_value = pmax
-	player_hp.value = php
-	player_hp_label.text = "%d / %d" % [php, pmax]
-	enemy_hp.max_value = emax
-	enemy_hp.value = ehp
-	enemy_hp_label.text = "%d / %d" % [ehp, emax]
-	var en := str(payload.get("ename", ""))
-	if en != "":
-		enemy_name.text = en
-	var lg := str(payload.get("log", ""))
-	if lg != "":
-		_append_log(lg)
-
-
-func _on_spectate_ended_signal(won: bool) -> void:
-	if not _spectator or _ended:
-		return
-	_end_spectator(won)
-
-
-func _end_spectator(won: bool) -> void:
-	if _ended:
-		return
-	_ended = true
-	banner.visible = true
-	banner.text = "觀戰結束 · " + ("勝" if won else "敗")
-	_append_log("[color=#9cf]同屏結束。回房間可領共鬥獎。[/color]")
-	if Engine.get_main_loop() is SceneTree:
-		var rs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-		if rs and rs.has_method("stop_spectate"):
-			rs.call("stop_spectate")
-	await get_tree().create_timer(1.2).timeout
-	if is_instance_valid(self):
-		battle_finished.emit(won)
-
-
 func _on_event(kind: String, data: Dictionary) -> void:
 	AudioManager.on_battle_event(kind, data)
-	if _room_broadcast:
-		match kind:
-			"hit":
-				_push_room_action("hit", "%s 造成 %s 傷害" % [data.get("attacker"), data.get("damage")], data)
-				_push_room_snap()
-			"skill_hit", "skill_cast":
-				_push_room_action("skill", str(data.get("skill", "技能")), data)
-				if bool(data.get("sync_combo", false)):
-					_push_room_action("mp", "雙星連招！", data)
-			"perfect_parry", "parry_ok":
-				_push_room_action("parry", "格擋！", data)
-			"miss":
-				_push_room_action("miss", "未中", data)
-			"mp_sync_window":
-				## 轉播連招窗給隊友 + 加速拉輸入
-				if Engine.get_main_loop() is SceneTree:
-					var rs2: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-					if rs2:
-						if rs2.has_method("broadcast_battle"):
-							rs2.call("broadcast_battle", "mp_sync_window", data, true)
-						if rs2.has_method("set_sync_window_hot"):
-							rs2.call("set_sync_window_hot", bool(data.get("open", false)))
-				if bool(data.get("open", false)):
-					_open_sync_ui(float(data.get("left", 1.05)))
-				elif bool(data.get("success", false)):
-					_close_sync_ui(true)
-				else:
-					_close_sync_ui(false)
-			"mp_sync_press":
-				_sync_host_ready = bool(data.get("host", false))
-				_sync_member_ready = bool(data.get("member", false))
-				if data.has("left"):
-					_sync_ui_left = float(data.get("left", _sync_ui_left))
-				var who2 := str(data.get("who", ""))
-				if who2 != "":
-					_input_ack = "%s 就緒" % who2
-					AudioManager.play("ui", 1.2, -8.0)
-			"mp_sync_success":
-				var cn := int(data.get("combo_n", 1))
-				_append_log("[color=#6f6]雙星連招成立！（本場 ×%d）[/color]" % cn)
-				_close_sync_ui(true)
-				_push_room_snap("雙星連招！")
-				if Engine.get_main_loop() is SceneTree:
-					var rs3: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-					if rs3 and rs3.has_method("set_sync_window_hot"):
-						rs3.call("set_sync_window_hot", false)
-			"mp_input":
-				var ok_in := bool(data.get("ok", true))
-				var knd := str(data.get("kind", ""))
-				var who3 := str(data.get("who", "隊友"))
-				if ok_in:
-					_append_log("[color=#9cf]%s · %s 成功[/color]" % [who3, knd])
-					_input_ack = "%s 操作生效" % who3
-					AudioManager.play("hit", 1.2, -10.0)
-				else:
-					_append_log("[color=#a88]%s · %s 未進窗[/color]" % [who3, knd])
-					_input_ack = "%s 按早／按晚" % who3
 	match kind:
 		"attack_swing":
 			var aid := str(data.get("id", ""))
@@ -2141,11 +1671,6 @@ func _on_end(won: bool) -> void:
 	_ended = true
 	countdown.visible = false
 	countdown_sub.visible = false
-	if _room_broadcast and Engine.get_main_loop() is SceneTree:
-		var rs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("RoomSystem")
-		if rs and rs.has_method("broadcast_end"):
-			rs.call("broadcast_end", won)
-		_push_room_snap("戰鬥結束")
 	AudioManager.battle_end(won)
 	if won:
 		banner.text = "勝　利"
@@ -2240,9 +1765,6 @@ func _hazard_name(kind: String) -> String:
 
 
 func _on_btn_flee_pressed() -> void:
-	if _spectator:
-		_end_spectator(false)
-		return
 	if _mode in ["leo", "fog", "demon", "abo", "falcon", "boar", "wrath", "tide", "statue", "chrono"]:
 		_append_log("無法逃離此戰。")
 		return
@@ -2292,13 +1814,6 @@ func _grant_rift_rewards(mode: String) -> void:
 		_append_log("[color=#aaa]練習局：金幣×0.35，無經驗／首通加成[/color]")
 	elif bool(mult.get("featured", false)):
 		_append_log("[color=#fc8]本週焦點：金幣×1.5 · 經驗×1.25[/color]")
-	## 助戰通關金
-	if Engine.get_main_loop() is SceneTree:
-		var pt2: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("PartySystem")
-		if pt2 and pt2.has_method("grant_win_bonus"):
-			var pb: Dictionary = pt2.call("grant_win_bonus")
-			if bool(pb.get("ok", false)):
-				_append_log("[color=#9cf]%s[/color]" % str(pb.get("msg", "")))
 
 
 ## autoload 之間用絕對路徑 get_node 在某些啟動時機會噴錯，一律從 SceneTree.root 走

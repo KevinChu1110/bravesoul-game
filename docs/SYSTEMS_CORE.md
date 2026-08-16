@@ -1,4 +1,4 @@
-# 核心系統設計 · 帳號／官網／數值表／裝備／倉庫／Log／爆擊
+# 核心系統設計 · 帳號／官網／數值表／裝備／Log／爆擊
 
 > 版本：**0.11.0**  
 > 原則：主線離線可玩；連線加厚；資料表 JSON 與程式欄位對齊。
@@ -32,7 +32,7 @@
 |------|------|
 | `game/data/tables/combat.json` | 傷害浮動、爆擊、命中基線 |
 | `game/data/tables/equipment.json` | 裝備基底＋浮動區間 |
-| `game/data/tables/items_meta.json` | 道具與倉庫規則 |
+| `game/data/tables/items_meta.json` | 道具規則 |
 
 程式：`DataTables` autoload 載入；`Formulas` / `EquipmentSystem` 只讀表。
 
@@ -51,13 +51,14 @@ quality：common / uncommon / rare / epic
 
 ---
 
-## 5. 倉庫
+## 5. 背包
 
-- **背包**：既有 `inventory` + 裝備實例列表 `equip_bag`  
-- **倉庫**：`warehouse`（堆疊物）+ `warehouse_equip`（裝備實例）  
-- 轉移：騎士堡／行商「倉庫官」  
+- **堆疊物**：`inventory`（item_id → 數量）  
+- **裝備實例**：未裝備的在 `equip_bag`，已穿的在 `equip_worn` + `equip_slots`  
 
-容量：背包 24 顯示格；倉庫 60 格（可堆疊物一格一 id）。
+容量：24 顯示格。**沒有倉庫** —— 全遊戲只有 11 種可交易物，
+背包永遠裝得下，多一層存取只是多一次點擊（2026-08-16 砍掉，見
+[DECISIONS.md](DECISIONS.md)）。
 
 ---
 

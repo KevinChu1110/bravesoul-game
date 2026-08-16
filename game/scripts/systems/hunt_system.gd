@@ -187,11 +187,6 @@ func _finish_run(full_clear: bool) -> Dictionary:
 	GameState.set_flag(_fk("active"), false)
 	GameState.set_flag(_fk("wave"), 0)
 	GameState.set_flag(_fk("practice"), false)
-	## 每日探索
-	if Engine.get_main_loop() is SceneTree:
-		var er: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("EventRuntime")
-		if er and er.has_method("mark_explore_daily"):
-			er.call("mark_explore_daily")
 	SaveManager.save_game()
 	return {
 		"ok": true,

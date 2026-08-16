@@ -87,6 +87,7 @@ func _process(_delta: float) -> bool:
 	## 純算資料的部分不必碰檔案
 	_check_v1_upgrade()
 	_check_v2_upgrade()
+	_check_v3_upgrade()
 	_check_idempotent()
 	_check_future_version()
 	_check_garbage()
@@ -204,8 +205,8 @@ func _check_v2_upgrade() -> void:
 		_fail("第 2 版存檔升不上來：%s" % str(res.get("reason", "")))
 		return
 	var applied: PackedStringArray = res.get("applied", PackedStringArray())
-	if applied.size() != 1 or applied[0] != "2→3":
-		_fail("第 2 版應該只走 2→3，實際 %s" % str(applied))
+	if applied.is_empty() or applied[0] != "2→3":
+		_fail("第 2 版第一步應該是 2→3，實際 %s" % str(applied))
 		return
 	var d: Dictionary = res.get("data", {})
 	var lv := int(((d.get("skill_data", {}) as Dictionary).get("slash", {}) as Dictionary).get("lv", 0))
@@ -216,7 +217,66 @@ func _check_v2_upgrade() -> void:
 	if bool(((d.get("souls", []) as Array)[0] as Dictionary).get("equipped", true)):
 		_fail("沒有魂槽時 equipped 還是 true")
 		return
-	print("  ok 第 2 版只走 2→3，不會倒著把資料改回去")
+	print("  ok 第 2 版從 2→3 起跳，不會倒著把資料改回去")
+
+
+## 3 → 4：倉庫與市集被移除，寄放在那裡的東西必須全數還給玩家。
+## 這一步如果只是把欄位刪掉，存檔讀得出來、遊戲也不報錯，但玩家的材料與裝備
+## 會安安靜靜消失 —— 正是升級表存在的理由，所以這裡逐項清點。
+func _check_v3_upgrade() -> void:
+	var v3 := {
+		"version": 3,
+		"chapter": "cleared",
+		"play_time": 120.0,
+		"inventory": {"hp_s": 2, "hunt_hide": 1},
+		"warehouse": {"hp_s": 5, "hunt_bone": 3},
+		"equip_bag": [{"uid": "a", "id": "rusty_blade"}],
+		"warehouse_equip": [{"uid": "b", "id": "dawn_blade"}],
+		"souls": [],
+		"soul_slots": [],
+		"flags": {
+			"market.local_listings": [
+				{"item_id": "hunt_hide", "qty": 4, "price": 30},
+				{"qty": 9},
+			],
+			"market.pending_credit": 120,
+			"c1_forged": true,
+		},
+	}
+	var res: Dictionary = SaveMigration.migrate(v3)
+	if not bool(res.get("ok", false)):
+		_fail("第 3 版存檔升不上來：%s" % str(res.get("reason", "")))
+		return
+	var d: Dictionary = res.get("data", {})
+
+	var inv: Dictionary = d.get("inventory", {})
+	## 背包 2 + 倉庫 5 = 7；掛單退的 4 加在原本的 1 上 = 5
+	if int(inv.get("hp_s", 0)) != 7:
+		_fail("倉庫裡的小紅水沒有倒回背包：hp_s=%d，期望 7" % int(inv.get("hp_s", 0)))
+		return
+	if int(inv.get("hunt_bone", 0)) != 3:
+		_fail("倉庫獨有的材料整批不見了：hunt_bone=%d，期望 3" % int(inv.get("hunt_bone", 0)))
+		return
+	if int(inv.get("hunt_hide", 0)) != 5:
+		_fail("市集掛單沒有退貨：hunt_hide=%d，期望 5" % int(inv.get("hunt_hide", 0)))
+		return
+
+	var eq: Array = d.get("equip_bag", [])
+	if eq.size() != 2:
+		_fail("倉庫裡的裝備沒有倒回未裝備清單，剩 %d 件" % eq.size())
+		return
+
+	if d.has("warehouse") or d.has("warehouse_equip"):
+		_fail("倉庫欄位倒完之後應該一併移除")
+		return
+	var flags: Dictionary = d.get("flags", {})
+	if flags.has("market.local_listings") or flags.has("market.pending_credit"):
+		_fail("市集殘留的旗標沒有清掉：%s" % str(flags.keys()))
+		return
+	if not bool(flags.get("c1_forged", false)):
+		_fail("清市集旗標時把別的旗標一起清掉了")
+		return
+	print("  ok 第 3 版升到第 4 版：倉庫與掛單的東西全數退回背包，殘留旗標清乾淨")
 
 
 ## 已經是最新版的檔再升一次要原封不動 —— 遊戲每次載入都會呼叫，不能每次都變一點

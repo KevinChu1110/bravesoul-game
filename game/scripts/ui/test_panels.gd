@@ -12,42 +12,22 @@ extends SceneTree
 ## min_buttons: 至少要有幾顆按鈕
 ## expect_buttons: 這些字串每個都要出現在某顆按鈕的文字裡
 ##
-## 注意 expect_buttons 為什麼必要：市集的 open() 先同步畫一次，接著 refresh_online()
-## 的回呼又會重畫一次。只驗「標題 + 按鈕數」的話，就算把同步那次拿掉，非同步重畫
-## 也會把測試補成綠燈 —— 實測過，那種破壞抓不到。驗到具體按鈕才擋得住。
+## 注意 expect_buttons 為什麼必要：面板常常先同步畫一次、之後再重畫一次。
+## 只驗「標題 + 按鈕數」的話，就算把同步那次拿掉，後來的重畫也會把測試補成綠燈
+## —— 實測過，那種破壞抓不到。驗到具體按鈕才擋得住。
 const PANELS: Array = [
-	{
-		"entry": "_go_market_panel",
-		"title": "星途市集",
-		"min_buttons": 3,
-		"expect_buttons": ["我要上架", "返回"],
-	},
-	## 未連線時的裂縫房：走 online_ready()==false 那條分支
-	{
-		"entry": "_go_room_panel",
-		"title": "裂縫房",
-		"min_buttons": 3,
-		"expect_buttons": ["連線設定", "星途助戰", "返回"],
-	},
-	## 帶輸入框的加入代碼窗（自己畫，不走 ui_panel）
-	{
-		"entry": "_go_room_join_code_panel",
-		"title": "用代碼加入房間",
-		"min_buttons": 2,
-		"expect_buttons": ["加入", "返回"],
-	},
-	## 裝備面板也是自己畫：三部位槽 + 背包網格
+	## 裝備面板是自己畫的：三部位槽 + 背包網格
 	{
 		"entry": "_go_equip_panel",
 		"title": "裝備",
-		"min_buttons": 2,
-		"expect_buttons": ["倉庫", "返回"],
+		"min_buttons": 1,
+		"expect_buttons": ["返回"],
 	},
 	{
-		"entry": "_go_warehouse_panel",
-		"title": "倉庫",
-		"min_buttons": 2,
-		"expect_buttons": ["裝備", "返回"],
+		"entry": "_go_save_slots_panel",
+		"title": "旅途紀錄",
+		"min_buttons": 1,
+		"expect_buttons": ["返回"],
 	},
 ]
 
@@ -55,7 +35,6 @@ const PANELS: Array = [
 const HOST_API: Array = [
 	"ui_panel", "ui_toast", "ui_goto",
 	"ui_host", "ui_clear_host", "ui_reset_fade", "ui_refresh_hud",
-	"ui_room_spectate", "ui_room_host_start",
 ]
 
 var _ok := true

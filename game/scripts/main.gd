@@ -32,10 +32,7 @@ const MapleHotbarScn = preload("res://scripts/ui/maple_hotbar.gd")
 const MapleInventoryScn = preload("res://scripts/ui/maple_inventory.gd")
 const CutscenePlayerScn = preload("res://scripts/ui/cutscene_player.gd")
 const NpcLines = preload("res://scripts/systems/npc_lines.gd")
-const MarketPanelScn = preload("res://scripts/ui/panels/market_panel.gd")
-const RoomPanelScn = preload("res://scripts/ui/panels/room_panel.gd")
 const EquipPanelScn = preload("res://scripts/ui/panels/equip_panel.gd")
-const WarehousePanelScn = preload("res://scripts/ui/panels/warehouse_panel.gd")
 const SaveSlotsPanelScn = preload("res://scripts/ui/panels/save_slots_panel.gd")
 var _dialogue: DialogueBox
 var _cutscene: Control  ## CutscenePlayer
@@ -43,10 +40,7 @@ var _explore: Control  ## ExploreView
 var _maple_hud: Control  ## MapleHud
 var _hotbar: Control  ## MapleHotbar
 var _inv_panel: Control  ## MapleInventory
-var _market_ui: RefCounted  ## MarketPanel
-var _room_ui: RefCounted  ## RoomPanel
 var _equip_ui: RefCounted  ## EquipPanel
-var _warehouse_ui: RefCounted  ## WarehousePanel
 var _saves_ui: RefCounted  ## SaveSlotsPanel
 var _toast: Label
 var _current: Screen = Screen.TITLE
@@ -106,10 +100,7 @@ func _ready() -> void:
 				_show_toast(str(res.get("msg", "")))
 				_player_bubble(str(res.get("msg", "")))
 		)
-	_market_ui = MarketPanelScn.new(self)
-	_room_ui = RoomPanelScn.new(self)
 	_equip_ui = EquipPanelScn.new(self)
-	_warehouse_ui = WarehousePanelScn.new(self)
 	_saves_ui = SaveSlotsPanelScn.new(self)
 	_saves_ui.on_loaded = func() -> void:
 		_apply_saved_ui_layout()
@@ -446,12 +437,6 @@ func _build_pause_layer() -> void:
 		_close_pause()
 		_go_quest_panel()
 	)
-	var ev_pause := EventRuntime.title_button_label()
-	if ev_pause != "":
-		_pause_btn(box, ev_pause, func():
-			_close_pause()
-			_go_event_panel()
-		)
 	_pause_btn(box, "公會／盟約", func():
 		_close_pause()
 		_go_guild_panel()
@@ -476,10 +461,6 @@ func _build_pause_layer() -> void:
 		_close_pause()
 		_go_equip_panel()
 	)
-	_pause_btn(box, "倉庫", func():
-		_close_pause()
-		_go_warehouse_panel()
-	)
 	_pause_btn(box, "冒險日誌", func():
 		_close_pause()
 		_go_game_log_panel()
@@ -488,21 +469,6 @@ func _build_pause_layer() -> void:
 		_pause_btn(box, "星途獵場", func():
 			_close_pause()
 			_open_explore("hunting_grounds", Screen.C1_WILD)
-		)
-	if PartySystem.is_unlocked():
-		_pause_btn(box, "星途助戰", func():
-			_close_pause()
-			_go_party_panel()
-		)
-	if MarketSystem.is_unlocked():
-		_pause_btn(box, "星途市集", func():
-			_close_pause()
-			_go_market_panel()
-		)
-	if PartySystem.is_unlocked():
-		_pause_btn(box, "裂縫房", func():
-			_close_pause()
-			_go_room_panel()
 		)
 	_pause_btn(box, "戰魂／星屑", func():
 		_close_pause()
@@ -526,145 +492,6 @@ func _build_pause_layer() -> void:
 		_close_pause()
 		_go_title()
 	)
-
-
-func _go_event_panel() -> void:
-	## 收攤優先
-	var ended: Array = EventRuntime.ended_with_tokens()
-	if not ended.is_empty() and EventRuntime.primary_event().is_empty():
-		var body0 := "有活動已收攤，剩餘活動幣可換成金幣。\n\n"
-		body0 += EventRuntime.calendar_preview_bbcode()
-		var buttons0: Array = []
-		for e in ended:
-			var eid0 := str(e.get("id", ""))
-			var nm := str(e.get("name", eid0))
-			buttons0.append({"text": "收攤換幣：%s" % nm, "cb": _event_cb_convert.bind(eid0)})
-		buttons0.append({"text": "返回", "cb": _hub_back})
-		_panel("活動收攤", body0, buttons0)
-		return
-
-	var ev: Dictionary = EventRuntime.primary_event()
-	if ev.is_empty():
-		var body_cal := EventRuntime.calendar_preview_bbcode()
-		body_cal += "\n\n" + EventRuntime.daily_board_bbcode()
-		var bcal: Array = [
-			{"text": "領三件事獎勵", "cb": _event_cb_daily_board},
-			{"text": "返回", "cb": _hub_back},
-		]
-		_panel("歲旅一覽", body_cal, bcal)
-		return
-	var eid := str(ev.get("id", ""))
-	var body := EventRuntime.panel_bbcode(ev)
-	var buttons: Array = []
-	var left := EventRuntime.daily_left(ev)
-	if left > 0:
-		buttons.append({"text": "有獎挑戰（剩 %d）" % left, "cb": _event_cb_challenge.bind(eid)})
-	else:
-		buttons.append({"text": "今日有獎已滿（仍可探索）", "cb": _event_cb_goto.bind(eid)})
-	buttons.append({"text": "一鍵領任務", "cb": _event_cb_claim_all.bind(eid)})
-	for m in ev.get("missions", []):
-		var mid := str(m.get("id", ""))
-		if EventRuntime.mission_done(ev, m) and not EventRuntime.mission_claimed(eid, mid):
-			var mname := str(m.get("name", mid))
-			buttons.append({"text": "領：%s" % mname, "cb": _event_cb_claim_one.bind(eid, mid)})
-	var shop: Array = ev.get("shop", [])
-	for i in mini(5, shop.size()):
-		var it: Dictionary = shop[i]
-		var label := "換 %s（%d）" % [str(it.get("name", it.get("id"))), int(it.get("cost", 0))]
-		buttons.append({"text": label, "cb": _event_cb_shop.bind(eid, i)})
-	buttons.append({"text": "領三件事獎勵", "cb": _event_cb_daily_board})
-	if str(ev.get("entry_map", "")) != "":
-		buttons.append({"text": "前往活動地圖", "cb": _event_cb_goto.bind(eid)})
-	for e2 in EventRuntime.ended_with_tokens():
-		var eid2 := str(e2.get("id", ""))
-		buttons.append({"text": "收攤：%s" % str(e2.get("name", "")), "cb": _event_cb_convert.bind(eid2)})
-	buttons.append({"text": "歲旅一覽", "cb": _event_cb_calendar})
-	buttons.append({"text": "返回", "cb": _hub_back})
-	_panel("活動 · %s" % str(ev.get("name", "")), body, buttons)
-
-
-func _event_cb_challenge(event_id: String) -> void:
-	_event_start_challenge(event_id)
-
-
-func _event_cb_goto(event_id: String) -> void:
-	_event_goto_map(EventRuntime.find_event(event_id))
-
-
-func _event_cb_claim_all(event_id: String) -> void:
-	var ra: Dictionary = EventRuntime.claim_all_missions(event_id)
-	_play_dialog([{"speaker": "系統", "text": str(ra.get("msg", ""))}], _go_event_panel)
-
-
-func _event_cb_claim_one(event_id: String, mission_id: String) -> void:
-	var r: Dictionary = EventRuntime.claim_mission(event_id, mission_id)
-	_play_dialog([{"speaker": "系統", "text": str(r.get("msg", ""))}], _go_event_panel)
-
-
-func _event_cb_shop(event_id: String, shop_index: int) -> void:
-	var r2: Dictionary = EventRuntime.shop_buy(event_id, shop_index)
-	_show_toast(str(r2.get("msg", "")))
-	_go_event_panel()
-
-
-func _event_cb_daily_board() -> void:
-	var rb: Dictionary = EventRuntime.claim_daily_board_bonus()
-	_play_dialog([{"speaker": "系統", "text": str(rb.get("msg", ""))}], _go_event_panel)
-
-
-func _event_cb_convert(event_id: String) -> void:
-	var rc: Dictionary = EventRuntime.convert_leftover_tokens(event_id)
-	_play_dialog([{"speaker": "行商", "text": str(rc.get("msg", ""))}], _go_event_panel)
-
-
-func _event_cb_calendar() -> void:
-	_panel("歲旅一覽", EventRuntime.calendar_preview_bbcode(), [
-		{"text": "返回活動", "cb": _go_event_panel},
-	])
-
-
-func _event_goto_map(ev: Dictionary) -> void:
-	var mid := str(ev.get("entry_map", ""))
-	if mid == "":
-		_hub_back()
-		return
-	if not EventRuntime.can_enter_map(ev):
-		_play_dialog([{"speaker": "系統", "text": str(ev.get("entry_deny", "尚不能前往。"))}], _go_event_panel)
-		return
-	_open_explore(mid, Screen.C1_WILD)
-	_show_toast("活動地圖：%s" % str(ev.get("name", mid)))
-
-
-func _event_start_challenge(event_id: String) -> void:
-	var ev := EventRuntime.find_event(event_id)
-	if not EventRuntime.can_rewarded_run(ev):
-		_play_dialog(DialogLines.lines("hub.event_no_reward_runs"), _go_event_panel)
-		return
-	var mode := EventRuntime.challenge_enemy(ev)
-	if mode == "" or not WorldContent.is_world_battle(mode):
-		mode = "scar_wisp"
-	GameState.set_flag("event.pending_run", event_id)
-	_play_dialog(DialogLines.lines("hub.event_challenge_start", {"event": str(ev.get("name", "活動"))}), func(): _start_battle(mode))
-
-
-func _event_try_finish_run_after_battle(won: bool) -> bool:
-	## 若有待結算活動挑戰，回 true 表示已處理（呼叫端勿再走一般雜魚收尾）
-	var pending := str(GameState.get_flag("event.pending_run", ""))
-	if pending == "":
-		## 在活動地圖打雜魚也可算有獎（可選）
-		return false
-	GameState.set_flag("event.pending_run", "")
-	if not won:
-		_play_dialog([{"speaker": "系統", "text": "挑戰失敗。有獎次數未扣。"}], func():
-			_hub_back_from_world_battle()
-		)
-		return true
-	var r: Dictionary = EventRuntime.complete_rewarded_run(pending)
-	var lines: Array = [{"speaker": "系統", "text": str(r.get("msg", "完成。"))}]
-	_play_dialog(lines, func():
-		_go_event_panel()
-	)
-	return true
 
 
 func _message_place_for_current() -> String:
@@ -770,10 +597,6 @@ func _go_hunt_panel() -> void:
 			buttons.append({"text": "開始有獎狩獵（剩 %d）" % HuntSystem.daily_left(), "cb": _hunt_start_rewarded})
 		buttons.append({"text": "練習狩獵（獎勵少）", "cb": _hunt_start_practice})
 	buttons.append({"text": "溢物回收", "cb": _go_hunt_recycle_panel})
-	buttons.append({"text": "星途市集", "cb": _go_market_panel})
-	buttons.append({"text": "狩獵房（組隊）", "cb": _go_hunt_room_panel})
-	if PartySystem.has_party():
-		buttons.append({"text": "助戰：已選（單人獵可帶）", "cb": _go_party_panel})
 	buttons.append({"text": "返回", "cb": _hub_back})
 	_panel("星途獵場", body, buttons)
 
@@ -783,15 +606,10 @@ func _hunt_start_rewarded() -> void:
 	if not bool(r.get("ok", false)):
 		_play_dialog([{"speaker": "系統", "text": str(r.get("msg", ""))}], _go_hunt_panel)
 		return
-	if PartySystem.has_party():
-		PartySystem.begin_party_battle()
 	var lines: Array = [
 		{"speaker": "旁白", "text": str(r.get("msg", "狩獵開始。"))},
 		{"speaker": "系統", "text": str(r.get("label", "第一波"))},
 	]
-	if PartySystem.has_party():
-		for pl in PartySystem.intro_lines():
-			lines.append(pl)
 	_play_dialog(lines, func(): _start_battle(str(r.get("mode", "ash_rat"))))
 
 
@@ -800,15 +618,10 @@ func _hunt_start_practice() -> void:
 	if not bool(r.get("ok", false)):
 		_play_dialog([{"speaker": "系統", "text": str(r.get("msg", ""))}], _go_hunt_panel)
 		return
-	if PartySystem.has_party():
-		PartySystem.begin_party_battle()
 	var lines: Array = [
 		{"speaker": "旁白", "text": str(r.get("msg", "練習開始。"))},
 		{"speaker": "系統", "text": str(r.get("label", "第一波"))},
 	]
-	if PartySystem.has_party():
-		for pl in PartySystem.intro_lines():
-			lines.append(pl)
 	_play_dialog(lines, func(): _start_battle(str(r.get("mode", "ash_rat"))))
 
 
@@ -823,23 +636,14 @@ func _hunt_continue() -> void:
 
 func _hunt_abandon() -> void:
 	HuntSystem.abandon_run()
-	PartySystem.end_party_battle()
-	if RoomSystem.is_in_room() and RoomSystem.is_hunt_room() and RoomSystem.is_host():
-		RoomSystem.host_report_result(false, func(_r: Dictionary): pass)
 	_play_dialog(DialogLines.lines("hub.hunt_abandoned"), _go_hunt_panel)
 
 
 func _on_hunt_battle_finished(won: bool) -> void:
 	if not won:
 		var lost: Dictionary = HuntSystem.on_wave_lost()
-		PartySystem.end_party_battle()
-		if RoomSystem.is_in_room() and RoomSystem.is_hunt_room() and RoomSystem.is_host():
-			RoomSystem.host_report_result(false, func(_r: Dictionary): pass)
 		_play_dialog([{"speaker": "系統", "text": str(lost.get("msg", "敗北。"))}], func():
-			if RoomSystem.is_in_room() and RoomSystem.is_hunt_room():
-				_go_hunt_room_panel()
-			else:
-				_open_explore("hunting_grounds", Screen.C1_WILD)
+			_open_explore("hunting_grounds", Screen.C1_WILD)
 		)
 		return
 	var r: Dictionary = HuntSystem.on_wave_won()
@@ -847,19 +651,7 @@ func _on_hunt_battle_finished(won: bool) -> void:
 		_open_explore("hunting_grounds", Screen.C1_WILD)
 		return
 	if bool(r.get("finished", false)):
-		PartySystem.end_party_battle()
-		var lines: Array = [{"speaker": "系統", "text": str(r.get("msg", "完成。"))}]
-		if RoomSystem.is_in_room() and RoomSystem.is_hunt_room() and RoomSystem.is_host():
-			RoomSystem.host_report_result(true, func(res: Dictionary):
-				var bmsg := str(res.get("bonus_msg", ""))
-				if bmsg != "":
-					lines.append({"speaker": "系統", "text": bmsg})
-				_play_dialog(lines, func():
-					_go_hunt_room_panel()
-				)
-			)
-			return
-		_play_dialog(lines, func():
+		_play_dialog([{"speaker": "系統", "text": str(r.get("msg", "完成。"))}], func():
 			_open_explore("hunting_grounds", Screen.C1_WILD)
 		)
 		return
@@ -870,149 +662,6 @@ func _on_hunt_battle_finished(won: bool) -> void:
 		text += "\n" + mid
 	_play_dialog([{"speaker": "系統", "text": text}], func():
 		_start_battle(str(r.get("next_mode", "ash_rat")))
-	)
-
-
-func _go_hunt_room_panel() -> void:
-	RoomSystem.filter_kind = "hunt"
-	var body: String = RoomSystem.status_bbcode("hunt")
-	var buttons: Array = []
-	if not RoomSystem.online_ready():
-		buttons.append({"text": "連線設定", "cb": _go_online_panel})
-		buttons.append({"text": "返回獵場", "cb": _go_hunt_panel})
-		_panel("狩獵房", body, buttons)
-		return
-	if RoomSystem.is_in_room():
-		if not RoomSystem.is_hunt_room():
-			body += "\n\n[color=#c96]你目前在裂縫房。請先離開再進狩獵房。[/color]"
-			buttons.append({"text": "前往裂縫房", "cb": _go_room_panel})
-			buttons.append({"text": "離開當前房", "cb": _room_leave})
-			buttons.append({"text": "返回獵場", "cb": _go_hunt_panel})
-			_panel("狩獵房", body, buttons)
-			return
-		buttons.append({"text": "刷新房間", "cb": _hunt_room_refresh})
-		if RoomSystem.is_host():
-			if RoomSystem.room_status() == "open" or RoomSystem.room_status() == "fighting":
-				if not HuntSystem.is_run_active():
-					buttons.append({"text": "開始共獵（房主）", "cb": _hunt_room_host_start})
-				else:
-					buttons.append({"text": "繼續當前波次", "cb": _hunt_continue})
-		else:
-			buttons.append({"text": "標記就緒", "cb": _room_ready})
-			if RoomSystem.room_status() == "fighting":
-				buttons.append({"text": "同屏操作（可輸入）", "cb": _room_spectate.bind(true)})
-				buttons.append({"text": "僅觀戰", "cb": _room_spectate.bind(false)})
-			if str(RoomSystem.current_room.get("result", "")) == "win":
-				buttons.append({"text": "領取共獵獎", "cb": _hunt_room_claim})
-		var rt2 := RoomSystem.realtime_status()
-		if rt2 != "":
-			body += "\n[color=#aaa]%s[/color]" % rt2
-		body += "\n操作：J 格擋／連招 · K 戰意 · L 助攻"
-		buttons.append({"text": "離開房間", "cb": _hunt_room_leave})
-		buttons.append({"text": "返回獵場", "cb": _go_hunt_panel})
-		_panel("狩獵房 · %s" % RoomSystem.room_code(), body, buttons)
-		return
-	buttons.append({"text": "建立狩獵房", "cb": _hunt_room_create})
-	buttons.append({"text": "用代碼加入…", "cb": _go_room_join_code_panel})
-	buttons.append({"text": "刷新開放狩獵房", "cb": _hunt_room_list})
-	buttons.append({"text": "返回獵場", "cb": _go_hunt_panel})
-	_panel("狩獵房", body, buttons)
-	RoomSystem.refresh_open_rooms(func(res: Dictionary):
-		_show_hunt_room_browser(res.get("list", []))
-	, "hunt")
-
-
-func _show_hunt_room_browser(list: Array) -> void:
-	if RoomSystem.is_in_room() and RoomSystem.is_hunt_room():
-		_go_hunt_room_panel()
-		return
-	var body: String = RoomSystem.status_bbcode("hunt") + "\n\n[b]開放狩獵房[/b]\n"
-	var buttons: Array = []
-	var n := 0
-	for row in list:
-		if typeof(row) != TYPE_DICTIONARY:
-			continue
-		if n >= 8:
-			break
-		var d: Dictionary = row
-		var code := str(d.get("code", ""))
-		body += "· 代碼 %s · %s\n" % [code, str(d.get("id", "")).substr(0, 8)]
-		buttons.append({
-			"text": "加入 %s" % (code if code != "" else str(d.get("id", "")).substr(0, 6)),
-			"cb": _hunt_room_join.bind(str(d.get("id", ""))),
-		})
-		n += 1
-	if n == 0:
-		body += "（暫無狩獵房，可自建）\n"
-	buttons.append({"text": "建立狩獵房", "cb": _hunt_room_create})
-	buttons.append({"text": "刷新", "cb": _hunt_room_list})
-	buttons.append({"text": "返回獵場", "cb": _go_hunt_panel})
-	_panel("狩獵房", body, buttons)
-
-
-func _hunt_room_create() -> void:
-	RoomSystem.create_hunt_room(func(res: Dictionary):
-		_show_toast(str(res.get("msg", "")))
-		_go_hunt_room_panel()
-	)
-
-
-func _hunt_room_join(rid: String) -> void:
-	RoomSystem.join_room_id(rid, func(res: Dictionary):
-		_show_toast(str(res.get("msg", "")))
-		_go_hunt_room_panel()
-	)
-
-
-func _hunt_room_list() -> void:
-	RoomSystem.refresh_open_rooms(func(res: Dictionary):
-		_show_hunt_room_browser(res.get("list", []))
-	, "hunt")
-
-
-func _hunt_room_refresh() -> void:
-	RoomSystem.poll_now()
-	_show_toast("已刷新 · 代碼 %s" % RoomSystem.room_code())
-	_go_hunt_room_panel()
-
-
-func _hunt_room_leave() -> void:
-	RoomSystem.leave_room(func(_res: Dictionary):
-		_show_toast("已離開狩獵房")
-		_go_hunt_room_panel()
-	)
-
-
-func _hunt_room_claim() -> void:
-	RoomSystem.claim_member_reward(func(res: Dictionary):
-		_show_toast(str(res.get("msg", "")))
-		_go_hunt_room_panel()
-	)
-
-
-func _hunt_room_host_start() -> void:
-	RoomSystem.host_start_battle(func(res: Dictionary):
-		if not bool(res.get("ok", false)):
-			_show_toast(str(res.get("msg", "無法開戰")))
-			_go_hunt_room_panel()
-			return
-		var hr: Dictionary = HuntSystem.start_run(false)
-		if not bool(hr.get("ok", false)):
-			## 可能日 cap 用盡 → 練習
-			hr = HuntSystem.start_run(true)
-		if not bool(hr.get("ok", false)):
-			_show_toast(str(hr.get("msg", "無法開始狩獵")))
-			_go_hunt_room_panel()
-			return
-		PartySystem.begin_party_battle()
-		var arr: Array = [
-			{"speaker": "系統", "text": str(res.get("msg", "共獵開戰"))},
-			{"speaker": "系統", "text": "代碼 %s · %s" % [RoomSystem.room_code(), str(hr.get("label", "第一波"))]},
-		]
-		if PartySystem.has_party():
-			for pl in PartySystem.intro_lines():
-				arr.append(pl)
-		_play_dialog(arr, func(): _start_battle(str(hr.get("mode", "ash_rat"))))
 	)
 
 
@@ -1037,67 +686,6 @@ func _hunt_recycle_one(item_id: String) -> void:
 	_show_toast(str(r.get("msg", "")))
 	_go_hunt_recycle_panel()
 
-
-# ─── 星途市集 ───
-
-func _go_market_panel() -> void:
-	_market_ui.open()
-
-
-# ─── 裂縫房 ───
-
-## 面板本體在 scripts/ui/panels/room_panel.gd。
-## 這幾支留成委派：狩獵房面板（仍在 main.gd）也在用同一組房間操作。
-
-func _go_room_panel() -> void:
-	_room_ui.open()
-
-
-func _go_room_join_code_panel() -> void:
-	_room_ui.open_join_code()
-
-
-func _room_ready() -> void:
-	_room_ui.set_ready()
-
-
-func _room_leave() -> void:
-	_room_ui.leave()
-
-
-## can_input=true 同屏操作／false 僅觀戰。原本是兩支幾乎一樣的函式，合併。
-func _room_spectate(can_input: bool) -> void:
-	var r: Dictionary = RoomSystem.start_coop_control(can_input)
-	var what := "同屏操作" if can_input else "觀戰"
-	if not bool(r.get("ok", false)):
-		_show_toast(str(r.get("msg", "無法%s" % what)))
-		return
-	_show_toast(str(r.get("msg", what)))
-	_start_spectate_battle(str(r.get("mode", RoomSystem.room_mode())), can_input)
-
-
-func _room_host_start() -> void:
-	if RoomSystem.is_hunt_room():
-		_hunt_room_host_start()
-		return
-	RoomSystem.host_start_battle(func(res: Dictionary):
-		if not bool(res.get("ok", false)):
-			_show_toast(str(res.get("msg", "無法開戰")))
-			_go_room_panel()
-			return
-		var mode := str(res.get("mode", RoomSystem.room_mode()))
-		## 消耗裂縫有獎次數
-		RiftSchedule.consume_attempt()
-		PartySystem.begin_party_battle()
-		var arr: Array = [
-			{"speaker": "系統", "text": str(res.get("msg", "開戰"))},
-			{"speaker": "系統", "text": "代碼 %s · 房主權威 · 隊友可「同屏觀戰」。" % RoomSystem.room_code()},
-		]
-		if PartySystem.has_party():
-			for pl in PartySystem.intro_lines():
-				arr.append(pl)
-		_play_dialog(arr, func(): _start_battle(mode))
-	)
 
 
 func _go_online_panel() -> void:
@@ -1338,10 +926,6 @@ func _go_telemetry_consent() -> void:
 		})
 	buttons.append({"text": "返回", "cb": _go_online_panel})
 	_panel("體驗回報", body, buttons)
-
-
-func _go_warehouse_panel() -> void:
-	_warehouse_ui.open()
 
 
 func _go_save_slots_panel() -> void:
@@ -1680,9 +1264,7 @@ func _clear_host() -> void:
 
 ## ui_goto 認得的去處。test_panels.gd 會逐一驗證都還接得到東西。
 const UI_GOTO_TARGETS: Array[String] = [
-	"hub", "postgame_hub", "online", "party",
-	"room", "hunt_room", "hunt_recycle", "market",
-	"equip", "warehouse", "saves",
+	"hub", "postgame_hub", "online", "hunt_recycle", "equip", "saves",
 ]
 
 
@@ -1701,13 +1283,8 @@ func ui_goto(target: String) -> bool:
 		"hub": _hub_back()
 		"postgame_hub": _go_postgame_hub()
 		"online": _go_online_panel()
-		"party": _go_party_panel()
-		"room": _go_room_panel()
-		"hunt_room": _go_hunt_room_panel()
 		"hunt_recycle": _go_hunt_recycle_panel()
-		"market": _go_market_panel()
 		"equip": _go_equip_panel()
-		"warehouse": _go_warehouse_panel()
 		"saves": _go_save_slots_panel()
 		_:
 			push_error("ui_goto: 未知去處 '%s'" % target)
@@ -1715,8 +1292,7 @@ func ui_goto(target: String) -> bool:
 	return true
 
 
-## 少數面板要自己畫（例如帶輸入框的加入代碼窗），才需要直接拿 host。
-## 一般面板請用 ui_panel()，不要碰這三支。
+## 少數面板要自己畫，才需要直接拿 host。一般面板請用 ui_panel()，不要碰這三支。
 func ui_host() -> Control:
 	return host
 
@@ -1731,15 +1307,6 @@ func ui_reset_fade() -> void:
 
 func ui_refresh_hud() -> void:
 	_refresh_hud()
-
-
-## 房間相關的「開戰」動作留在 main.gd —— 那是流程控制，不是面板的事。
-func ui_room_spectate(can_input: bool) -> void:
-	_room_spectate(can_input)
-
-
-func ui_room_host_start() -> void:
-	_room_host_start()
 
 
 func _panel(title: String, body: String, buttons: Array) -> void:
@@ -1897,7 +1464,6 @@ func _open_explore_then(map_id: String, screen: Screen, after: Callable) -> void
 		_explore.interacted.connect(_on_explore_interact)
 		AudioManager.play_bgm_for_map(map_id)
 		WorldContent.mark_visit(map_id)
-		EventRuntime.mark_explore_daily()
 		if OnlineGate.is_signed_in():
 			OnlineGate.push_presence(map_id)
 		## 舊存檔補起始包
@@ -2059,7 +1625,6 @@ func proof_jump_explore(map_id: String = "town") -> void:
 	_explore.interacted.connect(_on_explore_interact)
 	AudioManager.play_bgm_for_map(mid)
 	WorldContent.mark_visit(mid)
-	EventRuntime.mark_explore_daily()
 	if OnlineGate.is_signed_in():
 		OnlineGate.push_presence(mid)
 	if _explore.has_method("show_player_bubble"):
@@ -2146,9 +1711,6 @@ func _go_title() -> void:
 	if GameState.has_flag("game_cleared") or GameState.ng_plus > 0:
 		buttons.append({"text": Loc.t("title.ng"), "cb": _go_ng_plus_menu})
 	buttons.append({"text": Loc.t("title.titles"), "cb": _go_title_wall})
-	var ev_label := EventRuntime.title_button_label()
-	if ev_label != "":
-		buttons.append({"text": ev_label, "cb": _go_event_panel})
 	## 每日／任務與公會刻意不放在標題：它們讀寫的是「這趟旅途」的進度，
 	## 而標題畫面還沒載入任何一格，玩家在這裡領到的獎勵會進到一份空白狀態，
 	## 點了等於沒點。這兩個入口在暫停選單裡，那時候狀態才是真的。
@@ -2171,13 +1733,7 @@ func _go_title() -> void:
 	var title_line := "稱號 %d／%d" % [TitleCatalog.unlocked_count(), TitleCatalog.total_count()]
 	var body := "[center][i]%s[/i][/center]\n\n" % Loc.t("title.tagline")
 	body += Loc.t("title.blurb") + "\n\n"
-	body += "[color=#7fd]v0.9 · 每日／任務／公會／活動[/color]\n"
-	if EventRuntime.has_active():
-		var pev: Dictionary = EventRuntime.primary_event()
-		body += "[color=#c96]本期活動：%s（今日有獎剩 %d）[/color]\n" % [
-			str(pev.get("name", "")),
-			EventRuntime.daily_left(pev),
-		]
+	body += "[color=#7fd]v0.9 · 每日／任務／公會[/color]\n"
 	body += "[color=#b8a88a]%s%s[/color]\n\n" % [title_line, ng_line]
 	body += "[color=#8a8070]%s[/color]" % Loc.t("title.controls")
 	_panel("勇者之魂", body, buttons)
@@ -2255,7 +1811,6 @@ func _display_settings_back() -> void:
 	AudioManager.play_ui()
 	_show_toast(DisplaySettings.summary_line())
 	_hub_back()
-
 
 
 func _boot_tutorial() -> void:
@@ -2859,7 +2414,6 @@ func _handle_world_content(id: String) -> bool:
 			_play_dialog(DialogLines.lines("world.chest_empty"))
 			return true
 		GameState.set_flag(flag, true)
-		EventRuntime.mark_explore_daily()
 		var g := int(c.get("gold", 0))
 		var d := int(c.get("dust", 0))
 		_grant_boss_loot(g, d, 0)
@@ -2965,32 +2519,14 @@ func _handle_world_travel(id: String) -> bool:
 		"hunt_recycler":
 			_go_hunt_recycle_panel()
 			return true
-		"star_market", "market_board":
-			_go_market_panel()
-			return true
-		"warehouse_keep":
-			_play_dialog(DialogLines.lines("world.warehouse_keep"), _go_warehouse_panel)
-			return true
 		"save_hunt":
 			_touch_save_stone()
 			return true
-		"merchant", "event_stone":
+		"merchant":
 			## 霧中家書：先交真信
-			if id == "merchant" and GameState.has_flag("item.true_letter") and not GameState.has_flag("side.fog_letter_done"):
+			if GameState.has_flag("item.true_letter") and not GameState.has_flag("side.fog_letter_done"):
 				_side_deliver_true_letter()
 				return true
-			if id == "event_stone" or EventRuntime.has_active() or not EventRuntime.ended_with_tokens().is_empty():
-				var story: Array = []
-				if EventRuntime.has_active():
-					var evm: Dictionary = EventRuntime.primary_event()
-					for s in evm.get("story", []):
-						var spk := "行商" if id == "merchant" else "歲旅石"
-						story.append({"speaker": spk, "portrait": "caravan_chief", "text": str(s)})
-				else:
-					story.append({"speaker": "歲旅石", "text": "石上刻著十二個月的足跡。有的已熄，有的正亮。"})
-				_play_dialog(story, _go_event_panel)
-				return true
-			## 無活動：普通行商
 			_play_dialog([
 				{"speaker": "行商", "portrait": "caravan_chief", "text": "六域的路我都走過。金幣換消息：塔下最近開了門。"},
 				{"speaker": "行商", "portrait": "caravan_chief", "text": "乾糧 15 金。先付再說。"},
@@ -3080,14 +2616,6 @@ func _go_world_map() -> void:
 	body += "秘境 Boss：疤主 " + ("✓" if GameState.has_flag("boss.scar_lord_cleared") else "·")
 	body += " · 鏡影 " + ("✓" if GameState.has_flag("boss.mirror_wraith_cleared") else "·")
 	body += " · 船長 " + ("✓" if GameState.has_flag("boss.wreck_captain_cleared") else "·") + "\n"
-	if EventRuntime.has_active():
-		var pev: Dictionary = EventRuntime.primary_event()
-		body += "\n[color=#c96]本期活動：%s · %s %d · 今日有獎剩 %d[/color]\n" % [
-			str(pev.get("name", "")),
-			str(pev.get("currency_name", "幣")),
-			EventRuntime.tokens(str(pev.get("id", ""))),
-			EventRuntime.daily_left(pev),
-		]
 	body += "寶箱 %d／16 · 造訪地圖 %d · 可走分區 %d\n\n" % [
 		WorldContent.chest_opened_count(),
 		WorldContent.visit_count(),
@@ -3122,8 +2650,6 @@ func _go_world_map() -> void:
 	if GameState.has_flag("boss.abo_cleared") or GameState.has_flag("boss.shadowwind_cleared") \
 			or GameState.has_flag("boss.stonefist_cleared") or GameState.power_score() >= 42:
 		buttons.append({"text": "塔下營地", "cb": _go_c6_camp})
-	if EventRuntime.has_active():
-		buttons.append({"text": EventRuntime.title_button_label(), "cb": _go_event_panel})
 	if HuntSystem.is_unlocked():
 		buttons.append({"text": "星途獵場", "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
 	buttons.append({"text": "武器流派", "cb": _go_path_panel})
@@ -3368,38 +2894,7 @@ func _start_battle_raw(mode: String) -> void:
 	_refresh_hud()
 
 
-func _start_spectate_battle(mode: String, coop: bool = true) -> void:
-	_current = Screen.BATTLE
-	_battle_mode = "spectate:" + mode
-	_clear_host()
-	var battle = _battle_scene.instantiate()
-	battle.set_anchors_preset(Control.PRESET_FULL_RECT)
-	battle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	battle.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	host.add_child(battle)
-	battle.battle_finished.connect(_on_spectate_battle_finished)
-	if battle.has_method("setup_spectator"):
-		battle.setup_spectator(mode, coop)
-	else:
-		battle.setup(mode)
-	_refresh_hud()
-
-
-func _on_spectate_battle_finished(_won: bool) -> void:
-	RoomSystem.stop_spectate()
-	SaveManager.save_game()
-	_show_toast("觀戰結束")
-	if RoomSystem.is_hunt_room():
-		_go_hunt_room_panel()
-	else:
-		_go_room_panel()
-
-
 func _on_battle_finished(won: bool) -> void:
-	## 觀戰不應走到這裡；保險
-	if str(_battle_mode).begins_with("spectate:"):
-		_on_spectate_battle_finished(won)
-		return
 	SaveManager.save_game()
 	if _battle_mode == "wolf":
 		if won:
@@ -3443,31 +2938,15 @@ func _on_battle_finished(won: bool) -> void:
 			_play_dialog(DialogLines.lines("battle.boar_lose"), _go_c5_coast)
 	elif _battle_mode in ["wrath", "tide", "statue", "chrono"]:
 		if won:
-			if RoomSystem.is_in_room() and RoomSystem.is_host():
-				RoomSystem.host_report_result(true, func(res: Dictionary):
-					var extra_b := str(res.get("bonus_msg", ""))
-					if extra_b != "":
-						_show_toast(extra_b)
-					_go_rift_win(_battle_mode)
-				)
-			else:
-				_go_rift_win(_battle_mode)
+			_go_rift_win(_battle_mode)
 		else:
-			PartySystem.end_party_battle()
-			if RoomSystem.is_in_room() and RoomSystem.is_host():
-				RoomSystem.host_report_result(false, func(_r: Dictionary): pass)
 			var tips := {
 				"wrath": "灼燒要在滿層前躍出。",
 				"tide": "刺胞要在時間內解決。看牠當下的樣子，決定用普攻還是技能。",
 				"statue": "只打發光的石像。",
 				"chrono": "炸彈要拆；落岩要進安全。",
 			}
-			_play_dialog(DialogLines.lines("battle.rift_lose", {"tip": tips.get(_battle_mode, "")}), func():
-				if RoomSystem.is_in_room():
-					_go_room_panel()
-				else:
-					_go_postgame_hub()
-			)
+			_play_dialog(DialogLines.lines("battle.rift_lose", {"tip": tips.get(_battle_mode, "")}), _go_postgame_hub)
 	elif _battle_mode == "black_ronin":
 		_side_finish_ronin_battle(won)
 	elif WorldContent.is_world_battle(_battle_mode):
@@ -3516,9 +2995,6 @@ func _on_world_battle_finished(won: bool) -> void:
 	## 狩獵場波次
 	if HuntSystem.is_run_active() and WorldContent.is_world_battle(mode):
 		_on_hunt_battle_finished(won)
-		return
-	## 活動有獎挑戰優先
-	if _event_try_finish_run_after_battle(won):
 		return
 	## 雜魚
 	var def: Dictionary = WorldContent.enemy_def(mode)
@@ -5095,7 +4571,7 @@ func _go_ending() -> void:
 # ─── 通關後 · 黑焰裂縫 ───
 
 func _go_postgame_hub() -> void:
-	## 通關後中樞：裂縫 + 獵場 + 助戰
+	## 通關後中樞：裂縫 + 獵場
 	if not GameState.has_flag("game_cleared"):
 		_play_dialog(DialogLines.lines("post.rift_not_open"))
 		return
@@ -5106,11 +4582,6 @@ func _go_postgame_hub() -> void:
 	AudioManager.play_bgm("tower")
 	var body: String = RiftSchedule.hub_status_text()
 	body += "\n\n★＝本週焦點。有獎次數用盡後仍可練習。"
-	if PartySystem.has_party():
-		var pnames: PackedStringArray = []
-		for pc in PartySystem.selected_companions():
-			pnames.append(str(pc.get("name", "")))
-		body += "\n助戰：" + "、".join(pnames)
 	var feat: String = RiftSchedule.featured_mode()
 	var buttons: Array = [
 		{"text": "本週焦點·%s" % RiftSchedule.featured_name(), "cb": func(): _go_rift_intro(feat)},
@@ -5124,9 +4595,6 @@ func _go_postgame_hub() -> void:
 			"cb": func(): _go_rift_intro(mode_s),
 		})
 	buttons.append_array([
-		{"text": "裂縫房（真多人）", "cb": _go_room_panel},
-		{"text": "星途助戰（離線）", "cb": _go_party_panel},
-		{"text": "星途市集", "cb": _go_market_panel},
 		{"text": "星途獵場", "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)},
 		{"text": "塔下營地", "cb": _go_c6_camp},
 		{"text": "騎士堡", "cb": _go_c1_town},
@@ -5136,36 +4604,6 @@ func _go_postgame_hub() -> void:
 	buttons.insert(1, {"text": "稱號牆", "cb": _go_title_wall})
 	TitleCatalog.evaluate_all()
 	_panel("通關後 · 黑焰裂縫", body, buttons)
-
-
-func _go_party_panel() -> void:
-	var body: String = PartySystem.status_bbcode()
-	var buttons: Array = []
-	if not PartySystem.is_unlocked():
-		buttons.append({"text": "返回", "cb": _go_postgame_hub})
-		_panel("星途助戰", body, buttons)
-		return
-	for c in PartySystem.roster_for_ui():
-		var cid := str(c.get("id", ""))
-		var mark := "✓ " if bool(c.get("picked", false)) else ""
-		var label := "%s%s · 攻+%d 防+%d" % [mark, c.get("name", cid), int(c.get("atk", 0)), int(c.get("def", 0))]
-		buttons.append({"text": label, "cb": _party_toggle.bind(cid)})
-	if PartySystem.has_party():
-		buttons.append({"text": "清空助戰", "cb": _party_clear})
-	buttons.append({"text": "返回裂縫", "cb": _go_postgame_hub})
-	_panel("星途助戰", body, buttons)
-
-
-func _party_toggle(cid: String) -> void:
-	var r: Dictionary = PartySystem.toggle_companion(cid)
-	_show_toast(str(r.get("msg", "")))
-	_go_party_panel()
-
-
-func _party_clear() -> void:
-	PartySystem.clear_selected()
-	_show_toast("已改為單人出戰。")
-	_go_party_panel()
 
 
 func _go_rift_intro(mode: String) -> void:
@@ -5198,12 +4636,8 @@ func _go_rift_intro(mode: String) -> void:
 	}
 	var arr: Array = lines.get(mode, [{"speaker": "系統", "text": "裂縫張開。"}]).duplicate()
 	arr.append({"speaker": "系統", "text": attempt_note})
-	if PartySystem.has_party():
-		for pl in PartySystem.intro_lines():
-			arr.append(pl)
 	_play_dialog(arr, func():
 		RiftSchedule.consume_attempt()
-		PartySystem.begin_party_battle()
 		SaveManager.save_game()
 		_start_battle(mode)
 	)
@@ -5220,16 +4654,11 @@ func _go_rift_win(mode: String) -> void:
 		extra = "\n（本週焦點加成已套用）"
 	if GameState.has_flag("title.rift_walker"):
 		extra += "\n（裂縫行者）焰裡也有你的節奏。"
-	## grant_win_bonus 已在 battle_view 結算時呼叫；此處只收尾
-	PartySystem.end_party_battle()
 	_play_dialog(DialogLines.lines("post.rift_win", {
 		"mode": RiftSchedule.mode_name(mode),
 		"wins": wins,
 		"extra": extra,
 	}), func():
 		RiftSchedule.clear_attempt_flag()
-		if RoomSystem.is_in_room():
-			_go_room_panel()
-		else:
-			_go_postgame_hub()
+		_go_postgame_hub()
 	)

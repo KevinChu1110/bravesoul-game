@@ -6,7 +6,7 @@ signal gold_changed(amount: int)
 signal chapter_changed(chapter: String)
 
 ## 存檔版本。改動存檔結構就 +1，並在 save_migration.gd 補一支對應的升級步驟。
-const VERSION := 3
+const VERSION := 4
 
 ## 主線章節：title | c0 | c1 | c2 | c3 | c4 | c5 | c6 | cleared
 var chapter: String = "title"
@@ -59,12 +59,10 @@ var hotbar: Array = ["", "", "", "", "", "", "", ""]  ## 8 格 item_id
 ## 可拖視窗位置 { "hud": {x,y}, "hotbar":…, "inv":…, "minimap":… }
 var ui_layout: Dictionary = {}
 
-## 裝備實例／倉庫（0.11）
+## 裝備實例（0.11）
 var equip_bag: Array = []  ## 未裝備實例
 var equip_worn: Dictionary = {}  ## uid -> inst
 var equip_slots: Dictionary = {"weapon": "", "armor": "", "accessory": ""}
-var warehouse: Dictionary = {}  ## item_id -> count
-var warehouse_equip: Array = []  ## 裝備實例
 
 ## 角色爆擊基線（裝備再加成）
 var crit_rate: float = 5.0
@@ -370,8 +368,6 @@ func to_dict() -> Dictionary:
 		"equip_bag": equip_bag.duplicate(true),
 		"equip_worn": equip_worn.duplicate(true),
 		"equip_slots": equip_slots.duplicate(true),
-		"warehouse": warehouse.duplicate(true),
-		"warehouse_equip": warehouse_equip.duplicate(true),
 		"crit_rate": crit_rate,
 		"crit_dmg": crit_dmg,
 		"dmg_variance": dmg_variance,
@@ -435,8 +431,6 @@ func from_dict(d: Dictionary) -> void:
 	equip_bag = _array_field(d, "equip_bag")
 	equip_worn = _dict_field(d, "equip_worn")
 	equip_slots = _dict_field(d, "equip_slots", {"weapon": "", "armor": "", "accessory": ""})
-	warehouse = _dict_field(d, "warehouse")
-	warehouse_equip = _array_field(d, "warehouse_equip")
 	crit_rate = float(d.get("crit_rate", 5.0))
 	crit_dmg = float(d.get("crit_dmg", 50.0))
 	dmg_variance = float(d.get("dmg_variance", 0.08))

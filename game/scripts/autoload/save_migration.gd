@@ -15,7 +15,7 @@ extends RefCounted
 
 ## 目前的存檔版本。改動存檔結構時：這裡 +1、GameState.VERSION 同步 +1、
 ## 下面補一支 _vN_to_vN1()、然後去 test_save_slots.gd 加一個舊檔情境。
-const CURRENT := 3
+const CURRENT := 4
 
 ## 沒寫 version 的存檔一律當第 1 版。0.13 之前的檔就是這種。
 const OLDEST := 1
@@ -100,6 +100,8 @@ static func _step(from_v: int, d: Dictionary) -> Dictionary:
 			return _v1_to_v2(d)
 		2:
 			return _v2_to_v3(d)
+		3:
+			return _v3_to_v4(d)
 	return {}
 
 
@@ -169,4 +171,60 @@ static func _v2_to_v3(d: Dictionary) -> Dictionary:
 	else:
 		d["souls"] = []
 
+	return d
+
+
+## 3 → 4：倉庫與市集被移除，存在那兩處的東西要還給玩家。
+##
+## 這一步不是「補一個欄位」而是「把資料搬家」。倉庫欄位直接刪掉的話，
+## 玩家存進去的材料與裝備會安安靜靜消失——存檔讀得出來、遊戲也不會報錯，
+## 只是東西不見了。所以先倒回背包再刪。
+##
+## 市集掛單同理：本地掛單是把物品從背包扣走、寄放在 market.local_listings 裡的，
+## 系統沒了就沒有地方能取回，得在這裡退還。
+static func _v3_to_v4(d: Dictionary) -> Dictionary:
+	var inv: Variant = d.get("inventory", {})
+	if typeof(inv) != TYPE_DICTIONARY:
+		inv = {}
+	var bag: Dictionary = inv
+
+	## 倉庫的堆疊物倒回背包
+	var wh: Variant = d.get("warehouse", {})
+	if typeof(wh) == TYPE_DICTIONARY:
+		for item_id in (wh as Dictionary).keys():
+			var n := int((wh as Dictionary)[item_id])
+			if n > 0:
+				bag[str(item_id)] = int(bag.get(str(item_id), 0)) + n
+	d.erase("warehouse")
+
+	## 倉庫的裝備實例倒回未裝備清單
+	var eq_bag: Variant = d.get("equip_bag", [])
+	if typeof(eq_bag) != TYPE_ARRAY:
+		eq_bag = []
+	var wh_eq: Variant = d.get("warehouse_equip", [])
+	if typeof(wh_eq) == TYPE_ARRAY:
+		for inst in (wh_eq as Array):
+			if typeof(inst) == TYPE_DICTIONARY:
+				(eq_bag as Array).append(inst)
+	d.erase("warehouse_equip")
+	d["equip_bag"] = eq_bag
+
+	## 本地掛單退貨。掛單格式是 {item_id, qty, ...}；認不出來的就跳過，
+	## 寧可少退一筆也不要把垃圾塞進背包。
+	var flags: Variant = d.get("flags", {})
+	if typeof(flags) == TYPE_DICTIONARY:
+		var listings: Variant = (flags as Dictionary).get("market.local_listings", [])
+		if typeof(listings) == TYPE_ARRAY:
+			for row in (listings as Array):
+				if typeof(row) != TYPE_DICTIONARY:
+					continue
+				var iid := str((row as Dictionary).get("item_id", ""))
+				var q := int((row as Dictionary).get("qty", 0))
+				if iid != "" and q > 0:
+					bag[iid] = int(bag.get(iid, 0)) + q
+		(flags as Dictionary).erase("market.local_listings")
+		(flags as Dictionary).erase("market.pending_credit")
+		d["flags"] = flags
+
+	d["inventory"] = bag
 	return d

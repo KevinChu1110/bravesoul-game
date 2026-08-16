@@ -106,12 +106,6 @@ const ENTRIES: Array[Dictionary] = [
 		"cond": "chests12",
 	},
 	{
-		"flag": "title.event_any",
-		"name": "歲旅之人",
-		"desc": "完成任一期活動的十日簿或專屬任務。",
-		"cond": "event_any",
-	},
-	{
 		"flag": "title.debt_smith",
 		"name": "還債的錘",
 		"desc": "替釘釘把舊主斷劍送回爐火。",
@@ -195,8 +189,6 @@ func _cond_met(cond: String) -> bool:
 		"chests12":
 			var WC = load("res://scripts/world/world_content.gd")
 			return WC != null and WC.chest_opened_count() >= 12
-		"event_any":
-			return GameState.has_flag("title.event_any")
 		"ding_debt":
 			return GameState.has_flag("side.ding_debt_done")
 		"fog_letter":
@@ -206,28 +198,7 @@ func _cond_met(cond: String) -> bool:
 		"codex":
 			return GameState.has_flag("lore.codex_read")
 		_:
-			## 活動稱號：title.event_* 由 EventRuntime 直接立 flag
-			if cond.begins_with("event_"):
-				return GameState.has_flag("title." + cond)
 			return false
-
-
-func event_title_entries() -> Array:
-	var out: Array = []
-	if Engine.get_main_loop() is SceneTree:
-		var er: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("EventRuntime")
-		if er and er.has_method("all_events"):
-			for e in er.call("all_events"):
-				var flag := str(e.get("title_flag", ""))
-				if flag == "":
-					continue
-				out.append({
-					"flag": flag,
-					"name": str(e.get("title_name", e.get("name", flag))),
-					"desc": str(e.get("title_desc", "完成對應活動任務。")),
-					"cond": "",
-				})
-	return out
 
 
 func unlocked_count() -> int:
@@ -235,14 +206,11 @@ func unlocked_count() -> int:
 	for e in ENTRIES:
 		if is_unlocked(e):
 			n += 1
-	for e in event_title_entries():
-		if GameState.has_flag(str(e.get("flag", ""))):
-			n += 1
 	return n
 
 
 func total_count() -> int:
-	return ENTRIES.size() + event_title_entries().size()
+	return ENTRIES.size()
 
 
 func is_unlocked(entry: Dictionary) -> bool:
@@ -270,14 +238,6 @@ func wall_bbcode() -> String:
 			lines.append("[color=#e8c86a]★ %s[/color]\n  %s" % [name_s, desc_s])
 		else:
 			lines.append("[color=#666]？ ？？？[/color]\n  [color=#555]（尚未解鎖）[/color]")
-	lines.append("")
-	lines.append("[b]歲旅活動稱號[/b]")
-	for e in event_title_entries():
-		var unlocked2: bool = GameState.has_flag(str(e.get("flag", "")))
-		if unlocked2:
-			lines.append("[color=#c96]★ %s[/color]\n  %s" % [str(e.get("name", "")), str(e.get("desc", ""))])
-		else:
-			lines.append("[color=#666]？ %s[/color]\n  [color=#555]（活動未完成）[/color]" % str(e.get("name", "")))
 	## 外觀契機一覽（非稱號，附錄）
 	lines.append("")
 	lines.append("[b]外觀契機[/b]")
@@ -303,9 +263,6 @@ func unlocked_names_line() -> String:
 	evaluate_all()
 	var names: PackedStringArray = []
 	for e in ENTRIES:
-		if GameState.has_flag(str(e.get("flag", ""))):
-			names.append(str(e.get("name", "")))
-	for e in event_title_entries():
 		if GameState.has_flag(str(e.get("flag", ""))):
 			names.append(str(e.get("name", "")))
 	if names.is_empty():

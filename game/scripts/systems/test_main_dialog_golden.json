@@ -1,29 +1,5 @@
 [
  {
-  "key": "hub.event_no_reward_runs",
-  "src_line": 638,
-  "vars": {},
-  "expect": [
-   {
-    "speaker": "系統",
-    "text": "今日有獎次數已用完。"
-   }
-  ]
- },
- {
-  "key": "hub.event_challenge_start",
-  "src_line": 644,
-  "vars": {
-   "event": "«v0»"
-  },
-  "expect": [
-   {
-    "speaker": "旁白",
-    "text": "【«v0»】挑戰開始。"
-   }
-  ]
- },
- {
   "key": "hub.candle_need_online",
   "src_line": 741,
   "vars": {},
@@ -368,17 +344,6 @@
    {
     "speaker": "旁白",
     "text": "這裡已經平靜了。"
-   }
-  ]
- },
- {
-  "key": "world.warehouse_keep",
-  "src_line": 2944,
-  "vars": {},
-  "expect": [
-   {
-    "speaker": "倉庫官",
-    "text": "騎士堡管庫的。可堆疊物與裝備都能存。"
    }
   ]
  },

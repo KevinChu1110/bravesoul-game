@@ -104,14 +104,6 @@ func open() -> void:
 	actions.alignment = BoxContainer.ALIGNMENT_CENTER
 	actions.add_theme_constant_override("separation", 8)
 	root.add_child(actions)
-	var btn_wh := Button.new()
-	btn_wh.text = "倉庫"
-	UiStyle.style_button(btn_wh, false)
-	btn_wh.pressed.connect(func():
-		AudioManager.play_ui()
-		_host.ui_goto("warehouse")
-	)
-	actions.add_child(btn_wh)
 	var btn_back := Button.new()
 	btn_back.text = "返回"
 	UiStyle.style_button(btn_back, true)

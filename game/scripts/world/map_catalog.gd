@@ -290,8 +290,6 @@ static func _town() -> Dictionary:
 		_e("wall_notice", 360, 300, 44, 52, "告示牆", Color(0.45, 0.4, 0.35), true),
 		_e("message_stone", 280, 360, 48, 52, "留言石", Color(0.5, 0.55, 0.7), true),
 		_e("to_market", 550, 900, 64, 56, "下城市集", Color(0.5, 0.4, 0.3)),
-		_e("star_market", 720, 780, 64, 56, "星途市集", Color(0.7, 0.55, 0.35)),
-		_e("warehouse_keep", 800, 700, 64, 56, "倉庫官", Color(0.5, 0.48, 0.42)),
 		_e("market", 650, 850, 64, 52, "攤位殘架", Color(0.5, 0.4, 0.3), true),
 		_e("ding", 1000, 650, 48, 64, "釘釘·鐵匠", Color(0.7, 0.4, 0.25)),
 		_e("forge_sign", 1080, 550, 44, 44, "鐵匠招牌", Color(0.55, 0.4, 0.25)),
@@ -337,7 +335,6 @@ static func _town_market() -> Dictionary:
 	var m := _base("騎士堡 · 下城市集", Color(0.11, 0.1, 0.12), 2600, 1200, Vector2(200, 550), "town_market")
 	m["entities"] = [
 		_e("back_from_market", 100, 520, 56, 56, "回廣場", Color(0.4, 0.4, 0.45)),
-		_e("star_market", 300, 400, 72, 64, "星途市集", Color(0.7, 0.55, 0.35)),
 		_e("stall_a", 400, 400, 56, 48, "布攤", Color(0.55, 0.4, 0.35), true),
 		_e("stall_b", 600, 500, 56, 48, "藥草攤", Color(0.4, 0.55, 0.35), true),
 		_e("stall_c", 800, 420, 56, 48, "空攤", Color(0.45, 0.4, 0.35), true),
@@ -444,7 +441,6 @@ static func _crossroads() -> Dictionary:
 		_e("sign_board", 1400, 600, 64, 56, "六域路標", Color(0.45, 0.4, 0.3), true),
 		_e("camp_fire", 1250, 820, 48, 48, "旅人營火", Color(0.9, 0.4, 0.15), true),
 		_e("merchant", 1500, 850, 48, 64, "行商", Color(0.6, 0.5, 0.4)),
-		_e("event_stone", 1350, 720, 56, 52, "歲旅石", Color(0.75, 0.45, 0.35)),
 		_e("path_knight", 400, 750, 72, 64, "西·騎士堡", Color(0.5, 0.45, 0.4)),
 		_e("path_mist_c", 1400, 1350, 72, 64, "南·霧隱", Color(0.5, 0.55, 0.7)),
 		_e("path_dojo_c", 1400, 200, 72, 64, "北·道場", Color(0.4, 0.55, 0.35)),
@@ -504,12 +500,10 @@ static func _caravan_camp() -> Dictionary:
 		_e("wagon_b", 800, 500, 72, 56, "篷車", Color(0.48, 0.38, 0.28), true),
 		_e("merchant", 1000, 450, 48, 64, letter_lab, Color(0.6, 0.5, 0.4)),
 		_e("amber", 1100, 520, 48, 64, "琥珀·商人", Color(0.75, 0.55, 0.3)),
-		_e("star_market", 1150, 380, 64, 56, "星途市集", Color(0.7, 0.55, 0.35)),
 		_e("camp_fire", 1200, 550, 48, 48, "營火", Color(0.9, 0.4, 0.15), true),
 		_e("goods_pile", 1500, 400, 56, 48, "貨堆", Color(0.45, 0.4, 0.35)),
 		_e("map_table", 1700, 500, 48, 40, "地圖桌", Color(0.5, 0.45, 0.35)),
 		_e("guard_dog", 600, 650, 40, 36, "守車犬", Color(0.4, 0.35, 0.3)),
-		_e("event_stone", 1300, 400, 56, 52, "歲旅石", Color(0.75, 0.45, 0.35)),
 	]
 	return m
 
@@ -534,7 +528,6 @@ static func _hunting_grounds() -> Dictionary:
 		_e("hunt_board", 600, 500, 72, 64, "狩獵告示", Color(0.65, 0.4, 0.35), true),
 		_e("hunt_start", 800, 550, 64, 56, "開始狩獵", Color(0.75, 0.35, 0.4)),
 		_e("hunt_recycler", 1100, 480, 56, 64, "溢物回收", Color(0.55, 0.5, 0.4)),
-		_e("star_market", 1250, 520, 64, 56, "星途市集", Color(0.7, 0.55, 0.35)),
 		_e("camp_ash", 500, 700, 56, 40, "獵手餘燼", Color(0.4, 0.3, 0.25)),
 		_e("bone_pile", 1400, 600, 48, 40, "獸骨堆", Color(0.5, 0.48, 0.45)),
 		_e("scar_vein", 1700, 450, 56, 40, "溢脈", Color(0.35, 0.2, 0.35)),
@@ -556,7 +549,6 @@ static func _blackflame_scar() -> Dictionary:
 		_e("lost_banner", 1500, 350, 40, 56, "半融旗", Color(0.4, 0.25, 0.3)),
 		_e("whisper_stone", 1800, 500, 48, 48, "低語石", Color(0.35, 0.25, 0.4), true),
 		_e("scar_boss", 2000, 420, 80, 88, "黑焰疤主", Color(0.65, 0.25, 0.45)),
-		_e("event_stone", 1600, 600, 56, 52, "歲旅石", Color(0.75, 0.45, 0.35)),
 		_e("path_tower_c", 2200, 550, 72, 64, "疤地盡頭·塔", Color(0.45, 0.35, 0.55)),
 	]
 	return m

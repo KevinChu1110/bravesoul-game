@@ -44,7 +44,7 @@
 | [docs/SCRIPT_C6.md](docs/SCRIPT_C6.md) | 塔＋魔王＋終章 |
 | [docs/UI.md](docs/UI.md) | 介面與用詞 |
 | [docs/ONLINE.md](docs/ONLINE.md) | 連線分層 |
-| [docs/MULTIPLAYER_LOOPS.md](docs/MULTIPLAYER_LOOPS.md) | 狩獵場／市集／組隊 Boss |
+| [docs/HUNTING_GROUNDS.md](docs/HUNTING_GROUNDS.md) | 星途獵場 |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | 半年節奏 |
 | [docs/TECH.md](docs/TECH.md) | 技術選型 |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | 決策紀錄 |
@@ -74,7 +74,7 @@
 - [x] **0.9.4～0.9.5**：歲旅活動全年 12 月 · 日曆循環 · 三件事 · 收攤換幣 · 歲旅石 · 活動稱號  
 - [x] **0.9.6**：多人設計 `docs/ONLINE.md` · `OnlineGate` · Supabase schema · 純單機開關  
 - [x] **0.9.7**：星途殘影 · 留言石 · 通關蠟燭  
-- [x] **0.9.8**：星途獵場（3 波／日 cap 5／練習）· 溢皮／焰骨／溢核 · 溢物回收 · `MULTIPLAYER_LOOPS.md`  
+- [x] **0.9.8**：星途獵場（3 波／日 cap 5／練習）· 溢皮／焰骨／溢核 · 溢物回收  
 - [x] **0.9.9**：獵場專用地圖／banner · 星途助戰（離線組隊）· rooms SQL 骨架  
 - [x] **0.10.0**：真市集（掛單／買／貨款）· 真裂縫房（建房／加入／房主戰／共鬥獎）  
 - [x] **0.10.1**：狩獵多人房 · 單人獵可帶助戰 · 房代碼顯示強化  
@@ -87,6 +87,9 @@
 - [x] **0.12.1 養成加深**：多武器線鍛造 · 材料行循環 · 每日委託 · 流派契合加成  
 - [x] **0.12.2 UI（Artale 風）**：官網 GNB／粉紅主色／白底卡片 · 遊戲 HUD／快捷欄／對話／選單對齊  
 - [x] **0.13.0**：十種武器流派 · 多頁官網 · 帳號 OAuth · 星途／鐵骨說明 · 補 NPC 圖 · 概念圖  
+- [x] **減法（2026-08-16，未發版）**：砍掉市集／裂縫房／狩獵房／助戰／歲旅活動／倉庫五個系統。
+      上面 0.9.4～0.10.4 那幾行留著當紀錄，但那些功能**已經不在遊戲裡**。
+      為什麼砍見 [docs/DECISIONS.md](docs/DECISIONS.md)；舊存檔裡寄放在倉庫與掛單的東西會自動退回背包。  
 - [x] **0.11.0**：帳號密碼 · 官網 · 資料表 · 裝備浮動 · 倉庫 · 冒險日誌 · 傷害浮動／爆擊  
 - [x] **0.11.1**：連線健康檢查 UI · 中文錯誤 · 後端金鑰表單 · 雙星連招倒數／音效回饋  
 - [x] **Godogen 工作流**（`AGENTS.md` · `godot.md` · `.agents/skills/asset-gen` · `tools/proof_run.sh`）  

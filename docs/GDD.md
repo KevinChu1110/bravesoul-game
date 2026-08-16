@@ -33,8 +33,8 @@
 | [SCRIPT_C1.md](SCRIPT_C1.md) | 騎士域＋雷歐戰 | ✅ |
 | [SCRIPT_C6.md](SCRIPT_C6.md) | 塔＋反轉＋魔王＋終章 | ✅ |
 | [ONLINE.md](ONLINE.md) | 連線分層 | ✅ |
-| [MULTIPLAYER_LOOPS.md](MULTIPLAYER_LOOPS.md) | 狩獵場／市集／組隊 Boss | ✅ |
-| [SYSTEMS_CORE.md](SYSTEMS_CORE.md) | 帳號／官網／裝備／倉庫／Log／爆擊 | ✅ |
+| [HUNTING_GROUNDS.md](HUNTING_GROUNDS.md) | 星途獵場 | ✅ |
+| [SYSTEMS_CORE.md](SYSTEMS_CORE.md) | 帳號／官網／裝備／Log／爆擊 | ✅ |
 | [ROADMAP.md](ROADMAP.md) | 半年節奏 | ✅ |
 | [TECH.md](TECH.md) | 技術 | ✅ |
 | [DECISIONS.md](DECISIONS.md) | 決策 | ✅ |
@@ -45,7 +45,7 @@
 | [BOSS_KITS.md](BOSS_KITS.md) | 翠嶺四王機制定案 | ✅ |
 | [MECHANIC_LIBRARY.md](MECHANIC_LIBRARY.md) | Artale 機制全盤＋未來 Boss 工具箱 | ✅ |
 | [CHAPTER_C4_C5.md](CHAPTER_C4_C5.md) | **C4 疾影／C5 石拳 章節設計** | ✅ |
-| [POSTGAME_AND_EVENTS.md](POSTGAME_AND_EVENTS.md) | **通關後＋週裂縫活動** | ✅ |
+| [POSTGAME_AND_EVENTS.md](POSTGAME_AND_EVENTS.md) | **通關後＋週裂縫** | ✅ |
 | [ART_2D.md](ART_2D.md) | **2D 表現與遷移** | ✅ |
 | [SCRIPT_C2.md](SCRIPT_C2.md) | 忍者村＋N8 信＋白霧 | ✅ |
 

@@ -41,10 +41,6 @@ const MISSIONS: Array[Dictionary] = [
 	{"id": "m_wreck", "name": "沉船終結者", "desc": "戰勝沉船船長影", "kind": "flag", "key": "boss.wreck_captain_cleared", "need": 1, "gold": 100, "dust": 5},
 	{"id": "m_three_secrets", "name": "三秘境", "desc": "三隻秘境小 Boss 全通", "kind": "flags_all", "keys": ["boss.scar_lord_cleared", "boss.mirror_wraith_cleared", "boss.wreck_captain_cleared"], "need": 3, "gold": 200, "dust": 10},
 	{"id": "m_hunt3", "name": "星途獵手", "desc": "狩獵場有獎通關 3 次", "kind": "count", "key": "hunt.clears_total", "need": 3, "gold": 70, "dust": 3},
-	{"id": "m_party3", "name": "旅人同行", "desc": "助戰裂縫有獎加成 3 次", "kind": "count", "key": "party.boosts_total", "need": 3, "gold": 80, "dust": 4},
-	{"id": "m_coop_rift", "name": "裂縫同袍", "desc": "裂縫房共鬥勝 2 次", "kind": "count", "key": "room.coop_wins", "need": 2, "gold": 90, "dust": 4},
-	{"id": "m_coop_hunt", "name": "共獵之約", "desc": "狩獵房共鬥勝 2 次", "kind": "count", "key": "room.hunt_coop_wins", "need": 2, "gold": 80, "dust": 3},
-	{"id": "m_sync3", "name": "雙星合拍", "desc": "雙星連招成功 3 次", "kind": "count", "key": "room.sync_combos", "need": 3, "gold": 100, "dust": 5},
 ]
 
 

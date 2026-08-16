@@ -33,12 +33,6 @@
       "text": "這裡已經平靜了。"
     }
   ],
-  "world.warehouse_keep": [
-    {
-      "speaker": "倉庫官",
-      "text": "騎士堡管庫的。可堆疊物與裝備都能存。"
-    }
-  ],
   "region.mist_locked": [
     {
       "speaker": "系統",

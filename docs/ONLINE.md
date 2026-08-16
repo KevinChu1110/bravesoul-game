@@ -26,9 +26,8 @@
 | 做 | 不做 |
 |----|------|
 | 雲存檔、殘影、留言石、通關蠟燭 | 同圖強制組隊主線 |
-| 裂縫／歲旅 **可選** 2～4 人房 | 開放世界即時 PvP |
 | 輕排行、公會週貢獻 | 拍賣行、語音內建 |
-| 活動進度可同步 | 必須上線才能打活動 |
+| 主線完全離線可通 | 必須上線才能玩 |
 
 ---
 
@@ -36,7 +35,7 @@
 
 ### L0 · 本機（已有）
 
-本地存檔、匯出匯入、歲旅／裂縫／公會（離線）。
+本地存檔、匯出匯入、裂縫／公會（離線）。
 
 ### L0.5 · 雲存檔 + 帳號
 
@@ -58,16 +57,12 @@
 
 **不需要 WebSocket。**
 
-### L2 · 可選共鬥（0.10.0 輪詢版）
+### L2 · 可選共鬥 —— **2026-08-16 砍掉**
 
-| 功能 | 規格 |
-|------|------|
-| 裂縫房 | 2～4 人；房主權威戰鬥 |
-| 同步 | HTTP 輪詢 2.5s（非 Realtime 按鍵） |
-| 權威 | **房主跑 BattleSim**；結果寫 `rooms.result` |
-| 獎勵 | 客戶端共鬥金＋人數加成；成員手動領獎 |
-| 掉線 | 房主可單人續；離線改用助戰 |
-| 市集 | 非同步掛單 `market_listings` + `market_buy` RPC |
+裂縫房／狩獵房整套移除。727 行在沒有後端時一行都不會執行，
+等於只有設定過 Supabase 的人看得到。伺服器上 `rooms` / `room_members` /
+`room_events` / `room_inputs` 那幾張表還在，但客戶端已經不再呼叫。
+理由見 [DECISIONS.md](DECISIONS.md)。
 
 ### L3 · 以後
 
@@ -94,9 +89,7 @@
 |------|------|
 | 主線 flag、對話、單人戰鬥 | 客戶端 + 雲備份 |
 | **可交易的金幣與物品** | **伺服器影子帳 `player_econ`** |
-| 市集上架／購買／下架 | **伺服器**（`market_*` RPC） |
-| 活動有獎次數／排行／共鬥掉落 | **伺服器** |
-| 共鬥血量同步 | 房主（L2） |
+| 排行分數 | **伺服器** |
 | 外觀展示 | 伺服器認可的 unlock 列表 |
 
 單機模擬驗不出玩家的金幣怎麼來的，所以不驗來源，改驗**成長速率**：影子帳往下
@@ -151,14 +144,6 @@ POST candles_rpc_increment()  -- 通關一次
 GET  candles_total
 ```
 
-### 4.6 event_progress（可選同步）
-
-```
-UPSERT event_progress { user_id, event_id, runs_total, token, updated_at }
-```
-
-離線可玩；上線 merge（取 max runs、token 以伺服器為準若衝突）。
-
 ### 4.7 leaderboard
 
 ```
@@ -168,63 +153,12 @@ GET  leaderboard?board=eq.rift_weekly&limit=50
 
 只進不退（低分不覆蓋高分），分數上限 1e8。直接寫表已擋掉。
 
-### 4.8 市集與影子帳
-
-```
-POST /rest/v1/rpc/market_list_item      { p_item_id, p_qty, p_price }
-POST /rest/v1/rpc/market_buy            { p_listing_id }
-POST /rest/v1/rpc/market_cancel_listing { p_listing_id }
-POST /rest/v1/rpc/market_claim_credit   {}
-POST /rest/v1/rpc/econ_state            {}
-GET  market_listings?status=eq.active&order=created_at.desc&limit=40
-```
-
-全部在伺服器單一交易內完成，所以下架不會退兩次貨、掛單不會被買兩次。
-上架會檢查影子帳有沒有這些貨、訂價有沒有超過「基準價 × 數量 × 20」。
-`econ_state` 給客戶端顯示「連線可用金幣」用。
-
-### 4.9 共鬥結算
-
-```
-POST /rest/v1/rpc/room_report_result  { p_room_id, p_result }
-POST /rest/v1/rpc/room_claim_reward   { p_room_id }
-```
-
-`reward_claimed` 由觸發器保護，客戶端改不動，所以獎勵一人一次。
-
 ---
 
-## 5. 房間協議（L2 · 0.10.2 同屏觀戰）
+## 5. 房間協議 —— 已移除
 
-```
-ClientA (host) ──create_room──► rooms
-ClientB ──join──► room_members
-Host BattleSim → room_events (battle_start / snap / action / end)
-  ├─ RealtimeBridge WebSocket (postgres_changes)
-  └─ fallback: HTTP poll 0.4s
-ClientB ──同屏觀戰──► BattleView.setup_spectator
-```
-
-| kind | 內容 |
-|------|------|
-| `battle_start` | mode、房主名、人數 |
-| `snap` | 雙方 HP、敵名 |
-| `action` | hit／skill／parry／mp 文字 |
-| `mp_sync_window` | 雙星連招窗開／關 |
-| `end` | won |
-
-### 成員操作（0.10.3）
-
-| 鍵 | 輸入 kind | 房主套用 |
-|----|-----------|----------|
-| J | `sync`／`parry` | 格擋 + 連招同步 |
-| K | `skill` | 怒氣 +35 |
-| L | `assist` | 攻↑4 秒 |
-
-- 表：`room_inputs`（成員寫、房主 0.25s 拉）  
-- **雙星連招**：可格擋窗內雙方都按 J → 強化格擋 + 追加傷害 + 怒氣滿  
-- 權威仍在房主；**非**雙端完整幀重算（BattleSim 含隨機／浮點，改為輸入鎖步權威）  
-SQL：`room_events` + `room_inputs`；Realtime 可訂閱 `room_events`。
+房間、同屏觀戰、雙星連招在 2026-08-16 隨裂縫房一起砍掉。
+`RealtimeBridge`（WebSocket）也一併移除 —— 它只有房間在用。
 
 ---
 
@@ -268,7 +202,6 @@ SQL：`room_events` + `room_inputs`；Realtime 可訂閱 `room_events`。
 |------|------|
 | 故事粉 | 全程純單機覺得完整 |
 | 輕社交 | 殘影／蠟燭有溫度 |
-| 共鬥粉 | 偶開裂縫房，掉線不毀體驗 |
 | 開發 | 後端掛一週，主線仍可出包 |
 
 ---
@@ -283,14 +216,8 @@ SQL：`room_events` + `room_inputs`；Realtime 可訂閱 `room_events`。
 - [x] 留言石（城門告示／塔下）  
 - [x] 通關蠟燭（塔下祭壇 · 通關可點）  
 - [ ] 接上真實 Supabase 專案（需你方 URL/anon key）  
-- [x] 組隊助戰離線原型（`PartySystem`）  
-- [x] 真市集（`MarketSystem` · listings RPC）  
-- [x] 真裂縫房輪詢（`RoomSystem` · 房主權威）  
-- [x] `rooms` / `room_members` / `market_*` / `room_events` SQL  
-- [x] Realtime 同屏觀戰（`RealtimeBridge` · WS＋輪詢）  
-- [x] 成員可操作／雙星連招（`room_inputs` · 0.10.3）  
-- [x] 延遲容錯 + 代碼加入（0.10.4）
+- [x] 影子帳與經濟守門（`player_econ` · `economy.sql`）  
+- [x] ~~市集／裂縫房／狩獵房／助戰~~ —— 2026-08-16 全部砍掉，見 [DECISIONS.md](DECISIONS.md)
 
 接線步驟見 `docs/ONLINE_SETUP.md`。  
-循環內容見 `docs/MULTIPLAYER_LOOPS.md`。  
-**重跑** `supabase/schema.sql` 以啟用市集／房間表。
+循環內容見 `docs/HUNTING_GROUNDS.md`。

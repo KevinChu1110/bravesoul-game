@@ -82,11 +82,6 @@ func weapon_class_def(id: String) -> Dictionary:
 	return {}
 
 
-func warehouse_max() -> int:
-	var w: Dictionary = items_meta.get("warehouse", {})
-	return int(w.get("max_slots", 60))
-
-
 func log_max_lines() -> int:
 	var w: Dictionary = items_meta.get("log", {})
 	return int(w.get("max_lines", 2000))

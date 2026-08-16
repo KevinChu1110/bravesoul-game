@@ -52,7 +52,7 @@
 
 `game/scripts/autoload/telemetry.gd`（autoload 名稱 `Telemetry`）
 
-- 自己的 `HTTPRequest`，跟 `OnlineGate` 分開——回報再慢也不可以拖到市集／存檔。
+- 自己的 `HTTPRequest`，跟 `OnlineGate` 分開——回報再慢也不可以拖到存檔。
 - 批次送：滿 20 筆或每 60 秒送一次，一次一個 HTTP。
 - 佇列上限 200 筆（滿了丟最舊的）、單場總量上限 400 筆。記憶體必須有上界。
 - 連續失敗 5 次就整場閉嘴並倒掉佇列。
@@ -69,7 +69,6 @@
 | 戰鬥開始／結果 | `scripts/battle/battle_view.gd` 的 `setup()` 與 `battle_finished` |
 
 戰鬥掛在 `battle_finished` 訊號上而不是逐個 `emit` 點插一行，逃跑跟中途結束才不會漏。
-觀戰（`spectate:` 開頭）不算自己的戰績。
 
 ### main.gd 還缺的一件事：同意的入口
 

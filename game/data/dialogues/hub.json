@@ -1,16 +1,4 @@
 {
-  "hub.event_no_reward_runs": [
-    {
-      "speaker": "系統",
-      "text": "今日有獎次數已用完。"
-    }
-  ],
-  "hub.event_challenge_start": [
-    {
-      "speaker": "旁白",
-      "text": "【{event}】挑戰開始。"
-    }
-  ],
   "hub.candle_need_online": [
     {
       "speaker": "系統",
