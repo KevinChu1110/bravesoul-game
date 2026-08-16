@@ -242,10 +242,40 @@ func status_bbcode() -> String:
 	return "\n".join(lines)
 
 
-func line_display(line: String) -> String:
+func migrate_line(line: String) -> String:
+	## 舊 soul/iron 裝備線對齊十流派 id（與 path_style migration 一致）
 	match line:
+		"soul":
+			return "magic"
+		"iron":
+			return "hammer"
+		_:
+			return line
+
+
+func line_display(line: String) -> String:
+	var L := migrate_line(line)
+	match L:
 		"sword":
-			return "劍道"
+			return "劍"
+		"bow":
+			return "弓"
+		"magic":
+			return "法"
+		"fist":
+			return "拳"
+		"axe":
+			return "斧"
+		"hammer":
+			return "鎚"
+		"spear":
+			return "槍"
+		"gun":
+			return "火槍"
+		"dart":
+			return "鏢"
+		"crystal":
+			return "水晶"
 		"soul":
 			return "星途"
 		"iron":
@@ -287,10 +317,11 @@ func craft(recipe: Dictionary) -> Dictionary:
 			return {"ok": false, "msg": "扣材料失敗。"}
 	GameState.add_gold(-gold_n)
 	var base_id := str(recipe.get("base_id", ""))
-	## 流派對應線品質略升
+	## 流派對應線品質略升（soul/iron 舊線會 migrate 後再比）
 	var q := ""
-	var line := str(base_def(base_id).get("line", ""))
-	if line != "" and line == GameState.path_style and randf() < 0.35:
+	var line := migrate_line(str(base_def(base_id).get("line", "")))
+	var path_line := migrate_line(str(GameState.path_style))
+	if line != "" and line == path_line and randf() < 0.35:
 		q = "uncommon"
 	var inst := roll_instance(base_id, q)
 	if inst.is_empty():
@@ -307,6 +338,8 @@ func craft(recipe: Dictionary) -> Dictionary:
 		if qs and qs.has_method("track_day"):
 			qs.call("track_day", "craft", 1)
 	SaveManager.save_game()
+	if AudioManager and AudioManager.has_method("play_craft_success"):
+		AudioManager.play_craft_success()
 	return {
 		"ok": true,
 		"inst": inst,
@@ -326,7 +359,11 @@ func recipe_line(recipe: Dictionary) -> String:
 		parts.append("%s×%d" % [InventorySystem.item_name(str(mid)), int(mats[mid])])
 	var ok := bool(can_craft(recipe).get("ok", false))
 	var mark := "✓" if ok else "·"
-	return "%s [%s] %s  %d金 · %s  %s" % [mark, line, nm, gold_n, "、".join(parts), str(recipe.get("hint", ""))]
+	## 中高階配方是主 sink：金幣欄加「需」字，方便玩家對帳
+	var gold_s := "需 %d 金" % gold_n if gold_n >= 150 else "%d 金" % gold_n
+	var have := GameState.gold
+	var afford := "夠" if have >= gold_n else "差 %d" % (gold_n - have)
+	return "%s [%s] %s  %s（%s）· %s  %s" % [mark, line, nm, gold_s, afford, "、".join(parts), str(recipe.get("hint", ""))]
 
 
 ## 掉落：依機率 roll 裝備進背包

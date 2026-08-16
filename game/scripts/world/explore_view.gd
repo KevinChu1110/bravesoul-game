@@ -1022,13 +1022,14 @@ func _process(delta: float) -> void:
 	if frozen:
 		return
 	var dir := Vector2.ZERO
-	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
+	## 鍵盤（方向鍵／WASD）與手把（左搖桿／十字鍵）皆綁在 ui_*，見 project.godot [input]
+	if Input.is_action_pressed("ui_left"):
 		dir.x -= 1
-	if Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D):
+	if Input.is_action_pressed("ui_right"):
 		dir.x += 1
-	if Input.is_action_pressed("ui_up") or Input.is_key_pressed(KEY_W):
+	if Input.is_action_pressed("ui_up"):
 		dir.y -= 1
-	if Input.is_action_pressed("ui_down") or Input.is_key_pressed(KEY_S):
+	if Input.is_action_pressed("ui_down"):
 		dir.y += 1
 	_moving = dir != Vector2.ZERO
 	if _moving:

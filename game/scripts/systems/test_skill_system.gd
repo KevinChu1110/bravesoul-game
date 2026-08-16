@@ -112,6 +112,74 @@ func _initialize() -> void:
 	else:
 		print("battle kit OK")
 
+	## 十流派：grant_for_weapon_class 發簽名招，且可 learn
+	gs.reset_new_game()
+	sk.ensure_skill_map()
+	var class_sigs := {
+		"sword": "blade_dance",
+		"bow": "wind_arrow",
+		"magic": "star_pierce",
+		"fist": "pressure_fist",
+		"axe": "heavy_cleave",
+		"hammer": "iron_guard",
+		"spear": "line_thrust",
+		"gun": "powder_shot",
+		"dart": "mist_needle",
+		"crystal": "prism_ward",
+	}
+	if not sk.has_method("grant_for_weapon_class"):
+		push_error("missing grant_for_weapon_class")
+		ok = false
+	else:
+		for cid in class_sigs.keys():
+			gs.skill_data = {}
+			gs.skill_slash_lv = 0
+			gs.path_style = ""
+			var sid: String = str(class_sigs[cid])
+			if sk.def_of(sid).is_empty():
+				push_error("catalog missing %s for %s" % [sid, cid])
+				ok = false
+				continue
+			var got: Array = sk.grant_for_weapon_class(str(cid))
+			if not sk.is_learned("slash"):
+				push_error("grant %s should learn slash" % cid)
+				ok = false
+			if not sk.is_learned(sid):
+				push_error("grant %s should learn %s got %s" % [cid, sid, got])
+				ok = false
+			else:
+				## 攻擊招可算倍率；回復招可算 heal_pct
+				var kind := str(sk.def_of(sid).get("kind", ""))
+				if kind == "attack" and sk.mult_for(sid) < 1.5:
+					push_error("sig mult low %s %s" % [sid, sk.mult_for(sid)])
+					ok = false
+				if kind == "heal" and sk.heal_pct_for(sid) < 0.1:
+					push_error("sig heal low %s" % sid)
+					ok = false
+		print("ten class grant OK")
+
+		## 弓道優先：疾風穿矢 priority 高於 slash
+		gs.skill_data = {}
+		gs.skill_slash_lv = 0
+		sk.grant_for_weapon_class("bow")
+		var kit_bow: Dictionary = sk.pick_battle_skill(1.0)
+		if str(kit_bow.get("id", "")) != "wind_arrow":
+			push_error("bow priority want wind_arrow got %s" % kit_bow)
+			ok = false
+		else:
+			print("bow priority OK")
+
+		## 水晶危急：晶盾吐息
+		gs.skill_data = {}
+		gs.skill_slash_lv = 0
+		sk.grant_for_weapon_class("crystal")
+		var kit_cr: Dictionary = sk.pick_battle_skill(0.30)
+		if str(kit_cr.get("id", "")) != "prism_ward":
+			push_error("crystal low hp want prism_ward got %s" % kit_cr)
+			ok = false
+		else:
+			print("crystal heal pick OK")
+
 	if ok:
 		print("SKILL_OK")
 		quit(0)

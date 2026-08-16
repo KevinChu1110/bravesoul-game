@@ -24,10 +24,17 @@ var state: State = State.IDLE
 var state_timer: float = 0.0
 var target_id: String = ""
 
-## 武器風姿（秒）
+## 武器風姿（秒）—— 玩家由 combat.json weapon_tempo 寫入
 var windup_time: float = 0.25
 var recover_time: float = 0.40
 var dmg_variance: float = 0.0
+
+## 武器流派 id（sword/bow/gun/…）；驅動姿態與風姿
+var weapon_class: String = ""
+## 遠距「被壓」剩餘秒數（>0 = 近身易傷、無開闊輸出加成）
+var pressure_left: float = 0.0
+## 本場第一次受擊尚可減傷（遠距疾走／反應窗）
+var first_hit_guard: bool = true
 
 ## 技能
 var can_skill: bool = false
@@ -79,10 +86,26 @@ func tick_status(dt: float) -> void:
 		atk_buff_left = maxf(0.0, atk_buff_left - dt)
 		if atk_buff_left <= 0.0:
 			atk_buff_mult = 1.0
+	if pressure_left > 0.0:
+		pressure_left = maxf(0.0, pressure_left - dt)
+
+
+## 遠距開闊輸出加成（被壓時無）
+func scale_outgoing(dmg: int) -> int:
+	return Formulas.scale_ranged_outgoing(weapon_class, pressure_left, dmg)
 
 
 func take_damage(amount: int) -> int:
-	var dealt := mini(hp, maxi(0, amount))
+	var incoming := amount
+	## 玩家：坦克減傷／遠距第一次減傷／被壓易傷，並刷新被壓計時
+	if team == Team.PLAYER and amount > 0:
+		var st: Dictionary = Formulas.apply_player_incoming_stance(
+			weapon_class, pressure_left, first_hit_guard, amount
+		)
+		incoming = int(st.get("damage", amount))
+		pressure_left = float(st.get("pressure", pressure_left))
+		first_hit_guard = bool(st.get("first_hit_guard", first_hit_guard))
+	var dealt := mini(hp, maxi(0, incoming))
 	hp -= dealt
 	if dealt > 0:
 		rage = mini(100.0, rage + float(Formulas.rage_from_damage(dealt, max_hp)))

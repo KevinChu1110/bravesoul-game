@@ -44,6 +44,7 @@ var _pose_tween: Tween
 var _player_pose: String = "idle"
 var _player_pose_tween: Tween
 var _battle_weapon: TextureRect = null
+var _battle_armor: TextureRect = null
 var _skill_banner: Label
 var _rage_ready: Label
 var _coach: Label
@@ -608,11 +609,21 @@ func _apply_battle_art(mode: String) -> void:
 
 
 func _apply_battle_weapon_overlay() -> void:
+	## 掛在 player_body 底下（不是 PlayerSlot VBox）：
+	## VBox 會重排 sibling，固定 position 無效；當 body 子節點則 lunge／scale 自動跟著走。
+	## 裝備讀 SpriteDB（當前武器／防具／流派），下一場 setup → _apply_battle_art 會重讀。
 	if player_body == null:
 		return
-	var slot := player_body.get_parent() as Control
-	if slot == null:
-		return
+	if _battle_armor == null or not is_instance_valid(_battle_armor):
+		_battle_armor = TextureRect.new()
+		_battle_armor.name = "PlayerArmorOverlay"
+		_battle_armor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_battle_armor.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		_battle_armor.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		_battle_armor.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		player_body.add_child(_battle_armor)
+	elif _battle_armor.get_parent() != player_body:
+		_battle_armor.reparent(player_body)
 	if _battle_weapon == null or not is_instance_valid(_battle_weapon):
 		_battle_weapon = TextureRect.new()
 		_battle_weapon.name = "PlayerWeaponOverlay"
@@ -620,38 +631,55 @@ func _apply_battle_weapon_overlay() -> void:
 		_battle_weapon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		_battle_weapon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		_battle_weapon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		_battle_weapon.custom_minimum_size = Vector2(72, 72)
-		_battle_weapon.size = Vector2(72, 72)
-		slot.add_child(_battle_weapon)
-	## 戰鬥防具染色已在 body modulate；再疊一件縮小防具示意
-	var armor_node := slot.get_node_or_null("PlayerArmorOverlay") as TextureRect
-	if armor_node == null:
-		armor_node = TextureRect.new()
-		armor_node.name = "PlayerArmorOverlay"
-		armor_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		armor_node.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		armor_node.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		armor_node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		armor_node.custom_minimum_size = Vector2(160, 200)
-		armor_node.size = Vector2(160, 200)
-		slot.add_child(armor_node)
-	var atex := SpriteDB.player_armor_overlay()
-	if atex:
-		armor_node.texture = atex
-		armor_node.visible = true
-		armor_node.position = player_body.position + Vector2(20, 30)
-		armor_node.modulate = Color(1, 1, 1, 0.85)
-		armor_node.z_index = 1
-	else:
-		armor_node.visible = false
-	var wtex := SpriteDB.player_weapon_overlay()
-	if wtex:
-		_battle_weapon.texture = wtex
-		_battle_weapon.visible = true
-		_battle_weapon.position = player_body.position + Vector2(120, 90)
-		_battle_weapon.z_index = 2
-	else:
-		_battle_weapon.visible = false
+		player_body.add_child(_battle_weapon)
+	elif _battle_weapon.get_parent() != player_body:
+		_battle_weapon.reparent(player_body)
+	_layout_battle_equipment_overlays()
+	## body 尺寸可能在下一幀才穩定（VBox 排版）
+	if not player_body.resized.is_connected(_layout_battle_equipment_overlays):
+		player_body.resized.connect(_layout_battle_equipment_overlays)
+	call_deferred("_layout_battle_equipment_overlays")
+
+
+func _layout_battle_equipment_overlays() -> void:
+	if player_body == null:
+		return
+	var bs := player_body.size
+	if bs.x < 8.0 or bs.y < 8.0:
+		bs = player_body.custom_minimum_size
+	if bs.x < 8.0:
+		bs = Vector2(200, 250)
+	## 防具：略縮於身體中央
+	if _battle_armor and is_instance_valid(_battle_armor):
+		var atex := SpriteDB.player_armor_overlay()
+		if atex:
+			var asz := Vector2(bs.x * 0.78, bs.y * 0.78)
+			_battle_armor.texture = atex
+			_battle_armor.visible = true
+			_battle_armor.custom_minimum_size = asz
+			_battle_armor.size = asz
+			_battle_armor.position = Vector2((bs.x - asz.x) * 0.5, bs.y * 0.12)
+			_battle_armor.modulate = Color(1, 1, 1, 0.88)
+			_battle_armor.z_index = 1
+		else:
+			_battle_armor.visible = false
+	## 武器：右前手位置（與探索疊層同源 SpriteDB）
+	if _battle_weapon and is_instance_valid(_battle_weapon):
+		var wtex := SpriteDB.player_weapon_overlay()
+		if wtex:
+			var wsz := Vector2(bs.x * 0.38, bs.y * 0.38)
+			wsz.x = clampf(wsz.x, 56.0, 96.0)
+			wsz.y = clampf(wsz.y, 56.0, 96.0)
+			_battle_weapon.texture = wtex
+			_battle_weapon.visible = true
+			_battle_weapon.custom_minimum_size = wsz
+			_battle_weapon.size = wsz
+			_battle_weapon.position = Vector2(bs.x * 0.52, bs.y * 0.34)
+			_battle_weapon.pivot_offset = wsz * 0.5
+			_battle_weapon.rotation_degrees = -22.0
+			_battle_weapon.z_index = 2
+		else:
+			_battle_weapon.visible = false
 
 
 func _ensure_temptation_ui() -> void:
@@ -1896,7 +1924,8 @@ func _grant_rift_rewards(mode: String) -> void:
 		GameState.set_flag("title.rift_walker", true)
 
 	var mult: Dictionary = RiftSchedule.reward_mult(mode)
-	var gold_n: int = int(round(200.0 * float(mult.get("gold", 1.0))))
+	## 經濟 0.15：裂縫基準 200→160（可重複／練習局仍 ×0.35），避免終局刷金溢出
+	var gold_n: int = int(round(160.0 * float(mult.get("gold", 1.0))))
 	var xp_n: int = int(round(150.0 * float(mult.get("xp", 1.0))))
 	if gold_n > 0:
 		GameState.add_gold(gold_n)

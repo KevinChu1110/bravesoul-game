@@ -106,7 +106,9 @@ func _equipped_weapon_line() -> String:
 	var wuid := str(equip_slots.get("weapon", ""))
 	if wuid == "" or not equip_worn.has(wuid):
 		return ""
-	return str((equip_worn[wuid] as Dictionary).get("line", ""))
+	var raw := str((equip_worn[wuid] as Dictionary).get("line", ""))
+	## 舊 soul/iron 裝備線對齊 magic/hammer
+	return _migrate_path_style(raw)
 
 
 func effective_atk() -> int:
@@ -117,7 +119,7 @@ func effective_atk() -> int:
 	a += equip_bonus_atk()
 	var wb := weapon_class_bonuses()
 	a += int(wb.get("atk", 0))
-	## 裝備武器線與所選流派一致
+	## 裝備武器線與所選流派一致（含舊線 migrate）
 	var wline := _equipped_weapon_line()
 	var pid := _migrate_path_style(path_style)
 	if wline != "" and wline == pid:

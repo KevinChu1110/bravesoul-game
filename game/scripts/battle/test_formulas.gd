@@ -294,6 +294,137 @@ func _initialize() -> void:
 	else:
 		print("ng hazard OK ", wt)
 
+	## ── 時間模型 0.15 ──
+	## speed10：ATB 應約 4.0s 填滿（fill_base25 × 1.0）
+	var atb10 := Formulas.atb_seconds_to_full(10.0)
+	if atb10 < 3.7 or atb10 > 4.3:
+		push_error("time_model: speed10 ATB should ~4s got %s" % atb10)
+		ok = false
+	else:
+		print("time_model ATB speed10 OK ", atb10)
+	## 比 speed10 快一截，但不能快到雜魚 2 秒連砍
+	var atb14 := Formulas.atb_seconds_to_full(14.0)
+	if atb14 >= atb10 or atb14 < 2.8:
+		push_error("time_model: speed14 should be faster than 10 but >=2.8s got %s" % atb14)
+		ok = false
+	else:
+		print("time_model ATB speed14 OK ", atb14)
+	## 怒氣：約 8 刀滿（14×7=98）
+	var per := Formulas.rage_from_strike()
+	var strikes_full := int(ceil(100.0 / per))
+	if strikes_full < 6 or strikes_full > 10:
+		push_error("time_model: rage strikes-to-full out of band %s (per=%s)" % [strikes_full, per])
+		ok = false
+	else:
+		print("time_model rage strikes OK ", strikes_full, " per ", per)
+	## Boss 前搖常數仍可讀
+	if BattleSim.KING_SLASH_WINDUP < 1.4 or BattleSim.PARRY_WINDOW < 0.6:
+		push_error("time_model: boss telegraph too tight")
+		ok = false
+	else:
+		print("time_model boss telegraph OK")
+
+	## ── 姿態：遠距開闊／被壓、坦克容錯 ──
+	if not Formulas.is_ranged_class("bow") or not Formulas.is_ranged_class("gun"):
+		push_error("stance: bow/gun should be ranged")
+		ok = false
+	if not Formulas.is_tank_class("hammer") or not Formulas.is_tank_class("crystal"):
+		push_error("stance: hammer/crystal should be tank")
+		ok = false
+	if Formulas.is_ranged_class("sword") or Formulas.is_tank_class("gun"):
+		push_error("stance: class buckets wrong")
+		ok = false
+
+	var open_bow := Formulas.scale_ranged_outgoing("bow", 0.0, 100)
+	var press_bow := Formulas.scale_ranged_outgoing("bow", 1.0, 100)
+	if open_bow <= 100 or press_bow != 100:
+		push_error("stance: open bonus failed open=%s press=%s" % [open_bow, press_bow])
+		ok = false
+	else:
+		print("stance open dmg OK ", open_bow)
+
+	## 第一次受擊減傷
+	var hit1: Dictionary = Formulas.apply_player_incoming_stance("gun", 0.0, true, 100)
+	if int(hit1.get("damage", 100)) >= 100 or bool(hit1.get("first_hit_guard", true)):
+		push_error("stance: first hit should mitigate got %s" % hit1)
+		ok = false
+	else:
+		print("stance first hit OK ", hit1.get("damage"))
+	## 被壓易傷（guard 已用）
+	var hit2: Dictionary = Formulas.apply_player_incoming_stance(
+		"gun", float(hit1.get("pressure", 3.5)), false, 100
+	)
+	if int(hit2.get("damage", 100)) <= 100:
+		push_error("stance: pressured should amplify got %s" % hit2)
+		ok = false
+	else:
+		print("stance pressured OK ", hit2.get("damage"))
+
+	## 坦克常駐減傷；同 100 原傷下鎚 < 銃（被壓）
+	var tank_hit: Dictionary = Formulas.apply_player_incoming_stance("hammer", 0.0, true, 100)
+	var gun_press: Dictionary = Formulas.apply_player_incoming_stance("gun", 3.0, false, 100)
+	if int(tank_hit.get("damage", 100)) >= 100:
+		push_error("stance: tank should reduce got %s" % tank_hit)
+		ok = false
+	elif int(tank_hit.get("damage", 100)) >= int(gun_press.get("damage", 100)):
+		push_error("stance: tank should take less than pressured gun t=%s g=%s" % [
+			tank_hit.get("damage"), gun_press.get("damage")
+		])
+		ok = false
+	else:
+		print("stance tank vs gun OK t=", tank_hit.get("damage"), " g=", gun_press.get("damage"))
+
+	## BattleUnit 整合：make 戰寫入 weapon_class + 風姿
+	var gun_sim := BattleSim.make_tutorial_wolf_fight({
+		"atk": 20, "hp": 80, "max_hp": 80, "def": 5, "weapon_class": "gun"
+	})
+	var gp: BattleUnit = gun_sim.get_unit("player")
+	if gp.weapon_class != "gun" or gp.windup_time < 0.35:
+		push_error("stance: gun tempo not applied wc=%s wu=%s" % [gp.weapon_class, gp.windup_time])
+		ok = false
+	else:
+		print("stance gun tempo OK wu=", gp.windup_time)
+	var raw_out := 50
+	var scaled := gp.scale_outgoing(raw_out)
+	if scaled <= raw_out:
+		push_error("stance: unit open scale failed %s" % scaled)
+		ok = false
+	## 吃一刀 → 被壓 → 開闊消失
+	var hp_before := gp.hp
+	gp.take_damage(20)
+	if gp.hp >= hp_before or gp.pressure_left <= 0.0:
+		push_error("stance: hit should apply pressure hp %s→%s p=%s" % [hp_before, gp.hp, gp.pressure_left])
+		ok = false
+	elif gp.scale_outgoing(raw_out) != raw_out:
+		push_error("stance: pressured should lose open bonus")
+		ok = false
+	else:
+		print("stance unit pressure OK")
+
+	var ham_sim := BattleSim.make_tutorial_wolf_fight({
+		"atk": 20, "hp": 100, "max_hp": 100, "def": 8, "weapon_class": "hammer"
+	})
+	var ham_u: BattleUnit = ham_sim.get_unit("player")
+	var g_sim2 := BattleSim.make_tutorial_wolf_fight({
+		"atk": 20, "hp": 100, "max_hp": 100, "def": 8, "weapon_class": "gun"
+	})
+	var gu: BattleUnit = g_sim2.get_unit("player")
+	## 燒掉銃的第一次減傷
+	gu.take_damage(10)
+	gu.hp = 100
+	gu.pressure_left = 3.0
+	var h0 := ham_u.hp
+	var g0 := gu.hp
+	ham_u.take_damage(40)
+	gu.take_damage(40)
+	var h_lost := h0 - ham_u.hp
+	var g_lost := g0 - gu.hp
+	if h_lost >= g_lost:
+		push_error("stance: hammer should lose less hp than pressured gun h=%s g=%s" % [h_lost, g_lost])
+		ok = false
+	else:
+		print("stance hammer tankier OK h=", h_lost, " g=", g_lost)
+
 	if ok:
 		print("TEST_OK")
 		quit(0)

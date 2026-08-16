@@ -1,6 +1,7 @@
 extends Node
 ## 技能（招）：習得 · 熟練 · 升級。旅途養招，與器／魂正交。
 ## 戰鬥以怒氣滿自動放出「當前優先技能」；UI 看列表與下級預覽。
+## 十武器流派各有簽名招；選流派時 grant_for_weapon_class 發招。
 
 const MAX_LV := 3
 
@@ -10,12 +11,29 @@ const MASTERY_NEED := {
 	3: 80,
 }
 
-## 目錄（劍系 P0 + 敘事掛點）
+## 武器流派 id → 簽名技能 id（選流派時強制習得）
+const CLASS_SIGNATURE := {
+	"sword": "blade_dance",
+	"bow": "wind_arrow",
+	"magic": "star_pierce",
+	"fist": "pressure_fist",
+	"axe": "heavy_cleave",
+	"hammer": "iron_guard",
+	"spear": "line_thrust",
+	"gun": "powder_shot",
+	"dart": "mist_needle",
+	"crystal": "prism_ward",
+	## 舊 id 相容（存檔 migration 前）
+	"soul": "star_pierce",
+	"iron": "iron_guard",
+}
+
+## 目錄：通用橫斬 + 劍系 + 十流派簽名 + 星／骨相容招
 const CATALOG: Array[Dictionary] = [
 	{
 		"id": "slash",
 		"name": "橫斬",
-		"line": "劍",
+		"line": "sword",
 		"kind": "attack",
 		"base_mult": 1.8,
 		"priority": 10,
@@ -27,7 +45,7 @@ const CATALOG: Array[Dictionary] = [
 	{
 		"id": "counter_strike",
 		"name": "反戈一擊",
-		"line": "劍",
+		"line": "sword",
 		"kind": "attack",
 		"base_mult": 2.4,
 		"priority": 20,
@@ -39,7 +57,7 @@ const CATALOG: Array[Dictionary] = [
 	{
 		"id": "emergency_heal",
 		"name": "緊急恢復",
-		"line": "劍",
+		"line": "sword",
 		"kind": "heal",
 		"base_mult": 0.0,
 		"heal_pct": 0.30,
@@ -52,7 +70,7 @@ const CATALOG: Array[Dictionary] = [
 	{
 		"id": "thunder_fury",
 		"name": "怒雷狂擊",
-		"line": "劍",
+		"line": "sword",
 		"kind": "attack",
 		"base_mult": 2.6,
 		"priority": 40,
@@ -64,39 +82,124 @@ const CATALOG: Array[Dictionary] = [
 	{
 		"id": "star_pierce",
 		"name": "星芒穿刺",
-		"line": "星",
+		"line": "magic",
 		"kind": "attack",
 		"base_mult": 2.2,
 		"priority": 28,
-		"desc": "星途流派：偏暴擊節奏的一刺。",
+		"desc": "法／星途簽名：偏暴擊節奏的一刺。",
 		"lv2": "星芒更銳。",
 		"lv3": "穿刺附帶短暫識破（倍率再升）。",
-		"unlock_hint": "星途觀測 · 或等級 6",
+		"unlock_hint": "選法流派 · 或等級 6",
 	},
 	{
 		"id": "iron_guard",
 		"name": "鐵骨吐息",
-		"line": "骨",
+		"line": "hammer",
 		"kind": "heal",
 		"base_mult": 0.0,
 		"heal_pct": 0.22,
 		"priority": 8,
-		"desc": "鐵骨流派：較早觸發的穩血吐息。",
+		"desc": "鎚／鐵骨簽名：較早觸發的穩血吐息。",
 		"lv2": "回血略增。",
 		"lv3": "危急門檻更寬，回血再增。",
-		"unlock_hint": "鐵骨守護 · 或等級 5",
+		"unlock_hint": "選鎚流派 · 或等級 5",
 	},
 	{
 		"id": "blade_dance",
 		"name": "連鋒三斬",
-		"line": "劍",
+		"line": "sword",
 		"kind": "attack",
 		"base_mult": 2.1,
 		"priority": 32,
-		"desc": "劍道流派：中速連斬，熟練成長快。",
+		"desc": "劍道簽名：中速連斬，熟練成長快。",
 		"lv2": "連鋒更密。",
 		"lv3": "三斬尾勁延長。",
-		"unlock_hint": "劍道行者 · 或等級 8",
+		"unlock_hint": "選劍流派 · 或等級 8",
+	},
+	{
+		"id": "wind_arrow",
+		"name": "疾風穿矢",
+		"line": "bow",
+		"kind": "attack",
+		"base_mult": 2.15,
+		"priority": 30,
+		"desc": "弓道簽名：遠距一箭，吃暴擊節奏。",
+		"lv2": "穿矢更銳。",
+		"lv3": "尾勁延長，倍率再抬。",
+		"unlock_hint": "選弓流派 · 或等級 6",
+	},
+	{
+		"id": "pressure_fist",
+		"name": "破勢拳",
+		"line": "fist",
+		"kind": "attack",
+		"base_mult": 2.05,
+		"priority": 31,
+		"desc": "拳道簽名：貼身連打，破對手架勢。",
+		"lv2": "拳勢更密。",
+		"lv3": "破勢尾勁，傷害再抬。",
+		"unlock_hint": "選拳流派 · 或等級 6",
+	},
+	{
+		"id": "heavy_cleave",
+		"name": "重斧斷",
+		"line": "axe",
+		"kind": "attack",
+		"base_mult": 2.45,
+		"priority": 33,
+		"desc": "斧道簽名：一擊有重量，慢但痛。",
+		"lv2": "斧勢更沉。",
+		"lv3": "斷勢封頂前一檔。",
+		"unlock_hint": "選斧流派 · 或等級 6",
+	},
+	{
+		"id": "line_thrust",
+		"name": "一線突刺",
+		"line": "spear",
+		"kind": "attack",
+		"base_mult": 2.25,
+		"priority": 31,
+		"desc": "槍道簽名：卡住距離的迎擊一刺。",
+		"lv2": "槍線更長。",
+		"lv3": "突刺附短暫壓制。",
+		"unlock_hint": "選槍流派 · 或等級 6",
+	},
+	{
+		"id": "powder_shot",
+		"name": "火銃點射",
+		"line": "gun",
+		"kind": "attack",
+		"base_mult": 2.55,
+		"priority": 35,
+		"desc": "火槍簽名：遠距爆發，打中很痛。",
+		"lv2": "裝藥更穩。",
+		"lv3": "點射尾音延長。",
+		"unlock_hint": "選火槍流派 · 或等級 6",
+	},
+	{
+		"id": "mist_needle",
+		"name": "霧影鏢",
+		"line": "dart",
+		"kind": "attack",
+		"base_mult": 2.1,
+		"priority": 34,
+		"desc": "鏢道簽名：高速真假同色的一手。",
+		"lv2": "鏢影更密。",
+		"lv3": "識破破綻，倍率再升。",
+		"unlock_hint": "選鏢流派 · 或等級 6",
+	},
+	{
+		"id": "prism_ward",
+		"name": "晶盾吐息",
+		"line": "crystal",
+		"kind": "heal",
+		"base_mult": 0.0,
+		"heal_pct": 0.26,
+		"priority": 9,
+		"desc": "水晶簽名：把護盾織成吐息，穩血活得久。",
+		"lv2": "回血略增。",
+		"lv3": "危急門檻更寬。",
+		"unlock_hint": "選水晶流派 · 或等級 5",
 	},
 ]
 
@@ -265,8 +368,34 @@ func learn(id: String, min_lv: int = 1) -> bool:
 	return true
 
 
+func _path_id() -> String:
+	## 與 GameState 舊 soul/iron → magic/hammer 對齊
+	var p := str(GameState.path_style)
+	match p:
+		"soul":
+			return "magic"
+		"iron":
+			return "hammer"
+		_:
+			return p
+
+
+func _path_is(class_id: String) -> bool:
+	return _path_id() == class_id
+
+
+func signature_for_class(class_id: String) -> String:
+	var cid := class_id
+	match cid:
+		"soul":
+			cid = "magic"
+		"iron":
+			cid = "hammer"
+	return str(CLASS_SIGNATURE.get(cid, ""))
+
+
 func is_unlocked(id: String) -> bool:
-	## 可否習得（條件）— 0.12：等級／流派可解鎖，不全綁主線
+	## 可否習得（條件）— 等級／流派可解鎖，不全綁主線
 	match id:
 		"slash":
 			return true
@@ -276,14 +405,28 @@ func is_unlocked(id: String) -> bool:
 			return GameState.has_flag("c1_forged") or GameState.has_flag("c1_entered_city") or GameState.level >= 3
 		"thunder_fury":
 			return GameState.has_flag("boss.leo_cleared") \
-				or (GameState.path_style == "sword" and GameState.level >= 10) \
+				or (_path_is("sword") and GameState.level >= 10) \
 				or GameState.level >= 14
 		"star_pierce":
-			return GameState.path_style == "soul" or GameState.level >= 6 or GameState.has_flag("c1_soul_intro")
+			return _path_is("magic") or GameState.level >= 6 or GameState.has_flag("c1_soul_intro")
 		"iron_guard":
-			return GameState.path_style == "iron" or GameState.level >= 5
+			return _path_is("hammer") or GameState.level >= 5
 		"blade_dance":
-			return GameState.path_style == "sword" or GameState.level >= 8
+			return _path_is("sword") or GameState.level >= 8
+		"wind_arrow":
+			return _path_is("bow") or GameState.level >= 6
+		"pressure_fist":
+			return _path_is("fist") or GameState.level >= 6
+		"heavy_cleave":
+			return _path_is("axe") or GameState.level >= 6
+		"line_thrust":
+			return _path_is("spear") or GameState.level >= 6
+		"powder_shot":
+			return _path_is("gun") or GameState.level >= 6
+		"mist_needle":
+			return _path_is("dart") or GameState.level >= 6
+		"prism_ward":
+			return _path_is("crystal") or GameState.level >= 5
 		_:
 			return false
 
@@ -296,30 +439,39 @@ func try_unlock(id: String) -> bool:
 	return learn(id, 1)
 
 
-## 戰鬥用：挑當前該放的技能
+## 戰鬥用：挑當前該放的技能（不硬編碼只認劍系）
 func pick_battle_skill(hp_ratio: float = 1.0) -> Dictionary:
 	ensure_skill_map()
-	## 危急恢復（鐵骨吐息門檻略寬）
-	var heal_need := 0.40
-	if is_learned("iron_guard"):
-		heal_need = 0.48 if get_lv("iron_guard") >= 3 else 0.44
-	if is_learned("iron_guard") and hp_ratio <= heal_need:
+	## 危急恢復：已學 heal 技中 priority 最高者；鐵骨／晶盾門檻略寬
+	var best_heal: Dictionary = {}
+	var best_heal_p := -1
+	for d in CATALOG:
+		if str(d.get("kind", "")) != "heal":
+			continue
+		var sid: String = str(d.get("id", ""))
+		if not is_learned(sid):
+			continue
+		var threshold := 0.40
+		if sid == "iron_guard":
+			threshold = 0.48 if get_lv("iron_guard") >= 3 else 0.44
+		elif sid == "prism_ward":
+			threshold = 0.46 if get_lv("prism_ward") >= 3 else 0.42
+		if hp_ratio > threshold:
+			continue
+		var prio: int = int(d.get("priority", 0))
+		if prio > best_heal_p:
+			best_heal_p = prio
+			best_heal = d
+	if not best_heal.is_empty():
+		var hid: String = str(best_heal.get("id", ""))
 		return {
-			"id": "iron_guard",
-			"name": str(def_of("iron_guard").get("name", "鐵骨吐息")),
+			"id": hid,
+			"name": str(best_heal.get("name", hid)),
 			"kind": "heal",
 			"mult": 0.0,
-			"heal_pct": heal_pct_for("iron_guard"),
+			"heal_pct": heal_pct_for(hid),
 		}
-	if is_learned("emergency_heal") and hp_ratio <= 0.40:
-		return {
-			"id": "emergency_heal",
-			"name": str(def_of("emergency_heal").get("name", "緊急恢復")),
-			"kind": "heal",
-			"mult": 0.0,
-			"heal_pct": heal_pct_for("emergency_heal"),
-		}
-	## 攻擊技：priority 高者優先
+	## 攻擊技：priority 高者優先（含各流派簽名招）
 	var best: Dictionary = {}
 	var best_p := -1
 	for d in CATALOG:
@@ -368,7 +520,6 @@ func battle_player_stats_patch() -> Dictionary:
 const TUTOR_COST := 40
 const TUTOR_MASTERY := 15
 
-
 func can_tutor(id: String) -> bool:
 	return is_learned(id) and get_lv(id) < MAX_LV and GameState.gold >= TUTOR_COST
 
@@ -386,6 +537,14 @@ func panel_status_bbcode() -> String:
 	lines.append("[b]旅途 · 招式[/b]")
 	lines.append("鐵匠養器 · 星途養魂 · [color=#c9e]旅途養招[/color]")
 	lines.append("熟練靠戰鬥命中累積；滿了會自動升階。灰鬚可指點加速。")
+	var pid := _path_id()
+	if pid != "":
+		var sig := signature_for_class(pid)
+		if sig != "":
+			if is_learned(sig):
+				lines.append("當前流派簽名：%s" % display_name(sig))
+			else:
+				lines.append("當前流派簽名：%s（未習得）" % str(def_of(sig).get("name", sig)))
 	lines.append("")
 	for d in CATALOG:
 		var sid: String = str(d.get("id", ""))
@@ -418,8 +577,13 @@ func panel_status_bbcode() -> String:
 	lines.append("")
 	lines.append("[b]戰鬥優先[/b]")
 	lines.append("  平常：%s" % str(kit_full.get("name", "—")))
-	if is_learned("emergency_heal"):
-		lines.append("  危急（HP≤40%%）：%s" % str(kit.get("name", "—")))
+	var any_heal := false
+	for d2 in CATALOG:
+		if str(d2.get("kind", "")) == "heal" and is_learned(str(d2.get("id", ""))):
+			any_heal = true
+			break
+	if any_heal:
+		lines.append("  危急（低血）：%s" % str(kit.get("name", "—")))
 	return "\n".join(lines)
 
 
@@ -442,3 +606,25 @@ func grant_leo_insight() -> void:
 
 func grant_heal_insight() -> void:
 	try_unlock("emergency_heal")
+
+
+## 選武器流派時：通用橫斬 + 該系簽名招
+## 回傳本次新習得的 skill id 列表（已學則略過，不弄壞舊存檔）
+func grant_for_weapon_class(class_id: String) -> Array:
+	var cid := class_id
+	match cid:
+		"soul":
+			cid = "magic"
+		"iron":
+			cid = "hammer"
+	var granted: Array = []
+	if learn("slash", 1):
+		granted.append("slash")
+	elif is_learned("slash"):
+		pass
+	var sig := signature_for_class(cid)
+	if sig != "":
+		if learn(sig, 1):
+			granted.append(sig)
+		## 已學也算「有這招」；確保 unlock 條件之後不會擋
+	return granted

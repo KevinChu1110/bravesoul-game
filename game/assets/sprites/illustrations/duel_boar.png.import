@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dcuxusw1rw15h"
-path="res://.godot/imported/battle_boar.png-1098aa6320bc582ffe3cdb83340cee13.ctex"
+path="res://.godot/imported/duel_boar.png-fec5d50fb394df3dd803946959d1849c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/illustrations/duel_boar.png"
-dest_files=[]
+dest_files=["res://.godot/imported/duel_boar.png-fec5d50fb394df3dd803946959d1849c.ctex"]
 
 [params]
 

@@ -196,13 +196,14 @@ static func _village_cave() -> Dictionary:
 
 static func _village_grave() -> Dictionary:
 	var m := _base("翠谷 · 村後墓園", Color(0.07, 0.07, 0.09), 2200, 1000, Vector2(200, 480), "village_grave")
+	var lamp_lab := "長明燈（亮）" if GameState.has_flag("side.lantern_done") else "長明燈"
 	m["entities"] = [
 		_e("back_from_grave", 100, 450, 56, 56, "回村子", Color(0.4, 0.35, 0.3)),
 		_e("stone_gate", 400, 300, 64, 72, "墓園門", Color(0.4, 0.38, 0.4), true),
 		_e("grave_a", 700, 450, 40, 48, "無名碑", Color(0.45, 0.42, 0.4), true),
 		_e("grave_b", 900, 500, 40, 48, "舊碑", Color(0.42, 0.4, 0.38), true),
 		_e("willow", 1100, 280, 56, 80, "垂柳", Color(0.3, 0.4, 0.32), true),
-		_e("lantern_post", 1300, 400, 36, 56, "長明燈", Color(0.55, 0.5, 0.35)),
+		_e("lantern_post", 1300, 400, 36, 56, lamp_lab, Color(0.55, 0.5, 0.35)),
 		_e("fresh_earth", 1500, 550, 48, 40, "新土", Color(0.35, 0.3, 0.25)),
 		_e("hill_edge", 1800, 350, 56, 48, "遠眺丘", Color(0.35, 0.38, 0.32)),
 	]
@@ -243,18 +244,19 @@ static func _road_bridge() -> Dictionary:
 		_e("toll_ruin", 1400, 320, 56, 56, "廢稅亭", Color(0.42, 0.38, 0.35), true),
 		_e("broken_rail", 1600, 420, 80, 32, "斷欄杆", Color(0.4, 0.35, 0.3), true),
 		_e("east_span", 2100, 400, 64, 56, "橋東·接主路", Color(0.4, 0.42, 0.45)),
-		_e("nest_under", 1200, 700, 48, 40, "橋下鳥巢", Color(0.35, 0.4, 0.3)),
+		_e("nest_under", 1200, 700, 48, 40, "橋下鳥巢" + ("（已顧）" if GameState.has_flag("side.nest_care_done") else ""), Color(0.35, 0.4, 0.3)),
 	]
 	return m
 
 
 static func _road_inn() -> Dictionary:
 	var m := _base("荒路 · 半塌客棧", Color(0.11, 0.1, 0.12), 2200, 1000, Vector2(200, 480), "road_inn")
+	var hearth_lab := "壁爐（暖）" if GameState.has_flag("side.hearth_lit") else "熄滅壁爐"
 	m["entities"] = [
 		_e("back_road", 100, 450, 56, 56, "回主路", Color(0.4, 0.4, 0.45)),
 		_e("inn_sign", 500, 280, 48, 56, "「歇腳」破牌", Color(0.5, 0.4, 0.3), true),
 		_e("common_room", 700, 420, 80, 64, "大堂", Color(0.42, 0.35, 0.28), true),
-		_e("hearth", 900, 500, 56, 48, "熄滅壁爐", Color(0.35, 0.3, 0.28), true),
+		_e("hearth", 900, 500, 56, 48, hearth_lab, Color(0.35, 0.3, 0.28), true),
 		_e("cellar_hatch", 1100, 600, 48, 40, "地窖口", Color(0.3, 0.28, 0.25)),
 		_e("stable_ruin", 1400, 400, 64, 56, "馬廄廢墟", Color(0.4, 0.36, 0.3), true),
 		_e("guest_bed", 1600, 550, 48, 40, "塌床", Color(0.45, 0.38, 0.32)),
@@ -516,7 +518,7 @@ static func _starfall_plain() -> Dictionary:
 		_e("constellation", 1000, 300, 64, 48, "星圖刻地", Color(0.45, 0.5, 0.7)),
 		_e("star_reader_camp", 1400, 550, 56, 56, "星讀帳篷", Color(0.4, 0.4, 0.55), true),
 		_e("night_bloom", 1800, 650, 40, 40, "夜開花", Color(0.5, 0.4, 0.6)),
-		_e("wish_pool", 2100, 450, 64, 48, "許願淺池", Color(0.35, 0.4, 0.55), true),
+		_e("wish_pool", 2100, 450, 64, 48, "許願淺池" + ("（已許）" if GameState.has_flag("side.star_wish_done") else ""), Color(0.35, 0.4, 0.55), true),
 		_e("to_road_ruins", 2400, 700, 64, 56, "接古驛", Color(0.4, 0.38, 0.35)),
 	]
 	return m
@@ -612,10 +614,11 @@ static func _mist_cliff() -> Dictionary:
 
 static func _mist_shrine() -> Dictionary:
 	var m := _base("霧隱 · 霧祠內殿", Color(0.08, 0.09, 0.14), 2000, 950, Vector2(200, 420), "mist_shrine")
+	var incense_lab := "香爐（已燃）" if GameState.has_flag("side.fog_incense_done") else "香爐"
 	m["entities"] = [
 		_e("back_from_mist_sub", 100, 400, 56, 56, "出祠", Color(0.45, 0.5, 0.6)),
 		_e("fox_statue", 600, 300, 56, 64, "白狐像", Color(0.7, 0.72, 0.8), true),
-		_e("incense", 900, 450, 40, 40, "香爐", Color(0.5, 0.45, 0.4)),
+		_e("incense", 900, 450, 40, 40, incense_lab, Color(0.5, 0.45, 0.4)),
 		_e("prayer_strip", 1100, 350, 48, 56, "願條", Color(0.55, 0.5, 0.6)),
 		_e("secret_panel", 1500, 400, 48, 48, "暗板", Color(0.4, 0.4, 0.5)),
 	]

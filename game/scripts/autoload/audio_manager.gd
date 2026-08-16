@@ -66,6 +66,7 @@ func _preload_sfx() -> void:
 		"parry", "hit", "slash", "fire", "wind", "rock", "clock",
 		"reveal", "break", "stop", "clash", "victory", "defeat",
 		"ui", "interact", "step", "warn", "dodge", "battle_start",
+		"craft",  ## 可選；缺檔時 play_craft_success 走 ui+reveal
 	]
 	for n in names:
 		var path := "%s/%s.wav" % [SFX_DIR, n]
@@ -207,6 +208,21 @@ func play_interact() -> void:
 	play("interact")
 
 
+## 鍛造成功記憶點：有 craft.wav 用專檔，否則 ui + reveal 疊層
+func play_craft_success() -> void:
+	if _streams.has("craft"):
+		play("craft")
+	else:
+		play("ui", 1.05, -1.0)
+		play("reveal", 1.12, -2.0)
+
+
+## 觀星成功：reveal 為主、輕 ui 點綴
+func play_ritual_success() -> void:
+	play("reveal", 0.95)
+	play("ui", 1.18, -5.0)
+
+
 ## ─── BGM ───
 
 func play_bgm(id: String, fade: float = BGM_FADE) -> void:
@@ -301,10 +317,18 @@ func play_bgm_for_map(map_id: String) -> void:
 
 
 func play_bgm_for_battle(mode: String) -> void:
-	if mode in ["leo", "fog", "abo", "demon", "falcon", "boar", "wrath", "tide", "statue", "chrono", "scar_lord", "mirror_wraith", "wreck_captain"]:
+	if is_boss_battle(mode):
 		play_bgm("boss")
 	else:
 		play_bgm("battle")
+
+
+## 主線聖獸／魔王／秘境小 Boss 等「有記憶點」的戰
+func is_boss_battle(mode: String) -> bool:
+	return mode in [
+		"leo", "fog", "abo", "demon", "falcon", "boar", "wrath", "tide",
+		"statue", "chrono", "scar_lord", "mirror_wraith", "wreck_captain",
+	]
 
 
 static func map_to_bgm(map_id: String) -> String:
@@ -393,7 +417,10 @@ func on_battle_event(kind: String, data: Dictionary = {}) -> void:
 
 
 func battle_start(mode: String = "wolf") -> void:
+	## 雜魚：battle_start；Boss：再疊 warn，與一般遭遇聽感分開
 	play("battle_start")
+	if is_boss_battle(mode):
+		play("warn", 0.88, -1.0)
 	play_bgm_for_battle(mode)
 
 

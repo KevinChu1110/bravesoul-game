@@ -129,6 +129,18 @@ const ENTRIES: Array[Dictionary] = [
 		"desc": "讀完絲絨典籍架上的黑焰三說。",
 		"cond": "codex",
 	},
+	{
+		"flag": "title.lamp_keeper",
+		"name": "守燈人",
+		"desc": "把村後墓園的長明燈重新點亮。",
+		"cond": "lantern",
+	},
+	{
+		"flag": "title.star_wisher",
+		"name": "許願兔",
+		"desc": "在星落淺池許下一願——不必說出口。",
+		"cond": "star_wish",
+	},
 ]
 
 
@@ -197,6 +209,10 @@ func _cond_met(cond: String) -> bool:
 			return GameState.has_flag("side.ronin_done")
 		"codex":
 			return GameState.has_flag("lore.codex_read")
+		"lantern":
+			return GameState.has_flag("side.lantern_done")
+		"star_wish":
+			return GameState.has_flag("side.star_wish_done")
 		_:
 			return false
 

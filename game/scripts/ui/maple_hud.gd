@@ -153,12 +153,12 @@ func refresh_vitals() -> void:
 	var dust_cap: int = maxi(30, dust)
 	_mp_bar.max_value = dust_cap
 	_mp_bar.value = dust
-	_mp_bar.tooltip_text = "星屑 %d" % dust
+	_mp_bar.tooltip_text = Loc.t("hud.stardust", {"n": dust})
 
 	var need_xp: int = maxi(1, GameState.xp_to_next())
 	_exp_bar.max_value = 100
 	_exp_bar.value = clampf(float(GameState.xp) / float(need_xp) * 100.0, 0.0, 100.0)
-	_exp_bar.tooltip_text = "經驗 %d／%d" % [GameState.xp, need_xp]
+	_exp_bar.tooltip_text = Loc.t("hud.xp", {"cur": GameState.xp, "need": need_xp})
 
 
 func refresh() -> void:
@@ -166,9 +166,9 @@ func refresh() -> void:
 		return
 	var name_s := str(GameState.player_name)
 	if name_s == "":
-		name_s = "小白"
+		name_s = Loc.t("hud.default_name")
 	var lv_real: int = maxi(1, int(GameState.level))
-	_lv_l.text = "Lv.%d" % lv_real
+	_lv_l.text = Loc.t("common.level", {"n": lv_real})
 	_name_l.text = name_s
 
 	refresh_vitals()
@@ -178,9 +178,11 @@ func refresh() -> void:
 		var q: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("QuestSystem")
 		if q and q.has_method("claimable_count"):
 			claim = int(q.call("claimable_count"))
-	var claim_s := " · 待領%d" % claim if claim > 0 else ""
-	var week := "一周目" if GameState.ng_plus <= 0 else "迴響×%d" % GameState.ng_plus
-	_gold_l.text = "金 %d · 戰力 %d · %s%s" % [GameState.gold, GameState.power_score(), week, claim_s]
+	var claim_s := Loc.t("hud.claim", {"n": claim}) if claim > 0 else ""
+	var week := Loc.t("pause.week1") if GameState.ng_plus <= 0 else Loc.t("pause.echo", {"n": GameState.ng_plus})
+	_gold_l.text = Loc.t("hud.gold_power", {
+		"gold": GameState.gold, "pow": GameState.power_score(), "week": week, "claim": claim_s,
+	})
 
-	var path_s := GameState.path_display() if GameState.path_style != "" else "未選流派"
-	_tip_l.text = "%s · %s · Esc選單" % [GameState.weapon_name, path_s]
+	var path_s := GameState.path_display() if GameState.path_style != "" else Loc.t("hud.no_path")
+	_tip_l.text = Loc.t("hud.tip", {"weapon": GameState.weapon_name, "path": path_s})

@@ -286,6 +286,26 @@ func can_ritual() -> bool:
 	return GameState.stardust >= RITUAL_COST
 
 
+## 觀星 UI 足跡連線文案（簡版儀式感：先連線 → 再點亮出魂）
+func ritual_footprint_line() -> String:
+	var parts: PackedStringArray = []
+	if GameState.has_flag("boss.leo_cleared"):
+		parts.append("騎士域·勇／攻")
+	if GameState.has_flag("boss.white_fog_cleared"):
+		parts.append("霧痕·衡")
+	if GameState.has_flag("boss.abo_cleared"):
+		parts.append("拳山·防")
+	if GameState.has_flag("c0_care") or GameState.has_wheat_stalk or GameState.wheat_stalk_broken:
+		parts.append("麥稈·梁／血")
+	if GameState.has_flag("boss.shadowwind_cleared"):
+		parts.append("林風·銳")
+	if GameState.has_flag("boss.stonefist_cleared"):
+		parts.append("岸岩·血")
+	if parts.is_empty():
+		return "星圖仍暗——但你的腳步已經在畫線。"
+	return "足跡連線亮起：%s。" % " · ".join(parts)
+
+
 func ritual() -> Dictionary:
 	## 觀星：耗星屑，回傳新生戰魂 dict；失敗回空
 	if not can_ritual():
@@ -305,7 +325,20 @@ func ritual() -> Dictionary:
 		"equipped": false,
 	}
 	GameState.souls.append(soul)
+	_ritual_success_hooks(soul)
 	return soul
+
+
+## 觀星成功：既有 sfx + 冒險日誌（toast 由 main 三步演出負責）
+func _ritual_success_hooks(soul: Dictionary) -> void:
+	if AudioManager and AudioManager.has_method("play_ritual_success"):
+		AudioManager.play_ritual_success()
+	var tree := Engine.get_main_loop()
+	if not (tree is SceneTree) or (tree as SceneTree).root == null:
+		return
+	var gl: Node = (tree as SceneTree).root.get_node_or_null("GameLog")
+	if gl != null and gl.has_method("system"):
+		gl.call("system", "觀星凝出 %s（%s）" % [soul_display(soul), soul_bonus_line(soul)])
 
 
 func unequip_all_of(sid: String) -> void:

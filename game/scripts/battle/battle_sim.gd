@@ -444,6 +444,9 @@ func _resolve_strike(u: BattleUnit) -> void:
 	)
 	var dmg: int = int(rolled.get("damage", 1))
 	var is_crit: bool = bool(rolled.get("crit", false))
+	## 遠距開闊輸出加成（在 Boss 過濾之前，chip 也吃比例）
+	if u.team == BattleUnit.Team.PLAYER:
+		dmg = u.scale_outgoing(dmg)
 
 	if fog_mode and u.team == BattleUnit.Team.PLAYER:
 		_apply_player_hit_on_fog(u, target, dmg, is_crit)
@@ -549,6 +552,8 @@ func _resolve_skill(u: BattleUnit) -> void:
 	)
 	var dmg: int = int(sroll.get("damage", 1))
 	var skill_crit: bool = bool(sroll.get("crit", false))
+	if u.team == BattleUnit.Team.PLAYER:
+		dmg = u.scale_outgoing(dmg)
 	if fog_mode and u.team == BattleUnit.Team.PLAYER:
 		_apply_player_hit_on_fog(u, target, dmg, skill_crit, u.skill_name)
 		u.state = BattleUnit.State.RECOVER
@@ -944,6 +949,7 @@ func _perfect_parry(boss: BattleUnit) -> void:
 			var clash_dmg := maxi(8, int(p.atk * 1.6) + 12)
 			if boar_armor > 0:
 				clash_dmg = maxi(4, int(clash_dmg * 0.5))
+			clash_dmg = p.scale_outgoing(clash_dmg)
 			var dealt_b := boss.take_damage(clash_dmg)
 			_emit("skill_hit", {
 				"attacker": p.id,
@@ -956,6 +962,7 @@ func _perfect_parry(boss: BattleUnit) -> void:
 			})
 		else:
 			var dmg := Formulas.skill_damage(p.atk * (p.atk_buff_mult if p.atk_buff_left > 0.0 else 1.0), boss.defense, 2.4)
+			dmg = p.scale_outgoing(dmg)
 			if abo_mode and boss.id == "abo" and abo_broken_left <= 0.0:
 				dmg = _abo_filter_damage(boss, dmg, true)
 			if falcon_mode and boss.id == "falcon":
@@ -1666,6 +1673,29 @@ static func _apply_player_skill_stats(p: BattleUnit, player_stats: Dictionary) -
 	p.crit = float(player_stats.get("crit", Formulas.default_player_crit()))
 	p.crit_dmg = float(player_stats.get("crit_dmg", Formulas.default_crit_dmg()))
 	p.dmg_variance = float(player_stats.get("dmg_variance", Formulas.default_variance()))
+	## 流派姿態 + 風姿（時間模型 0.15）
+	_apply_weapon_class(p, player_stats)
+
+
+## 寫入 weapon_class、風姿、姿態初值。stats 可帶 weapon_class；否則讀 GameState.path_style。
+static func _apply_weapon_class(p: BattleUnit, player_stats: Dictionary) -> void:
+	var wc := str(player_stats.get("weapon_class", ""))
+	if wc.is_empty() and Engine.get_main_loop() is SceneTree:
+		var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameState")
+		if gs != null and "path_style" in gs:
+			wc = str(gs.get("path_style"))
+			## 舊存檔 path 對應（與 GameState 遷移同精神）
+			match wc:
+				"soul":
+					wc = "magic"
+				"iron":
+					wc = "hammer"
+	p.weapon_class = wc
+	p.pressure_left = 0.0
+	p.first_hit_guard = true
+	var tempo: Dictionary = Formulas.weapon_tempo(wc)
+	p.windup_time = float(tempo.get("windup", p.windup_time))
+	p.recover_time = float(tempo.get("recover", p.recover_time))
 
 
 static func _rift_player(player_stats: Dictionary) -> BattleUnit:

@@ -53,6 +53,23 @@ func _initialize() -> void:
 			ok = false
 		else:
 			print("OK weapon_class_from_path sword")
+		## 各流派武器／防具疊層貼圖（探索＋戰鬥同源 SpriteDB）
+		for cls in ["sword", "bow", "magic", "fist", "axe", "hammer", "spear", "gun", "dart", "crystal"]:
+			gs.path_style = cls
+			var otex: Texture2D = SpriteDB.player_weapon_overlay()
+			if otex == null:
+				push_error("weapon overlay missing for path %s" % cls)
+				ok = false
+			else:
+				print("OK weapon_overlay ", cls, " ", otex.get_size())
+		gs.path_style = "sword"
+		for arm in ["plate", "leather", "veil", "cloth"]:
+			var ap := "res://assets/sprites/player/armor/%s.png" % arm
+			if not ResourceLoader.exists(ap):
+				push_error("armor overlay asset missing: %s" % arm)
+				ok = false
+			else:
+				print("OK armor_asset ", arm)
 
 	if not _check_entity_coverage():
 		ok = false

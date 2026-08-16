@@ -6,12 +6,13 @@ const DAILY_CLAIMED := "meta.daily_claimed"
 const DAILY_STREAK := "meta.daily_streak"
 
 ## 每日委託（養成循環）：track 對應 track_day
+## 經濟 0.15：刷怪／練功略降；鍛造委託維持較高獎勵，引導錢進爐。
 const COMMISSIONS: Array[Dictionary] = [
-	{"id": "d_train", "name": "演武三巡", "desc": "演武場練功 3 次", "track": "train", "need": 3, "gold": 30, "dust": 1, "xp": 25},
-	{"id": "d_skirmish", "name": "清道委託", "desc": "雜魚勝 3 場", "track": "skirmish", "need": 3, "gold": 35, "dust": 1, "xp": 30},
-	{"id": "d_mats", "name": "材料回收", "desc": "賣出材料累計 5 件", "track": "sell", "need": 5, "gold": 25, "dust": 1, "xp": 20},
-	{"id": "d_craft", "name": "爐邊功課", "desc": "鍛造升階或職系武器 1 次", "track": "craft", "need": 1, "gold": 40, "dust": 2, "xp": 35},
-	{"id": "d_shop", "name": "市集一遊", "desc": "在材料行購買 1 次", "track": "shop", "need": 1, "gold": 20, "dust": 1, "xp": 15},
+	{"id": "d_train", "name": "演武三巡", "desc": "演武場練功 3 次", "track": "train", "need": 3, "gold": 24, "dust": 1, "xp": 25},
+	{"id": "d_skirmish", "name": "清道委託", "desc": "雜魚勝 3 場", "track": "skirmish", "need": 3, "gold": 28, "dust": 1, "xp": 30},
+	{"id": "d_mats", "name": "材料回收", "desc": "賣出材料累計 5 件", "track": "sell", "need": 5, "gold": 20, "dust": 1, "xp": 20},
+	{"id": "d_craft", "name": "爐邊功課", "desc": "鍛造升階或職系武器 1 次", "track": "craft", "need": 1, "gold": 45, "dust": 2, "xp": 35},
+	{"id": "d_shop", "name": "市集一遊", "desc": "在材料行購買 1 次", "track": "shop", "need": 1, "gold": 18, "dust": 1, "xp": 15},
 ]
 
 ## 里程碑任務的經驗＝金幣 × 這個倍率。
@@ -45,12 +46,19 @@ const MISSIONS: Array[Dictionary] = [
 	{"id": "m_chests12", "name": "翠嶺寶藏家", "desc": "開啟 12 個世界寶箱", "kind": "chests", "need": 12, "gold": 100, "dust": 5},
 	{"id": "m_visit15", "name": "遠足兔", "desc": "造訪 15 張不同地圖", "kind": "visits", "need": 15, "gold": 60, "dust": 3},
 	{"id": "m_visit30", "name": "六域漫遊", "desc": "造訪 30 張不同地圖", "kind": "visits", "need": 30, "gold": 120, "dust": 6},
-	{"id": "m_skirmish10", "name": "路邊清道夫", "desc": "雜魚勝場 10", "kind": "count", "key": "meta.skirmish_wins", "need": 10, "gold": 70, "dust": 3},
+	{"id": "m_skirmish10", "name": "路邊清道夫", "desc": "雜魚勝場 10", "kind": "count", "key": "meta.skirmish_wins", "need": 10, "gold": 55, "dust": 3},
 	{"id": "m_scar", "name": "疤地行者", "desc": "戰勝黑焰疤主", "kind": "flag", "key": "boss.scar_lord_cleared", "need": 1, "gold": 100, "dust": 5},
 	{"id": "m_mirror", "name": "破鏡之人", "desc": "戰勝鏡廊殘影", "kind": "flag", "key": "boss.mirror_wraith_cleared", "need": 1, "gold": 90, "dust": 5},
 	{"id": "m_wreck", "name": "沉船終結者", "desc": "戰勝沉船船長影", "kind": "flag", "key": "boss.wreck_captain_cleared", "need": 1, "gold": 100, "dust": 5},
 	{"id": "m_three_secrets", "name": "三秘境", "desc": "三隻秘境小 Boss 全通", "kind": "flags_all", "keys": ["boss.scar_lord_cleared", "boss.mirror_wraith_cleared", "boss.wreck_captain_cleared"], "need": 3, "gold": 200, "dust": 10},
-	{"id": "m_hunt3", "name": "星途獵手", "desc": "狩獵場有獎通關 3 次", "kind": "count", "key": "hunt.clears_total", "need": 3, "gold": 70, "dust": 3},
+	{"id": "m_hunt3", "name": "星途獵手", "desc": "狩獵場有獎通關 3 次", "kind": "count", "key": "hunt.clears_total", "need": 3, "gold": 55, "dust": 3},
+	## 日常小事支線（探索互動物件；完成旗標後可於任務面板再領一次）
+	{"id": "m_lantern", "name": "長明一火", "desc": "在村後墓園點亮長明燈", "kind": "flag", "key": "side.lantern_done", "need": 1, "gold": 30, "dust": 2},
+	{"id": "m_nest", "name": "橋下軟羽", "desc": "照顧荒路大橋下的鳥巢", "kind": "flag", "key": "side.nest_care_done", "need": 1, "gold": 25, "dust": 1},
+	{"id": "m_star_wish", "name": "星池一願", "desc": "在星落平原許願淺池許願", "kind": "flag", "key": "side.star_wish_done", "need": 1, "gold": 35, "dust": 2},
+	{"id": "m_fog_incense", "name": "霧祠一炷", "desc": "在霧祠香爐上香", "kind": "flag", "key": "side.fog_incense_done", "need": 1, "gold": 35, "dust": 2},
+	{"id": "m_hearth", "name": "歇腳餘溫", "desc": "點燃路旁客棧的壁爐", "kind": "flag", "key": "side.hearth_lit", "need": 1, "gold": 25, "dust": 1},
+	{"id": "m_life5", "name": "日常微光", "desc": "完成長明燈／鳥巢／許願／上香／壁爐五件小事", "kind": "flags_all", "keys": ["side.lantern_done", "side.nest_care_done", "side.star_wish_done", "side.fog_incense_done", "side.hearth_lit"], "need": 5, "gold": 150, "dust": 8},
 ]
 
 

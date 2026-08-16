@@ -75,25 +75,25 @@ static func art_fallback(mode: String) -> String:
 	return str(d.get("art_fallback", d.get("art", "wolf")))
 
 
-## entity id → 寶箱
+## entity id → 寶箱（經濟 0.15：單次略收，合計約 −12%；不重砍，主線探索仍要有摸箱爽感）
 static func chests() -> Dictionary:
 	return {
-		"sealed_chest": {"flag": "loot.chest.road_ruins", "gold": 45, "dust": 2, "text": "封箱裂開：古驛的通行費，如今歸你。"},
-		"chest_root": {"flag": "loot.chest.forest_ruins", "gold": 50, "dust": 3, "text": "根纏箱打開：遊俠留下的箭矢錢。"},
-		"chest_half": {"flag": "loot.chest.coast_wreck", "gold": 55, "dust": 2, "text": "半埋箱：海水泡過的金幣仍作響。"},
-		"supply_crate": {"flag": "loot.chest.wild_supply", "gold": 30, "dust": 1, "text": "補給箱：乾糧與幾枚城徽幣。"},
-		"hidden_cache": {"flag": "loot.chest.forest_cache", "gold": 40, "dust": 2, "text": "獵人藏匿處：藥草與銅板。"},
-		"cellar_hatch": {"flag": "loot.chest.road_inn", "gold": 35, "dust": 1, "text": "地窖底：客棧老闆藏的小費罐。"},
-		"ore_cart": {"flag": "loot.chest.village_cave", "gold": 25, "dust": 2, "text": "礦車夾層：半袋未熔的星屑礦砂。"},
-		"fresh_earth": {"flag": "loot.chest.village_grave", "gold": 20, "dust": 1, "text": "新土下露出小盒——村民的護身符錢。"},
-		"goods_pile": {"flag": "loot.chest.caravan", "gold": 40, "dust": 2, "text": "行商允你摸一層貨——規矩內的謝禮。"},
-		"scroll_pile": {"flag": "loot.chest.tower_scrolls", "gold": 35, "dust": 3, "text": "卷軸間夾著星屑袋。斷頁說過：拿吧。"},
-		"obsidian": {"flag": "loot.chest.scar_obsidian", "gold": 60, "dust": 4, "text": "黑曜碎中封著濃縮星屑——燙手，但有用。"},
-		"scale_table": {"flag": "loot.chest.market_scale", "gold": 28, "dust": 1, "text": "天秤台抽屜：商會遺落的零錢。"},
-		"guest_bed": {"flag": "loot.chest.inn_bed", "gold": 15, "dust": 1, "text": "塌床底下：旅客來不及拿走的錢袋。"},
-		"nest_mark": {"flag": "loot.chest.forest_feather", "gold": 35, "dust": 2, "text": "羽痕石縫：疾影屬下遺落的戰利。"},
-		"pirate_mark": {"flag": "loot.chest.coast_pirate", "gold": 48, "dust": 2, "text": "海盜標記下埋著箱——他們不會回來了。"},
-		"mosaic": {"flag": "loot.chest.star_mosaic", "gold": 42, "dust": 3, "text": "馬賽克中央撬起：古驛的星途通行符與金幣。"},
+		"sealed_chest": {"flag": "loot.chest.road_ruins", "gold": 40, "dust": 2, "text": "封箱裂開：古驛的通行費，如今歸你。"},
+		"chest_root": {"flag": "loot.chest.forest_ruins", "gold": 44, "dust": 3, "text": "根纏箱打開：遊俠留下的箭矢錢。"},
+		"chest_half": {"flag": "loot.chest.coast_wreck", "gold": 48, "dust": 2, "text": "半埋箱：海水泡過的金幣仍作響。"},
+		"supply_crate": {"flag": "loot.chest.wild_supply", "gold": 26, "dust": 1, "text": "補給箱：乾糧與幾枚城徽幣。"},
+		"hidden_cache": {"flag": "loot.chest.forest_cache", "gold": 35, "dust": 2, "text": "獵人藏匿處：藥草與銅板。"},
+		"cellar_hatch": {"flag": "loot.chest.road_inn", "gold": 30, "dust": 1, "text": "地窖底：客棧老闆藏的小費罐。"},
+		"ore_cart": {"flag": "loot.chest.village_cave", "gold": 22, "dust": 2, "text": "礦車夾層：半袋未熔的星屑礦砂。"},
+		"fresh_earth": {"flag": "loot.chest.village_grave", "gold": 18, "dust": 1, "text": "新土下露出小盒——村民的護身符錢。"},
+		"goods_pile": {"flag": "loot.chest.caravan", "gold": 35, "dust": 2, "text": "行商允你摸一層貨——規矩內的謝禮。"},
+		"scroll_pile": {"flag": "loot.chest.tower_scrolls", "gold": 30, "dust": 3, "text": "卷軸間夾著星屑袋。斷頁說過：拿吧。"},
+		"obsidian": {"flag": "loot.chest.scar_obsidian", "gold": 52, "dust": 4, "text": "黑曜碎中封著濃縮星屑——燙手，但有用。"},
+		"scale_table": {"flag": "loot.chest.market_scale", "gold": 24, "dust": 1, "text": "天秤台抽屜：商會遺落的零錢。"},
+		"guest_bed": {"flag": "loot.chest.inn_bed", "gold": 14, "dust": 1, "text": "塌床底下：旅客來不及拿走的錢袋。"},
+		"nest_mark": {"flag": "loot.chest.forest_feather", "gold": 30, "dust": 2, "text": "羽痕石縫：疾影屬下遺落的戰利。"},
+		"pirate_mark": {"flag": "loot.chest.coast_pirate", "gold": 42, "dust": 2, "text": "海盜標記下埋著箱——他們不會回來了。"},
+		"mosaic": {"flag": "loot.chest.star_mosaic", "gold": 36, "dust": 3, "text": "馬賽克中央撬起：古驛的星途通行符與金幣。"},
 	}
 
 
@@ -127,12 +127,16 @@ static func minibosses() -> Dictionary:
 			"flag": "boss.scar_lord_cleared",
 			"need_flag": "boss.abo_cleared",
 			"deny": "疤主的氣壓太重。至少先通過道場試煉。",
+			"cleared_dialog": "world.scar_cleared",
 			"intro": [
 				{"speaker": "旁白", "text": "疤地中央，黑焰聚成人形——沒有臉，只有胃口。"},
+				{"speaker": "旁白", "text": "焦土一跳一跳，像還在流血的傷口。"},
 				{"speaker": "黑焰疤主", "portrait": "scar_lord", "text": "……弱者……也配踏入我的傷口？"},
+				{"speaker": "黑焰疤主", "portrait": "scar_lord", "text": "野心……香味……過來。讓我把它從你身上撕開。"},
 			],
 			"win": [
 				{"speaker": "疤主", "portrait": "scar_lord", "text": "傷口……合上了嗎……"},
+				{"speaker": "疤主", "portrait": "scar_lord", "text": "……你沒有餵我。奇怪。……"},
 				{"speaker": "系統", "text": "戰勝【黑焰疤主】。金 90 · 星屑 5。稱號「疤地行者」進度。"},
 			],
 			"lose": "黑焰把你掀回岔路。疤地仍在跳動脈搏。",
@@ -145,12 +149,16 @@ static func minibosses() -> Dictionary:
 			"flag": "boss.mirror_wraith_cleared",
 			"need_flag": "c2_entered",
 			"deny": "鏡廊拒絕外人。先被霧隱接納。",
+			"cleared_dialog": "world.mirror_cleared",
 			"intro": [
 				{"speaker": "旁白", "text": "所有鏡子同時亮起——裡頭的你，比你更像獵人。"},
+				{"speaker": "旁白", "text": "倒影先動了一步。你還沒拔劍。"},
 				{"speaker": "鏡廊殘影", "portrait": "mirror_wraith", "text": "我才是敢走捷徑的那一個。"},
+				{"speaker": "鏡廊殘影", "portrait": "mirror_wraith", "text": "你把懦弱叫作慈悲。來——讓我替你變強。"},
 			],
 			"win": [
 				{"speaker": "殘影", "portrait": "mirror_wraith", "text": "……原來真影比較沉。"},
+				{"speaker": "殘影", "portrait": "mirror_wraith", "text": "捷徑……碎了。你自己走吧。"},
 				{"speaker": "系統", "text": "戰勝【鏡廊殘影】。金 80 · 星屑 5。"},
 			],
 			"lose": "你被自己的倒影推回霧隱村。",
@@ -163,12 +171,16 @@ static func minibosses() -> Dictionary:
 			"flag": "boss.wreck_captain_cleared",
 			"need_flag": "c5_entered",
 			"deny": "船長影只認海上來的人。先踏上維京海岸。",
+			"cleared_dialog": "world.wreck_cleared",
 			"intro": [
 				{"speaker": "旁白", "text": "沉船龍骨站起——船長帽下沒有臉，只有浪聲。"},
+				{"speaker": "旁白", "text": "潮水退半尺，像在給你登船的時間。很短。"},
 				{"speaker": "沉船船長影", "portrait": "wreck_captain", "text": "這船是我的墳。訪客，留下通行證——或骨頭。"},
+				{"speaker": "沉船船長影", "portrait": "wreck_captain", "text": "海不認弱者的名字。報上你的，或沉下去。"},
 			],
 			"win": [
 				{"speaker": "船長影", "portrait": "wreck_captain", "text": "……潮水……準時……"},
+				{"speaker": "船長影", "portrait": "wreck_captain", "text": "……船……可以再睡一次。……去吧，岸上的。"},
 				{"speaker": "系統", "text": "戰勝【沉船船長影】。金 95 · 星屑 5。"},
 			],
 			"lose": "浪把你送回碼頭。船骸仍張著口。",

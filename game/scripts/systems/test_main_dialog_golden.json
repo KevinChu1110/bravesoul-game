@@ -1,7 +1,7 @@
 [
  {
   "key": "hub.candle_need_online",
-  "src_line": 741,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -12,7 +12,7 @@
  },
  {
   "key": "hub.candle_already_lit",
-  "src_line": 744,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -23,7 +23,7 @@
  },
  {
   "key": "hub.candle_lit",
-  "src_line": 751,
+  "src_line": 0,
   "vars": {
    "total": "«v0»"
   },
@@ -36,7 +36,7 @@
  },
  {
   "key": "hub.hunt_abandoned",
-  "src_line": 828,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -47,7 +47,7 @@
  },
  {
   "key": "hub.online_health_ok",
-  "src_line": 1131,
+  "src_line": 0,
   "vars": {
    "msg": "«v0»"
   },
@@ -60,7 +60,7 @@
  },
  {
   "key": "hub.online_health_fail",
-  "src_line": 1133,
+  "src_line": 0,
   "vars": {
    "msg": "«v0»"
   },
@@ -73,7 +73,7 @@
  },
  {
   "key": "shop.not_enough_gold",
-  "src_line": 1452,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -84,7 +84,7 @@
  },
  {
   "key": "shop.bought",
-  "src_line": 1458,
+  "src_line": 0,
   "vars": {
    "item": "«v0»",
    "price": "18"
@@ -102,7 +102,7 @@
  },
  {
   "key": "hub.ng_plus_not_yet",
-  "src_line": 2262,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -113,7 +113,7 @@
  },
  {
   "key": "side.guard_dog",
-  "src_line": 2428,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -123,8 +123,68 @@
   ]
  },
  {
+  "key": "world.road_note",
+  "src_line": 0,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "留言板",
+    "text": "「客棧今日無湯。若見橋下鳥巢，別掏蛋——羽軟的那窩是過路人養的。」"
+   },
+   {
+    "speaker": "留言板",
+    "text": "下方另有一行新字：「墓園長明燈滅了。誰有火，點一下。謝。」"
+   }
+  ]
+ },
+ {
+  "key": "world.grave_b",
+  "src_line": 0,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "舊碑前插著一束乾野花。花瓣被風翻過，還壓著一枚小銅板。"
+   },
+   {
+    "speaker": "內心",
+    "text": "有人來過。村子沒有全空。"
+   }
+  ]
+ },
+ {
+  "key": "world.scare_field",
+  "src_line": 0,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "稻草人戴著童帽，袖口縫了補丁。帽子裡塞著半塊乾糧——給鳥的，不是給人的。"
+   },
+   {
+    "speaker": "旁白",
+    "text": "帽沿寫著歪字：別吃麥穗的。"
+   }
+  ]
+ },
+ {
+  "key": "world.camp_ash_road",
+  "src_line": 0,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "路人餘燼還溫。旁邊石頭排成箭頭：東邊有城，西邊有煙。"
+   },
+   {
+    "speaker": "內心",
+    "text": "有人剛走。腳印不大，像也是趕路的。"
+   }
+  ]
+ },
+ {
   "key": "side.training_need_weapon",
-  "src_line": 2437,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -135,7 +195,7 @@
  },
  {
   "key": "side.training_daily_cap",
-  "src_line": 2441,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -146,7 +206,7 @@
  },
  {
   "key": "side.training_result",
-  "src_line": 2484,
+  "src_line": 0,
   "vars": {
    "msg": "«v0»",
    "power": "18"
@@ -164,7 +224,7 @@
  },
  {
   "key": "side.weapon_rack_untasked",
-  "src_line": 2513,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -175,7 +235,7 @@
  },
  {
   "key": "side.broken_blade_gone",
-  "src_line": 2517,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -186,7 +246,7 @@
  },
  {
   "key": "side.amber_has_letter",
-  "src_line": 2531,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -201,7 +261,7 @@
  },
  {
   "key": "side.amber_shop_open",
-  "src_line": 2536,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -216,7 +276,7 @@
  },
  {
   "key": "side.ronin_guard_fire",
-  "src_line": 2546,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -232,7 +292,7 @@
  },
  {
   "key": "side.ronin_gone",
-  "src_line": 2553,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -243,7 +303,7 @@
  },
  {
   "key": "side.ronin_too_early",
-  "src_line": 2557,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -254,7 +314,7 @@
  },
  {
   "key": "side.ronin_defeated",
-  "src_line": 2636,
+  "src_line": 0,
   "vars": {
    "xp": "7",
    "level_up": "«v1»"
@@ -272,7 +332,7 @@
  },
  {
   "key": "side.ding_debt_remind",
-  "src_line": 2695,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -283,7 +343,7 @@
  },
  {
   "key": "world.inspect_object",
-  "src_line": 2807,
+  "src_line": 0,
   "vars": {
    "label": "«v0»"
   },
@@ -295,8 +355,53 @@
   ]
  },
  {
+  "key": "world.scar_cleared",
+  "src_line": 0,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "疤地不再跳動。焦土裂縫裡長出一點灰綠——像傷口結痂。"
+   },
+   {
+    "speaker": "內心",
+    "text": "胃口閉了。我沒有餵它。"
+   }
+  ]
+ },
+ {
+  "key": "world.mirror_cleared",
+  "src_line": 0,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "鏡廊只剩你一個倒影。捷徑的裂痕還在，但不發光了。"
+   },
+   {
+    "speaker": "內心",
+    "text": "真影比較沉——那就沉著走。"
+   }
+  ]
+ },
+ {
+  "key": "world.wreck_cleared",
+  "src_line": 0,
+  "vars": {},
+  "expect": [
+   {
+    "speaker": "旁白",
+    "text": "船骸安靜下來。浪拍龍骨，像準點的水鐘。"
+   },
+   {
+    "speaker": "內心",
+    "text": "船長睡了。通行證……是活著上岸。"
+   }
+  ]
+ },
+ {
   "key": "world.miniboss_cleared",
-  "src_line": 2820,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -307,7 +412,7 @@
  },
  {
   "key": "world.chest_empty",
-  "src_line": 2833,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -318,7 +423,7 @@
  },
  {
   "key": "world.chest_open",
-  "src_line": 2856,
+  "src_line": 0,
   "vars": {
    "found": "«v0»",
    "gold": "18",
@@ -338,7 +443,7 @@
  },
  {
   "key": "world.skirmish_cleared",
-  "src_line": 2869,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -349,7 +454,7 @@
  },
  {
   "key": "c6.refugee",
-  "src_line": 3113,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -360,7 +465,7 @@
  },
  {
   "key": "c6.scroll_pile",
-  "src_line": 3115,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -371,7 +476,7 @@
  },
  {
   "key": "c6.tower_gate",
-  "src_line": 3117,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -382,7 +487,7 @@
  },
  {
   "key": "c0.shrine_stub",
-  "src_line": 3230,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -393,7 +498,7 @@
  },
  {
   "key": "c0.field_west",
-  "src_line": 3232,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -404,7 +509,7 @@
  },
  {
   "key": "c0.leave_without_sword",
-  "src_line": 3248,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -415,7 +520,7 @@
  },
  {
   "key": "c0.road_east",
-  "src_line": 3311,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -426,7 +531,7 @@
  },
  {
   "key": "battle.wolf_win",
-  "src_line": 3384,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -445,7 +550,7 @@
  },
  {
   "key": "battle.wolf_lose",
-  "src_line": 3391,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -456,7 +561,7 @@
  },
  {
   "key": "battle.leo_lose",
-  "src_line": 3398,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -471,7 +576,7 @@
  },
  {
   "key": "battle.fog_lose",
-  "src_line": 3406,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -486,7 +591,7 @@
  },
  {
   "key": "battle.demon_lose",
-  "src_line": 3414,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -501,7 +606,7 @@
  },
  {
   "key": "battle.abo_lose",
-  "src_line": 3422,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -516,7 +621,7 @@
  },
  {
   "key": "battle.falcon_lose",
-  "src_line": 3430,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -531,7 +636,7 @@
  },
  {
   "key": "battle.boar_lose",
-  "src_line": 3438,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -546,7 +651,7 @@
  },
  {
   "key": "battle.rift_lose",
-  "src_line": 3463,
+  "src_line": 0,
   "vars": {
    "tip": "«v0»"
   },
@@ -559,7 +664,7 @@
  },
  {
   "key": "battle.world_win",
-  "src_line": 3555,
+  "src_line": 0,
   "vars": {
    "enemy": "«v0»",
    "gold": "18",
@@ -574,7 +679,7 @@
  },
  {
   "key": "battle.world_flee",
-  "src_line": 3561,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -585,7 +690,7 @@
  },
  {
   "key": "c1.flag_paw",
-  "src_line": 3641,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -596,7 +701,7 @@
  },
  {
   "key": "c1.flag_grey",
-  "src_line": 3643,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -607,7 +712,7 @@
  },
  {
   "key": "c1.outer_ward",
-  "src_line": 3664,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -618,7 +723,7 @@
  },
  {
   "key": "c1.save_stone",
-  "src_line": 3672,
+  "src_line": 0,
   "vars": {
    "extra": "«v0»"
   },
@@ -635,7 +740,7 @@
  },
  {
   "key": "c1.sprout_after_leo",
-  "src_line": 3761,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -650,7 +755,7 @@
  },
  {
   "key": "c1.sprout_thanks",
-  "src_line": 3766,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -661,7 +766,7 @@
  },
  {
   "key": "c1.sprout_wish",
-  "src_line": 3805,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -676,7 +781,7 @@
  },
  {
   "key": "skill.learned",
-  "src_line": 3854,
+  "src_line": 0,
   "vars": {
    "skill": "«v0»"
   },
@@ -693,7 +798,7 @@
  },
  {
   "key": "skill.not_yet",
-  "src_line": 3859,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -704,7 +809,7 @@
  },
  {
   "key": "skill.tutor_deny",
-  "src_line": 3865,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -715,7 +820,7 @@
  },
  {
   "key": "soul.equipped",
-  "src_line": 3885,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -726,7 +831,7 @@
  },
  {
   "key": "soul.ritual_not_enough",
-  "src_line": 3890,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -737,7 +842,7 @@
  },
  {
   "key": "soul.fused",
-  "src_line": 3940,
+  "src_line": 0,
   "vars": {
    "soul": "«v0»"
   },
@@ -754,7 +859,7 @@
  },
  {
   "key": "soul.fuse_requirement",
-  "src_line": 3945,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -765,7 +870,7 @@
  },
  {
   "key": "forge.need_rusty_first",
-  "src_line": 4026,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -776,7 +881,7 @@
  },
  {
   "key": "forge.path_chosen",
-  "src_line": 4094,
+  "src_line": 0,
   "vars": {
    "path": "«v0»",
    "play": "«v1»",
@@ -800,7 +905,7 @@
  },
  {
   "key": "forge.wood_sword_no_gold",
-  "src_line": 4108,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -811,7 +916,7 @@
  },
  {
   "key": "forge.wood_sword_owned",
-  "src_line": 4111,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -822,7 +927,7 @@
  },
  {
   "key": "forge.tier_max",
-  "src_line": 4127,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -833,7 +938,7 @@
  },
  {
   "key": "forge.no_gold",
-  "src_line": 4130,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -844,7 +949,7 @@
  },
  {
   "key": "forge.success",
-  "src_line": 4151,
+  "src_line": 0,
   "vars": {
    "tier": "7",
    "scrap": "«v1»"
@@ -858,7 +963,7 @@
  },
  {
   "key": "forge.pity_break",
-  "src_line": 4157,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -866,14 +971,22 @@
     "text": "（錘砸台面）夠了！鐵都比你有耐心！"
    },
    {
+    "speaker": "系統",
+    "text": "錘被摔在爐邊，火星亂竄。"
+   },
+   {
     "speaker": "釘釘",
-    "text": "……消氣餅。滾。"
+    "text": "……拿去，消氣餅。明天再來，別讓我看到你這張臉。"
+   },
+   {
+    "speaker": "系統",
+    "text": "體力回了一些。連敗計數清零。"
    }
   ]
  },
  {
   "key": "forge.failed",
-  "src_line": 4162,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -884,7 +997,7 @@
  },
  {
   "key": "c1.wild_need_forge",
-  "src_line": 4168,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -895,7 +1008,7 @@
  },
  {
   "key": "c1.burnt_field",
-  "src_line": 4180,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -906,7 +1019,7 @@
  },
  {
   "key": "c1.tower_empty",
-  "src_line": 4189,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -917,7 +1030,7 @@
  },
  {
   "key": "c1.wild_shrine",
-  "src_line": 4199,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -932,7 +1045,7 @@
  },
  {
   "key": "c1.crate_empty",
-  "src_line": 4205,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -943,7 +1056,7 @@
  },
  {
   "key": "c1.leo_gate_cleared",
-  "src_line": 4219,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -954,7 +1067,7 @@
  },
  {
   "key": "c1.leo_win",
-  "src_line": 4232,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -977,7 +1090,7 @@
  },
  {
   "key": "c2.arrive",
-  "src_line": 4325,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -996,7 +1109,7 @@
  },
  {
   "key": "c2.lantern",
-  "src_line": 4347,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1007,7 +1120,7 @@
  },
  {
   "key": "c2.well_fog",
-  "src_line": 4349,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1018,7 +1131,7 @@
  },
  {
   "key": "c2.laundry",
-  "src_line": 4351,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1029,7 +1142,7 @@
  },
  {
   "key": "c2.cat_shadow",
-  "src_line": 4353,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1044,7 +1157,7 @@
  },
  {
   "key": "c2.shrine",
-  "src_line": 4358,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1059,7 +1172,7 @@
  },
  {
   "key": "c2.train_need_letter",
-  "src_line": 4364,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1070,7 +1183,7 @@
  },
  {
   "key": "c2.train_tip",
-  "src_line": 4366,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1085,7 +1198,7 @@
  },
  {
   "key": "c2.letter_reread",
-  "src_line": 4384,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1100,7 +1213,7 @@
  },
  {
   "key": "c2.fog_need_letter",
-  "src_line": 4411,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1111,7 +1224,7 @@
  },
  {
   "key": "c2.fog_cleared",
-  "src_line": 4414,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1122,7 +1235,7 @@
  },
  {
   "key": "c2.fog_win",
-  "src_line": 4424,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1141,7 +1254,7 @@
  },
  {
   "key": "region.mist_locked",
-  "src_line": 4484,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1152,7 +1265,7 @@
  },
  {
   "key": "region.dojo_warn",
-  "src_line": 4489,
+  "src_line": 0,
   "vars": {
    "power": "7"
   },
@@ -1165,7 +1278,7 @@
  },
  {
   "key": "region.forest_warn",
-  "src_line": 4494,
+  "src_line": 0,
   "vars": {
    "power": "7"
   },
@@ -1178,7 +1291,7 @@
  },
  {
   "key": "region.coast_warn",
-  "src_line": 4499,
+  "src_line": 0,
   "vars": {
    "power": "7"
   },
@@ -1191,7 +1304,7 @@
  },
  {
   "key": "c3.soft_warn",
-  "src_line": 4510,
+  "src_line": 0,
   "vars": {
    "power": "7"
   },
@@ -1208,7 +1321,7 @@
  },
  {
   "key": "c3.arrive",
-  "src_line": 4540,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1223,7 +1336,7 @@
  },
  {
   "key": "c3.gate_bell",
-  "src_line": 4559,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1234,7 +1347,7 @@
  },
  {
   "key": "c3.dummy_done",
-  "src_line": 4562,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1245,7 +1358,7 @@
  },
  {
   "key": "c3.scroll_wall",
-  "src_line": 4573,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1260,7 +1373,7 @@
  },
  {
   "key": "c3.stone_garden",
-  "src_line": 4578,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1271,7 +1384,7 @@
  },
  {
   "key": "c3.abo_cleared",
-  "src_line": 4602,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1282,7 +1395,7 @@
  },
  {
   "key": "c4.arrive",
-  "src_line": 4693,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1297,7 +1410,7 @@
  },
  {
   "key": "c4.treehouse",
-  "src_line": 4712,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1312,7 +1425,7 @@
  },
  {
   "key": "c4.kite_freed",
-  "src_line": 4718,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1323,7 +1436,7 @@
  },
  {
   "key": "c4.stream",
-  "src_line": 4730,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1334,7 +1447,7 @@
  },
  {
   "key": "c4.owl_post",
-  "src_line": 4732,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1349,7 +1462,7 @@
  },
  {
   "key": "c4.arrow_path_done",
-  "src_line": 4738,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1360,7 +1473,7 @@
  },
  {
   "key": "c4.watch_tower",
-  "src_line": 4748,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1379,7 +1492,7 @@
  },
  {
   "key": "c4.herb_looted",
-  "src_line": 4755,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1390,7 +1503,7 @@
  },
  {
   "key": "c4.falcon_cleared",
-  "src_line": 4778,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1401,7 +1514,7 @@
  },
  {
   "key": "c4.falcon_win",
-  "src_line": 4789,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1424,7 +1537,7 @@
  },
  {
   "key": "c5.arrive",
-  "src_line": 4860,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1439,7 +1552,7 @@
  },
  {
   "key": "c5.dock",
-  "src_line": 4879,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1454,7 +1567,7 @@
  },
  {
   "key": "c5.boat_wreck",
-  "src_line": 4884,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1465,7 +1578,7 @@
  },
  {
   "key": "c5.net_rack",
-  "src_line": 4886,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1476,7 +1589,7 @@
  },
  {
   "key": "c5.runestone",
-  "src_line": 4888,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1491,7 +1604,7 @@
  },
  {
   "key": "c5.forge_tip_done",
-  "src_line": 4894,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1502,7 +1615,7 @@
  },
  {
   "key": "c5.cliff_path",
-  "src_line": 4906,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1517,7 +1630,7 @@
  },
  {
   "key": "c5.boar_cleared",
-  "src_line": 4927,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1528,7 +1641,7 @@
  },
  {
   "key": "c5.boar_win",
-  "src_line": 4938,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1551,7 +1664,7 @@
  },
  {
   "key": "c6.bell_not_rung",
-  "src_line": 5000,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1562,7 +1675,7 @@
  },
  {
   "key": "c6.path_not_open",
-  "src_line": 5002,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1573,7 +1686,7 @@
  },
  {
   "key": "c6.floor_shadow",
-  "src_line": 5063,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1596,7 +1709,7 @@
  },
  {
   "key": "c6.demon_win",
-  "src_line": 5118,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1623,7 +1736,7 @@
  },
  {
   "key": "post.rift_not_open",
-  "src_line": 5206,
+  "src_line": 0,
   "vars": {},
   "expect": [
    {
@@ -1634,7 +1747,7 @@
  },
  {
   "key": "post.rift_win",
-  "src_line": 5331,
+  "src_line": 0,
   "vars": {
    "mode": "«v0»",
    "wins": "18",

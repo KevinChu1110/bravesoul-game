@@ -301,7 +301,7 @@
   "craft": [
     {
       "base_id": "knight_saber",
-      "gold": 80,
+      "gold": 160,
       "mats": {
         "knight_shard": 2,
         "iron_scrap": 2
@@ -311,18 +311,18 @@
     },
     {
       "base_id": "gale_edge",
-      "gold": 140,
+      "gold": 320,
       "mats": {
         "knight_shard": 3,
         "oak_resin": 2,
         "iron_scrap": 2
       },
       "need_tier": 3,
-      "hint": "劍道高階"
+      "hint": "劍道高階 · 主線金幣主 sink"
     },
     {
       "base_id": "star_fang",
-      "gold": 70,
+      "gold": 100,
       "mats": {
         "star_ore": 2,
         "dust_crumb": 1
@@ -332,17 +332,17 @@
     },
     {
       "base_id": "nebula_needle",
-      "gold": 120,
+      "gold": 240,
       "mats": {
         "star_ore": 3,
         "mist_shard": 2
       },
       "need_tier": 2,
-      "hint": "星途中階"
+      "hint": "星途中階 · 主 sink"
     },
     {
       "base_id": "iron_cudgel",
-      "gold": 65,
+      "gold": 95,
       "mats": {
         "iron_scrap": 3
       },
@@ -351,27 +351,27 @@
     },
     {
       "base_id": "bastion_blade",
-      "gold": 110,
+      "gold": 220,
       "mats": {
         "iron_scrap": 4,
         "wolf_fang": 2
       },
       "need_tier": 2,
-      "hint": "鐵骨中階"
+      "hint": "鐵骨中階 · 主 sink"
     },
     {
       "base_id": "knight_plate",
-      "gold": 90,
+      "gold": 180,
       "mats": {
         "iron_scrap": 3,
         "knight_shard": 2
       },
       "need_tier": 1,
-      "hint": "防具"
+      "hint": "防具 · 中階 sink"
     },
     {
       "base_id": "star_pendant",
-      "gold": 45,
+      "gold": 55,
       "mats": {
         "star_ore": 1
       },
@@ -380,7 +380,7 @@
     },
     {
       "base_id": "blade_ring",
-      "gold": 55,
+      "gold": 80,
       "mats": {
         "wolf_fang": 2,
         "iron_scrap": 1
@@ -390,7 +390,7 @@
     },
     {
       "base_id": "oak_charm",
-      "gold": 50,
+      "gold": 75,
       "mats": {
         "oak_resin": 2
       },

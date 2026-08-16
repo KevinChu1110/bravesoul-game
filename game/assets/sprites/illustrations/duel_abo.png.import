@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://8wvyaoeroaoh"
-path="res://.godot/imported/battle_abo.png-41738b02392b1522726fd4c0831c3ae3.ctex"
+path="res://.godot/imported/duel_abo.png-7b665f892022112b16595bf3b154be7d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/illustrations/duel_abo.png"
-dest_files=[]
+dest_files=["res://.godot/imported/duel_abo.png-7b665f892022112b16595bf3b154be7d.ctex"]
 
 [params]
 

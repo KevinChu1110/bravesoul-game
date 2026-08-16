@@ -1,18 +1,54 @@
 {
   "schema": "equipment_v1",
-  "version": 2,
+  "version": 3,
+  "note": "line 對齊十武器流派 id（sword/bow/magic/…）。舊 soul→magic、iron→hammer 相容；顯示與 bonus 比對時會 migrate。",
   "qualities": {
-    "common": { "label": "凡品", "color": "#aaa", "roll_bonus": 0.0, "weight": 55 },
-    "uncommon": { "label": "良品", "color": "#6c6", "roll_bonus": 0.08, "weight": 28 },
-    "rare": { "label": "上品", "color": "#59f", "roll_bonus": 0.16, "weight": 12 },
-    "epic": { "label": "秘寶", "color": "#c6f", "roll_bonus": 0.28, "weight": 5 }
+    "common": {
+      "label": "凡品",
+      "color": "#aaa",
+      "roll_bonus": 0.0,
+      "weight": 55
+    },
+    "uncommon": {
+      "label": "良品",
+      "color": "#6c6",
+      "roll_bonus": 0.08,
+      "weight": 28
+    },
+    "rare": {
+      "label": "上品",
+      "color": "#59f",
+      "roll_bonus": 0.16,
+      "weight": 12
+    },
+    "epic": {
+      "label": "秘寶",
+      "color": "#c6f",
+      "roll_bonus": 0.28,
+      "weight": 5
+    }
   },
   "float_ranges": {
-    "atk": { "min_ratio": 0.85, "max_ratio": 1.15 },
-    "def": { "min_ratio": 0.85, "max_ratio": 1.15 },
-    "hp": { "min_ratio": 0.90, "max_ratio": 1.12 },
-    "crit": { "min_ratio": 0.70, "max_ratio": 1.30 },
-    "crit_dmg": { "min_ratio": 0.85, "max_ratio": 1.20 }
+    "atk": {
+      "min_ratio": 0.85,
+      "max_ratio": 1.15
+    },
+    "def": {
+      "min_ratio": 0.85,
+      "max_ratio": 1.15
+    },
+    "hp": {
+      "min_ratio": 0.9,
+      "max_ratio": 1.12
+    },
+    "crit": {
+      "min_ratio": 0.7,
+      "max_ratio": 1.3
+    },
+    "crit_dmg": {
+      "min_ratio": 0.85,
+      "max_ratio": 1.2
+    }
   },
   "bases": {
     "rusty_blade": {
@@ -20,196 +56,702 @@
       "slot": "weapon",
       "tier": 1,
       "line": "sword",
-      "base": { "atk": 4, "def": 0, "hp": 0, "crit": 2, "crit_dmg": 5 }
+      "base": {
+        "atk": 4,
+        "def": 0,
+        "hp": 0,
+        "crit": 2,
+        "crit_dmg": 5
+      }
     },
     "meager_edge": {
       "name": "微末之刃",
       "slot": "weapon",
       "tier": 2,
       "line": "sword",
-      "base": { "atk": 9, "def": 0, "hp": 0, "crit": 4, "crit_dmg": 10 }
+      "base": {
+        "atk": 9,
+        "def": 0,
+        "hp": 0,
+        "crit": 4,
+        "crit_dmg": 10
+      }
     },
     "knight_saber": {
       "name": "騎士軍刀",
       "slot": "weapon",
       "tier": 3,
       "line": "sword",
-      "base": { "atk": 14, "def": 0, "hp": 0, "crit": 6, "crit_dmg": 15 }
+      "base": {
+        "atk": 14,
+        "def": 0,
+        "hp": 0,
+        "crit": 6,
+        "crit_dmg": 15
+      }
     },
     "gale_edge": {
       "name": "疾風刃",
       "slot": "weapon",
       "tier": 4,
       "line": "sword",
-      "base": { "atk": 18, "def": 0, "hp": 0, "crit": 8, "crit_dmg": 18 }
+      "base": {
+        "atk": 18,
+        "def": 0,
+        "hp": 0,
+        "crit": 8,
+        "crit_dmg": 18
+      }
     },
     "dawn_blade": {
       "name": "晨光長劍",
       "slot": "weapon",
       "tier": 5,
       "line": "sword",
-      "base": { "atk": 24, "def": 1, "hp": 4, "crit": 7, "crit_dmg": 20 }
+      "base": {
+        "atk": 24,
+        "def": 1,
+        "hp": 4,
+        "crit": 7,
+        "crit_dmg": 20
+      }
+    },
+    "reed_bow": {
+      "name": "蘆風短弓",
+      "slot": "weapon",
+      "tier": 1,
+      "line": "bow",
+      "base": {
+        "atk": 7,
+        "def": 0,
+        "hp": 0,
+        "crit": 6,
+        "crit_dmg": 14
+      }
+    },
+    "hawk_longbow": {
+      "name": "鷹眼長弓",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "bow",
+      "base": {
+        "atk": 13,
+        "def": 0,
+        "hp": 0,
+        "crit": 12,
+        "crit_dmg": 24
+      }
+    },
+    "star_rod": {
+      "name": "星屑短杖",
+      "slot": "weapon",
+      "tier": 1,
+      "line": "magic",
+      "base": {
+        "atk": 6,
+        "def": 0,
+        "hp": 2,
+        "crit": 5,
+        "crit_dmg": 16
+      }
     },
     "star_fang": {
       "name": "星牙短匕",
       "slot": "weapon",
       "tier": 2,
       "line": "soul",
-      "base": { "atk": 8, "def": 0, "hp": 0, "crit": 10, "crit_dmg": 22 }
+      "base": {
+        "atk": 8,
+        "def": 0,
+        "hp": 0,
+        "crit": 10,
+        "crit_dmg": 22
+      }
     },
     "nebula_needle": {
       "name": "星雲細針",
       "slot": "weapon",
       "tier": 3,
       "line": "soul",
-      "base": { "atk": 12, "def": 0, "hp": 2, "crit": 14, "crit_dmg": 28 }
+      "base": {
+        "atk": 12,
+        "def": 0,
+        "hp": 2,
+        "crit": 14,
+        "crit_dmg": 28
+      }
     },
     "hunt_claw": {
       "name": "溢地獵爪",
       "slot": "weapon",
       "tier": 3,
       "line": "soul",
-      "base": { "atk": 13, "def": 0, "hp": 0, "crit": 12, "crit_dmg": 24 }
+      "base": {
+        "atk": 13,
+        "def": 0,
+        "hp": 0,
+        "crit": 12,
+        "crit_dmg": 24
+      }
     },
     "void_quill": {
       "name": "虛空羽鋒",
       "slot": "weapon",
       "tier": 5,
       "line": "soul",
-      "base": { "atk": 20, "def": 0, "hp": 2, "crit": 16, "crit_dmg": 35 }
+      "base": {
+        "atk": 20,
+        "def": 0,
+        "hp": 2,
+        "crit": 16,
+        "crit_dmg": 35
+      }
+    },
+    "wrap_gloves": {
+      "name": "練拳綁帶",
+      "slot": "weapon",
+      "tier": 1,
+      "line": "fist",
+      "base": {
+        "atk": 6,
+        "def": 1,
+        "hp": 4,
+        "crit": 3,
+        "crit_dmg": 8
+      }
+    },
+    "iron_knuckle": {
+      "name": "鐵節拳套",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "fist",
+      "base": {
+        "atk": 12,
+        "def": 2,
+        "hp": 8,
+        "crit": 5,
+        "crit_dmg": 14
+      }
+    },
+    "notch_axe": {
+      "name": "缺刃手斧",
+      "slot": "weapon",
+      "tier": 1,
+      "line": "axe",
+      "base": {
+        "atk": 9,
+        "def": 0,
+        "hp": 2,
+        "crit": 2,
+        "crit_dmg": 10
+      }
+    },
+    "split_greataxe": {
+      "name": "裂山巨斧",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "axe",
+      "base": {
+        "atk": 16,
+        "def": 1,
+        "hp": 4,
+        "crit": 3,
+        "crit_dmg": 16
+      }
+    },
+    "anvil_hammer": {
+      "name": "砧心小鎚",
+      "slot": "weapon",
+      "tier": 1,
+      "line": "hammer",
+      "base": {
+        "atk": 5,
+        "def": 3,
+        "hp": 10,
+        "crit": 0,
+        "crit_dmg": 6
+      }
     },
     "iron_cudgel": {
       "name": "鐵骨重棒",
       "slot": "weapon",
       "tier": 2,
       "line": "iron",
-      "base": { "atk": 8, "def": 2, "hp": 8, "crit": 2, "crit_dmg": 8 }
+      "base": {
+        "atk": 8,
+        "def": 2,
+        "hp": 8,
+        "crit": 2,
+        "crit_dmg": 8
+      }
     },
     "bastion_blade": {
       "name": "壁壘厚刃",
       "slot": "weapon",
       "tier": 3,
       "line": "iron",
-      "base": { "atk": 12, "def": 4, "hp": 12, "crit": 3, "crit_dmg": 10 }
+      "base": {
+        "atk": 12,
+        "def": 4,
+        "hp": 12,
+        "crit": 3,
+        "crit_dmg": 10
+      }
     },
     "anchor_axe": {
       "name": "錨心戰斧",
       "slot": "weapon",
       "tier": 4,
       "line": "iron",
-      "base": { "atk": 16, "def": 5, "hp": 16, "crit": 3, "crit_dmg": 12 }
+      "base": {
+        "atk": 16,
+        "def": 5,
+        "hp": 16,
+        "crit": 3,
+        "crit_dmg": 12
+      }
+    },
+    "ash_spear": {
+      "name": "灰木長槍",
+      "slot": "weapon",
+      "tier": 1,
+      "line": "spear",
+      "base": {
+        "atk": 8,
+        "def": 1,
+        "hp": 2,
+        "crit": 2,
+        "crit_dmg": 8
+      }
+    },
+    "knight_pike": {
+      "name": "騎士長矛",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "spear",
+      "base": {
+        "atk": 14,
+        "def": 2,
+        "hp": 4,
+        "crit": 3,
+        "crit_dmg": 12
+      }
+    },
+    "flint_gun": {
+      "name": "燧發火銃",
+      "slot": "weapon",
+      "tier": 1,
+      "line": "gun",
+      "base": {
+        "atk": 10,
+        "def": 0,
+        "hp": 0,
+        "crit": 8,
+        "crit_dmg": 20
+      }
+    },
+    "blackpowder_rifle": {
+      "name": "黑火長銃",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "gun",
+      "base": {
+        "atk": 17,
+        "def": 0,
+        "hp": 0,
+        "crit": 12,
+        "crit_dmg": 30
+      }
+    },
+    "mist_darts": {
+      "name": "霧隱手鏢",
+      "slot": "weapon",
+      "tier": 1,
+      "line": "dart",
+      "base": {
+        "atk": 7,
+        "def": 0,
+        "hp": 0,
+        "crit": 7,
+        "crit_dmg": 16
+      }
+    },
+    "shadow_chakram": {
+      "name": "影環飛刃",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "dart",
+      "base": {
+        "atk": 13,
+        "def": 0,
+        "hp": 0,
+        "crit": 14,
+        "crit_dmg": 26
+      }
+    },
+    "shard_focus": {
+      "name": "碎晶聚能",
+      "slot": "weapon",
+      "tier": 1,
+      "line": "crystal",
+      "base": {
+        "atk": 4,
+        "def": 2,
+        "hp": 10,
+        "crit": 2,
+        "crit_dmg": 8
+      }
+    },
+    "prism_scepter": {
+      "name": "棱鏡權杖",
+      "slot": "weapon",
+      "tier": 3,
+      "line": "crystal",
+      "base": {
+        "atk": 10,
+        "def": 4,
+        "hp": 16,
+        "crit": 4,
+        "crit_dmg": 12
+      }
     },
     "ash_mail": {
       "name": "灰燼甲片",
       "slot": "armor",
       "tier": 1,
       "line": "iron",
-      "base": { "atk": 0, "def": 3, "hp": 12, "crit": 0, "crit_dmg": 0 }
+      "base": {
+        "atk": 0,
+        "def": 3,
+        "hp": 12,
+        "crit": 0,
+        "crit_dmg": 0
+      }
     },
     "knight_plate": {
       "name": "騎士殘甲",
       "slot": "armor",
       "tier": 3,
       "line": "iron",
-      "base": { "atk": 0, "def": 7, "hp": 22, "crit": 0, "crit_dmg": 0 }
+      "base": {
+        "atk": 0,
+        "def": 7,
+        "hp": 22,
+        "crit": 0,
+        "crit_dmg": 0
+      }
     },
     "star_veil": {
       "name": "星紗披風",
       "slot": "armor",
       "tier": 3,
       "line": "soul",
-      "base": { "atk": 1, "def": 4, "hp": 14, "crit": 4, "crit_dmg": 8 }
+      "base": {
+        "atk": 1,
+        "def": 4,
+        "hp": 14,
+        "crit": 4,
+        "crit_dmg": 8
+      }
     },
     "star_pendant": {
       "name": "星屑墜",
       "slot": "accessory",
       "tier": 1,
       "line": "soul",
-      "base": { "atk": 1, "def": 0, "hp": 5, "crit": 5, "crit_dmg": 12 }
+      "base": {
+        "atk": 1,
+        "def": 0,
+        "hp": 5,
+        "crit": 5,
+        "crit_dmg": 12
+      }
     },
     "oak_charm": {
       "name": "橡心符",
       "slot": "accessory",
       "tier": 2,
       "line": "iron",
-      "base": { "atk": 0, "def": 2, "hp": 10, "crit": 1, "crit_dmg": 5 }
+      "base": {
+        "atk": 0,
+        "def": 2,
+        "hp": 10,
+        "crit": 1,
+        "crit_dmg": 5
+      }
     },
     "blade_ring": {
       "name": "鋒勢指環",
       "slot": "accessory",
       "tier": 2,
       "line": "sword",
-      "base": { "atk": 2, "def": 0, "hp": 2, "crit": 4, "crit_dmg": 10 }
+      "base": {
+        "atk": 2,
+        "def": 0,
+        "hp": 2,
+        "crit": 4,
+        "crit_dmg": 10
+      }
     }
   },
   "craft_recipes": [
     {
       "base_id": "knight_saber",
-      "gold": 80,
-      "mats": { "knight_shard": 2, "iron_scrap": 2 },
+      "gold": 160,
+      "mats": {
+        "knight_shard": 2,
+        "iron_scrap": 2
+      },
       "need_tier": 2,
       "hint": "劍道中階 · 騎士域材料"
     },
     {
       "base_id": "gale_edge",
-      "gold": 140,
-      "mats": { "knight_shard": 3, "oak_resin": 2, "iron_scrap": 2 },
+      "gold": 320,
+      "mats": {
+        "knight_shard": 3,
+        "oak_resin": 2,
+        "iron_scrap": 2
+      },
       "need_tier": 3,
-      "hint": "劍道高階"
+      "hint": "劍道高階 · 主線金幣主 sink"
+    },
+    {
+      "base_id": "reed_bow",
+      "gold": 70,
+      "mats": {
+        "oak_resin": 2,
+        "wolf_fang": 1
+      },
+      "need_tier": 1,
+      "hint": "弓道入門"
+    },
+    {
+      "base_id": "hawk_longbow",
+      "gold": 230,
+      "mats": {
+        "oak_resin": 3,
+        "wolf_fang": 2,
+        "mist_shard": 1
+      },
+      "need_tier": 2,
+      "hint": "弓道中階 · 主 sink"
+    },
+    {
+      "base_id": "star_rod",
+      "gold": 65,
+      "mats": {
+        "star_ore": 2
+      },
+      "need_tier": 1,
+      "hint": "法道入門杖"
     },
     {
       "base_id": "star_fang",
-      "gold": 70,
-      "mats": { "star_ore": 2, "dust_crumb": 1 },
+      "gold": 100,
+      "mats": {
+        "star_ore": 2,
+        "dust_crumb": 1
+      },
       "need_tier": 2,
-      "hint": "星途入門刃"
+      "hint": "星途入門刃（舊線相容）"
     },
     {
       "base_id": "nebula_needle",
-      "gold": 120,
-      "mats": { "star_ore": 3, "mist_shard": 2 },
+      "gold": 240,
+      "mats": {
+        "star_ore": 3,
+        "mist_shard": 2
+      },
       "need_tier": 2,
-      "hint": "星途中階"
+      "hint": "星途中階 · 主 sink"
+    },
+    {
+      "base_id": "wrap_gloves",
+      "gold": 60,
+      "mats": {
+        "oak_resin": 1,
+        "iron_scrap": 1
+      },
+      "need_tier": 1,
+      "hint": "拳道入門"
+    },
+    {
+      "base_id": "iron_knuckle",
+      "gold": 200,
+      "mats": {
+        "iron_scrap": 3,
+        "wolf_fang": 2
+      },
+      "need_tier": 2,
+      "hint": "拳道中階 · 主 sink"
+    },
+    {
+      "base_id": "notch_axe",
+      "gold": 70,
+      "mats": {
+        "iron_scrap": 2,
+        "wolf_fang": 1
+      },
+      "need_tier": 1,
+      "hint": "斧道入門"
+    },
+    {
+      "base_id": "split_greataxe",
+      "gold": 240,
+      "mats": {
+        "iron_scrap": 4,
+        "knight_shard": 2
+      },
+      "need_tier": 2,
+      "hint": "斧道中階 · 主 sink"
+    },
+    {
+      "base_id": "anvil_hammer",
+      "gold": 65,
+      "mats": {
+        "iron_scrap": 2
+      },
+      "need_tier": 1,
+      "hint": "鎚道入門"
     },
     {
       "base_id": "iron_cudgel",
-      "gold": 65,
-      "mats": { "iron_scrap": 3 },
+      "gold": 95,
+      "mats": {
+        "iron_scrap": 3
+      },
       "need_tier": 2,
-      "hint": "鐵骨入門"
+      "hint": "鐵骨入門（舊線相容）"
     },
     {
       "base_id": "bastion_blade",
-      "gold": 110,
-      "mats": { "iron_scrap": 4, "wolf_fang": 2 },
+      "gold": 220,
+      "mats": {
+        "iron_scrap": 4,
+        "wolf_fang": 2
+      },
       "need_tier": 2,
-      "hint": "鐵骨中階"
+      "hint": "鐵骨中階 · 主 sink"
+    },
+    {
+      "base_id": "ash_spear",
+      "gold": 70,
+      "mats": {
+        "oak_resin": 2,
+        "iron_scrap": 1
+      },
+      "need_tier": 1,
+      "hint": "槍道入門"
+    },
+    {
+      "base_id": "knight_pike",
+      "gold": 230,
+      "mats": {
+        "knight_shard": 2,
+        "oak_resin": 2,
+        "iron_scrap": 1
+      },
+      "need_tier": 2,
+      "hint": "槍道中階 · 主 sink"
+    },
+    {
+      "base_id": "flint_gun",
+      "gold": 75,
+      "mats": {
+        "iron_scrap": 2,
+        "dust_crumb": 1
+      },
+      "need_tier": 1,
+      "hint": "火槍入門"
+    },
+    {
+      "base_id": "blackpowder_rifle",
+      "gold": 260,
+      "mats": {
+        "iron_scrap": 3,
+        "knight_shard": 2,
+        "dust_crumb": 2
+      },
+      "need_tier": 2,
+      "hint": "火槍中階 · 主 sink"
+    },
+    {
+      "base_id": "mist_darts",
+      "gold": 65,
+      "mats": {
+        "mist_shard": 1,
+        "iron_scrap": 1
+      },
+      "need_tier": 1,
+      "hint": "鏢道入門"
+    },
+    {
+      "base_id": "shadow_chakram",
+      "gold": 220,
+      "mats": {
+        "mist_shard": 3,
+        "wolf_fang": 2
+      },
+      "need_tier": 2,
+      "hint": "鏢道中階 · 主 sink"
+    },
+    {
+      "base_id": "shard_focus",
+      "gold": 70,
+      "mats": {
+        "star_ore": 1,
+        "mist_shard": 1
+      },
+      "need_tier": 1,
+      "hint": "水晶入門"
+    },
+    {
+      "base_id": "prism_scepter",
+      "gold": 240,
+      "mats": {
+        "star_ore": 3,
+        "mist_shard": 2,
+        "dust_crumb": 1
+      },
+      "need_tier": 2,
+      "hint": "水晶中階 · 主 sink"
     },
     {
       "base_id": "knight_plate",
-      "gold": 90,
-      "mats": { "iron_scrap": 3, "knight_shard": 2 },
+      "gold": 180,
+      "mats": {
+        "iron_scrap": 3,
+        "knight_shard": 2
+      },
       "need_tier": 1,
-      "hint": "防具"
+      "hint": "防具 · 中階 sink"
     },
     {
       "base_id": "star_pendant",
-      "gold": 45,
-      "mats": { "star_ore": 1 },
+      "gold": 55,
+      "mats": {
+        "star_ore": 1
+      },
       "need_tier": 1,
       "hint": "飾品"
     },
     {
       "base_id": "blade_ring",
-      "gold": 55,
-      "mats": { "wolf_fang": 2, "iron_scrap": 1 },
+      "gold": 80,
+      "mats": {
+        "wolf_fang": 2,
+        "iron_scrap": 1
+      },
       "need_tier": 1,
       "hint": "劍道飾品"
     },
     {
       "base_id": "oak_charm",
-      "gold": 50,
-      "mats": { "oak_resin": 2 },
+      "gold": 75,
+      "mats": {
+        "oak_resin": 2
+      },
       "need_tier": 1,
       "hint": "鐵骨飾品"
     }
