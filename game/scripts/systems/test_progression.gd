@@ -33,7 +33,70 @@ func _initialize() -> void:
 	_check_hunt_wave_xp(gs, hunt)
 	_check_hunt_run_xp(gs, hunt)
 	_check_mission_xp(gs, quest)
+	_check_soul_slots_reachable()
+	_check_forge_is_a_sink()
 	_finish()
+
+
+## 承諾的每一個魂槽都要拿得到。
+##
+## 踩過：魂槽表寫「T11 開第三槽」，而鍛造在 T8 就擋下來 ——
+## 第三個魂槽是一個玩家再怎麼玩都拿不到的獎勵。兩份程式各自看都沒問題，
+## 對起來才知道壞了，而且不會報錯：玩家只會把武器練到頂、
+## 發現第三格還是灰的，以為是自己漏了什麼。
+func _check_soul_slots_reachable() -> void:
+	var soul := root.get_node_or_null("SoulSystem")
+	var main_script := load("res://scripts/main.gd")
+	if soul == null or main_script == null:
+		_fail("SoulSystem 或 main.gd 載不到")
+		return
+	var max_tier := int(main_script.get("FORGE_MAX_TIER"))
+	if max_tier <= 0:
+		_fail("讀不到 main.gd 的 FORGE_MAX_TIER")
+		return
+	var tiers: Array = soul.SLOT_TIERS
+	if tiers.is_empty():
+		_fail("SoulSystem.SLOT_TIERS 是空的 —— 這條檢查等於沒在檢查")
+		return
+	for need in tiers:
+		if int(need) > max_tier:
+			_fail("魂槽要 T%d 才開，但鍛造只到 T%d —— 那一格永遠拿不到" % [int(need), max_tier])
+			return
+	print("  ok %d 個魂槽門檻（最高 T%d）都在鍛造上限 T%d 之內" % [
+		tiers.size(), int(tiers[tiers.size() - 1]), max_tier
+	])
+
+
+## 鍛造是全遊戲最大的金幣去處，價格要跟著階數走。
+##
+## 踩過：每一階都是固定 50 金，T2 到封頂總共約 430 金 —— 比一趟野外來回還便宜。
+## 而全遊戲 24 個收入點對 5 個支出點，實測一趟通關收入 10328、支出 1480。
+## 金幣單向累積的結果是「賺錢」在中期之後完全失去意義，
+## 而鍛造／戰魂／技能三條養成柱共用的就是這個資源。
+func _check_forge_is_a_sink() -> void:
+	var gs := root.get_node_or_null("GameState")
+	var main_script := load("res://scripts/main.gd")
+	if gs == null or main_script == null:
+		_fail("GameState 或 main.gd 載不到")
+		return
+	var per := int(main_script.get("FORGE_COST_PER_TIER"))
+	var max_tier := int(main_script.get("FORGE_MAX_TIER"))
+	if per <= 0:
+		_fail("讀不到 FORGE_COST_PER_TIER")
+		return
+	## 價格必須隨階上升，否則後期等於免費
+	if per * max_tier <= per * 2:
+		_fail("升階價沒有隨階數上升，鍛造在後期不再是金幣的去處")
+		return
+	## 一路練到頂要花的錢，要跟一趟通關的收入是同一個量級。
+	## 太便宜＝金幣沒有用；太貴＝逼玩家刷。這裡只擋「太便宜」那一邊。
+	var total := 0
+	for t in range(2, max_tier):
+		total += per * t
+	if total < 2000:
+		_fail("T2 練到 T%d 只要 %d 金，跟一趟通關上萬的收入不成比例" % [max_tier, total])
+		return
+	print("  ok 升階價隨階上升，T2→T%d 期望花費約 %d 金（未計失敗重試）" % [max_tier, total])
 
 
 ## 每一波都要給經驗，而且要跟在野外打同一隻怪一樣多

@@ -3481,9 +3481,25 @@ func _go_c1_forge() -> void:
 
 
 func _show_forge_panel() -> void:
-	var body := "微末之刃 T%d · 攻擊 +%d\n連敗：%d（3 次釘釘發脾氣）\n金幣：%d（升階 50）" % [
-		GameState.weapon_tier, GameState.weapon_atk, GameState.forge_fail_streak, GameState.gold
+	var at_max := GameState.weapon_tier >= FORGE_MAX_TIER
+	var body := "微末之刃 T%d／%d · 攻擊 +%d\n連敗：%d（3 次釘釘發脾氣）\n金幣：%d" % [
+		GameState.weapon_tier, FORGE_MAX_TIER, GameState.weapon_atk,
+		GameState.forge_fail_streak, GameState.gold
 	]
+	if at_max:
+		body += "\n已到頂階。"
+	else:
+		body += "\n升下一階：%d 金 · 成功率約 %d%%" % [forge_cost(), int(forge_rate_base() * 100.0)]
+	## 魂槽是跟著器階開的，讓玩家看得到下一格在哪裡
+	var slots: int = SoulSystem.slot_count()
+	var next_slot := 0
+	for need in SoulSystem.SLOT_TIERS:
+		if GameState.weapon_tier < need:
+			next_slot = need
+			break
+	body += "\n魂槽 %d／%d" % [slots, SoulSystem.SLOT_TIERS.size()]
+	if next_slot > 0:
+		body += "（T%d 開下一格）" % next_slot
 	if GameState.has_flag("meta.forge_debt_bonus"):
 		body += "\n舊債加成：升階更穩（一次人情）。"
 	if GameState.has_flag("c1_sprout_asked") and not GameState.has_flag("c1_sprout_done"):
@@ -3613,15 +3629,40 @@ func _forge_wood_sword() -> void:
 	)
 
 
+## 鍛造的階數上限。設計是 T1～T15（PROGRESSION 2.2），三個月切片先做到 T8，
+## 而魂槽門檻寫的是 T1／T6／T11 —— 於是第三個魂槽永遠開不了。
+## 開到 T11 讓那個承諾兌現得了，也讓金幣在後期還有地方去。
+const FORGE_MAX_TIER := 11
+
+## 升階價 = 這個數 × 目前階數。
+##
+## 原本每一階都是固定 50 金：T2 打到封頂總共約 430 金，比一趟野外來回還便宜。
+## 而全遊戲有 24 個收入點、5 個支出點，實測一趟通關收入 10328、支出 1480 ——
+## 金幣是單向累積的，中期之後永遠花不完，於是「賺錢」對三條養成柱都失去意義。
+## 改成隨階漲價之後，T2→T11 約要 3500 金，後期的每一場戰鬥又開始有理由打。
+const FORGE_COST_PER_TIER := 40
+
+
+func forge_cost() -> int:
+	return FORGE_COST_PER_TIER * maxi(1, GameState.weapon_tier)
+
+
+## 成功率隨階下降（PROGRESSION 2.2 寫了但沒實作，之前是固定 0.70）。
+## 連敗 3 次保底成功那條還在，所以最壞情況仍然是四次一定升。
+func forge_rate_base() -> float:
+	return maxf(0.45, 0.80 - 0.03 * float(GameState.weapon_tier - 1))
+
+
 func _try_forge() -> void:
-	if GameState.weapon_tier >= 8:
+	if GameState.weapon_tier >= FORGE_MAX_TIER:
 		_play_dialog(DialogLines.lines("forge.tier_max"), _show_forge_panel)
 		return
-	if GameState.gold < 50:
+	var cost := forge_cost()
+	if GameState.gold < cost:
 		_play_dialog(DialogLines.lines("forge.no_gold"), _show_forge_panel)
 		return
-	GameState.add_gold(-50)
-	var forge_rate := 0.70
+	GameState.add_gold(-cost)
+	var forge_rate := forge_rate_base()
 	if GameState.has_flag("meta.forge_debt_bonus"):
 		forge_rate = 0.88
 	if GameState.path_style in ["hammer", "crystal"]:
@@ -3655,7 +3696,11 @@ func _go_c1_wild() -> void:
 	if not GameState.has_flag("c1_forged"):
 		_play_dialog(DialogLines.lines("c1.wild_need_forge"))
 		return
-	if GameState.gold < 100:
+	## 起步安全網：第一次進荒野時若身上不夠打一把器，補一筆。
+	## 原本沒有旗標，於是每次金幣低於 100 走進荒野就 +120 —— 那是個無限水龍頭，
+	## 玩家永遠不會缺錢，經濟的下限直接消失。
+	if GameState.gold < 100 and not GameState.has_flag("meta.wild_stipend"):
+		GameState.set_flag("meta.wild_stipend", true)
 		GameState.add_gold(120)
 	_open_explore("wild", Screen.C1_WILD)
 

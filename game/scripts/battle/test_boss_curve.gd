@@ -66,8 +66,15 @@ func _stats(lv: int, def_bonus: int) -> Dictionary:
 			crit += 0.5
 		if nl % 4 == 0:
 			spd += 1
-	## 釘釘給的 T2（攻 +9）起跳，之後每 4 級升一階、每階 +2，封頂 T8
-	var tier := clampi(2 + int((lv - 8) / 4.0), 1, 8)
+	## 釘釘給的 T2（攻 +9）起跳，之後每 4 級升一階、每階 +2。
+	## 上限直接讀 main.gd 的 FORGE_MAX_TIER —— 寫死數字的話，
+	## 哪天鍛造開放到更高階，這個模型會安靜地繼續用舊上限算，
+	## 於是低估玩家、把 Boss 調得太弱。
+	var max_tier := 8
+	var ms := load("res://scripts/main.gd")
+	if ms != null and int(ms.get("FORGE_MAX_TIER")) > 0:
+		max_tier = int(ms.get("FORGE_MAX_TIER"))
+	var tier := clampi(2 + int((lv - 8) / 4.0), 1, max_tier)
 	var wpn := 9 + (tier - 2) * 2
 	return {
 		"name": "小白",

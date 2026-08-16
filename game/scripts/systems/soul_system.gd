@@ -54,16 +54,22 @@ const SECRET_RELICS: Dictionary = {
 }
 
 
+## 器階到魂槽的門檻。設計是 T1／T6／T11 各開一槽（PROGRESSION 2.2）。
+##
+## 這張表要跟鍛造的階數上限對得起來。曾經對不上：這裡寫 T11 開第三槽，
+## 而鍛造在 T8 就擋下來 —— 第三個魂槽是一個玩家再怎麼玩都拿不到的獎勵。
+## 不會報錯，玩家只會把武器練到頂、發現第三格還是灰的，以為自己漏了什麼。
+## `test_progression.gd` 現在守著「每一個門檻都要鍛造得到」。
+const SLOT_TIERS: Array[int] = [1, 6, 11]
+
+
 func slot_count() -> int:
-	## T1+ 開 1 槽；T6+ 2；T11+ 3
 	var t: int = GameState.weapon_tier
-	if t >= 11:
-		return 3
-	if t >= 6:
-		return 2
-	if t >= 1:
-		return 1
-	return 0
+	var n := 0
+	for need in SLOT_TIERS:
+		if t >= need:
+			n += 1
+	return n
 
 
 func ensure_slots() -> void:
