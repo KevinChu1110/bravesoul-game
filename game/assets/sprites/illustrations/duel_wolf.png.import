@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jjyxspcsocmr"
-path="res://.godot/imported/battle_falcon.png-c2bc2fbd38d78540e15ac4a2e750e65f.ctex"
+uid="uid://h3rc6n1p0cym"
+path="res://.godot/imported/battle_wolf.png-c2f4a93fa974436a05b488721302ace3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/maps/battle_falcon.png"
-dest_files=["res://.godot/imported/battle_falcon.png-c2bc2fbd38d78540e15ac4a2e750e65f.ctex"]
+source_file="res://assets/sprites/illustrations/duel_wolf.png"
+dest_files=[]
 
 [params]
 

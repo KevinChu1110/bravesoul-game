@@ -594,28 +594,14 @@ func _apply_battle_art(mode: String) -> void:
 			_enemy_base_mod = Color.WHITE
 	enemy_body.modulate = _enemy_base_mod
 
+	## 背景解析（專屬圖 → 那場仗發生的地圖 → 保底）統一在 SpriteDB.battle_bg_path()。
+	## 這裡原本自己寫了一串 fallback（demon→fog→boar→wolf），而那四張正是
+	## 「主角＋敵人都畫好」的完成稿插圖 —— 於是打某些王的時候，
+	## 背景裡有另一隻主角在跟別的怪對砍。
 	var bg := SpriteDB.battle_bg(mode)
-	if bg == null and mode in ["wrath", "tide", "statue", "chrono", "scar_lord"]:
-		bg = SpriteDB.battle_bg("demon")
-	if bg == null and mode == "mirror_wraith":
-		bg = SpriteDB.battle_bg("fog")
-	if bg == null and mode == "wreck_captain":
-		bg = SpriteDB.battle_bg("boar")
-	if bg == null and _is_world_mode(mode):
-		bg = SpriteDB.battle_bg("wolf")
 	if battle_bg and bg:
 		battle_bg.texture = bg
-		match mode:
-			"wrath":
-				battle_bg.modulate = Color(1.1, 0.55, 0.45, 1)
-			"tide":
-				battle_bg.modulate = Color(0.55, 0.7, 1.0, 1)
-			"statue":
-				battle_bg.modulate = Color(0.85, 0.75, 0.6, 1)
-			"chrono":
-				battle_bg.modulate = Color(0.7, 0.55, 0.95, 1)
-			_:
-				battle_bg.modulate = Color(0.75, 0.75, 0.8, 1)
+		battle_bg.modulate = _battle_bg_tint(mode)
 	elif battle_bg:
 		battle_bg.texture = null
 		battle_bg.modulate = Color(0.12, 0.1, 0.16)
@@ -882,6 +868,22 @@ func _mirror_hp_to_state(p: BattleUnit) -> void:
 		GameState.hp = hp
 	if Engine.get_main_loop() is SceneTree:
 		(Engine.get_main_loop() as SceneTree).call_group(MapleHud.VITALS_GROUP, "refresh_vitals")
+
+
+## 裂縫四種各自的染色。背景是共用的地圖底圖，靠色調把四場仗分開。
+func _battle_bg_tint(mode: String) -> Color:
+	match mode:
+		"wrath":
+			return Color(1.1, 0.55, 0.45, 1)
+		"tide":
+			return Color(0.55, 0.7, 1.0, 1)
+		"statue":
+			return Color(0.85, 0.75, 0.6, 1)
+		"chrono":
+			return Color(0.7, 0.55, 0.95, 1)
+		"mirror_wraith":
+			return Color(0.75, 0.75, 0.8, 1)
+	return Color(1, 1, 1, 1)
 
 
 func _refresh_hud() -> void:

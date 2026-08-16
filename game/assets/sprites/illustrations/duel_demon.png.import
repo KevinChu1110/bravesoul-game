@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ctilvjsstrqm2"
-path="res://.godot/imported/battle_leo.png-2094f8351479c451e063ff37e20fda5a.ctex"
+uid="uid://5f5f6c8cnxub"
+path="res://.godot/imported/battle_demon.png-2a9575b6d2771160c4be160cee00007f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/maps/battle_leo.png"
-dest_files=["res://.godot/imported/battle_leo.png-2094f8351479c451e063ff37e20fda5a.ctex"]
+source_file="res://assets/sprites/illustrations/duel_demon.png"
+dest_files=[]
 
 [params]
 

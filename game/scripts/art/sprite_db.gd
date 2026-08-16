@@ -286,8 +286,74 @@ static func map_bg(map_id: String) -> Texture2D:
 	return tex("%s/maps/%s_bg.png" % [ROOT, map_id])
 
 
+## 每一種戰鬥該站在哪張圖前面。
+##
+## 這張表存在的理由：`maps/battle_<mode>.png` 只有七張，而且那七張是
+## 「主角＋敵人都畫好」的**完成稿插圖**被當背景用 —— 打雷歐的時候，
+## 背景裡有一隻比人還大的兔子在跟哥布林對砍，前景又疊一隻活的主角。
+## 其餘十六種戰鬥連圖都沒有，`battle_view` 直接把背景設成純黑。
+##
+## 那七張已經搬到 `illustrations/duel_*.png`（它們本身是好圖，只是不能當背景）。
+## 這張表讓每一場戰鬥都退到「那場仗實際發生的地方」的既有底圖，
+## 五十幾張地圖底圖本來就在 repo 裡，不必等新美術就先不黑。
+##
+## 專屬戰鬥背景畫好之後丟 `maps/battle_<mode>.png`，會自動蓋過這張表。
+const BATTLE_BG_MAP := {
+	## 主線 Boss
+	"wolf": "road",
+	"leo": "wild_leo_court",
+	"fog": "mist_village",
+	"abo": "dojo",
+	"falcon": "forest",
+	"boar": "coast",
+	"demon": "tower",
+	## 通關後裂縫：都發生在黑焰疤地
+	"wrath": "blackflame_scar",
+	"tide": "coast_wreck",
+	"statue": "tower_memory",
+	"chrono": "tower_stairs",
+	## 秘境小 Boss
+	"scar_lord": "blackflame_scar",
+	"mirror_wraith": "mist_mirror",
+	"wreck_captain": "coast_wreck",
+	## 雜魚：照牠們出沒的地方
+	"ash_rat": "hunting_grounds",
+	"road_bandit": "road_ruins",
+	"sewer_slime": "town_sewers",
+	"fog_shade": "mist_cliff",
+	"bamboo_spirit": "dojo_bamboo",
+	"forest_sprite": "forest_canopy",
+	"coast_raider": "coast_wreck",
+	"scar_wisp": "blackflame_scar",
+	"black_ronin": "crossroads",
+}
+
+## 誰都沒對上時的最後一張。挑荒野是因為它夠中性，什麼仗擺上去都不突兀。
+const BATTLE_BG_LAST_RESORT := "wild"
+
+
+## 這場戰鬥的背景圖路徑。順序：專屬戰鬥背景 → 那場仗發生的地圖 → 保底。
+## 回空字串代表連保底都不在（正常情況不該發生，test_art 會擋）。
+static func battle_bg_path(mode: String) -> String:
+	var own := "%s/maps/battle_%s.png" % [ROOT, mode]
+	if ResourceLoader.exists(own):
+		return own
+	var map_id := str(BATTLE_BG_MAP.get(mode, ""))
+	if map_id != "":
+		var by_map := "%s/maps/%s_bg.png" % [ROOT, map_id]
+		if ResourceLoader.exists(by_map):
+			return by_map
+	var last := "%s/maps/%s_bg.png" % [ROOT, BATTLE_BG_LAST_RESORT]
+	return last if ResourceLoader.exists(last) else ""
+
+
+## 這張背景是專屬畫的，還是退回去用地圖底圖的。給工具與測試看覆蓋率用。
+static func battle_bg_is_dedicated(mode: String) -> bool:
+	return ResourceLoader.exists("%s/maps/battle_%s.png" % [ROOT, mode])
+
+
 static func battle_bg(mode: String) -> Texture2D:
-	return tex("%s/maps/battle_%s.png" % [ROOT, mode])
+	return tex(battle_bg_path(mode))
 
 
 static func fx(kind: String) -> Texture2D:

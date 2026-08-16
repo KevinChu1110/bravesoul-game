@@ -149,4 +149,51 @@ Assets                    ← 兔、Boss、tile、FX
 
 - 機制：MECHANIC_LIBRARY / BOSS_KITS  
 - 章節：CHAPTER_C4_C5、POSTGAME  
-- 本檔只管**怎麼看起來像 2D 遊戲**  
+- 本檔只管**怎麼看起來像 2D 遊戲**
+
+---
+
+## 戰鬥背景
+
+**`maps/battle_<mode>.png` 這個檔名只放「純背景」。**
+
+歷史上那裡放的是七張「主角＋敵人都畫好」的完成稿插圖，被 `battle_view` 當背景用
+—— 打雷歐的時候，背景裡有一隻比人還大的兔子在跟哥布林對砍，前景又疊一隻活的主角。
+看起來像 bug，其實是拿錯圖。那七張已經搬到 `illustrations/duel_*.png`。
+
+### 解析順序（`SpriteDB.battle_bg_path()`）
+
+1. `maps/battle_<mode>.png` —— 專屬戰鬥背景
+2. 那場仗實際發生的地圖底圖（`sprite_db.gd` 的 `BATTLE_BG_MAP`）
+3. `maps/wild_bg.png` 保底
+
+所以**現在沒有純黑的戰鬥了**，23 種模式全部解析得到東西。第 2 層用的是探索用的
+俯視底圖，當側視戰鬥背景會怪，但那是暫代，不是壞掉。
+
+### 產專屬背景
+
+```bash
+.venv-asset/bin/python tools/gen_battle_bg.py --list      # 看現況
+.venv-asset/bin/python tools/gen_battle_bg.py             # 產還沒有的
+.venv-asset/bin/python tools/gen_battle_bg.py --only leo,fog
+```
+
+**構圖是硬要求**：戰鬥畫面左右各站一個角色（玩家在左約 1/4、敵人在右約 3/4，
+腳底約在畫面 75% 高）。所以背景要**完全沒有角色**、左右與下三分之一保持乾淨、
+細節往上半與遠景放。腳本的 `COMPOSITION` 就是在講這件事，自己手動生圖也要照做。
+
+### 驗收
+
+```bash
+godot --path game --headless -s res://scripts/art/test_art.gd
+```
+
+會印「N 種戰鬥都有背景（其中 M 種有專屬圖）」。M 要往上跑；
+N 少於 23 就是有戰鬥會變純黑，測試會直接紅。
+`test_art` 另外擋一件事：`maps/` 底下不准出現對不到任何戰鬥模式的 `battle_*`
+—— 那通常代表又有人把插圖丟進背景的位置。
+
+### `illustrations/`
+
+那七張 duel 圖現在沒有程式在用，但它們是好圖（可以拿去做 Boss 進場卡或官網）。
+留在 repo、**排除在出貨包外**（`export_presets.cfg`），等有東西用它們再放回去。

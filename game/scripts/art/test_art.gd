@@ -16,6 +16,7 @@ func _initialize() -> void:
 		["town_bg", SpriteDB.map_bg("town")],
 		["forest_bg", SpriteDB.map_bg("forest")],
 		["battle_leo", SpriteDB.battle_bg("leo")],
+		["battle_scar_wisp", SpriteDB.battle_bg("scar_wisp")],
 		["ding", SpriteDB.explore_entity_tex("ding")],
 		["fire_ring", SpriteDB.fx("fire_ring")],
 		["tile_stone", SpriteDB.tile("stone")],
@@ -55,6 +56,8 @@ func _initialize() -> void:
 
 	if not _check_entity_coverage():
 		ok = false
+	if not _check_battle_backgrounds():
+		ok = false
 
 	if ok:
 		print("ART_OK")
@@ -62,6 +65,61 @@ func _initialize() -> void:
 	else:
 		print("ART_FAIL")
 		quit(1)
+
+
+## 每一種戰鬥都要有背景，而且不可以用到「畫了角色的完成稿」。
+##
+## 踩過兩件事：
+##   1. `maps/battle_leo.png` 那七張是主角＋敵人都畫好的插圖被當背景用。
+##      打雷歐的時候背景裡有一隻比人還大的兔子在跟哥布林對砍，
+##      前景又疊一隻活的主角。看起來像 bug，其實是「拿錯圖」。
+##   2. 其餘十六種戰鬥連圖都沒有，背景直接是純黑。
+##
+## 現在解析順序是「專屬圖 → 那場仗發生的地圖 → 保底」，所以這裡守兩件事：
+## 每一種模式都解析得到東西，而且 maps/ 底下不准再出現角色插圖。
+func _check_battle_backgrounds() -> bool:
+	## 所有會進戰鬥的 mode
+	var modes: Array[String] = [
+		"wolf", "leo", "fog", "abo", "falcon", "boar", "demon",
+		"wrath", "tide", "statue", "chrono",
+		"scar_lord", "mirror_wraith", "wreck_captain",
+		"ash_rat", "road_bandit", "sewer_slime", "fog_shade",
+		"bamboo_spirit", "forest_sprite", "coast_raider", "scar_wisp",
+		"black_ronin",
+	]
+	var missing: PackedStringArray = []
+	var dedicated := 0
+	for m in modes:
+		if SpriteDB.battle_bg_path(m) == "":
+			missing.append(m)
+		elif SpriteDB.battle_bg_is_dedicated(m):
+			dedicated += 1
+	if missing.size() > 0:
+		push_error("這些戰鬥沒有背景，畫面會是純黑：%s" % ", ".join(missing))
+		print("  FAIL 沒有背景的戰鬥：", ", ".join(missing))
+		return false
+	print("  ok %d 種戰鬥都有背景（其中 %d 種有專屬圖，其餘退到該地圖底圖）" % [
+		modes.size(), dedicated
+	])
+
+	## maps/ 底下不該再有 battle_*：那個檔名現在專門留給「純背景」，
+	## 而歷史上放在那裡的是畫了角色的完成稿。
+	var dir := DirAccess.open("res://assets/sprites/maps")
+	if dir == null:
+		push_error("開不了 maps 目錄")
+		return false
+	var strays: PackedStringArray = []
+	for f in dir.get_files():
+		var base := f.trim_suffix(".import")
+		if base.begins_with("battle_") and base.ends_with(".png"):
+			var mode := base.trim_prefix("battle_").trim_suffix(".png")
+			if not modes.has(mode):
+				strays.append(base)
+	if strays.size() > 0:
+		push_error("maps/ 底下有對不到任何戰鬥的 battle_*：%s" % ", ".join(strays))
+		print("  FAIL 對不到戰鬥的背景檔：", ", ".join(strays))
+		return false
+	return true
 
 
 ## 場景物件的貼圖覆蓋率。

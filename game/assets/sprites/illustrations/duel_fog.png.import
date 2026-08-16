@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcuxusw1rw15h"
-path="res://.godot/imported/battle_boar.png-1098aa6320bc582ffe3cdb83340cee13.ctex"
+uid="uid://b2rxpj3h2dtkw"
+path="res://.godot/imported/battle_fog.png-a5c5c2dc4cb46501decd41b49c52ef18.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/maps/battle_boar.png"
-dest_files=["res://.godot/imported/battle_boar.png-1098aa6320bc582ffe3cdb83340cee13.ctex"]
+source_file="res://assets/sprites/illustrations/duel_fog.png"
+dest_files=[]
 
 [params]
 
