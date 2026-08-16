@@ -65,6 +65,7 @@ func _is_world_miniboss(mode: String) -> bool:
 func setup(mode: String) -> void:
 	_mode = mode
 	_ended = false
+	_claim_hp_authority()
 	_telemetry_watch(mode)
 	_apply_hud_chrome()
 	banner.visible = false
@@ -819,11 +820,74 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+## ── 戰鬥中的 HP 權威 ──
+##
+## 開戰時玩家的 HP 被快照進 BattleUnit，之後整場只有那一份在動。
+## 兩個後果，都要在這裡收乾淨：
+##   1. 喝藥若只加 GameState.hp，戰鬥單位一滴都沒回 —— 藥被吃掉但沒效果。
+##   2. 左上角那塊狀態板讀的是 GameState.hp，整場停在開戰前的數字，
+##      跟戰鬥畫面自己那條血條各說各話。
+## 所以：藥交給戰鬥單位吃（_battle_heal），戰鬥單位的血每幀鏡回 GameState。
+
+func _claim_hp_authority() -> void:
+	var inv := _inventory_node()
+	if inv != null:
+		inv.set("hp_authority", Callable(self, "_battle_heal"))
+
+
+func _release_hp_authority() -> void:
+	var inv := _inventory_node()
+	if inv != null and inv.get("hp_authority") == Callable(self, "_battle_heal"):
+		inv.set("hp_authority", Callable())
+
+
+func _inventory_node() -> Node:
+	var t := Engine.get_main_loop()
+	if t is SceneTree and (t as SceneTree).root != null:
+		return (t as SceneTree).root.get_node_or_null("InventorySystem")
+	return null
+
+
+## 逃跑不走 _on_end()，戰鬥畫面直接被清掉。不在這裡交還的話，
+## InventorySystem 會一直握著指向已釋放節點的 Callable。
+func _exit_tree() -> void:
+	_release_hp_authority()
+
+
+## 回傳「實際回了多少」——訊息要靠這個數字，回 0 就會顯示「HP +0」，
+## 那正是玩家該看到的（滿血喝藥本來就沒有效果）。
+func _battle_heal(h: int) -> int:
+	if sim == null or _ended:
+		return 0
+	var p: BattleUnit = sim.get_unit("player")
+	if p == null or not p.is_alive():
+		return 0
+	var before := p.hp
+	p.hp = mini(p.max_hp, p.hp + h)
+	var healed := p.hp - before
+	if healed > 0:
+		_flash(player_body, Color(0.6, 1.0, 0.7))
+		_append_log("[color=#6f6]回復 %d[/color]" % healed)
+		_refresh_hud()
+	return healed
+
+
+func _mirror_hp_to_state(p: BattleUnit) -> void:
+	if p == null:
+		return
+	var hp := maxi(0, p.hp)
+	if GameState.hp != hp:
+		GameState.hp = hp
+	if Engine.get_main_loop() is SceneTree:
+		(Engine.get_main_loop() as SceneTree).call_group(MapleHud.VITALS_GROUP, "refresh_vitals")
+
+
 func _refresh_hud() -> void:
 	if sim == null:
 		return
 	var p: BattleUnit = sim.get_unit("player")
 	var e := _primary_enemy()
+	_mirror_hp_to_state(p)
 
 	if p:
 		player_name_l.text = p.display_name
@@ -1669,6 +1733,7 @@ func _try_wheat_save(hp_after: int) -> void:
 
 func _on_end(won: bool) -> void:
 	_ended = true
+	_release_hp_authority()
 	countdown.visible = false
 	countdown_sub.visible = false
 	AudioManager.battle_end(won)

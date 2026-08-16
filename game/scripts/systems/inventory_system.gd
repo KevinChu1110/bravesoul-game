@@ -5,6 +5,29 @@ signal inventory_changed
 signal hotbar_changed
 signal item_used(item_id: String, result: Dictionary)
 
+## 戰鬥中 HP 的權威不在 GameState，而在 BattleSim 的戰鬥單位上。
+##
+## 開戰時 battle_view 把玩家當下的 HP 快照進戰鬥單位，之後整場的加減都只動那一份；
+## GameState.hp 要到戰鬥結束才被寫回去。所以戰鬥中喝藥如果只加 GameState.hp：
+##   1. 戰鬥單位一滴都沒回，藥等於沒效
+##   2. GameState.hp 通常還停在滿血，mini() 夾完 healed 是 0，訊息顯示「HP +0」
+##   3. 藥還是被扣掉了
+## 三件事湊起來就是「藥被吃掉但什麼都沒發生」——不報錯，玩家只能懷疑自己看錯。
+##
+## battle_view 開戰時把自己掛上來，結束時拿掉。沒掛的時候照舊寫 GameState。
+var hp_authority: Callable = Callable()
+
+
+func _apply_heal(h: int) -> int:
+	if h <= 0:
+		return 0
+	if hp_authority.is_valid():
+		return int(hp_authority.call(h))
+	var max_h: int = GameState.effective_max_hp()
+	var before: int = GameState.hp
+	GameState.hp = mini(max_h, GameState.hp + h)
+	return GameState.hp - before
+
 const HOTBAR_SIZE := 8
 const BAG_SLOTS := 24  ## 顯示格數（4×6）
 
@@ -304,11 +327,7 @@ func use_item(id: String) -> Dictionary:
 			var msg_parts: PackedStringArray = []
 			var healed := 0
 			if def.has("heal"):
-				var h: int = int(def.get("heal", 0))
-				var max_h: int = GameState.effective_max_hp()
-				var before: int = GameState.hp
-				GameState.hp = mini(max_h, GameState.hp + h)
-				healed = GameState.hp - before
+				healed = _apply_heal(int(def.get("heal", 0)))
 				msg_parts.append("HP +%d" % healed)
 			if def.has("dust"):
 				var d: int = int(def.get("dust", 0))

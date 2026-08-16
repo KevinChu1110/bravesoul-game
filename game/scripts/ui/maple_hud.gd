@@ -2,6 +2,9 @@ class_name MapleHud
 extends Control
 ## Artale 風狀態板：白底卡片 · 粉紅標題列 · 可拖曳
 
+## battle_view 每幀用這個群組把戰鬥單位的 HP 推回畫面
+const VITALS_GROUP := "hud_vitals"
+
 const UiStyle = preload("res://scripts/ui/ui_style.gd")
 const WindowDrag = preload("res://scripts/ui/window_drag.gd")
 
@@ -26,6 +29,9 @@ func _ready() -> void:
 	size = Vector2(228, 118)
 	custom_minimum_size = Vector2(228, 118)
 	_build()
+	## 戰鬥中 HP 由 BattleSim 的戰鬥單位當權威，變動不經過任何訊號。
+	## 加進群組讓 battle_view 每幀推一次，兩條血條才不會各說各話。
+	add_to_group(VITALS_GROUP)
 	WindowDrag.attach(self, _drag_handle, "hud")
 	call_deferred("_restore_layout")
 
@@ -130,16 +136,11 @@ func _make_bar(h: float = 10) -> ProgressBar:
 	return b
 
 
-func refresh() -> void:
-	if not is_inside_tree():
+## 只更新三條量條。可以每幀呼叫 —— 刻意不碰下面那行金幣／待領，
+## 因為 claimable_count() 會把所有里程碑跑一遍，不是每幀該做的事。
+func refresh_vitals() -> void:
+	if not is_inside_tree() or _hp_bar == null:
 		return
-	var name_s := str(GameState.player_name)
-	if name_s == "":
-		name_s = "小白"
-	var lv_real: int = maxi(1, int(GameState.level))
-	_lv_l.text = "Lv.%d" % lv_real
-	_name_l.text = name_s
-
 	var max_hp: int = GameState.effective_max_hp()
 	var hp: int = mini(GameState.hp, max_hp)
 	_hp_bar.max_value = maxi(1, max_hp)
@@ -158,6 +159,19 @@ func refresh() -> void:
 	_exp_bar.max_value = 100
 	_exp_bar.value = clampf(float(GameState.xp) / float(need_xp) * 100.0, 0.0, 100.0)
 	_exp_bar.tooltip_text = "經驗 %d／%d" % [GameState.xp, need_xp]
+
+
+func refresh() -> void:
+	if not is_inside_tree():
+		return
+	var name_s := str(GameState.player_name)
+	if name_s == "":
+		name_s = "小白"
+	var lv_real: int = maxi(1, int(GameState.level))
+	_lv_l.text = "Lv.%d" % lv_real
+	_name_l.text = name_s
+
+	refresh_vitals()
 
 	var claim := 0
 	if Engine.get_main_loop() is SceneTree:
