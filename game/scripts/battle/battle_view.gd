@@ -776,6 +776,8 @@ func _hide_size_compare() -> void:
 
 func _process(delta: float) -> void:
 	_tick_coach(delta)
+	if _parry_note_left > 0.0:
+		_parry_note_left = maxf(0.0, _parry_note_left - delta)
 	if _shake > 0.0:
 		_shake = maxf(0.0, _shake - delta)
 		arena.position = Vector2(randf_range(-4, 4), randf_range(-3, 3)) * (_shake * 8.0)
@@ -1255,8 +1257,9 @@ func _update_parry_countdown(e: BattleUnit) -> void:
 		countdown.add_theme_color_override("font_color", Color(0.4, 1.0, 0.45))
 		countdown_sub.text = "現在按 J 或滑鼠左鍵！"
 		countdown_sub.add_theme_color_override("font_color", Color(0.6, 1.0, 0.65))
-		parry_hint.text = "格擋時機！（剩餘 %.1f 秒）" % remain
-		parry_hint.modulate = Color(0.5, 1.0, 0.5)
+		if _parry_note_left <= 0.0:
+			parry_hint.text = "格擋時機！（剩餘 %.1f 秒）" % remain
+			parry_hint.modulate = Color(0.5, 1.0, 0.5)
 		if _last_cd_bucket != 0:
 			_last_cd_bucket = 0
 			_pulse_countdown()
@@ -1266,14 +1269,28 @@ func _update_parry_countdown(e: BattleUnit) -> void:
 		countdown.add_theme_color_override("font_color", Color(1, 0.85, 0.3))
 		countdown_sub.text = "王者斬蓄力中… %.1f 秒後可格擋" % maxf(0.0, remain - BattleSim.PARRY_WINDOW)
 		countdown_sub.add_theme_color_override("font_color", Color(1, 0.7, 0.55))
-		parry_hint.text = "準備：倒數到「格擋」再按"
-		parry_hint.modulate = Color(1, 0.55, 0.45)
+		if _parry_note_left <= 0.0:
+			parry_hint.text = "準備：倒數到「格擋」再按"
+			parry_hint.modulate = Color(1, 0.55, 0.45)
 		if bucket != _last_cd_bucket:
 			_last_cd_bucket = bucket
 			_pulse_countdown()
 
 	## 小字顯示精確剩餘
 	countdown_sub.text += "\n(出手倒數 %.1fs)" % display_sec
+
+
+## 格擋回饋短暫蓋掉提示條。倒數每幀都在寫 parry_hint，
+## 所以要記一個到期時間，讓 _update_parry_countdown 在期間內別覆蓋回去。
+var _parry_note_left: float = 0.0
+
+
+func _flash_parry_note(text: String, col: Color) -> void:
+	if parry_hint == null:
+		return
+	parry_hint.text = text
+	parry_hint.modulate = col
+	_parry_note_left = 0.9
 
 
 func _pulse_countdown() -> void:
@@ -1418,6 +1435,20 @@ func _on_telemetry_battle_finished(won: bool) -> void:
 func _on_event(kind: String, data: Dictionary) -> void:
 	AudioManager.on_battle_event(kind, data)
 	match kind:
+		"parry_early":
+			## 「差一點」——機會還在，要講清楚，不然玩家以為格擋壞了
+			_append_log("[color=#fc8]太早了 · 等倒數變綠[/color]")
+			AudioManager.play("ui", 0.9, -8.0)
+			_flash_parry_note("太早了", Color(1.0, 0.78, 0.45))
+		"parry_whiff":
+			## 機會用掉了：這一次前搖已經沒有第二下
+			_append_log("[color=#e88]揮空了 · 這一擊擋不掉[/color]")
+			AudioManager.play("miss", 1.0, -6.0)
+			_flash(player_body, Color(1.0, 0.55, 0.45))
+			_shake = 0.12
+			_flash_parry_note("揮空 · 這一擊沒機會了", Color(1.0, 0.5, 0.42))
+		"parry_spent":
+			_flash_parry_note("這一擊的機會用完了", Color(0.85, 0.6, 0.55))
 		"attack_swing":
 			var aid := str(data.get("id", ""))
 			_lunge(aid)

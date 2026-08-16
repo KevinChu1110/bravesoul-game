@@ -41,6 +41,9 @@ var heal_pct: float = 0.0
 var is_boss: bool = false
 var king_slash_cd: float = 0.0
 var telegraph_active: bool = false
+## 這次前搖玩家已經按過格擋了嗎。每次前搖開始時清掉。
+## 「一次前搖只有一次機會」就靠這一格 —— 見 BattleSim.try_react()。
+var parry_used: bool = false
 var telegraph_timer: float = 0.0
 
 ## 白霧戰

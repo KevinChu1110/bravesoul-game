@@ -12,6 +12,15 @@ const KING_SLASH_WINDUP := 1.85  ## 較長前搖，方便看倒數
 const PARRY_WINDOW := 0.85      ## 可格擋窗（出手前這段都算成功）
 const KING_SLASH_CD := 8.0
 
+## 「差一點」的寬限：窗開之前這麼久按下去，算按早了但**不算用掉機會**。
+##
+## 沒有這條的話，一次前搖一次機會會變成在罰手速：量過，每次前搖都早按 0.15 秒的玩家
+## 跟無腦連按的人拿到一樣的成績（都是 0% 勝率）。那不是在教時機。
+## 有了寬限，按早一點點的人收到「太早了」的回饋、機會還在，補按仍然接得住；
+## 而連按的人第一下必定落在寬限之外（前搖一開始就按），機會照樣花掉。
+const PARRY_EARLY_GRACE := 0.35
+
+
 var units: Dictionary = {}  ## id -> BattleUnit
 var time: float = 0.0
 var finished: bool = false
@@ -591,6 +600,7 @@ func _step_abo_slam(dt: float) -> void:
 	a.state = BattleUnit.State.WINDUP
 	a.state_timer = 1.2
 	a.telegraph_active = true
+	a.parry_used = false
 	a.telegraph_timer = 1.2
 	var foes: Array = living_of(BattleUnit.Team.PLAYER)
 	if not foes.is_empty():
@@ -663,6 +673,7 @@ func _step_boar_charge(dt: float) -> void:
 	b.state = BattleUnit.State.WINDUP
 	b.state_timer = 1.45
 	b.telegraph_active = true
+	b.parry_used = false
 	b.telegraph_timer = 1.45
 	var foes: Array = living_of(BattleUnit.Team.PLAYER)
 	if not foes.is_empty():
@@ -775,6 +786,7 @@ func _start_king_slash(u: BattleUnit) -> void:
 	u.state = BattleUnit.State.WINDUP
 	u.state_timer = KING_SLASH_WINDUP
 	u.telegraph_active = true
+	u.parry_used = false
 	u.telegraph_timer = KING_SLASH_WINDUP
 	var foes: Array = living_of(BattleUnit.Team.PLAYER)
 	if not foes.is_empty():
@@ -784,17 +796,80 @@ func _start_king_slash(u: BattleUnit) -> void:
 	_emit("state", {"id": u.id, "state": "telegraph"})
 
 
-## 統一反應鍵：場地機制窗 or Boss 前搖格擋
+## 玩家現在按下去有沒有東西可以接。給 UI 用（顯示倒數、變綠）。
+func parry_window_open() -> bool:
+	if sim_paused or finished:
+		return false
+	if hazard_phase == "window" and not hazard_reacted:
+		return true
+	for u in units.values():
+		if u.is_boss and u.telegraph_active and u.state == BattleUnit.State.WINDUP:
+			if u.state_timer <= _parry_win_for(u) and u.state_timer > 0.0:
+				return true
+	return false
+
+
+## 統一反應鍵：場地機制窗 or Boss 前搖格擋。
+##
+## **一次前搖只有一次機會。**
+##
+## 為什麼要有這條規則：實測過，「完美時機」跟「每 0.1 秒狂按」的結果一模一樣
+## —— 雷歐戰兩者都成功格擋 10.18 次、勝率都是 97.8%，差別只有按 10 下還是 658 下。
+## 空揮零代價的時候，看倒數這件事就沒有理由做，整個遊戲最核心的機制等於不存在。
+##
+## 規則：Boss 舉起手（前搖開始）到揮下來之間，玩家按的**第一下**就是這次的答案。
+## 按在窗內＝格擋成功；按早了＝這次前搖沒了，下次再來。
+##
+## 為什麼是「一次機會」而不是「空揮鎖 N 秒」：鎖時間的版本量過，
+## 連按確實壓到 0 次格擋，但「手快按早了一下、之後在窗內補按」的玩家
+## 也一起被壓到 0% 勝率 —— 那是在罰手速，不是在教時機。
+## 一次前搖一次機會的代價剛好落在「這一次」上：連按的人每次前搖都把機會
+## 花在第一下（必定在窗外），而按早的人只損失那一次前搖，下一次仍是乾淨的。
+##
+## 罰則刻意不扣血。目的是讓時機變得有意義，不是懲罰玩家。
 func try_react() -> bool:
 	if sim_paused:
 		return false
-	## 1) 火圈／時鐘等 window
+	## 1) 火圈／時鐘等 window：機制窗本來就只結算一次（hazard_reacted）
 	if hazard_phase == "window" and not hazard_reacted:
 		hazard_reacted = true
 		_resolve_hazard(true)
 		return true
-	## 2) Boss 前搖格擋
-	return try_parry()
+	## 2) Boss 前搖：找正在舉手的那一隻
+	var tel := _telegraphing_boss()
+	if tel == null:
+		## 沒有任何前搖 —— 按了也沒東西可接，但也沒東西可以浪費
+		_emit("parry_idle", {})
+		return false
+	if tel.parry_used:
+		_emit("parry_spent", {"boss": tel.id})
+		return false
+	if try_parry():
+		tel.parry_used = true
+		return true
+	## 差一點：窗還沒開、但已經很接近了 —— 給回饋，不扣機會
+	if tel.state_timer <= _parry_win_for(tel) + PARRY_EARLY_GRACE:
+		_emit("parry_early", {"boss": tel.id})
+		return false
+	tel.parry_used = true
+	_emit("parry_whiff", {"boss": tel.id})
+	return false
+
+
+## 這隻 Boss 的格擋窗長度（阿波重拳／石拳對撞略寬）
+func _parry_win_for(u: BattleUnit) -> float:
+	if abo_mode and u.id == "abo":
+		return 0.95
+	if boar_mode and u.id == "boar":
+		return 1.0
+	return PARRY_WINDOW
+
+
+func _telegraphing_boss() -> BattleUnit:
+	for u in units.values():
+		if u.is_boss and u.is_alive() and u.telegraph_active and u.state == BattleUnit.State.WINDUP:
+			return u
+	return null
 
 
 ## 玩家在格擋窗按 parry
@@ -803,12 +878,7 @@ func try_parry() -> bool:
 		return false
 	for u in units.values():
 		if u.is_boss and u.telegraph_active and u.state == BattleUnit.State.WINDUP:
-			## 阿波重拳／石拳對撞窗略寬
-			var win := PARRY_WINDOW
-			if abo_mode and u.id == "abo":
-				win = 0.95
-			elif boar_mode and u.id == "boar":
-				win = 1.0
+			var win := _parry_win_for(u)
 			if u.state_timer <= win and u.state_timer > 0.0:
 				_perfect_parry(u)
 				return true
