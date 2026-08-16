@@ -74,10 +74,10 @@ game/assets/sprites/player/_backup_hero/
 就是為了這個 —— git 沒辦法把「已被排除的目錄」底下的檔案再放行，
 只排除內容才留得住 `!**/.gdignore` 這條例外。
 
-### ⚠ 目前還有 89.77 MB 的生成物是被追蹤的
+### ✅ 89.77 MB 的生成物已退出版控（2026-08-16）
 
 `.gitignore` 對**已經追蹤**的檔案沒有效果。以下 173 個檔案是在規則加上去之前
-就進了版控，要手動退出來：
+就進了版控，已經手動退出來：
 
 | 目錄 | 檔數 | 大小 |
 |---|---:|---:|
@@ -94,23 +94,35 @@ git rm -r --cached game/assets/sprites/_gen_content \
                    game/assets/sprites/maps/_gen \
                    game/assets/sprites/maps/_gen_world \
                    game/assets/sprites/maps/_backup_20260813
+# 每個目錄裡的 .gdignore 要留著，用 -f 補回來（.gitignore 會擋一般的 add）
+git add -f game/assets/sprites/*/.gdignore game/assets/sprites/maps/*/.gdignore
 ```
 
 `--cached` 只從索引移除，磁碟上的檔案留著。做完之後
-`game/assets` 的追蹤量從 194.1 MB 降到 104.3 MB（−46%），CI 的 clone 與
+`game/assets` 的追蹤量從 194.1 MB 降到 106 MB（−45%），CI 的 clone 與
 import 都少掉將近一半。
 
-注意這只讓**之後**的 clone 變小；歷史裡的 blob 還在，`.git` 不會縮。
-真要縮就得 `git filter-repo` 重寫歷史，那是另一件事，要挑沒有其他分支在跑的時機做。
+**注意 `.gdignore` 會被一起 `git rm` 掉**，那五個空檔要補回版控，
+否則本機一開專案 Godot 就會去 import 那三百多 MB 的中間產物。
 
-### 另外有 61 個 `.import` 該補進版控
+### ✅ 61 個 `.import` 已補進版控（2026-08-16）
 
-這些 PNG 已經追蹤了，但它們的 `.import` 沒有 —— 主要在 `equipment/`、`props/`、
-`player/weapons/`。補進去：
+這些 PNG 早就追蹤了，但它們的 `.import` 沒有 —— 主要在 `equipment/`、`props/`、
+`player/weapons/`。補的方式：
 
 ```bash
-git add game/assets/sprites/**/*.png.import
+git status --short | grep '^??' | grep '\.png\.import$' \
+  | sed 's/^?? //' | tr '\n' '\0' | xargs -0 git add
 ```
+
+（不要直接寫 `git add game/assets/sprites/**/*.png.import`：那個 glob 會掃到
+`_gen*` 目錄裡的 `.import`，被 `.gitignore` 擋下來時整個指令會失敗。）
+
+### ✅ 歷史已重寫（2026-08-16）
+
+上面兩件事只讓**之後**的 clone 變小，歷史裡的 blob 還在。已用 `git filter-repo`
+把那 173 個路徑從全部歷史刪掉，`.git` 從 439 MB 降下來。細節與重跑指令見
+[REPO_HISTORY.md](REPO_HISTORY.md)。
 
 ---
 
@@ -197,7 +209,6 @@ python3 tools/compress_sprites.py --import-mode --quality 0 --apply
 4. `git add` 時 **PNG 和 `.import` 要成對**。
 5. 跑 `python3 tools/compress_sprites.py --import-mode --apply`，
    讓新的大圖也套上分級壓縮。
-6. `git add -A game/assets` 現在是安全的 —— 加上排除規則後，未追蹤檔從
-   832 個掉到 74 個（61 個該補的 `.import` ＋ 13 個 `.gdignore`），
-   生成的 PNG 一張都進不來。規則改動之後可以用
-   `git add -An game/assets` 再驗一次。
+6. `git add -A game/assets` 現在是安全的 —— 加上排除規則、且 61 個 `.import`
+   都補完之後，`git add -An game/assets` 應該是**零輸出**，生成的 PNG 一張都進不來。
+   規則改動之後用那道 dry-run 再驗一次；有輸出就代表規則破了，先查清楚再 add。
