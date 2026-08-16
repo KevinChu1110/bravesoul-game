@@ -110,6 +110,15 @@ func _go_telemetry_consent() -> void:
 
 `supabase/telemetry.sql`（跑在 `schema.sql`、`economy.sql` 之後，可重複執行）
 
+**2026-08-16 已部署到正式專案。** 4 張表、5 張視圖、3 支函式；
+權限實測過：`anon` 進得去 `telemetry_ingest`，讀不到 `telemetry_events`、
+呼叫不到 `telemetry_prune`。冒煙測試也驗過清洗確實生效 ——
+白名單外的事件名整筆丟掉、`player_name` 這種自由文字欄位被洗掉，
+留下的只有白名單裡的短 token 與數字。
+
+還沒設定的：`telemetry_prune()` 的每日排程（Supabase → Database → Cron）。
+不設也不會壞，只是資料會一直留著。
+
 | 物件 | 作用 |
 |---|---|
 | `telemetry_events` | 事件本體。RLS 開著、沒有任何 policy、表權限也收乾淨 |
