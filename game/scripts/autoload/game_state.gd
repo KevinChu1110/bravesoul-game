@@ -154,6 +154,25 @@ func effective_variance() -> float:
 	return dmg_variance
 
 
+## 出手速度。**要用這支，不要直接讀 speed。**
+##
+## 這個數字原本有三個來源、零個消費者：
+##   1. 升級 —— 根本沒加過，Lv1 到 Lv40 都是 10
+##   2. 武器流派 —— weapon_classes.json 每一種都寫了 speed（鏢 +3、鎚 −1），
+##      weapon_class_bonuses() 也老實算出來，然後沒有人讀
+##   3. battle_view —— 直接抓 GameState.speed，繞過上面兩者
+## 結果是出手節奏從頭到尾固定，而疾影 16、白霧 12 這些 Boss 的速度是寫死的，
+## 玩家永遠追不上。「選流派」對手感的影響也等於零。
+##
+## 裝備目前沒有 speed 欄位（equipment.json 裡沒有），所以這裡不接 —— 
+## 要接的是資料而不是程式，補了資料這支自然要加上 equip_bonus_speed()。
+func effective_speed() -> int:
+	var sp := speed
+	var wb := weapon_class_bonuses()
+	sp += int(wb.get("speed", 0))
+	return maxi(1, sp)
+
+
 func equip_bonus_atk() -> int:
 	return int(_equip_bonus().get("atk", 0))
 
@@ -240,12 +259,18 @@ func add_xp(n: int) -> Dictionary:
 			def_stat += 1
 		if level % 5 == 0:
 			crit_rate += 0.5
+		## 每 4 級 +1 出手速度。ATB 的填充是 0.6 + speed×0.04，
+		## 所以每點速度約等於多 4% 的出手次數；Lv40 累積到 +9（10→19），
+		## 剛好在最快的 Boss（疾影 16）之上而不是碾過去。
+		if level % 4 == 0:
+			speed += 1
 		if pid in ["hammer", "crystal"]:
 			max_hp += 2
 			hp = mini(effective_max_hp(), hp + 2)
 		if pid in ["sword", "axe", "gun"] and level % 2 == 0:
 			atk += 1
-		msgs.append("等級提升 → Lv%d（HP %d · 攻 %d · 防 %d）" % [level, max_hp, atk, def_stat])
+		var sp_s := " · 速 %d" % speed if level % 4 == 0 else ""
+		msgs.append("等級提升 → Lv%d（HP %d · 攻 %d · 防 %d%s）" % [level, max_hp, atk, def_stat, sp_s])
 	return {"gained": gained, "levels": levels, "messages": msgs}
 
 

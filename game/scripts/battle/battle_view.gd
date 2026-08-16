@@ -90,7 +90,7 @@ func setup(mode: String) -> void:
 		"hp": mini(GameState.hp, max_h),
 		"atk": GameState.effective_atk(),
 		"def": GameState.effective_def(),
-		"speed": GameState.speed,
+		"speed": GameState.effective_speed(),
 		"can_skill": GameState.skill_slash_lv >= 1 or mode == "wolf",
 		"slash_lv": maxi(1, GameState.skill_slash_lv),
 		"crit": GameState.effective_crit(),

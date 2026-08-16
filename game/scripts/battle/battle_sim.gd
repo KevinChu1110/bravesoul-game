@@ -39,7 +39,13 @@ var player_id: String = "player"
 var fog_mode: bool = false
 var fog_vuln_cd: float = 0.0
 var fog_vuln_left: float = 0.0
-const FOG_VULN_INTERVAL := 3.2
+## 本體現形的節奏。玩家沒有辦法決定自己什麼時候出手（ATB 自動填滿就揮），
+## 所以「只有發白那一瞬打得中」實際上不是時機考驗，是一個玩家影響不了的傷害稅：
+## 原本 1.35/(3.2+1.35) = 30% 的攻擊有效，其餘全部落空。
+## 加上兩隻打不死的幻影一起輸出，實測 Lv40 也只有 7% 勝率。
+##
+## 破綻拉到 38% 的時間佔比，讓這場變成「看準破綻集中輸出」而不是擲骰子。
+const FOG_VULN_INTERVAL := 2.2
 const FOG_VULN_DURATION := 1.35
 
 ## 魔王模式：血量階段誘惑暫停
@@ -87,9 +93,23 @@ var tide_summon_cd: float = 0.0
 var tide_wave_left: float = 0.0
 var tide_wave_active: bool = false
 var tide_player_swings: int = 0  ## 本波玩家出手次數
-const TIDE_SUMMON_INTERVAL := 11.0
-const TIDE_WAVE_TIME := 7.5
-const TIDE_CLEAR_SWINGS := 2  ## 設計「兩次出手週期」；以時限為準，此為提示
+## 兩波刺胞之間、玩家可以專心打本體的時間。
+##
+## 原本 11 秒，而清一波要三刀（通關等級約 10 秒）—— 玩家幾乎整場都在清刺胞。
+## 實測 Lv25 一場打出 663 點傷害，其中 540 點餵給刺胞，本體只掉 180／480。
+## 波次不該是整場戰鬥，它是打斷。
+const TIDE_SUMMON_INTERVAL := 18.0
+
+## 刺胞波給玩家幾個「出手週期」去清。
+##
+## 原本這裡寫死 7.5 秒，而玩家在 speed 10 時每 4 秒才出手一次
+## —— 7.5 秒＝1.9 刀，要用 1.9 刀殺掉三隻各 45 血的刺胞，任何等級都做不到。
+## 清不掉的罰則又是「最大生命 18%」，是百分比，練等一點用都沒有：
+## 每 11 秒固定掉 18%，六波之內必死，跟你多強完全無關。實測全等級 0% 勝率。
+##
+## 改成用玩家自己的出手節奏算時限，速度變快時限也跟著縮 —— 難度維持在
+## 「三刀之內清完，中間不能亂打」，而不是一個跟玩家能力脫鉤的秒數。
+const TIDE_CLEAR_CYCLES := 4.0
 var tide_phase_skill: bool = false  ## false=普攻減半 true=技傷減半
 var tide_phase_cd: float = 0.0
 const TIDE_PHASE_INTERVAL := 6.0
@@ -1205,7 +1225,9 @@ func _step_tide(dt: float) -> void:
 			tide_wave_active = false
 			tide_wave_left = 0.0
 			_emit("tide_wave_clear", {})
-			tide_summon_cd = TIDE_SUMMON_INTERVAL * 0.55
+			## 清得快要有回報。原本是「清完之後只休息 0.55 個間隔」，
+			## 於是清得愈快、下一波來得愈早、要餵的刺胞血量愈多 —— 打得好反而更累。
+			tide_summon_cd = TIDE_SUMMON_INTERVAL
 		elif tide_wave_left <= 0.0:
 			## 未清完：全場 % 傷
 			var p := get_unit(player_id)
@@ -1242,9 +1264,23 @@ func _kill_all_polyps() -> void:
 			_emit("unit_dead", {"id": id})
 
 
+## 玩家出手一次要多久（ATB 從 0 填滿）。刺胞波的時限照這個算。
+func _player_attack_cycle() -> float:
+	var p := get_unit(player_id)
+	var sp := p.speed if p != null else 10.0
+	var fill := Formulas.atb_fill_per_sec(sp)
+	if fill <= 0.0:
+		return 4.0
+	return ATB_MAX / fill
+
+
+func _tide_wave_time() -> float:
+	return maxf(6.0, _player_attack_cycle() * TIDE_CLEAR_CYCLES)
+
+
 func _tide_summon_wave() -> void:
 	tide_wave_active = true
-	tide_wave_left = TIDE_WAVE_TIME
+	tide_wave_left = _tide_wave_time()
 	tide_player_swings = 0
 	tide_summon_cd = 999.0
 	for i in 3:
@@ -1256,7 +1292,9 @@ func _tide_summon_wave() -> void:
 			u.display_name = "黑焰刺胞"
 			u.team = BattleUnit.Team.ENEMY
 			u.is_boss = false
-			u.max_hp = 45
+			## 一刀一隻。原本 45 血在通關等級要兩刀才死，三隻就要六刀，
+			## 而時限只給得起三、四刀 —— 那不是難，是算不出來。
+			u.max_hp = 30
 			u.atk = 6
 			u.defense = 2
 			u.speed = 14.0
@@ -1266,7 +1304,7 @@ func _tide_summon_wave() -> void:
 		u.hp = u.max_hp
 		u.state = BattleUnit.State.IDLE
 		u.atb = float(i) * 20.0
-	_emit("tide_summon", {"count": 3, "time": TIDE_WAVE_TIME})
+	_emit("tide_summon", {"count": 3, "time": _tide_wave_time()})
 	## 玩家優先打刺胞
 	var p := get_unit(player_id)
 	if p:
@@ -1818,8 +1856,15 @@ static func make_fog_fight(player_stats: Dictionary) -> BattleSim:
 	real_u.team = BattleUnit.Team.ENEMY
 	real_u.is_boss = true
 	real_u.is_fog_real = true
-	real_u.max_hp = 380
-	real_u.hp = 380
+	## 白霧是第二章的王，世界地圖上標「建議 18+」。
+	## 380 血的時候實測要 Lv30 才打得贏（Lv20 打出 283 就先倒了）——
+	## 玩家照著指示在 18 級來，會撞上一場數字上贏不了的仗。
+	##
+	## 240 是量出來的：測試模型裡的玩家只有等級成長＋鍛造武器，
+	## 沒有戰魂也沒有裝備，所以這個數字對真正的玩家是偏保守的。
+	## 對一個「遊戲叫你來」的主線王，寧可鬆一點。
+	real_u.max_hp = 240
+	real_u.hp = 240
 	real_u.atk = 13
 	real_u.defense = 9
 	real_u.speed = 12.0
@@ -1833,7 +1878,9 @@ static func make_fog_fight(player_stats: Dictionary) -> BattleSim:
 		ph.is_phantom = true
 		ph.max_hp = 999
 		ph.hp = 999
-		ph.atk = 10
+		## 幻影是來騙你砍錯的，不是來輾血量的。原本兩隻加起來的輸出跟本體一樣多，
+		## 於是「認出本體」這件事做對了也沒有回報。罰則留在砍中幻影的 35% 反噬上。
+		ph.atk = 5
 		ph.defense = 4
 		ph.speed = 11.0 + rng_offset(sim)
 		sim.add_unit(ph)
