@@ -366,6 +366,14 @@ static func explore_entity_path(entity_id: String) -> String:
 			return "%s/bosses/leo_icon.png" % ROOT
 		"fog_gate":
 			return "%s/bosses/fog_icon.png" % ROOT
+		"scar_boss":
+			return "%s/bosses/scar_lord_icon.png" % ROOT
+		"mirror_boss":
+			return "%s/bosses/mirror_wraith_icon.png" % ROOT
+		"wreck_boss":
+			return "%s/bosses/wreck_captain_icon.png" % ROOT
+		"duanye":
+			return "%s/npcs/duanye.png" % ROOT
 		"trial_hall":
 			return "%s/bosses/abo_icon.png" % ROOT
 		"falcon_nest":
@@ -393,8 +401,6 @@ static func explore_entity_path(entity_id: String) -> String:
 			return "%s/props/tower.png" % ROOT
 		"gate_bell":
 			return "%s/props/bell.png" % ROOT
-		"tea":
-			return "%s/props/tea.png" % ROOT
 		"herb_slope":
 			return "%s/props/herb.png" % ROOT
 		"dock":
@@ -403,40 +409,110 @@ static func explore_entity_path(entity_id: String) -> String:
 			return "%s/props/forge.png" % ROOT
 		"path_mist", "path_dojo", "path_forest", "path_coast", "path_tower", "path_tower_c5", "arrow_path", "cliff_path", "sign_east", "trail_mark":
 			return "%s/props/path.png" % ROOT
-		"treehouse", "inn", "hut_a", "hut_b", "market", "cart", "burnt_field":
+		"market", "cart", "burnt_field":
 			return "%s/props/camp.png" % ROOT
 		"look_back", "ash_pile", "dawn_glow":
 			return "%s/props/fire.png" % ROOT
-		"gate_arch", "milepost", "wall_notice":
-			return "%s/props/tower.png" % ROOT
 		"well", "fountain", "bench", "well_fog", "keep_well":
 			return "%s/props/well.png" % ROOT if ResourceLoader.exists("%s/props/well.png" % ROOT) else "%s/props/save.png" % ROOT
 		"rubble", "road_stone", "bush_a", "bush_b", "scarecrow", "rock", "ruin_pillar":
 			return "%s/props/rock.png" % ROOT if ResourceLoader.exists("%s/props/rock.png" % ROOT) else "%s/props/herb.png" % ROOT
 		"tree", "pine", "treehouse":
 			return "%s/props/tree.png" % ROOT if ResourceLoader.exists("%s/props/tree.png" % ROOT) else "%s/props/camp.png" % ROOT
-		"barrel", "crate":
+		"barrel", "crate", "hunt_recycler":
 			return "%s/props/barrel.png" % ROOT if ResourceLoader.exists("%s/props/barrel.png" % ROOT) else "%s/props/camp.png" % ROOT
 		"lantern", "beacon":
 			return "%s/props/lantern.png" % ROOT if ResourceLoader.exists("%s/props/lantern.png" % ROOT) else "%s/props/fire.png" % ROOT
-		"sign", "sign_board", "milepost", "milepost_b":
+		"sign", "sign_board", "milepost", "milepost_b", "wall_notice", "hunt_board", "hunt_start":
 			return "%s/props/sign.png" % ROOT if ResourceLoader.exists("%s/props/sign.png" % ROOT) else "%s/props/path.png" % ROOT
 		"campfire", "refugee_fire":
 			return "%s/props/campfire.png" % ROOT if ResourceLoader.exists("%s/props/campfire.png" % ROOT) else "%s/props/fire.png" % ROOT
-		"shrine", "shrine_stub", "altar":
+		"shrine", "shrine_stub", "altar", "message_stone":
 			return "%s/props/shrine.png" % ROOT if ResourceLoader.exists("%s/props/shrine.png" % ROOT) else "%s/props/bell.png" % ROOT
-		"boat", "boat_wreck", "dock":
+		"boat", "boat_wreck":
 			return "%s/props/boat.png" % ROOT if ResourceLoader.exists("%s/props/boat.png" % ROOT) else "%s/props/dock.png" % ROOT
 		"hut_a", "hut_b", "hut_c", "inn", "dorm", "stable", "chapel":
 			return "%s/props/hut.png" % ROOT if ResourceLoader.exists("%s/props/hut.png" % ROOT) else "%s/props/camp.png" % ROOT
-		"gate_arch", "tower_gate", "leo_gate":
+		"gate_arch", "tower_gate":
 			return "%s/props/gate.png" % ROOT if ResourceLoader.exists("%s/props/gate.png" % ROOT) else "%s/props/tower.png" % ROOT
-		"banner", "flag":
+		"banner":
 			return "%s/props/banner.png" % ROOT if ResourceLoader.exists("%s/props/banner.png" % ROOT) else "%s/props/flag.png" % ROOT
 		"merchant":
 			return "%s/npcs/merchant.png" % ROOT
 		_:
-			return ""
+			return _fallback_prop_path(entity_id)
+
+
+## 上面那張表沒列到的 entity 落到這裡。
+##
+## 為什麼需要這一層：地圖裡有 373 種 entity，明確列出來的只有 100 出頭；
+## 其餘的在畫面上是純色方塊。一個一個補太慢也補不完，而且大多數缺口
+## 根本不需要專屬圖 —— 「回岔路」「往塔頂」「石堆」用既有的那幾張就講得清楚。
+##
+## 規則走 **底線切出來的詞**，不是字串包含。用包含的話 forest 裡有 ore、
+## store 裡有 tor，會把森林畫成石頭。切詞之後 to_forest_ruins 的詞是
+## [to, forest, ruins]，只會命中第一個 to（導覽點）。
+##
+## 匹配不到就回空字串，讓 ExploreView 照舊畫純色方塊 —— 那是誠實的表示
+## 「這個東西還沒有圖」，比硬湊一張不相干的圖好。
+const _HEAD_PROP := {
+	"back": "exit", "exit": "exit", "to": "exit", "leave": "exit",
+	"path": "path", "trail": "path", "climb": "path", "cross": "path", "road": "path",
+	"save": "save",
+}
+
+## 順序有意義：先比對細的再比對粗的。campfire 要排在 camp 前面，
+## 不然營火會變成營帳。
+const _TOKEN_PROP := [
+	[["grave", "tomb", "shrine", "altar", "statue"], "shrine"],
+	[["campfire", "bonfire"], "campfire"],
+	[["camp", "tent"], "camp"],
+	[["fire", "ember", "flame", "torch"], "fire"],
+	[["hut", "house", "inn", "dorm", "cabin", "mill", "barn", "shed", "room", "hall"], "hut"],
+	[["pine"], "pine"],
+	[["tree", "wood", "orchard", "willow", "canopy", "log", "bamboo", "reed"], "tree"],
+	[["rock", "stone", "bone", "rubble", "ore", "pile", "boulder", "vein", "obsidian"], "rock"],
+	[["sign", "notice", "board", "post", "milepost", "plaque", "mark"], "sign"],
+	[["gate", "arch", "door", "span"], "gate"],
+	[["well", "pond", "water", "spring", "fountain", "pool"], "well"],
+	[["boat", "dock", "ship", "wreck", "raft", "hull", "mast", "net"], "boat"],
+	[["banner", "flag"], "banner"],
+	[["barrel", "crate", "cart", "box", "wagon", "rack"], "barrel"],
+	[["lantern", "lamp", "beacon", "candle", "incense"], "lantern"],
+	[["tower", "keep", "spire", "column", "pillar"], "tower"],
+	[["bell", "chime"], "bell"],
+	[["forge", "anvil", "smith"], "forge"],
+	[["herb", "grass", "moss", "bush", "field", "wheat", "crop", "scare", "bloom"], "herb"],
+	[["cliff", "ridge", "slope", "peak", "canyon", "ravine"], "cliff"],
+	[["nest"], "nest"],
+	[["sword", "blade", "weapon", "armor"], "sword"],
+	[["dummy", "training", "spar"], "dummy"],
+	[["tea"], "tea"],
+]
+
+
+static func _fallback_prop_path(entity_id: String) -> String:
+	var toks := entity_id.split("_", false)
+	if toks.is_empty():
+		return ""
+	var name := ""
+	if _HEAD_PROP.has(toks[0]):
+		name = str(_HEAD_PROP[toks[0]])
+	else:
+		for rule in _TOKEN_PROP:
+			var keys: Array = rule[0]
+			var hit := false
+			for tk in toks:
+				if tk in keys:
+					hit = true
+					break
+			if hit:
+				name = str(rule[1])
+				break
+	if name == "":
+		return ""
+	var path := "%s/props/%s.png" % [ROOT, name]
+	return path if ResourceLoader.exists(path) else ""
 
 
 static func explore_entity_tex(entity_id: String) -> Texture2D:
