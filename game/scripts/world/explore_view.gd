@@ -367,6 +367,12 @@ func _build_chrome() -> void:
 	add_child(_scroll)
 
 	_floor = TextureRect.new()
+	## 底圖是手繪插畫不是像素畫（town_bg 有 63,141 種顏色、邊緣帶抗鋸齒），
+	## 而專案預設是 NEAREST。用 NEAREST 把它放大 2.3 倍（而且不是整數倍），
+	## 抗鋸齒的邊會被硬放大成階梯狀，石板描邊有的 2px 有的 3px —— 那就是
+	## 「看起來不精緻」的主因。畫過的圖要用 LINEAR。
+	## 玩家與 prop 是真像素畫，維持 NEAREST。
+	_floor.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	_floor.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_floor.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_floor.stretch_mode = TextureRect.STRETCH_SCALE
@@ -394,6 +400,7 @@ func _build_chrome() -> void:
 	_scroll.add_child(_floor_tint)
 
 	_banner = TextureRect.new()
+	_banner.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_banner.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
