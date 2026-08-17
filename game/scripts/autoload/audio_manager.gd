@@ -7,7 +7,7 @@ const BGM_DIR := "res://assets/audio/bgm"
 ## 由 tools/import_bgm.py 產生，見 docs/MEDIA.md
 const BGM_LOOPS_PATH := "res://assets/audio/bgm/loops.json"
 const POOL_SIZE := 8
-const BGM_FADE := 0.7
+const BGM_FADE := 1.1  ## 切曲更柔，少「突然換帶」
 
 var _streams: Dictionary = {}  ## sfx id -> AudioStream
 var _bgm_streams: Dictionary = {}  ## bgm id -> AudioStream
@@ -16,7 +16,7 @@ var _bgm_sources: Dictionary = {}  ## bgm id -> "ogg" | "wav"
 var _pool: Array = []  ## AudioStreamPlayer
 var _pool_i: int = 0
 var _sfx_db: float = -4.0
-var _bgm_db: float = -6.0  ## 新 BGM 偏暖 pad，略降避免刺耳
+var _bgm_db: float = -5.0  ## 悠揚版略抬一點，仍避免蓋過 SFX
 var _muted: bool = false
 var _bgm_muted: bool = false
 var _step_cd: float = 0.0

@@ -279,7 +279,7 @@ offset_bottom = 40.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 48
-text = "微末一格"
+text = "完美格擋"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -302,9 +302,7 @@ grow_vertical = 2
 [node name="SizeLabel" type="Label" parent="SizeCompare"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
-text = "體型對照
-[ 兔 ]          [ 聖獅·雷歐 ]
-  小                  大"
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 

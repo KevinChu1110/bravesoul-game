@@ -928,7 +928,7 @@ func _perfect_parry(boss: BattleUnit) -> void:
 	boss.state = BattleUnit.State.RECOVER
 	boss.state_timer = 1.2  ## 硬直
 	slowmo = 0.85
-	var banner := "微末一格"
+	var banner := "完美格擋"
 	if demon_mode:
 		banner = "微末到底"
 	elif abo_mode and boss.id == "abo":

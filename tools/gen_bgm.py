@@ -18,32 +18,20 @@ OUT = Path(__file__).resolve().parents[1] / "game" / "assets" / "audio" / "bgm"
 # ─── 各地區身分卡 ─────────────────────────────────────────
 # bars, root_midi, mode, bpm, energy, region_id
 TRACKS = {
-    # 標題：英雄銅管主題，中快，辨識度最高
-    "title":   (16, 60, "major",  118, 0.90, "title"),
-    # 翠谷村：慢一點、溫暖、幾乎無鼓、木笛感
-    "village": (16, 65, "major",   92, 0.55, "village"),
-    # 騎士堡：進行曲軍鼓 + 號角
-    "town":    (16, 62, "mixo",   112, 0.78, "town"),
-    # 荒路：穩定步伐低音 + 旅途動機
-    "road":    (16, 57, "dorian", 108, 0.72, "road"),
-    # 荒野：不安切分、偏暗
-    "wild":    (12, 58, "phryg",  120, 0.80, "wild"),
-    # 霧隱：極慢、稀疏、長延音、幾乎無鼓
-    "mist":    (16, 53, "minor",   72, 0.40, "mist"),
-    # 道場：規律打擊、短促音型
-    "dojo":    (12, 64, "dorian", 126, 0.82, "dojo"),
-    # 森林：高音空靈、琶音、輕
-    "forest":  (16, 67, "major",   98, 0.58, "forest"),
-    # 海岸：搖擺節奏、開闊五度
-    "coast":   (16, 59, "mixo",   104, 0.68, "coast"),
-    # 戰鬥：最快最密
-    "battle":  (16, 55, "minor",  148, 1.00, "battle"),
-    # Boss：厚重慢一點但巨大
-    "boss":    (16, 50, "phryg",  128, 1.00, "boss"),
-    # 塔：低沉儀式
-    "tower":   (16, 52, "minor",   88, 0.62, "tower"),
-    # 終章：溫暖大調、情緒收束
-    "ending":  (18, 60, "major",   96, 0.70, "ending"),
+    # 0.15.1 悠揚向：探索曲更慢、更長樂句、鼓更少；戰鬥／Boss 仍保留張力
+    "title":   (20, 60, "major",  100, 0.78, "title"),
+    "village": (20, 64, "major",   78, 0.48, "village"),
+    "town":    (18, 62, "mixo",    96, 0.62, "town"),
+    "road":    (18, 57, "dorian",  90, 0.58, "road"),
+    "wild":    (16, 58, "phryg",  100, 0.68, "wild"),
+    "mist":    (22, 53, "minor",   64, 0.38, "mist"),
+    "dojo":    (16, 64, "dorian", 108, 0.70, "dojo"),
+    "forest":  (20, 67, "major",   84, 0.50, "forest"),
+    "coast":   (20, 59, "mixo",    88, 0.55, "coast"),
+    "battle":  (16, 55, "minor",  138, 0.95, "battle"),
+    "boss":    (18, 50, "phryg",  118, 0.95, "boss"),
+    "tower":   (20, 52, "minor",   76, 0.52, "tower"),
+    "ending":  (22, 60, "major",   84, 0.62, "ending"),
 }
 
 
@@ -88,19 +76,19 @@ REGION = {
     # bass: soft|walk|drive|pulse|none
     # pad: warm|thin|dark|bright|none
     # stabs: bool, arp: bool, sidechain: float, bright: float cutoff factor
-    "title":   dict(drums="drive", lead="brass", bass="drive", pad="bright", stabs=True,  arp=False, sc=0.18, bright=1.2, crash=True),
-    "village": dict(drums="none",  lead="flute", bass="soft",  pad="warm",   stabs=False, arp=True,  sc=0.0,  bright=0.85, crash=False),
-    "town":    dict(drums="march", lead="horn",  bass="walk",  pad="thin",   stabs=True,  arp=False, sc=0.12, bright=1.05, crash=True),
-    "road":    dict(drums="soft",  lead="pulse", bass="walk",  pad="thin",   stabs=False, arp=False, sc=0.10, bright=0.95, crash=False),
-    "wild":    dict(drums="drive", lead="pulse", bass="drive", pad="dark",   stabs=True,  arp=False, sc=0.15, bright=0.9, crash=False),
-    "mist":    dict(drums="none",  lead="choir", bass="none",  pad="dark",   stabs=False, arp=False, sc=0.0,  bright=0.55, crash=False),
-    "dojo":    dict(drums="march", lead="pulse", bass="pulse", pad="none",   stabs=True,  arp=False, sc=0.14, bright=1.0, crash=False),
-    "forest":  dict(drums="soft",  lead="bell",  bass="soft",  pad="bright", stabs=False, arp=True,  sc=0.05, bright=1.15, crash=False),
-    "coast":   dict(drums="soft",  lead="flute", bass="walk",  pad="warm",   stabs=False, arp=True,  sc=0.08, bright=1.1, crash=False),
-    "battle":  dict(drums="battle",lead="power", bass="drive", pad="thin",   stabs=True,  arp=False, sc=0.25, bright=1.35, crash=True),
-    "boss":    dict(drums="battle",lead="power", bass="drive", pad="dark",   stabs=True,  arp=False, sc=0.22, bright=1.15, crash=True),
-    "tower":   dict(drums="soft",  lead="choir", bass="soft",  pad="dark",   stabs=False, arp=False, sc=0.05, bright=0.6, crash=False),
-    "ending":  dict(drums="soft",  lead="brass", bass="soft",  pad="warm",   stabs=False, arp=True,  sc=0.08, bright=1.0, crash=True),
+    "title":   dict(drums="soft",  lead="horn",  bass="soft",  pad="warm",   stabs=False, arp=True,  sc=0.06, bright=0.95, crash=False),
+    "village": dict(drums="none",  lead="flute", bass="soft",  pad="warm",   stabs=False, arp=True,  sc=0.0,  bright=0.80, crash=False),
+    "town":    dict(drums="soft",  lead="horn",  bass="soft",  pad="warm",   stabs=False, arp=False, sc=0.05, bright=0.92, crash=False),
+    "road":    dict(drums="none",  lead="flute", bass="soft",  pad="warm",   stabs=False, arp=True,  sc=0.0,  bright=0.88, crash=False),
+    "wild":    dict(drums="soft",  lead="pulse", bass="walk",  pad="dark",   stabs=False, arp=False, sc=0.08, bright=0.85, crash=False),
+    "mist":    dict(drums="none",  lead="choir", bass="none",  pad="dark",   stabs=False, arp=False, sc=0.0,  bright=0.50, crash=False),
+    "dojo":    dict(drums="soft",  lead="pulse", bass="soft",  pad="thin",   stabs=False, arp=False, sc=0.06, bright=0.92, crash=False),
+    "forest":  dict(drums="none",  lead="bell",  bass="soft",  pad="bright", stabs=False, arp=True,  sc=0.0,  bright=1.05, crash=False),
+    "coast":   dict(drums="none",  lead="flute", bass="soft",  pad="warm",   stabs=False, arp=True,  sc=0.0,  bright=1.0, crash=False),
+    "battle":  dict(drums="battle",lead="power", bass="drive", pad="thin",   stabs=True,  arp=False, sc=0.20, bright=1.2, crash=True),
+    "boss":    dict(drums="drive", lead="power", bass="drive", pad="dark",   stabs=True,  arp=False, sc=0.18, bright=1.05, crash=True),
+    "tower":   dict(drums="none",  lead="choir", bass="soft",  pad="dark",   stabs=False, arp=False, sc=0.0,  bright=0.55, crash=False),
+    "ending":  dict(drums="none",  lead="flute", bass="soft",  pad="warm",   stabs=False, arp=True,  sc=0.0,  bright=0.95, crash=False),
 }
 
 
@@ -316,10 +304,10 @@ def motif_for(region: str, bar_i: int) -> list[tuple[int, float]]:
             [(0, 1), (4, 0.5), (5, 0.5), (7, 1), (-1, 0.5), (5, 0.5)],
         ],
         "village": [
-            [(0, 1), (2, 1), (4, 1.5), (-1, 0.5)],
-            [(5, 1), (4, 1), (2, 1), (0, 1)],
-            [(2, 0.5), (4, 0.5), (5, 1), (4, 1), (2, 1)],
-            [(0, 2), (-1, 1), (4, 1)],
+            [(0, 2), (2, 1), (4, 2), (-1, 1)],
+            [(5, 2), (4, 1.5), (2, 1.5), (0, 1)],
+            [(2, 1), (4, 1), (5, 2), (4, 2)],
+            [(0, 3), (-1, 1), (4, 2)],
         ],
         "town": [
             [(0, 0.5), (0, 0.5), (4, 1), (5, 1), (7, 1)],
@@ -608,24 +596,32 @@ def render_track(bars, root, mode, bpm, energy, region: str) -> list[float]:
             duck = 1.0 - sc * math.exp(-pos * 12.0)
             buf[i] *= 0.88 + 0.12 * duck
 
-    # ── 地區混響感 ──
-    delay_sec = 0.22 if region in ("mist", "tower", "forest") else 0.12 if region in ("village", "coast", "ending") else 0.09
-    fb = 0.28 if region in ("mist", "tower") else 0.14 if region in ("forest", "coast") else 0.08
+    # ── 地區混響感（悠揚：探索曲更長尾）──
+    if region in ("mist", "tower", "forest", "village", "coast", "ending", "road", "title"):
+        delay_sec, fb = 0.28, 0.32
+    elif region in ("town", "dojo", "wild"):
+        delay_sec, fb = 0.16, 0.18
+    else:
+        delay_sec, fb = 0.10, 0.10
     dly = int(delay_sec * SR)
     delayed = [0.0] * n
     for i in range(n):
         delayed[i] = buf[i]
         if i >= dly:
             delayed[i] += delayed[i - dly] * fb
+    # 第二層更短延遲，加一點空間
+    dly2 = int(0.09 * SR)
+    for i in range(n - 1, dly2 - 1, -1):
+        delayed[i] += delayed[i - dly2] * 0.12
     buf = delayed
 
-    # ── EQ 按地區 ──
-    buf = one_pole_hp(buf, 40.0 if region in ("mist", "tower") else 55.0)
-    cut = 2200.0 * cfg["bright"] + 1500.0 * energy
-    if region in ("battle", "boss", "title"):
-        cut = min(7200.0, cut + 1500)
-    if region in ("mist", "tower"):
-        cut = min(cut, 2800.0)
+    # ── EQ 按地區（探索偏暖、少刺耳高頻）──
+    buf = one_pole_hp(buf, 40.0 if region in ("mist", "tower") else 50.0)
+    cut = 1800.0 * cfg["bright"] + 1200.0 * energy
+    if region in ("battle", "boss"):
+        cut = min(6200.0, cut + 1200)
+    if region in ("mist", "tower", "village", "ending"):
+        cut = min(cut, 2600.0)
     buf = one_pole_lp(buf, cut)
 
     # 輕壓縮

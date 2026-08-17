@@ -112,76 +112,65 @@ func setup(mode: String) -> void:
 		stats["hp"] = GameState.max_hp
 		stats["def"] = int(stats["def"]) + 3
 		sim = BattleSim.make_leo_fight(stats)
-		size_compare.visible = true
-		get_tree().create_timer(1.4).timeout.connect(_hide_size_compare)
 	elif mode == "fog":
 		GameState.hp = GameState.max_hp
 		stats["hp"] = GameState.max_hp
 		stats["def"] = int(stats["def"]) + 2
 		sim = BattleSim.make_fog_fight(stats)
-		size_compare.visible = false
 	elif mode == "demon":
 		GameState.hp = GameState.max_hp
 		stats["hp"] = GameState.max_hp
 		stats["def"] = int(stats["def"]) + 4
 		stats["atk"] = int(stats["atk"]) + 4
 		sim = BattleSim.make_demon_fight(stats)
-		size_compare.visible = false
 		_ensure_temptation_ui()
 	elif mode == "abo":
 		GameState.hp = GameState.max_hp
 		stats["hp"] = GameState.max_hp
 		stats["def"] = int(stats["def"]) + 2
 		sim = BattleSim.make_abo_fight(stats)
-		size_compare.visible = false
 	elif mode == "falcon":
 		GameState.hp = GameState.max_hp
 		stats["hp"] = GameState.max_hp
 		stats["def"] = int(stats["def"]) + 2
 		stats["speed"] = int(stats["speed"]) + 2
 		sim = BattleSim.make_falcon_fight(stats)
-		size_compare.visible = false
 	elif mode == "boar":
 		GameState.hp = GameState.max_hp
 		stats["hp"] = GameState.max_hp
 		stats["def"] = int(stats["def"]) + 3
 		sim = BattleSim.make_boar_fight(stats)
-		size_compare.visible = false
 	elif mode == "wrath":
 		GameState.hp = GameState.max_hp
 		stats["hp"] = GameState.max_hp
 		stats["def"] = int(stats["def"]) + 3
 		stats["atk"] = int(stats["atk"]) + 2
 		sim = BattleSim.make_wrath_fight(stats)
-		size_compare.visible = false
 	elif mode == "tide":
 		GameState.hp = GameState.max_hp
 		stats["hp"] = GameState.max_hp
 		stats["def"] = int(stats["def"]) + 2
 		sim = BattleSim.make_tide_fight(stats)
-		size_compare.visible = false
 	elif mode == "statue":
 		GameState.hp = GameState.max_hp
 		stats["hp"] = GameState.max_hp
 		stats["def"] = int(stats["def"]) + 3
 		sim = BattleSim.make_statue_fight(stats)
-		size_compare.visible = false
 	elif mode == "chrono":
 		GameState.hp = GameState.max_hp
 		stats["hp"] = GameState.max_hp
 		stats["def"] = int(stats["def"]) + 2
 		sim = BattleSim.make_chrono_fight(stats)
-		size_compare.visible = false
 	elif _is_world_mode(mode):
 		if _is_world_miniboss(mode):
 			GameState.hp = GameState.max_hp
 			stats["hp"] = GameState.max_hp
 			stats["def"] = int(stats["def"]) + 2
 		sim = BattleSim.make_world_fight(stats, mode)
-		size_compare.visible = false
 	else:
 		sim = BattleSim.make_tutorial_wolf_fight(stats)
-		size_compare.visible = false
+	## 體型對照已撤：玩家回饋「看不懂、畫面花、不需要」
+	_hide_size_compare()
 
 	## 黑焰迴響：敵強化 + 機制窗略短
 	var ng_m: float = GameState.ng_enemy_mult()
@@ -1556,15 +1545,19 @@ func _on_event(kind: String, data: Dictionary) -> void:
 						_set_boss_pose("idle")
 				)
 		"perfect_parry":
-			banner.text = str(data.get("banner", "微末一格"))
+			## 不用「微末一格／體型對照」等開發梗；只給可讀的短提示
+			banner.text = str(data.get("banner", "完美格擋"))
+			if banner.text == "微末一格":
+				banner.text = "完美格擋"
 			banner.visible = true
 			banner.modulate = Color(1, 1, 1, 1)
-			banner.scale = Vector2(0.55, 0.55)
+			banner.add_theme_font_size_override("font_size", 28)
+			banner.scale = Vector2(0.85, 0.85)
 			banner.pivot_offset = banner.size * 0.5 if banner.size.x > 1 else Vector2(200, 40)
 			var tw := create_tween()
-			tw.tween_property(banner, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-			tw.tween_interval(0.9)
-			tw.tween_property(banner, "modulate:a", 0.0, 0.2)
+			tw.tween_property(banner, "scale", Vector2.ONE, 0.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+			tw.tween_interval(0.55)
+			tw.tween_property(banner, "modulate:a", 0.0, 0.18)
 			GameState.set_flag("c1_perfect_parry_once", true)
 			_flash(enemy_body, Color(1.2, 1.15, 0.7))
 			_set_boss_pose("recover")

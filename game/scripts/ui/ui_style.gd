@@ -91,9 +91,59 @@ static func header_style() -> StyleBoxFlat:
 	return s
 
 
+static func interact_badge_style() -> StyleBoxFlat:
+	## 靠近互動物件時的「E」框
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(1.0, 0.96, 0.90, 0.96)
+	s.border_color = KEY_STRONG
+	s.set_border_width_all(2)
+	s.set_corner_radius_all(8)
+	s.content_margin_left = 8
+	s.content_margin_right = 8
+	s.content_margin_top = 4
+	s.content_margin_bottom = 4
+	s.shadow_color = Color(0.17, 0.12, 0.14, 0.22)
+	s.shadow_size = 4
+	s.shadow_offset = Vector2(0, 2)
+	return s
+
+
+static func interact_name_style() -> StyleBoxFlat:
+	## 靠近時才顯示的名稱小牌（平常不掛滿場字）
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(1, 1, 1, 0.92)
+	s.border_color = LINE
+	s.set_border_width_all(1)
+	s.set_corner_radius_all(6)
+	s.content_margin_left = 8
+	s.content_margin_right = 8
+	s.content_margin_top = 3
+	s.content_margin_bottom = 3
+	s.shadow_color = Color(0.1, 0.08, 0.12, 0.18)
+	s.shadow_size = 3
+	return s
+
+
+static func hint_bar_style() -> StyleBoxFlat:
+	## 底部操作提示框（比 chip 更像「互動框」）
+	var s := panel_style(KEY)
+	s.bg_color = Color(1, 1, 1, 0.94)
+	s.set_border_width_all(1)
+	s.border_color = Color(0.949, 0.788, 0.827, 1.0)
+	s.set_corner_radius_all(10)
+	s.content_margin_left = 14
+	s.content_margin_right = 14
+	s.content_margin_top = 8
+	s.content_margin_bottom = 8
+	s.shadow_size = 6
+	return s
+
+
 static func dialogue_style() -> StyleBoxFlat:
-	var s := panel_style(LINE)
-	s.bg_color = Color(1, 1, 1, 0.97)
+	var s := panel_style(KEY_STRONG)
+	s.bg_color = Color(1, 1, 1, 0.98)
+	s.set_border_width_all(2)
+	s.border_color = Color(0.949, 0.788, 0.827, 1.0)
 	s.set_corner_radius_all(12)
 	s.content_margin_left = 16
 	s.content_margin_right = 16

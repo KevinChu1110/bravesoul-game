@@ -381,13 +381,15 @@ func _build_chrome() -> void:
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_banner.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	_banner.modulate = Color(1, 1, 1, 0.78)
+	## 橫幅半透明再降一點：有 scenic 底圖時少搶視覺
+	_banner.modulate = Color(1, 1, 1, 0.42)
 	_scroll.add_child(_banner)
 
 	## 底部 vignette 加深景深
 	_vignette = ColorRect.new()
 	_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_vignette.color = Color(0.02, 0.02, 0.04, 0.35)
+	## 淺 vignette：過重會整圖髒、搶物件可讀性
+	_vignette.color = Color(0.02, 0.02, 0.04, 0.14)
 	_scroll.add_child(_vignette)
 
 	_world = Control.new()
@@ -419,26 +421,25 @@ func _build_chrome() -> void:
 
 	_build_minimap_ui()
 
-	## 底部窄提示（不拉滿全寬）
+	## 底部互動提示框（有邊框；靠近時變提示物件名）
 	var hint_bar := PanelContainer.new()
 	hint_bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	hint_bar.anchor_left = 0.5
 	hint_bar.anchor_right = 0.5
-	hint_bar.offset_left = -160
-	hint_bar.offset_right = 160
-	hint_bar.offset_top = -78
-	hint_bar.offset_bottom = -52
+	hint_bar.offset_left = -200
+	hint_bar.offset_right = 200
+	hint_bar.offset_top = -86
+	hint_bar.offset_bottom = -48
 	hint_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hint_bar.add_theme_stylebox_override("panel", UiStyle.chip_style())
+	hint_bar.add_theme_stylebox_override("panel", UiStyle.hint_bar_style())
+	hint_bar.z_index = 20
 	add_child(hint_bar)
 	_hint = Label.new()
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint.add_theme_font_size_override("font_size", 12)
-	_hint.add_theme_color_override("font_color", UiStyle.INK_DIM)
+	_hint.add_theme_font_size_override("font_size", 13)
+	_hint.add_theme_color_override("font_color", UiStyle.INK)
 	_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	## 這行原本沒有初始文字，而更新只在「靠近的物件換了」時發生，
-	## 所以進圖到第一次走近東西之前，畫面正下方掛著一塊空白白牌
-	_hint.text = "WASD／方向鍵移動 · 靠近後按 E 互動 · M 小地圖 · I 背包"
+	_hint.text = "移動靠近目標 · 按 E 互動"
 	hint_bar.add_child(_hint)
 
 	_player_shadow = ColorRect.new()
@@ -490,6 +491,8 @@ func _build_chrome() -> void:
 	## 角色名牌（頭上）
 	var name_tag := PanelContainer.new()
 	name_tag.name = "PlayerNameTag"
+	## 預設不顯示玩家頭頂字牌，減少畫面雜訊
+	name_tag.visible = false
 	name_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	name_tag.add_theme_stylebox_override("panel", UiStyle.name_tag_style())
 	var ntl := Label.new()
@@ -936,39 +939,39 @@ func _rebuild_entities() -> void:
 			root.add_child(box)
 			root.set_meta("sort_y", e.pos.y + e.size.y)
 
+		## 名稱牌：預設隱藏，只在靠近時顯示（避免滿場白字「好花」）
+		var name_chip := PanelContainer.new()
+		name_chip.visible = false
+		name_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		name_chip.add_theme_stylebox_override("panel", UiStyle.interact_name_style())
+		name_chip.position = Vector2(root.size.x * 0.5 - 40, -52)
 		var lab := Label.new()
 		lab.text = e.label
-		lab.position = Vector2(-8, -22)
-		lab.add_theme_font_size_override("font_size", 13)
-		lab.add_theme_color_override("font_color", Color(0.95, 0.92, 0.85))
-		lab.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
-		lab.add_theme_constant_override("shadow_offset_x", 1)
-		lab.add_theme_constant_override("shadow_offset_y", 1)
+		lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lab.add_theme_font_size_override("font_size", 12)
+		lab.add_theme_color_override("font_color", UiStyle.INK)
 		lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		root.add_child(lab)
+		name_chip.add_child(lab)
+		root.add_child(name_chip)
 		root.set_meta("label_node", lab)
-		## 靠近時顯示的 E 徽章
+		root.set_meta("name_chip", name_chip)
+		## 靠近時的 E 互動框（有邊框）
+		var badge_panel := PanelContainer.new()
+		badge_panel.visible = false
+		badge_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		badge_panel.add_theme_stylebox_override("panel", UiStyle.interact_badge_style())
+		badge_panel.position = Vector2(root.size.x * 0.5 - 18, -84)
 		var badge := Label.new()
-		badge.text = " E "
-		badge.visible = false
-		badge.position = Vector2(root.size.x * 0.5 - 12, -44)
-		badge.add_theme_font_size_override("font_size", 14)
-		badge.add_theme_color_override("font_color", Color(0.12, 0.10, 0.08))
-		badge.add_theme_color_override("font_shadow_color", Color(0.95, 0.8, 0.4, 0.9))
-		badge.add_theme_constant_override("shadow_offset_x", 0)
-		badge.add_theme_constant_override("shadow_offset_y", 0)
+		badge.text = "E"
+		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		badge.add_theme_font_size_override("font_size", 15)
+		badge.add_theme_color_override("font_color", UiStyle.KEY_DEEP)
 		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		## 黃底小牌
-		var badge_bg := ColorRect.new()
-		badge_bg.color = Color(0.92, 0.78, 0.35, 0.95)
-		badge_bg.size = Vector2(28, 20)
-		badge_bg.position = Vector2(root.size.x * 0.5 - 14, -46)
-		badge_bg.visible = false
-		badge_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		root.add_child(badge_bg)
-		root.add_child(badge)
+		badge_panel.add_child(badge)
+		root.add_child(badge_panel)
 		root.set_meta("badge", badge)
-		root.set_meta("badge_bg", badge_bg)
+		root.set_meta("badge_panel", badge_panel)
+		root.set_meta("badge_bg", null)  ## 舊欄位相容
 		root.pivot_offset = e.size * 0.5
 		_entity_nodes[e.id] = root
 
@@ -1341,8 +1344,8 @@ func _update_near() -> void:
 			if _guide_hint != "":
 				_hint.text = _guide_hint
 			else:
-				_hint.text = "WASD／方向鍵移動 · 靠近後按 E 互動"
-			_hint.modulate = Color(0.85, 0.85, 0.9)
+				_hint.text = "移動靠近目標 · 按 E 互動"
+			_hint.modulate = Color(1, 1, 1, 0.9)
 			hint_changed.emit(_hint.text)
 		else:
 			var label := best
@@ -1350,8 +1353,8 @@ func _update_near() -> void:
 				if e.id == best:
 					label = e.label
 					break
-			_hint.text = "E · 互動：%s" % label
-			_hint.modulate = Color(1, 0.92, 0.55)
+			_hint.text = "〔 E 〕  %s" % label
+			_hint.modulate = Color(1, 1, 1, 1)
 			hint_changed.emit(_hint.text)
 		_highlight_near()
 
@@ -1361,20 +1364,29 @@ func _highlight_near() -> void:
 		var root: Control = _entity_nodes.get(e.id)
 		if root == null:
 			continue
-		var badge: Label = root.get_meta("badge") if root.has_meta("badge") else null
+		var badge_panel: Control = root.get_meta("badge_panel") if root.has_meta("badge_panel") else null
+		var name_chip: Control = root.get_meta("name_chip") if root.has_meta("name_chip") else null
 		var badge_bg: ColorRect = root.get_meta("badge_bg") if root.has_meta("badge_bg") else null
-		if e.id == _near_id:
-			root.modulate = Color(1.15, 1.12, 1.05)
-			root.scale = Vector2(1.05, 1.05)
-			if badge:
-				badge.visible = true
+		var on: bool = (e.id == _near_id)
+		if on:
+			## 輕量高亮，避免 scale 抖動 + 過曝
+			root.modulate = Color(1.06, 1.05, 1.02)
+			root.scale = Vector2.ONE
+			if badge_panel:
+				badge_panel.visible = true
+				badge_panel.position = Vector2(root.size.x * 0.5 - 18, -84)
+			if name_chip:
+				name_chip.visible = true
+				name_chip.position = Vector2(root.size.x * 0.5 - 40, -52)
 			if badge_bg:
 				badge_bg.visible = true
 		else:
 			root.modulate = Color.WHITE
 			root.scale = Vector2.ONE
-			if badge:
-				badge.visible = false
+			if badge_panel:
+				badge_panel.visible = false
+			if name_chip:
+				name_chip.visible = false
 			if badge_bg:
 				badge_bg.visible = false
 
