@@ -54,6 +54,17 @@ var telegraph_active: bool = false
 var parry_used: bool = false
 var telegraph_timer: float = 0.0
 
+## 部位破壞系統 (Part Break System)
+var has_part: bool = false
+var part_name: String = ""
+var part_max_hp: int = 0
+var part_hp: int = 0
+var part_broken: bool = false
+
+## 暴怒覺醒 (Fury Awakening)
+var fury_active: bool = false
+var fury_timer: float = 0.0
+
 ## 白霧戰
 var is_phantom: bool = false
 var is_fog_real: bool = false
@@ -73,9 +84,10 @@ func is_alive() -> bool:
 func atb_rate_mult() -> float:
 	if atb_freeze_left > 0.0:
 		return 0.0
-	if atb_slow_left > 0.0:
-		return 0.45
-	return 1.0
+	var mult: float = 0.45 if atb_slow_left > 0.0 else 1.0
+	if fury_active:
+		mult *= 1.4
+	return mult
 
 
 func tick_status(dt: float) -> void:
@@ -89,6 +101,10 @@ func tick_status(dt: float) -> void:
 			atk_buff_mult = 1.0
 	if pressure_left > 0.0:
 		pressure_left = maxf(0.0, pressure_left - dt)
+	if fury_active:
+		fury_timer = maxf(0.0, fury_timer - dt)
+		if fury_timer <= 0.0:
+			fury_active = false
 
 
 ## 遠距開闊輸出加成（被壓時無）
