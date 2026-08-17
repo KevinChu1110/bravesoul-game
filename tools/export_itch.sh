@@ -10,7 +10,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 GAME="$ROOT/game"
 DIST="$ROOT/dist"
-VERSION="${VERSION:-0.14.9}"
+VERSION="${VERSION:-0.15.0}"
 GODOT="${GODOT:-godot}"
 
 TEMPLATES="$HOME/Library/Application Support/Godot/export_templates/4.7.1.stable"
