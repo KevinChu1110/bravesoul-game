@@ -358,6 +358,14 @@ func _apply_hud_chrome() -> void:
 	if btn_flee:
 		UiStyle.style_button(btn_flee, false)
 		btn_flee.text = Loc.t("battle.flee")
+		## 逃不掉的仗就把按鈕關掉。教學才剛講過「可按逃離脫離非必要戰鬥」，
+		## 讓玩家按下去才在戰報看到一行「無法逃離」，等於教了一件做不到的事。
+		if _mode in NO_FLEE_MODES:
+			btn_flee.disabled = true
+			btn_flee.tooltip_text = "這一戰逃不掉。"
+		else:
+			btn_flee.disabled = false
+			btn_flee.tooltip_text = ""
 
 	## 技能名橫幅（獨立於格擋 banner）
 	if _skill_banner == null:
@@ -804,20 +812,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_append_log("鎖定：%s" % sim.get_unit(tid).display_name)
 		get_viewport().set_input_as_handled()
 		return
-	if _mode == "fog" and event is InputEventKey and event.pressed and not event.echo:
-		match event.keycode:
-			KEY_1:
-				sim.set_player_target("phantom_a")
-				_append_log("鎖定：幻影甲")
-				get_viewport().set_input_as_handled()
-			KEY_2:
-				sim.set_player_target("white_fog")
-				_append_log("鎖定：白霧本體")
-				get_viewport().set_input_as_handled()
-			KEY_3:
-				sim.set_player_target("phantom_b")
-				_append_log("鎖定：幻影乙")
-				get_viewport().set_input_as_handled()
+	## 白霧戰原本把 1/2/3 拿去切鎖定目標並 set_input_as_handled()（BattleView 在樹上
+	## 比 main 深，會先吃到事件）—— 於是全遊戲最需要中途補血的一場，
+	## 快捷欄前三格（玩家最可能放藥的位置）是死的，畫面上也沒有任何一句話說明。
+	## 切目標本來就有 Tab 可以循環，數字鍵還給道具。
 	if event.is_action_pressed("parry"):
 		if sim.try_react():
 			_shake = 0.3
@@ -986,7 +984,7 @@ func _refresh_hud() -> void:
 				telegraph.visible = false
 				if _mode == "leo":
 					parry_hint.modulate = Color(1, 1, 1)
-					parry_hint.text = "王者斬會出現倒數。數字變綠時按 J 或滑鼠格擋。"
+					parry_hint.text = "王者斬會出現倒數。倒數變綠時按 J 或滑鼠格擋。"
 				elif _mode == "demon":
 					parry_hint.modulate = Color(1, 1, 1)
 					parry_hint.text = "黑焰必殺可格擋 · 階段誘惑選「我拒絕」"
@@ -1263,12 +1261,18 @@ func _update_parry_countdown(e: BattleUnit) -> void:
 	var bucket: int
 	if in_window:
 		bucket = 0
-	elif remain > 1.2:
+	## 桶的邊界要照格擋窗算，不能寫死。
+	## in_window 的門檻是 PARRY_WINDOW（0.85），而 bucket=1 原本要 remain <= 0.7
+	## —— 0.85 以下早就進 in_window 分支了，所以「1」永遠不會出現，
+	## 玩家看到的是 3 → 2 →「格擋」。
+	##
+	## 順帶：太早的寬限是窗前 PARRY_EARLY_GRACE（0.35），
+	## 也就是 bucket 2 的區間剛好等於「按早了還救得回來」，
+	## bucket 3 則是「按了就揮空」。這是個很乾淨的視覺規則，值得讓它成立。
+	elif remain > BattleSim.PARRY_WINDOW + BattleSim.PARRY_EARLY_GRACE:
 		bucket = 3
-	elif remain > 0.7:
-		bucket = 2
 	else:
-		bucket = 1
+		bucket = 2
 
 	if in_window:
 		telegraph.color = Color(0.2, 0.9, 0.35, 0.22 + 0.12 * sin(Time.get_ticks_msec() * 0.025))
@@ -1798,6 +1802,14 @@ func _on_end(won: bool) -> void:
 		var p: BattleUnit = sim.get_unit("player")
 		if p:
 			GameState.hp = maxi(1, p.hp)
+		## 金幣與星屑**不在這裡發**。
+		##
+		## 主線 Boss 的戰利品由 main.gd 的 _grant_boss_loot() 統一發，
+		## 而台詞報的也是那一組數字。這裡原本又各發一次 ——
+		## 狼實得 40 金但台詞說 25，雷歐實得 380／8 但台詞說 80／4。
+		## 左上角就掛著金幣數，第一場戰鬥就對不上，玩家會開始不信任所有數字。
+		##
+		## 經驗留在這裡：_grant_boss_loot() 不發經驗，拿掉就沒了。
 		if _mode == "wolf":
 			GameState.set_flag("c0_first_battle", true)
 			if Engine.get_main_loop() is SceneTree:
@@ -1806,7 +1818,6 @@ func _on_end(won: bool) -> void:
 					sk0.call("grant_c0_slash")
 			if GameState.skill_slash_lv < 1:
 				GameState.skill_slash_lv = 1
-			GameState.add_gold(15)
 			_award_xp(20)
 		elif _mode == "leo":
 			GameState.set_flag("boss.leo_cleared", true)
@@ -1814,43 +1825,29 @@ func _on_end(won: bool) -> void:
 				var sk1: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("SkillSystem")
 				if sk1 and sk1.has_method("grant_leo_insight"):
 					sk1.call("grant_leo_insight")
-			GameState.add_gold(300)
 			_award_xp(200)
-			GameState.add_stardust(4)
 		elif _mode == "fog":
 			GameState.set_flag("boss.white_fog_cleared", true)
-			GameState.add_gold(250)
 			_award_xp(180)
-			GameState.add_stardust(3)
 		elif _mode == "demon":
 			GameState.set_flag("boss.demon_cleared", true)
-			GameState.add_gold(400)
 			_award_xp(300)
-			GameState.add_stardust(6)
 			if sim and sim.refuse_count >= 3:
 				GameState.set_flag("c6_refuse_all", true)
 		elif _mode == "abo":
 			GameState.set_flag("boss.abo_cleared", true)
-			GameState.add_gold(280)
 			_award_xp(200)
-			GameState.add_stardust(3)
 			if sim and sim.abo_break_count >= 2:
 				GameState.set_flag("c3_abo_perfect", true)
 		elif _mode == "falcon":
 			GameState.set_flag("boss.shadowwind_cleared", true)
-			GameState.add_gold(260)
 			_award_xp(190)
-			GameState.add_stardust(3)
 		elif _mode == "boar":
 			GameState.set_flag("boss.stonefist_cleared", true)
-			GameState.add_gold(270)
 			_award_xp(195)
-			GameState.add_stardust(3)
 		elif _mode in ["wrath", "tide", "statue", "chrono"]:
 			_grant_rift_rewards(_mode)
 			GameState.add_stardust(2)
-		elif _mode == "wolf":
-			GameState.add_stardust(1)
 	else:
 		banner.text = "敗　北"
 		banner.modulate = Color(1, 1, 1, 1)
@@ -1883,8 +1880,14 @@ func _hazard_name(kind: String) -> String:
 			return kind
 
 
+## 逃不掉的仗。教學才剛講過「可按逃離脫離非必要戰鬥」，
+## 所以這幾場要把按鈕直接關掉，而不是讓玩家按下去才在戰報看到一行「無法逃離」。
+const NO_FLEE_MODES := ["leo", "fog", "demon", "abo", "falcon", "boar",
+	"wrath", "tide", "statue", "chrono"]
+
+
 func _on_btn_flee_pressed() -> void:
-	if _mode in ["leo", "fog", "demon", "abo", "falcon", "boar", "wrath", "tide", "statue", "chrono"]:
+	if _mode in NO_FLEE_MODES:
 		_append_log("無法逃離此戰。")
 		return
 	_ended = true

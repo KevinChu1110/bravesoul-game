@@ -471,9 +471,19 @@ func pick_battle_skill(hp_ratio: float = 1.0) -> Dictionary:
 			"mult": 0.0,
 			"heal_pct": heal_pct_for(hid),
 		}
-	## 攻擊技：priority 高者優先（含各流派簽名招）
+	## 攻擊技：先看流派，再看 priority。
+	##
+	## 原本只看 priority，而打贏雷歐一定會體悟「怒雷狂擊」（priority 40，全表最高、
+	## 劍系）。於是第一章之後，不管玩家選的是弓、鎚、法還是鏢，實戰永遠只會放出
+	## 怒雷 ＋ 一個治療 —— 另外 9 招一輩子放不出來。連帶熟練度只在 skill_hit 累積，
+	## 那些招的熟練度也永遠凍結：演武場還能練，練了不會被用到。
+	##
+	## 改成自己流派的招優先。跨流派的招仍然學得到、仍然是保底
+	## （沒有本流派攻擊技時照樣會挑到），只是不再蓋掉玩家自己選的那條路。
+	var my_line := GameState.path_style
 	var best: Dictionary = {}
 	var best_p := -1
+	var best_own := false
 	for d in CATALOG:
 		var sid: String = str(d.get("id", ""))
 		if str(d.get("kind", "")) != "attack":
@@ -481,6 +491,14 @@ func pick_battle_skill(hp_ratio: float = 1.0) -> Dictionary:
 		if not is_learned(sid):
 			continue
 		var prio: int = int(d.get("priority", 0))
+		var is_own: bool = my_line != "" and str(d.get("line", "")) == my_line
+		## 本流派一律排在跨流派前面；同一邊之內才比 priority
+		if is_own != best_own:
+			if is_own:
+				best_own = true
+				best_p = prio
+				best = d
+			continue
 		if prio > best_p:
 			best_p = prio
 			best = d
