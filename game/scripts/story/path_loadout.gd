@@ -1,6 +1,7 @@
 extends RefCounted
 class_name PathLoadout
-## 選流派後的發放：簽名招 + starter 武器（每流派一次）。
+## 選武器系統後的發放：該職業兩套武器的起手招 + starter 武器（每系統一次）。
+## 6 職業 × 雙武器系統（對等，非主副）——見 SkillSystem.PROFESSION_WEAPONS。
 ##
 ## 從 main.gd 抽出，避免路由器再堆養成細節。
 ## GameState／各 System 走執行期查找（class_name 不可在編譯期引用 autoload）。
@@ -33,7 +34,7 @@ static func normalize_class_id(class_id: String) -> String:
 	return cid
 
 
-## 發招：通用橫斬 + 該系簽名（SkillSystem.grant_for_weapon_class）
+## 發招：通用橫斬 + 該武器系統起手 + 同職另一武器起手
 static func grant_skills_for_path(class_id: String) -> void:
 	var sk := _sys("SkillSystem")
 	if sk == null:

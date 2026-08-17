@@ -4,8 +4,17 @@ extends Node
 
 signal equipment_changed
 
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
 const SLOTS: Array[String] = ["weapon", "armor", "accessory"]
 
+
+
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
 
 func _ready() -> void:
 	_ensure_state()
@@ -98,7 +107,7 @@ func add_to_bag(inst: Dictionary) -> bool:
 	if Engine.get_main_loop() is SceneTree:
 		var gl: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameLog")
 		if gl and gl.has_method("info"):
-			gl.call("info", "equip", "獲得裝備【%s】（%s）" % [inst.get("name", ""), inst.get("quality_label", "")], {"uid": inst.get("uid")})
+			gl.call("info", "equip", _t("獲得裝備【%s】（%s）") % [inst.get("name", ""), inst.get("quality_label", "")], {"uid": inst.get("uid")})
 	return true
 
 
@@ -132,10 +141,10 @@ func equip(uid: String) -> Dictionary:
 	_ensure_state()
 	var inst := find_bag(uid)
 	if inst.is_empty():
-		return {"ok": false, "msg": "背包沒有此裝。"}
+		return {"ok": false, "msg": _t("背包沒有此裝。")}
 	var slot := str(inst.get("slot", "weapon"))
 	if slot not in SLOTS:
-		return {"ok": false, "msg": "未知部位。"}
+		return {"ok": false, "msg": _t("未知部位。")}
 	## 卸下舊的
 	var old_uid := str(GameState.equip_slots.get(slot, ""))
 	if old_uid != "":
@@ -147,14 +156,14 @@ func equip(uid: String) -> Dictionary:
 	_sync_legacy_weapon()
 	equipment_changed.emit()
 	SaveManager.save_game()
-	return {"ok": true, "msg": "裝備【%s】" % inst.get("name", "")}
+	return {"ok": true, "msg": _t("裝備【%s】") % inst.get("name", "")}
 
 
 func unequip(slot: String) -> Dictionary:
 	_ensure_state()
 	var uid := str(GameState.equip_slots.get(slot, ""))
 	if uid == "":
-		return {"ok": false, "msg": "該部位無裝備。"}
+		return {"ok": false, "msg": _t("該部位無裝備。")}
 	var inst: Dictionary = GameState.equip_worn.get(uid, {})
 	GameState.equip_slots[slot] = ""
 	GameState.equip_worn.erase(uid)
@@ -163,7 +172,7 @@ func unequip(slot: String) -> Dictionary:
 	_sync_legacy_weapon()
 	equipment_changed.emit()
 	SaveManager.save_game()
-	return {"ok": true, "msg": "已卸下"}
+	return {"ok": true, "msg": _t("已卸下")}
 
 
 func _remove_from_bag(uid: String) -> void:
@@ -204,9 +213,9 @@ func bonus_totals() -> Dictionary:
 
 func label(inst: Dictionary) -> String:
 	if inst.is_empty():
-		return "（空）"
+		return _t("（空）")
 	var r: Dictionary = inst.get("rolled", {})
-	return "%s〔%s〕攻%d 防%d 暴%.0f%%" % [
+	return _t("%s〔%s〕攻%d 防%d 暴%.0f%%") % [
 		inst.get("name", "?"),
 		inst.get("quality_label", ""),
 		int(r.get("atk", 0)),
@@ -218,9 +227,9 @@ func label(inst: Dictionary) -> String:
 func status_bbcode() -> String:
 	_ensure_state()
 	var lines: PackedStringArray = []
-	lines.append("[b]裝備[/b]（素質於獲得時浮動鎖定）")
+	lines.append(_t("[b]裝備[/b]（素質於獲得時浮動鎖定）"))
 	var b := bonus_totals()
-	lines.append("總加成：攻+%d 防+%d 血+%d 暴擊+%.1f 暴傷+%.1f" % [
+	lines.append(_t("總加成：攻+%d 防+%d 血+%d 暴擊+%.1f 暴傷+%.1f") % [
 		int(b.atk), int(b.def), int(b.hp), float(b.crit), float(b.crit_dmg)
 	])
 	for s in SLOTS:
@@ -228,17 +237,17 @@ func status_bbcode() -> String:
 		var name_s := s
 		match s:
 			"weapon":
-				name_s = "武器"
+				name_s = _t("武器")
 			"armor":
-				name_s = "防具"
+				name_s = _t("防具")
 			"accessory":
-				name_s = "飾品"
+				name_s = _t("飾品")
 		if uid != "" and GameState.equip_worn.has(uid):
 			lines.append("· %s：%s" % [name_s, label(GameState.equip_worn[uid])])
 		else:
 			lines.append("· %s：—" % name_s)
 	lines.append("")
-	lines.append("背包裝備 %d 件" % GameState.equip_bag.size())
+	lines.append(_t("背包裝備 %d 件") % GameState.equip_bag.size())
 	return "\n".join(lines)
 
 
@@ -257,31 +266,37 @@ func line_display(line: String) -> String:
 	var L := migrate_line(line)
 	match L:
 		"sword":
-			return "劍"
+			return _t("劍")
 		"bow":
-			return "弓"
+			return _t("弓")
 		"magic":
-			return "法"
+			return _t("法")
 		"fist":
-			return "拳"
+			return _t("拳")
 		"axe":
-			return "斧"
+			return _t("斧")
 		"hammer":
-			return "鎚"
+			return _t("鎚")
 		"spear":
-			return "槍"
+			return _t("槍")
 		"gun":
-			return "火槍"
+			return _t("火槍")
 		"dart":
-			return "鏢"
+			return _t("鏢")
+		"dagger":
+			return _t("匕首")
+		"claw":
+			return _t("爪")
 		"crystal":
-			return "水晶"
+			return _t("水晶")
+		"common":
+			return _t("通用")
 		"soul":
-			return "星途"
+			return _t("星途")
 		"iron":
-			return "鐵骨"
+			return _t("鐵骨")
 		_:
-			return "通用"
+			return _t("通用")
 
 
 func can_craft(recipe: Dictionary) -> Dictionary:
@@ -289,21 +304,21 @@ func can_craft(recipe: Dictionary) -> Dictionary:
 	var base_id := str(recipe.get("base_id", ""))
 	var def := base_def(base_id)
 	if def.is_empty():
-		return {"ok": false, "msg": "未知配方。"}
+		return {"ok": false, "msg": _t("未知配方。")}
 	var need_tier := int(recipe.get("need_tier", 1))
 	if GameState.weapon_tier < need_tier and not GameState.has_flag("c1_forged"):
-		return {"ok": false, "msg": "先完成釘釘初鍛。"}
+		return {"ok": false, "msg": _t("先完成釘釘初鍛。")}
 	if GameState.weapon_tier < need_tier:
-		return {"ok": false, "msg": "器階不足（需 T%d+）" % need_tier}
+		return {"ok": false, "msg": _t("器階不足（需 T%d+）") % need_tier}
 	var gold_n := int(recipe.get("gold", 0))
 	if GameState.gold < gold_n:
-		return {"ok": false, "msg": "金幣不足（需 %d）" % gold_n}
+		return {"ok": false, "msg": _t("金幣不足（需 %d）") % gold_n}
 	var mats: Dictionary = recipe.get("mats", {})
 	for mid in mats.keys():
 		var need := int(mats[mid])
 		if not InventorySystem.has_item(str(mid), need):
-			return {"ok": false, "msg": "缺材料：%s ×%d" % [InventorySystem.item_name(str(mid)), need]}
-	return {"ok": true, "msg": "可鍛"}
+			return {"ok": false, "msg": _t("缺材料：%s ×%d") % [InventorySystem.item_name(str(mid)), need]}
+	return {"ok": true, "msg": _t("可鍛")}
 
 
 func craft(recipe: Dictionary) -> Dictionary:
@@ -314,7 +329,7 @@ func craft(recipe: Dictionary) -> Dictionary:
 	var mats: Dictionary = recipe.get("mats", {})
 	for mid in mats.keys():
 		if not InventorySystem.remove_item(str(mid), int(mats[mid])):
-			return {"ok": false, "msg": "扣材料失敗。"}
+			return {"ok": false, "msg": _t("扣材料失敗。")}
 	GameState.add_gold(-gold_n)
 	var base_id := str(recipe.get("base_id", ""))
 	## 流派對應線品質略升（soul/iron 舊線會 migrate 後再比）
@@ -325,14 +340,14 @@ func craft(recipe: Dictionary) -> Dictionary:
 		q = "uncommon"
 	var inst := roll_instance(base_id, q)
 	if inst.is_empty():
-		return {"ok": false, "msg": "鍛造失敗（定義錯誤）。"}
+		return {"ok": false, "msg": _t("鍛造失敗（定義錯誤）。")}
 	add_to_bag(inst)
 	## 自動裝備武器（若是武器槽）
 	var auto := ""
 	if str(inst.get("slot", "")) == "weapon":
 		var er := equip(str(inst.get("uid", "")))
 		if bool(er.get("ok", false)):
-			auto = " · 已裝備"
+			auto = _t(" · 已裝備")
 	if Engine.get_main_loop() is SceneTree:
 		var qs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("QuestSystem")
 		if qs and qs.has_method("track_day"):
@@ -343,7 +358,7 @@ func craft(recipe: Dictionary) -> Dictionary:
 	return {
 		"ok": true,
 		"inst": inst,
-		"msg": "鍛成【%s】%s" % [label(inst), auto],
+		"msg": _t("鍛成【%s】%s") % [label(inst), auto],
 	}
 
 
@@ -360,9 +375,9 @@ func recipe_line(recipe: Dictionary) -> String:
 	var ok := bool(can_craft(recipe).get("ok", false))
 	var mark := "✓" if ok else "·"
 	## 中高階配方是主 sink：金幣欄加「需」字，方便玩家對帳
-	var gold_s := "需 %d 金" % gold_n if gold_n >= 150 else "%d 金" % gold_n
+	var gold_s := _t("需 %d 金") % gold_n if gold_n >= 150 else _t("%d 金") % gold_n
 	var have := GameState.gold
-	var afford := "夠" if have >= gold_n else "差 %d" % (gold_n - have)
+	var afford := _t("夠") if have >= gold_n else _t("差 %d") % (gold_n - have)
 	return "%s [%s] %s  %s（%s）· %s  %s" % [mark, line, nm, gold_s, afford, "、".join(parts), str(recipe.get("hint", ""))]
 
 
@@ -380,4 +395,4 @@ func try_drop_loot(force_id: String = "") -> Dictionary:
 	if inst.is_empty():
 		return {"ok": false}
 	add_to_bag(inst)
-	return {"ok": true, "inst": inst, "msg": "獲得 %s" % label(inst)}
+	return {"ok": true, "inst": inst, "msg": _t("獲得 %s") % label(inst)}

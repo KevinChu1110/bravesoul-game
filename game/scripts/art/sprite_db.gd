@@ -60,10 +60,10 @@ static func _equip_line(slot: String) -> String:
 
 static func _line_to_weapon_visual(line: String) -> String:
 	match line:
-		"sword", "bow", "magic", "fist", "axe", "hammer", "spear", "gun", "dart", "crystal":
+		"sword", "bow", "magic", "fist", "axe", "hammer", "spear", "gun", "dart", "crystal", "dagger", "claw":
 			return line
 		"soul":
-			return "crystal"
+			return "magic"
 		"iron":
 			return "hammer"
 		_:
@@ -113,11 +113,15 @@ static func player_weapon_class_id() -> String:
 			return "spear"
 		if blob.find("gun") >= 0 or blob.find("銃") >= 0:
 			return "gun"
+		if blob.find("dagger") >= 0 or blob.find("匕首") >= 0 or blob.find("短匕") >= 0:
+			return "dagger"
 		if blob.find("dart") >= 0 or blob.find("鏢") >= 0 or blob.find("針") >= 0:
 			return "dart"
-		if blob.find("crystal") >= 0 or blob.find("orb") >= 0 or blob.find("星") >= 0:
+		if blob.find("crystal") >= 0 or blob.find("orb") >= 0 or blob.find("晶") >= 0:
 			return "crystal"
-		if blob.find("fist") >= 0 or blob.find("claw") >= 0 or blob.find("拳") >= 0 or blob.find("爪") >= 0:
+		if blob.find("claw") >= 0 or blob.find("爪") >= 0:
+			return "claw"
+		if blob.find("fist") >= 0 or blob.find("拳") >= 0 or blob.find("手套") >= 0:
 			return "fist"
 		if blob.find("sword") >= 0 or blob.find("blade") >= 0 or blob.find("saber") >= 0 \
 				or blob.find("edge") >= 0 or blob.find("劍") >= 0 or blob.find("刃") >= 0:
@@ -128,7 +132,7 @@ static func player_weapon_class_id() -> String:
 	var from_path := _line_to_weapon_visual(ps)
 	if from_path != "":
 		return from_path
-	if ps in ["sword", "bow", "magic", "fist", "axe", "hammer", "spear", "gun", "dart", "crystal"]:
+	if ps in ["sword", "bow", "magic", "fist", "axe", "hammer", "spear", "gun", "dart", "crystal", "dagger", "claw"]:
 		return ps
 	## 3) 舊武器名
 	if gs and gs.weapon_name != "" and gs.weapon_name != "空手":
@@ -150,28 +154,65 @@ static func player_weapon_overlay() -> Texture2D:
 	var t := tex("%s/player/weapons/%s.png" % [ROOT, wid])
 	if t:
 		return t
+	## 新武器系統尚無專圖時退回同職近似
+	match wid:
+		"dagger":
+			t = tex("%s/player/weapons/dart.png" % ROOT)
+		"claw":
+			t = tex("%s/player/weapons/fist.png" % ROOT)
+	if t:
+		return t
 	return tex("%s/player/weapons/sword.png" % ROOT)
 
 
-## 防具種類：plate | leather | veil | cloth | ""（類型 fallback）
+## 防具種類：plate | leather | veil | cloth | hide | wrap | gi | ""（類型 fallback）
+## 六職對應：騎士 plate、維京 hide、忍者 wrap、武鬥 gi、法師 veil、遊俠 leather
 static func player_armor_kind() -> String:
 	var line := _equip_line("armor")
 	var inst := _equip_inst("armor")
 	var base_id := str(inst.get("base_id", "")).to_lower()
 	var name_s := str(inst.get("name", "")).to_lower()
-	var blob := base_id + " " + name_s + " " + line
-	if blob.find("plate") >= 0 or blob.find("mail") >= 0 or blob.find("knight") >= 0 \
-			or blob.find("甲") >= 0 or line == "iron":
+	var prof := str(inst.get("profession", "")).to_lower()
+	var blob := base_id + " " + name_s + " " + line + " " + prof
+	## 六職專用 base_id 先判
+	match base_id:
+		"knight_plate":
+			return "plate"
+		"viking_hide":
+			return "hide"
+		"ninja_wrap":
+			return "wrap"
+		"monk_gi":
+			return "gi"
+		"star_veil":
+			return "veil"
+		"ranger_leather":
+			return "leather"
+		"ash_mail":
+			return "plate"
+	if prof == "knight" or blob.find("plate") >= 0 or blob.find("knight") >= 0 \
+			or line in ["sword", "spear"] or line == "iron":
 		return "plate"
-	if blob.find("veil") >= 0 or blob.find("cloak") >= 0 or blob.find("披風") >= 0 \
-			or blob.find("紗") >= 0 or line == "soul":
+	if prof == "viking" or blob.find("hide") >= 0 or blob.find("viking") >= 0 \
+			or blob.find("獸甲") >= 0 or line in ["axe", "hammer"]:
+		return "hide"
+	if prof == "ninja" or blob.find("wrap") >= 0 or blob.find("ninja") >= 0 \
+			or blob.find("夜衣") >= 0 or line in ["dagger", "dart"]:
+		return "wrap"
+	if prof == "monk" or blob.find("gi") >= 0 or blob.find("monk") >= 0 \
+			or blob.find("練衣") >= 0 or line in ["fist", "claw"]:
+		return "gi"
+	if prof == "mage" or blob.find("veil") >= 0 or blob.find("cloak") >= 0 \
+			or blob.find("披風") >= 0 or blob.find("紗") >= 0 \
+			or line in ["magic", "crystal", "soul"]:
 		return "veil"
-	if blob.find("leather") >= 0 or blob.find("hide") >= 0 or blob.find("皮") >= 0:
+	if prof == "ranger" or blob.find("leather") >= 0 or blob.find("ranger") >= 0 \
+			or blob.find("皮") >= 0 or line in ["bow", "gun"]:
 		return "leather"
 	if blob.find("cloth") >= 0 or blob.find("robe") >= 0:
 		return "cloth"
 	if not inst.is_empty():
-		return "leather"  ## 有穿就至少皮甲感
+		return "leather"
 	return ""
 
 
@@ -182,11 +223,22 @@ static func player_armor_overlay() -> Texture2D:
 		var unique := paperdoll_tex("armor", bid)
 		if unique:
 			return unique
-	## 2) 類型共用
+	## 2) 類型／六職共用
 	var kind := player_armor_kind()
 	if kind == "":
 		return null
-	return tex("%s/player/armor/%s.png" % [ROOT, kind])
+	var t := tex("%s/player/armor/%s.png" % [ROOT, kind])
+	if t:
+		return t
+	## 尚無專圖時退回近似類型
+	match kind:
+		"hide":
+			return tex("%s/player/armor/leather.png" % ROOT)
+		"wrap":
+			return tex("%s/player/armor/veil.png" % ROOT)
+		"gi":
+			return tex("%s/player/armor/cloth.png" % ROOT)
+	return null
 
 
 ## 防具染色（疊在身體 modulate；外層 armor 貼圖另加）
@@ -199,19 +251,27 @@ static func player_armor_modulate() -> Color:
 				return Color(0.96, 0.94, 1.04, 1)
 			"knight_plate":
 				return Color(0.94, 0.96, 1.02, 1)
+			"viking_hide":
+				return Color(1.02, 0.96, 0.90, 1)
+			"ninja_wrap":
+				return Color(0.90, 0.92, 1.04, 1)
+			"monk_gi":
+				return Color(1.02, 0.98, 0.90, 1)
+			"ranger_leather":
+				return Color(1.04, 0.96, 0.86, 1)
 			"ash_mail":
 				return Color(0.96, 0.95, 0.94, 1)
 			_:
 				return Color(1, 1, 1, 1)
 	var kind := player_armor_kind()
 	match kind:
-		"veil":
+		"veil", "wrap":
 			return Color(0.88, 0.84, 1.08, 1)
-		"leather":
+		"leather", "hide":
 			return Color(1.06, 0.94, 0.82, 1)
 		"plate":
 			return Color(0.84, 0.90, 1.06, 1)
-		"cloth":
+		"cloth", "gi":
 			return Color(0.90, 1.02, 0.92, 1)
 		_:
 			return Color(1, 1, 1, 1)

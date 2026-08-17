@@ -159,7 +159,7 @@
       "name": "星牙短匕",
       "slot": "weapon",
       "tier": 2,
-      "line": "soul",
+      "line": "dagger",
       "base": {
         "atk": 8,
         "def": 0,
@@ -172,7 +172,7 @@
       "name": "星雲細針",
       "slot": "weapon",
       "tier": 3,
-      "line": "soul",
+      "line": "dagger",
       "base": {
         "atk": 12,
         "def": 0,
@@ -185,7 +185,7 @@
       "name": "溢地獵爪",
       "slot": "weapon",
       "tier": 3,
-      "line": "soul",
+      "line": "claw",
       "base": {
         "atk": 13,
         "def": 0,
@@ -419,7 +419,7 @@
       "name": "灰燼甲片",
       "slot": "armor",
       "tier": 1,
-      "line": "iron",
+      "line": "common",
       "base": {
         "atk": 0,
         "def": 3,
@@ -432,7 +432,8 @@
       "name": "騎士殘甲",
       "slot": "armor",
       "tier": 3,
-      "line": "iron",
+      "line": "sword",
+      "profession": "knight",
       "base": {
         "atk": 0,
         "def": 7,
@@ -441,16 +442,73 @@
         "crit_dmg": 0
       }
     },
+    "viking_hide": {
+      "name": "北境獸甲",
+      "slot": "armor",
+      "tier": 3,
+      "line": "axe",
+      "profession": "viking",
+      "base": {
+        "atk": 1,
+        "def": 8,
+        "hp": 28,
+        "crit": 0,
+        "crit_dmg": 0
+      }
+    },
+    "ninja_wrap": {
+      "name": "霧隱夜衣",
+      "slot": "armor",
+      "tier": 3,
+      "line": "dart",
+      "profession": "ninja",
+      "base": {
+        "atk": 2,
+        "def": 3,
+        "hp": 10,
+        "crit": 6,
+        "crit_dmg": 10
+      }
+    },
+    "monk_gi": {
+      "name": "道場練衣",
+      "slot": "armor",
+      "tier": 3,
+      "line": "fist",
+      "profession": "monk",
+      "base": {
+        "atk": 1,
+        "def": 5,
+        "hp": 20,
+        "crit": 2,
+        "crit_dmg": 4
+      }
+    },
     "star_veil": {
       "name": "星紗披風",
       "slot": "armor",
       "tier": 3,
-      "line": "soul",
+      "line": "magic",
+      "profession": "mage",
       "base": {
         "atk": 1,
         "def": 4,
         "hp": 14,
         "crit": 4,
+        "crit_dmg": 8
+      }
+    },
+    "ranger_leather": {
+      "name": "遊俠皮甲",
+      "slot": "armor",
+      "tier": 3,
+      "line": "bow",
+      "profession": "ranger",
+      "base": {
+        "atk": 2,
+        "def": 4,
+        "hp": 12,
+        "crit": 5,
         "crit_dmg": 8
       }
     },
@@ -725,7 +783,57 @@
         "knight_shard": 2
       },
       "need_tier": 1,
-      "hint": "防具 · 中階 sink"
+      "hint": "騎士防具 · 劍／槍系"
+    },
+    {
+      "base_id": "viking_hide",
+      "gold": 180,
+      "mats": {
+        "iron_scrap": 3,
+        "wolf_fang": 2
+      },
+      "need_tier": 1,
+      "hint": "維京防具 · 斧／鎚系"
+    },
+    {
+      "base_id": "ninja_wrap",
+      "gold": 175,
+      "mats": {
+        "mist_shard": 2,
+        "oak_resin": 2
+      },
+      "need_tier": 1,
+      "hint": "忍者防具 · 匕／鏢系"
+    },
+    {
+      "base_id": "monk_gi",
+      "gold": 170,
+      "mats": {
+        "oak_resin": 3,
+        "iron_scrap": 1
+      },
+      "need_tier": 1,
+      "hint": "武鬥防具 · 拳／爪系"
+    },
+    {
+      "base_id": "star_veil",
+      "gold": 175,
+      "mats": {
+        "star_ore": 3,
+        "mist_shard": 1
+      },
+      "need_tier": 1,
+      "hint": "法師防具 · 杖／晶系"
+    },
+    {
+      "base_id": "ranger_leather",
+      "gold": 175,
+      "mats": {
+        "oak_resin": 2,
+        "wolf_fang": 2
+      },
+      "need_tier": 1,
+      "hint": "遊俠防具 · 弓／銃系"
     },
     {
       "base_id": "star_pendant",

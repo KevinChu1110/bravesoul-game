@@ -1,10 +1,59 @@
 {
+  "anvil_slam": {
+    "desc": "A whole anvil comes down. Slow, but it pins them.",
+    "lv2": "Heavier slam.",
+    "lv3": "Shockwave along the ground.",
+    "name": "Anvil Slam",
+    "unlock_hint": "Hammer line Lv7"
+  },
+  "arrow_storm": {
+    "desc": "★ Level 16 rage technique. Ten arrows blanket the ground.",
+    "lv2": "Fiercer storm.",
+    "lv3": "The storm converges.",
+    "name": "Arrow Storm",
+    "unlock_hint": "Bow line Lv16"
+  },
+  "axe_split": {
+    "desc": "Basic axe technique. One stroke with weight behind it.",
+    "lv2": "Heavier swing.",
+    "lv3": "One notch below the damage cap.",
+    "name": "Cleave",
+    "unlock_hint": "Axe line opener"
+  },
+  "beowulf": {
+    "desc": "An early axe-hammer power blow — strength driven into the edge.",
+    "lv2": "Fiercer force.",
+    "lv3": "The roar widens the damage window.",
+    "name": "Beowulf's Might",
+    "unlock_hint": "Axe line Lv7"
+  },
   "blade_dance": {
     "desc": "Sword signature: mid-speed combo, fast mastery growth.",
     "lv2": "Denser combo.",
     "lv3": "Longer follow-through on the third cut.",
     "name": "Triple Edge",
     "unlock_hint": "Choose the sword style · or level 8"
+  },
+  "blood_petal": {
+    "desc": "★ Claw line quest technique. Petal-shaped cuts in sequence.",
+    "lv2": "Denser petals.",
+    "lv3": "Longer trailing edge.",
+    "name": "Blood Petal",
+    "unlock_hint": "Claw line Lv13"
+  },
+  "claw_rake": {
+    "desc": "Claw opener: tears the line open.",
+    "lv2": "Deeper marks.",
+    "lv3": "The rake also breaks guard.",
+    "name": "Rake",
+    "unlock_hint": "Claw line opener"
+  },
+  "combo_fist": {
+    "desc": "A three-punch opener, three hits.",
+    "lv2": "Denser punches.",
+    "lv3": "Chain follow-through.",
+    "name": "Chain Fist",
+    "unlock_hint": "Fist line opener"
   },
   "counter_strike": {
     "desc": "Bite back after taking a hit. High multiplier, fiercer tempo.",
@@ -13,12 +62,82 @@
     "name": "Counterstrike",
     "unlock_hint": "After Leo · or level 7"
   },
+  "crystal_prison": {
+    "desc": "★ Crystal quest technique. Imprison, then shatter for damage.",
+    "lv2": "Harder prison.",
+    "lv3": "The shattering spreads.",
+    "name": "Crystal Prison",
+    "unlock_hint": "Crystal Lv13"
+  },
+  "crystal_tornado": {
+    "desc": "★ Level 13 quest technique. A combo vortex, four hits of true damage.",
+    "lv2": "Denser vortex.",
+    "lv3": "Crystal trailing edge.",
+    "name": "Crystal Tornado",
+    "unlock_hint": "Dagger line Lv13"
+  },
+  "def_break": {
+    "desc": "★ Level 13 quest technique. A blow that breaks the enemy's defence.",
+    "lv2": "Deeper break.",
+    "lv3": "The aftershock raises damage again.",
+    "name": "Defence Break",
+    "unlock_hint": "Axe line Lv13"
+  },
+  "doom_strike": {
+    "desc": "★ Level 16 rage technique. Slow, heavy, painful.",
+    "lv2": "Heavier doom.",
+    "lv3": "One notch below the cap.",
+    "name": "Doom Strike",
+    "unlock_hint": "Axe line Lv16"
+  },
+  "double_tap": {
+    "desc": "Two pulls in a row; the second hurts more.",
+    "lv2": "Steadier pair.",
+    "lv3": "The second shot goes for the heart.",
+    "name": "Double Tap",
+    "unlock_hint": "Gun Lv7"
+  },
+  "earth_breaker": {
+    "desc": "★ Hammer line rage technique. A finishing blow that splits the ground.",
+    "lv2": "Wider rift.",
+    "lv3": "The blast caps out.",
+    "name": "Earthbreaker",
+    "unlock_hint": "Hammer line Lv16"
+  },
   "emergency_heal": {
     "desc": "One breath out, health back. Auto-prioritised when critical.",
     "lv2": "Slightly more healing.",
     "lv3": "More healing again — enough to hold a crisis.",
     "name": "Emergency Recovery",
     "unlock_hint": "After forging in C1, ask Greybeard"
+  },
+  "energy_beam": {
+    "desc": "★ Level 13 quest technique. Inner energy turned into a beam.",
+    "lv2": "Tighter beam.",
+    "lv3": "Overload.",
+    "name": "Energy Beam",
+    "unlock_hint": "Fist line Lv13"
+  },
+  "explosive_round": {
+    "desc": "★ Gun quest technique. Detonates on impact.",
+    "lv2": "Larger blast.",
+    "lv3": "Shrapnel aftershock.",
+    "name": "Explosive Round",
+    "unlock_hint": "Gun Lv13"
+  },
+  "fatal_throw": {
+    "desc": "An early dart-dagger power move. Lethal from the release.",
+    "lv2": "Truer throw.",
+    "lv3": "Lethal follow-through.",
+    "name": "Fatal Throw",
+    "unlock_hint": "Dagger line Lv7"
+  },
+  "fireball": {
+    "desc": "★ Level 13 quest technique. A scorching ball of fire.",
+    "lv2": "Larger fireball.",
+    "lv3": "Blast aftershock.",
+    "name": "Fireball",
+    "unlock_hint": "Staff Lv13"
   },
   "heavy_cleave": {
     "desc": "Axe signature: one strike with weight behind it — slow but it hurts.",
@@ -27,12 +146,33 @@
     "name": "Heavy Cleave",
     "unlock_hint": "Choose the axe style · or level 6"
   },
+  "hundred_flowers": {
+    "desc": "An early fist-claw combo, five hits of flurry.",
+    "lv2": "Faster flurry.",
+    "lv3": "The flowers close on one strike.",
+    "name": "Hundred Flowers",
+    "unlock_hint": "Fist line Lv7"
+  },
+  "ice_lance": {
+    "desc": "An icicle drives through.",
+    "lv2": "Longer lance.",
+    "lv3": "Frost slows them (multiplier↑).",
+    "name": "Ice Lance",
+    "unlock_hint": "Staff Lv7"
+  },
   "iron_guard": {
     "desc": "Hammer/Ironbone signature: a steadying breath that triggers earlier.",
     "lv2": "Slightly more healing.",
     "lv3": "Wider critical threshold, more healing.",
     "name": "Ironbone Breath",
     "unlock_hint": "Choose the hammer style · or level 5"
+  },
+  "last_bullet": {
+    "desc": "★ Gun rage technique. One report that decides it.",
+    "lv2": "Higher chamber pressure.",
+    "lv3": "The finisher caps out.",
+    "name": "Last Bullet",
+    "unlock_hint": "Gun Lv16"
   },
   "line_thrust": {
     "desc": "Spear signature: an intercepting thrust that holds the distance.",
@@ -41,12 +181,54 @@
     "name": "Line Thrust",
     "unlock_hint": "Choose the spear style · or level 6"
   },
+  "magic_bolt": {
+    "desc": "A basic magic bolt.",
+    "lv2": "Tighter bolt.",
+    "lv3": "Stardust in its wake.",
+    "name": "Magic Bolt",
+    "unlock_hint": "Staff opener"
+  },
+  "meteor": {
+    "desc": "★ Level 16 rage technique. A meteor bombardment.",
+    "lv2": "Heavier meteor.",
+    "lv3": "Falling stars in sequence.",
+    "name": "Meteor",
+    "unlock_hint": "Staff Lv16"
+  },
   "mist_needle": {
     "desc": "Dart signature: a fast play where true and false share a colour.",
     "lv2": "Denser dart shadows.",
     "lv3": "Sees the tell, multiplier up again.",
     "name": "Mist Needle",
     "unlock_hint": "Choose the dart style · or level 6"
+  },
+  "multi_shot": {
+    "desc": "★ Level 13 quest technique. Four true shots in a row.",
+    "lv2": "Steadier arrow count.",
+    "lv3": "Multishot follows up.",
+    "name": "Multishot",
+    "unlock_hint": "Bow line Lv13"
+  },
+  "phalanx_sweep": {
+    "desc": "The spear shaft sweeps a half circle, forcing them back.",
+    "lv2": "Wider sweep.",
+    "lv3": "The sweep also breaks guard.",
+    "name": "Phalanx Sweep",
+    "unlock_hint": "Spear line Lv7"
+  },
+  "phantom_rain": {
+    "desc": "★ Dart line quest technique. A rain of darts you can't tell apart.",
+    "lv2": "Denser rain.",
+    "lv3": "Phantoms follow up.",
+    "name": "Phantom Rain",
+    "unlock_hint": "Dart line Lv13"
+  },
+  "piercing_shot": {
+    "desc": "An armour-piercing arrow, made for heavy plate.",
+    "lv2": "Deeper penetration.",
+    "lv3": "Follow-through pierces.",
+    "name": "Piercing Shot",
+    "unlock_hint": "Bow line Lv7"
   },
   "powder_shot": {
     "desc": "Gun signature: a burst at range that hurts when it lands.",
@@ -62,12 +244,68 @@
     "name": "Guardbreak Fist",
     "unlock_hint": "Choose the fist style · or level 6"
   },
+  "prism_nova": {
+    "desc": "★ Crystal rage technique. A refracted burst.",
+    "lv2": "Brighter nova.",
+    "lv3": "Seven-colour scatter.",
+    "name": "Prism Nova",
+    "unlock_hint": "Crystal Lv16"
+  },
   "prism_ward": {
     "desc": "Crystal signature: weaves the ward into a breath — steady health, long life.",
     "lv2": "Slightly more healing.",
     "lv3": "Wider critical threshold.",
     "name": "Prism Breath",
     "unlock_hint": "Choose the crystal style · or level 5"
+  },
+  "quake_slash": {
+    "desc": "★ Level 16 rage technique. A blow that tears the ground open.",
+    "lv2": "Wider rift.",
+    "lv3": "A second gale impact.",
+    "name": "Gale Earthrend",
+    "unlock_hint": "Fist line Lv16"
+  },
+  "quick_shot": {
+    "desc": "Bow opener: one fast arrow.",
+    "lv2": "Faster draw.",
+    "lv3": "Shots in quick succession.",
+    "name": "Quick Shot",
+    "unlock_hint": "Bow line opener"
+  },
+  "quick_stab": {
+    "desc": "Dagger opener: one fast strike.",
+    "lv2": "Faster thrust.",
+    "lv3": "The stab reads the opening.",
+    "name": "Quick Stab",
+    "unlock_hint": "Dagger line opener"
+  },
+  "shadow_fan": {
+    "desc": "A fan of shadow darts covering the blind spots of movement.",
+    "lv2": "Wider spread.",
+    "lv3": "Darts chain together.",
+    "name": "Shadow Fan",
+    "unlock_hint": "Dart line Lv7"
+  },
+  "shard_bolt": {
+    "desc": "Crystal opener: keen crystal shards.",
+    "lv2": "Denser shards.",
+    "lv3": "The bolt refracts on impact.",
+    "name": "Shard Bolt",
+    "unlock_hint": "Crystal opener"
+  },
+  "shinra": {
+    "desc": "★ Level 16 rage technique. Sixteen linked thrusts.",
+    "lv2": "Faster chain.",
+    "lv3": "The final thrust always lands.",
+    "name": "All Creation",
+    "unlock_hint": "Dagger line Lv16"
+  },
+  "sky_lance": {
+    "desc": "★ Spear line rage technique. A killing blow dropped from above.",
+    "lv2": "Heavier descent.",
+    "lv3": "Shockwave where the lance strikes.",
+    "name": "Sky Lance",
+    "unlock_hint": "Spear line Lv16"
   },
   "slash": {
     "desc": "One sweeping cut. Fires automatically when Rage is full. The first move of the journey.",
@@ -76,6 +314,13 @@
     "name": "Wide Slash",
     "unlock_hint": "First battle, or Greybeard's pointer"
   },
+  "spiral_pierce": {
+    "desc": "★ Spear line quest technique. A spinning thrust through armour.",
+    "lv2": "Deeper penetration.",
+    "lv3": "Longer follow-through.",
+    "name": "Spiral Pierce",
+    "unlock_hint": "Spear line Lv13"
+  },
   "star_pierce": {
     "desc": "Magic/Starpath signature: a thrust tuned to critical tempo.",
     "lv2": "Sharper starlight.",
@@ -83,12 +328,40 @@
     "name": "Starlight Pierce",
     "unlock_hint": "Choose the magic style · or level 6"
   },
+  "stone_crush": {
+    "desc": "Hammer line opener: a blow like splitting rock.",
+    "lv2": "Steadier smash.",
+    "lv3": "Aftershock through the stone.",
+    "name": "Stone Crusher",
+    "unlock_hint": "Hammer line opener"
+  },
+  "thousand_needles": {
+    "desc": "★ Dart line rage technique. A thousand needles at once.",
+    "lv2": "Faster needles.",
+    "lv3": "The burial caps out.",
+    "name": "Thousand Needles",
+    "unlock_hint": "Dart line Lv16"
+  },
   "thunder_fury": {
     "desc": "Priority finisher at full Rage. Understood after the lion's approval.",
     "lv2": "Stronger thunder.",
     "lv3": "Longer thunder tail, one notch below the damage cap.",
     "name": "Thunder Fury",
     "unlock_hint": "Understood after beating Leo · or Sword Lv10"
+  },
+  "tiger_rush": {
+    "desc": "A low pounce, both claws tearing.",
+    "lv2": "Fiercer pounce.",
+    "lv3": "The roar suppresses.",
+    "name": "Tiger Pounce",
+    "unlock_hint": "Claw line Lv7"
+  },
+  "void_rend": {
+    "desc": "★ Claw line rage technique. A finish that tears space open.",
+    "lv2": "Sharper rend.",
+    "lv3": "Void aftershock.",
+    "name": "Void Rend",
+    "unlock_hint": "Claw line Lv16"
   },
   "wind_arrow": {
     "desc": "Bow signature: one shot at range, rides critical tempo.",

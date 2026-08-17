@@ -147,7 +147,7 @@ static func default_variance() -> float:
 
 # ── 姿態（虛擬距離）：遠距開闊／被壓、坦克常駐減傷 ──
 
-const _RANGED_DEFAULT: Array[String] = ["bow", "gun", "magic", "dart"]
+const _RANGED_DEFAULT: Array[String] = ["bow", "gun", "magic", "dart", "crystal"]
 const _TANK_DEFAULT: Array[String] = ["hammer", "crystal"]
 
 
@@ -254,7 +254,9 @@ static func weapon_tempo(weapon_class: String) -> Dictionary:
 		"gun": {"windup": 0.42, "recover": 0.55},
 		"magic": {"windup": 0.32, "recover": 0.42},
 		"dart": {"windup": 0.18, "recover": 0.28},
+		"dagger": {"windup": 0.16, "recover": 0.26},
 		"fist": {"windup": 0.20, "recover": 0.32},
+		"claw": {"windup": 0.18, "recover": 0.30},
 		"axe": {"windup": 0.35, "recover": 0.50},
 		"hammer": {"windup": 0.36, "recover": 0.52},
 		"spear": {"windup": 0.28, "recover": 0.42},

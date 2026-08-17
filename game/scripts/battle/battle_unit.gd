@@ -38,7 +38,8 @@ var first_hit_guard: bool = true
 
 ## 技能
 var can_skill: bool = false
-var skill_mult: float = 1.8
+var skill_mult: float = 1.8  ## 每段倍率（多段技為單段）
+var skill_hits: int = 1  ## 多段攻擊段數
 var skill_name: String = "橫斬"
 var skill_id: String = "slash"
 var skill_kind: String = "attack"  ## attack | heal

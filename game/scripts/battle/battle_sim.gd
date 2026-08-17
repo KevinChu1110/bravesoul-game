@@ -6,6 +6,8 @@ extends RefCounted
 signal event(kind: String, data: Dictionary)
 signal battle_ended(won: bool)
 
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
 const ATB_MAX := 100.0
 const RAGE_MAX := 100.0
 const KING_SLASH_WINDUP := 1.85  ## 較長前搖，方便看倒數
@@ -147,6 +149,13 @@ const HAZARD_WINDOW_WRATH := 0.65
 var ng_tight_hazards: bool = false
 var ng_scale_applied: bool = false
 
+
+
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
 
 func _init(seed: int = 0) -> void:
 	rng = RandomNumberGenerator.new()
@@ -506,7 +515,7 @@ func _resolve_strike(u: BattleUnit) -> void:
 		"rage": target.rage,
 	})
 	if abo_mode and u.team == BattleUnit.Team.PLAYER and target.id == "abo":
-		_abo_add_guard(28.0 if is_crit else 18.0, "普攻")
+		_abo_add_guard(28.0 if is_crit else 18.0, _t("普攻"))
 	if statue_mode and u.team == BattleUnit.Team.PLAYER:
 		_statue_retarget_player()
 	u.state = BattleUnit.State.STRIKE
@@ -531,6 +540,7 @@ func _refresh_player_skill_choice(u: BattleUnit) -> void:
 	u.skill_name = str(kit.get("name", u.skill_name))
 	u.skill_kind = str(kit.get("kind", "attack"))
 	u.skill_mult = float(kit.get("mult", u.skill_mult))
+	u.skill_hits = maxi(1, int(kit.get("hits", u.skill_hits)))
 	u.heal_pct = float(kit.get("heal_pct", 0.0))
 
 
@@ -552,6 +562,8 @@ func _resolve_skill(u: BattleUnit) -> void:
 			"heal": actual,
 			"hp": u.hp,
 			"max_hp": u.max_hp,
+			"hit_index": 0,
+			"hits": 1,
 		})
 		u.state = BattleUnit.State.RECOVER
 		u.state_timer = u.recover_time * 1.1
@@ -567,47 +579,77 @@ func _resolve_skill(u: BattleUnit) -> void:
 		target = foes[0]
 		u.target_id = target.id
 
+	## 真多段：每段獨立擲骰與結算；目標中途死亡則中斷
+	var hits_n: int = maxi(1, u.skill_hits)
 	var atk_s := float(u.atk) * (u.atk_buff_mult if u.atk_buff_left > 0.0 else 1.0)
 	var var_s := u.dmg_variance if u.dmg_variance > 0.0 else Formulas.default_variance()
-	var sroll: Dictionary = Formulas.roll_hit_damage(
-		atk_s, target.defense, u.skill_mult, var_s,
-		u.crit, target.crit_resist, u.crit_dmg, rng, true
-	)
-	var dmg: int = int(sroll.get("damage", 1))
-	var skill_crit: bool = bool(sroll.get("crit", false))
-	if u.team == BattleUnit.Team.PLAYER:
-		dmg = u.scale_outgoing(dmg)
+	var any_crit := false
+	var total_dealt := 0
+	for hi in range(hits_n):
+		if target == null or not target.is_alive():
+			break
+		var sroll: Dictionary = Formulas.roll_hit_damage(
+			atk_s, target.defense, u.skill_mult, var_s,
+			u.crit, target.crit_resist, u.crit_dmg, rng, true
+		)
+		var dmg: int = int(sroll.get("damage", 1))
+		var skill_crit: bool = bool(sroll.get("crit", false))
+		if skill_crit:
+			any_crit = true
+		if u.team == BattleUnit.Team.PLAYER:
+			dmg = u.scale_outgoing(dmg)
+		if fog_mode and u.team == BattleUnit.Team.PLAYER:
+			_apply_player_hit_on_fog(u, target, dmg, skill_crit, u.skill_name)
+			## 霧戰多段仍逐段打幻影／本體
+			_emit("skill_hit", {
+				"attacker": u.id,
+				"defender": target.id,
+				"skill": u.skill_name,
+				"skill_id": u.skill_id,
+				"kind": "attack",
+				"crit": skill_crit,
+				"damage": dmg,
+				"hp": target.hp if target else 0,
+				"max_hp": target.max_hp if target else 1,
+				"hit_index": hi,
+				"hits": hits_n,
+				"grant_mastery": hi == 0,
+			})
+			continue
+
+		if abo_mode and u.team == BattleUnit.Team.PLAYER and target.id == "abo":
+			dmg = _abo_filter_damage(target, dmg, true)
+		if falcon_mode and u.team == BattleUnit.Team.PLAYER and target.id == "falcon":
+			dmg = _falcon_filter_damage(target, dmg)
+		if boar_mode and u.team == BattleUnit.Team.PLAYER and target.id == "boar":
+			dmg = _boar_filter_damage(target, dmg)
+		if tide_mode and u.team == BattleUnit.Team.PLAYER:
+			dmg = _tide_filter_damage(target, dmg, true)
+			if u.id == player_id and tide_wave_active:
+				tide_player_swings += 1
+		if statue_mode and u.team == BattleUnit.Team.PLAYER:
+			dmg = _statue_filter_damage(target, dmg)
+		var dealt := target.take_damage(dmg)
+		total_dealt += dealt
+		_emit("skill_hit", {
+			"attacker": u.id,
+			"defender": target.id,
+			"skill": u.skill_name,
+			"skill_id": u.skill_id,
+			"kind": "attack",
+			"crit": skill_crit,
+			"damage": dealt,
+			"hp": target.hp,
+			"max_hp": target.max_hp,
+			"hit_index": hi,
+			"hits": hits_n,
+			"grant_mastery": hi == 0,
+		})
 	if fog_mode and u.team == BattleUnit.Team.PLAYER:
-		_apply_player_hit_on_fog(u, target, dmg, skill_crit, u.skill_name)
 		u.state = BattleUnit.State.RECOVER
 		u.state_timer = u.recover_time * 1.2
 		return
-
-	if abo_mode and u.team == BattleUnit.Team.PLAYER and target.id == "abo":
-		dmg = _abo_filter_damage(target, dmg, true)
-	if falcon_mode and u.team == BattleUnit.Team.PLAYER and target.id == "falcon":
-		dmg = _falcon_filter_damage(target, dmg)
-	if boar_mode and u.team == BattleUnit.Team.PLAYER and target.id == "boar":
-		dmg = _boar_filter_damage(target, dmg)
-	if tide_mode and u.team == BattleUnit.Team.PLAYER:
-		dmg = _tide_filter_damage(target, dmg, true)
-		if u.id == player_id and tide_wave_active:
-			tide_player_swings += 1
-	if statue_mode and u.team == BattleUnit.Team.PLAYER:
-		dmg = _statue_filter_damage(target, dmg)
-	var dealt := target.take_damage(dmg)
-	_emit("skill_hit", {
-		"attacker": u.id,
-		"defender": target.id,
-		"skill": u.skill_name,
-		"skill_id": u.skill_id,
-		"kind": "attack",
-		"crit": skill_crit,
-		"damage": dealt,
-		"hp": target.hp,
-		"max_hp": target.max_hp,
-	})
-	if abo_mode and u.team == BattleUnit.Team.PLAYER and target.id == "abo":
+	if abo_mode and u.team == BattleUnit.Team.PLAYER and target != null and target.id == "abo":
 		_abo_add_guard(42.0, u.skill_name)  ## 技能灌破防較多
 	if statue_mode and u.team == BattleUnit.Team.PLAYER:
 		_statue_retarget_player()
@@ -653,7 +695,7 @@ func _step_abo_slam(dt: float) -> void:
 	var foes: Array = living_of(BattleUnit.Team.PLAYER)
 	if not foes.is_empty():
 		a.target_id = foes[0].id
-	_emit("king_slash_start", {"id": a.id, "windup": 1.2, "label": "重拳", "abo_slam": true})
+	_emit("king_slash_start", {"id": a.id, "windup": 1.2, "label": _t("重拳"), "abo_slam": true})
 
 
 func _abo_filter_damage(abo: BattleUnit, dmg: int, is_skill: bool) -> int:
@@ -726,7 +768,7 @@ func _step_boar_charge(dt: float) -> void:
 	var foes: Array = living_of(BattleUnit.Team.PLAYER)
 	if not foes.is_empty():
 		b.target_id = foes[0].id
-	_emit("king_slash_start", {"id": b.id, "windup": 1.45, "label": "衝鋒", "boar_clash": true})
+	_emit("king_slash_start", {"id": b.id, "windup": 1.45, "label": _t("衝鋒"), "boar_clash": true})
 
 
 func _abo_add_guard(amount: float, source: String) -> void:
@@ -782,11 +824,11 @@ func _begin_temptation(stage: int) -> void:
 		if d.state == BattleUnit.State.WINDUP:
 			d.state = BattleUnit.State.IDLE
 			d.state_timer = 0.0
-	var titles := {1: "力量", 2: "復仇", 3: "安穩"}
+	var titles := {1: _t("力量"), 2: _t("復仇"), 3: _t("安穩")}
 	var lines := {
-		1: "我給你力量。一擊劈開黑焰。你的村、你的人，瞬間安全。你不是慕強。你只是——效率。",
-		2: "恨我。恨燒村的焰。把恨鍛成刃——比愛鋒利。",
-		3: "放下劍。我替你撐封印。你回村。麥田會在。永不變強的安穩——這不就是「不慕強權」嗎？",
+		1: _t("我給你力量。一擊劈開黑焰。你的村、你的人，瞬間安全。你不是慕強。你只是——效率。"),
+		2: _t("恨我。恨燒村的焰。把恨鍛成刃——比愛鋒利。"),
+		3: _t("放下劍。我替你撐封印。你回村。麥田會在。永不變強的安穩——這不就是「不慕強權」嗎？"),
 	}
 	_emit("temptation", {
 		"stage": stage,
@@ -839,7 +881,7 @@ func _start_king_slash(u: BattleUnit) -> void:
 	var foes: Array = living_of(BattleUnit.Team.PLAYER)
 	if not foes.is_empty():
 		u.target_id = foes[0].id
-	var skill_label := "黑焰必殺" if demon_mode else "王者斬"
+	var skill_label := _t("黑焰必殺") if demon_mode else _t("王者斬")
 	_emit("king_slash_start", {"id": u.id, "windup": KING_SLASH_WINDUP, "label": skill_label})
 	_emit("state", {"id": u.id, "state": "telegraph"})
 
@@ -951,13 +993,13 @@ func _perfect_parry(boss: BattleUnit) -> void:
 	boss.state = BattleUnit.State.RECOVER
 	boss.state_timer = 1.2  ## 硬直
 	slowmo = 0.85
-	var banner := "完美格擋"
+	var banner := _t("完美格擋")
 	if demon_mode:
-		banner = "微末到底"
+		banner = _t("微末到底")
 	elif abo_mode and boss.id == "abo":
-		banner = "拆招"
+		banner = _t("拆招")
 	elif boar_mode and boss.id == "boar":
-		banner = "對撞"
+		banner = _t("對撞")
 	pending_micro_end = banner
 	_emit("perfect_parry", {"boss": boss.id, "banner": banner})
 	_emit("parry_window", {"attacker": boss.id, "open": false})
@@ -977,7 +1019,7 @@ func _perfect_parry(boss: BattleUnit) -> void:
 			_emit("skill_hit", {
 				"attacker": p.id,
 				"defender": boss.id,
-				"skill": "對撞",
+				"skill": _t("對撞"),
 				"damage": dealt_b,
 				"hp": boss.hp,
 				"max_hp": boss.max_hp,
@@ -1127,28 +1169,28 @@ func _resolve_hazard(success: bool) -> void:
 					_emit("hazard_resolve", {
 						"kind": kind,
 						"success": true,
-						"msg": "躍出火圈 · 灼燒－1（現 %d）" % burn_stacks,
+						"msg": _t("躍出火圈 · 灼燒－1（現 %d）") % burn_stacks,
 						"burn": burn_stacks,
 					})
 				else:
-					_emit("hazard_resolve", {"kind": kind, "success": true, "msg": "躍出火圈"})
+					_emit("hazard_resolve", {"kind": kind, "success": true, "msg": _t("躍出火圈")})
 			"time_clock":
 				p.atk_buff_left = 4.0
 				p.atk_buff_mult = 1.25
 				var d := get_unit("demon")
 				if d:
 					d.atb_slow_left = maxf(d.atb_slow_left, 3.0)
-				_emit("hazard_resolve", {"kind": kind, "success": true, "msg": "控時成功：你加速、敵減速"})
+				_emit("hazard_resolve", {"kind": kind, "success": true, "msg": _t("控時成功：你加速、敵減速")})
 			"lightning":
 				p.atk_buff_left = 5.0
 				p.atk_buff_mult = 1.2
-				_emit("hazard_resolve", {"kind": kind, "success": true, "msg": "導雷成功：攻擊上升"})
+				_emit("hazard_resolve", {"kind": kind, "success": true, "msg": _t("導雷成功：攻擊上升")})
 			"wind_cut":
-				_emit("hazard_resolve", {"kind": kind, "success": true, "msg": "避開風切"})
+				_emit("hazard_resolve", {"kind": kind, "success": true, "msg": _t("避開風切")})
 			"rockfall":
-				_emit("hazard_resolve", {"kind": kind, "success": true, "msg": "踩進安全區"})
+				_emit("hazard_resolve", {"kind": kind, "success": true, "msg": _t("踩進安全區")})
 			"bomb":
-				_emit("hazard_resolve", {"kind": kind, "success": true, "msg": "拆除炸彈"})
+				_emit("hazard_resolve", {"kind": kind, "success": true, "msg": _t("拆除炸彈")})
 			_:
 				_emit("hazard_resolve", {"kind": kind, "success": true})
 	else:
@@ -1165,7 +1207,7 @@ func _resolve_hazard(success: bool) -> void:
 						_emit("hazard_resolve", {
 							"kind": kind,
 							"success": false,
-							"msg": "灼燒滿層！黑焰爆燃",
+							"msg": _t("灼燒滿層！黑焰爆燃"),
 							"damage": dealt_b,
 							"hp": p.hp,
 							"max_hp": p.max_hp,
@@ -1177,7 +1219,7 @@ func _resolve_hazard(success: bool) -> void:
 						_emit("hazard_resolve", {
 							"kind": kind,
 							"success": false,
-							"msg": "火圈灼傷 · 疊層 %d/%d" % [burn_stacks, BURN_STACK_MAX],
+							"msg": _t("火圈灼傷 · 疊層 %d/%d") % [burn_stacks, BURN_STACK_MAX],
 							"damage": dealt,
 							"hp": p.hp,
 							"max_hp": p.max_hp,
@@ -1186,30 +1228,30 @@ func _resolve_hazard(success: bool) -> void:
 				else:
 					var burn2 := maxi(1, int(p.max_hp * 0.12))
 					var dealt2 := p.take_damage(burn2)
-					_emit("hazard_resolve", {"kind": kind, "success": false, "msg": "火圈灼傷", "damage": dealt2, "hp": p.hp, "max_hp": p.max_hp})
+					_emit("hazard_resolve", {"kind": kind, "success": false, "msg": _t("火圈灼傷"), "damage": dealt2, "hp": p.hp, "max_hp": p.max_hp})
 			"time_clock":
 				p.atb_freeze_left = maxf(p.atb_freeze_left, 2.2)
-				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": "時鐘錯位：你被凍結出手"})
+				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": _t("時鐘錯位：你被凍結出手")})
 			"lightning":
 				var zap := maxi(1, int(p.max_hp * 0.10))
 				var d2 := p.take_damage(zap)
 				p.atk_buff_left = 4.0
 				p.atk_buff_mult = 0.85
-				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": "導雷失敗：受傷且虛弱", "damage": d2, "hp": p.hp, "max_hp": p.max_hp})
+				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": _t("導雷失敗：受傷且虛弱"), "damage": d2, "hp": p.hp, "max_hp": p.max_hp})
 			"wind_cut":
 				var w := maxi(1, int(p.max_hp * 0.11))
 				var dw := p.take_damage(w)
 				p.atb_slow_left = maxf(p.atb_slow_left, 2.5)
-				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": "風切刮傷，動作變慢", "damage": dw, "hp": p.hp, "max_hp": p.max_hp})
+				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": _t("風切刮傷，動作變慢"), "damage": dw, "hp": p.hp, "max_hp": p.max_hp})
 			"rockfall":
 				var r := maxi(1, int(p.max_hp * 0.14))
 				var dr := p.take_damage(r)
-				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": "落岩砸中", "damage": dr, "hp": p.hp, "max_hp": p.max_hp})
+				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": _t("落岩砸中"), "damage": dr, "hp": p.hp, "max_hp": p.max_hp})
 			"bomb":
 				var bom := maxi(1, int(p.max_hp * 0.16))
 				var db := p.take_damage(bom)
 				p.atb_slow_left = maxf(p.atb_slow_left, 1.8)
-				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": "炸彈爆炸", "damage": db, "hp": p.hp, "max_hp": p.max_hp})
+				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": _t("炸彈爆炸"), "damage": db, "hp": p.hp, "max_hp": p.max_hp})
 			_:
 				_emit("hazard_resolve", {"kind": kind, "success": false})
 	## 時牢：副機制 rockfall 結束後切回炸彈
@@ -1246,7 +1288,7 @@ func _step_tide(dt: float) -> void:
 		tide_phase_skill = not tide_phase_skill
 		_emit("tide_phase", {
 			"skill_half": tide_phase_skill,
-			"label": "他在擋技能 · 改用普攻" if tide_phase_skill else "他在擋普攻 · 改用技能",
+			"label": _t("他在擋技能 · 改用普攻") if tide_phase_skill else _t("他在擋普攻 · 改用技能"),
 		})
 	if tide_wave_active:
 		tide_wave_left -= dt
@@ -1319,7 +1361,7 @@ func _tide_summon_wave() -> void:
 		if u == null:
 			u = BattleUnit.new()
 			u.id = id
-			u.display_name = "黑焰刺胞"
+			u.display_name = _t("黑焰刺胞")
 			u.team = BattleUnit.Team.ENEMY
 			u.is_boss = false
 			## 一刀一隻。原本 45 血在通關等級要兩刀才死，三隻就要六刀，
@@ -1411,7 +1453,7 @@ func _spawn_echo_body() -> void:
 	if e == null:
 		e = BattleUnit.new()
 		e.id = "echo"
-		e.display_name = "石像殘響"
+		e.display_name = _t("石像殘響")
 		e.team = BattleUnit.Team.ENEMY
 		e.is_boss = true
 		e.max_hp = 160
@@ -1521,7 +1563,7 @@ static func make_tutorial_wolf_fight(player_stats: Dictionary) -> BattleSim:
 	var sim := BattleSim.new()
 	var p := BattleUnit.new()
 	p.id = "player"
-	p.display_name = str(player_stats.get("name", "兔勇者"))
+	p.display_name = str(player_stats.get("name", _t("兔勇者")))
 	p.team = BattleUnit.Team.PLAYER
 	p.max_hp = int(player_stats.get("max_hp", 50))
 	p.hp = int(player_stats.get("hp", p.max_hp))
@@ -1534,7 +1576,7 @@ static func make_tutorial_wolf_fight(player_stats: Dictionary) -> BattleSim:
 
 	var w := BattleUnit.new()
 	w.id = "wolf"
-	w.display_name = "渣滓之狼"
+	w.display_name = _t("渣滓之狼")
 	w.team = BattleUnit.Team.ENEMY
 	w.max_hp = 45
 	w.hp = 45
@@ -1549,7 +1591,7 @@ static func make_leo_fight(player_stats: Dictionary) -> BattleSim:
 	var sim := BattleSim.new()
 	var p := BattleUnit.new()
 	p.id = "player"
-	p.display_name = str(player_stats.get("name", "兔勇者"))
+	p.display_name = str(player_stats.get("name", _t("兔勇者")))
 	p.team = BattleUnit.Team.PLAYER
 	p.max_hp = int(player_stats.get("max_hp", 80))
 	p.hp = int(player_stats.get("hp", p.max_hp))
@@ -1562,7 +1604,7 @@ static func make_leo_fight(player_stats: Dictionary) -> BattleSim:
 
 	var leo := BattleUnit.new()
 	leo.id = "leo"
-	leo.display_name = "聖獅·雷歐"
+	leo.display_name = _t("聖獅·雷歐")
 	leo.team = BattleUnit.Team.ENEMY
 	leo.is_boss = true
 	## 垂直切片數值（完整版再拉到 ~800）
@@ -1586,7 +1628,7 @@ static func make_falcon_fight(player_stats: Dictionary) -> BattleSim:
 	sim.falcon_stop_left = 0.0
 	var p := BattleUnit.new()
 	p.id = "player"
-	p.display_name = str(player_stats.get("name", "兔勇者"))
+	p.display_name = str(player_stats.get("name", _t("兔勇者")))
 	p.team = BattleUnit.Team.PLAYER
 	p.max_hp = int(player_stats.get("max_hp", 90))
 	p.hp = int(player_stats.get("hp", p.max_hp))
@@ -1599,7 +1641,7 @@ static func make_falcon_fight(player_stats: Dictionary) -> BattleSim:
 
 	var f := BattleUnit.new()
 	f.id = "falcon"
-	f.display_name = "疾影"
+	f.display_name = _t("疾影")
 	f.team = BattleUnit.Team.ENEMY
 	f.is_boss = true
 	f.max_hp = 400
@@ -1621,7 +1663,7 @@ static func make_boar_fight(player_stats: Dictionary) -> BattleSim:
 	sim.boar_charge_cd = 3.5
 	var p := BattleUnit.new()
 	p.id = "player"
-	p.display_name = str(player_stats.get("name", "兔勇者"))
+	p.display_name = str(player_stats.get("name", _t("兔勇者")))
 	p.team = BattleUnit.Team.PLAYER
 	p.max_hp = int(player_stats.get("max_hp", 95))
 	p.hp = int(player_stats.get("hp", p.max_hp))
@@ -1634,7 +1676,7 @@ static func make_boar_fight(player_stats: Dictionary) -> BattleSim:
 
 	var b := BattleUnit.new()
 	b.id = "boar"
-	b.display_name = "石拳"
+	b.display_name = _t("石拳")
 	b.team = BattleUnit.Team.ENEMY
 	b.is_boss = true
 	## 建議 30+，原本 Lv8 就有 38% 勝率
@@ -1662,7 +1704,7 @@ static func make_wrath_fight(player_stats: Dictionary) -> BattleSim:
 
 	var w := BattleUnit.new()
 	w.id = "wrath"
-	w.display_name = "無臉·怒火"
+	w.display_name = _t("無臉·怒火")
 	w.team = BattleUnit.Team.ENEMY
 	w.is_boss = true
 	## 通關後裂縫，原本 Lv12 就 100%
@@ -1688,7 +1730,8 @@ static func _apply_player_skill_stats(p: BattleUnit, player_stats: Dictionary) -
 		p.skill_mult = float(player_stats.get("skill_mult", default_mult))
 	else:
 		p.skill_mult = default_mult
-	p.skill_name = str(player_stats.get("skill_name", "橫斬"))
+	p.skill_hits = maxi(1, int(player_stats.get("skill_hits", 1)))
+	p.skill_name = str(player_stats.get("skill_name", _t("橫斬")))
 	p.skill_id = str(player_stats.get("skill_id", "slash"))
 	p.skill_kind = str(player_stats.get("skill_kind", "attack"))
 	p.heal_pct = float(player_stats.get("heal_pct", 0.0))
@@ -1724,7 +1767,7 @@ static func _apply_weapon_class(p: BattleUnit, player_stats: Dictionary) -> void
 static func _rift_player(player_stats: Dictionary) -> BattleUnit:
 	var p := BattleUnit.new()
 	p.id = "player"
-	p.display_name = str(player_stats.get("name", "兔勇者"))
+	p.display_name = str(player_stats.get("name", _t("兔勇者")))
 	p.team = BattleUnit.Team.PLAYER
 	p.max_hp = int(player_stats.get("max_hp", 100))
 	p.hp = int(player_stats.get("hp", p.max_hp))
@@ -1747,7 +1790,7 @@ static func make_tide_fight(player_stats: Dictionary) -> BattleSim:
 	sim.player_id = p.id
 	var t := BattleUnit.new()
 	t.id = "tide"
-	t.display_name = "無臉·潮噬"
+	t.display_name = _t("無臉·潮噬")
 	t.team = BattleUnit.Team.ENEMY
 	t.is_boss = true
 	t.max_hp = 480
@@ -1774,7 +1817,7 @@ static func make_statue_fight(player_stats: Dictionary) -> BattleSim:
 	for i in 3:
 		var s := BattleUnit.new()
 		s.id = "statue_%d" % i
-		s.display_name = "黑焰石像·%s" % ["甲", "乙", "丙"][i]
+		s.display_name = _t("黑焰石像·%s") % [_t("甲"), _t("乙"), _t("丙")][i]
 		s.team = BattleUnit.Team.ENEMY
 		s.is_boss = false
 		## 三尊石像。原本各 120，Lv20 就 92% 勝率
@@ -1802,7 +1845,7 @@ static func make_chrono_fight(player_stats: Dictionary) -> BattleSim:
 	sim.player_id = p.id
 	var c := BattleUnit.new()
 	c.id = "chrono"
-	c.display_name = "無臉·時牢"
+	c.display_name = _t("無臉·時牢")
 	c.team = BattleUnit.Team.ENEMY
 	c.is_boss = true
 	## 通關後裂縫，原本 Lv12 就 100%
@@ -1830,7 +1873,7 @@ static func make_abo_fight(player_stats: Dictionary) -> BattleSim:
 	sim.abo_slam_cd = 1.5
 	var p := BattleUnit.new()
 	p.id = "player"
-	p.display_name = str(player_stats.get("name", "兔勇者"))
+	p.display_name = str(player_stats.get("name", _t("兔勇者")))
 	p.team = BattleUnit.Team.PLAYER
 	p.max_hp = int(player_stats.get("max_hp", 85))
 	p.hp = int(player_stats.get("hp", p.max_hp))
@@ -1843,7 +1886,7 @@ static func make_abo_fight(player_stats: Dictionary) -> BattleSim:
 
 	var abo := BattleUnit.new()
 	abo.id = "abo"
-	abo.display_name = "阿波熊貓"
+	abo.display_name = _t("阿波熊貓")
 	abo.team = BattleUnit.Team.ENEMY
 	abo.is_boss = true
 	## 建議 26+，原本 Lv16 就有 72% 勝率
@@ -1864,7 +1907,7 @@ static func make_demon_fight(player_stats: Dictionary) -> BattleSim:
 	sim.demon_mode = true
 	var p := BattleUnit.new()
 	p.id = "player"
-	p.display_name = str(player_stats.get("name", "兔勇者"))
+	p.display_name = str(player_stats.get("name", _t("兔勇者")))
 	p.team = BattleUnit.Team.PLAYER
 	p.max_hp = int(player_stats.get("max_hp", 90))
 	p.hp = int(player_stats.get("hp", p.max_hp))
@@ -1877,7 +1920,7 @@ static func make_demon_fight(player_stats: Dictionary) -> BattleSim:
 
 	var demon := BattleUnit.new()
 	demon.id = "demon"
-	demon.display_name = "魔王"
+	demon.display_name = _t("魔王")
 	demon.team = BattleUnit.Team.ENEMY
 	demon.is_boss = true
 	## 終章魔王。原本 520 血，Lv8 的玩家 22 刀就砍完（每刀約 23）——
@@ -1904,7 +1947,7 @@ static func make_fog_fight(player_stats: Dictionary) -> BattleSim:
 	sim.fog_vuln_cd = 1.2  ## 開場稍後第一次破綻
 	var p := BattleUnit.new()
 	p.id = "player"
-	p.display_name = str(player_stats.get("name", "兔勇者"))
+	p.display_name = str(player_stats.get("name", _t("兔勇者")))
 	p.team = BattleUnit.Team.PLAYER
 	p.max_hp = int(player_stats.get("max_hp", 80))
 	p.hp = int(player_stats.get("hp", p.max_hp))
@@ -1918,7 +1961,7 @@ static func make_fog_fight(player_stats: Dictionary) -> BattleSim:
 
 	var real_u := BattleUnit.new()
 	real_u.id = "white_fog"
-	real_u.display_name = "白霧（本體）"
+	real_u.display_name = _t("白霧（本體）")
 	real_u.team = BattleUnit.Team.ENEMY
 	real_u.is_boss = true
 	real_u.is_fog_real = true
@@ -1936,7 +1979,7 @@ static func make_fog_fight(player_stats: Dictionary) -> BattleSim:
 	real_u.speed = 12.0
 	sim.add_unit(real_u)
 
-	for pair in [["phantom_a", "幻影甲", Vector2()], ["phantom_b", "幻影乙", Vector2()]]:
+	for pair in [["phantom_a", _t("幻影甲"), Vector2()], ["phantom_b", _t("幻影乙"), Vector2()]]:
 		var ph := BattleUnit.new()
 		ph.id = str(pair[0])
 		ph.display_name = str(pair[1])
@@ -1970,7 +2013,7 @@ static func make_world_fight(player_stats: Dictionary, mode: String) -> BattleSi
 	var sim := BattleSim.new()
 	var p := BattleUnit.new()
 	p.id = "player"
-	p.display_name = str(player_stats.get("name", "兔勇者"))
+	p.display_name = str(player_stats.get("name", _t("兔勇者")))
 	p.team = BattleUnit.Team.PLAYER
 	p.max_hp = int(player_stats.get("max_hp", 80))
 	p.hp = int(player_stats.get("hp", p.max_hp))
