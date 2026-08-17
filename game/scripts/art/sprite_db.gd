@@ -70,6 +70,25 @@ static func _line_to_weapon_visual(line: String) -> String:
 			return ""
 
 
+## ── 完整紙娃娃：優先 base_id 專用疊層，再退回類型圖 ──
+
+static func _equip_base_id(slot: String) -> String:
+	var inst := _equip_inst(slot)
+	if inst.is_empty():
+		return ""
+	return str(inst.get("base_id", "")).strip_edges()
+
+
+static func paperdoll_path(slot: String, base_id: String) -> String:
+	if slot == "" or base_id == "":
+		return ""
+	return "%s/player/paperdoll/%s/%s.png" % [ROOT, slot, base_id]
+
+
+static func paperdoll_tex(slot: String, base_id: String) -> Texture2D:
+	return tex(paperdoll_path(slot, base_id))
+
+
 ## 裝備武器疊層（優先已裝備武器 → 流派）
 static func player_weapon_class_id() -> String:
 	## 1) 已裝備武器的 line / base_id
@@ -118,6 +137,13 @@ static func player_weapon_class_id() -> String:
 
 
 static func player_weapon_overlay() -> Texture2D:
+	## 1) 每件武器 base_id 專用疊層
+	var bid := _equip_base_id("weapon")
+	if bid != "":
+		var unique := paperdoll_tex("weapon", bid)
+		if unique:
+			return unique
+	## 2) 類型共用（劍／弓／…）
 	var wid := player_weapon_class_id()
 	if wid == "":
 		return null
@@ -127,7 +153,7 @@ static func player_weapon_overlay() -> Texture2D:
 	return tex("%s/player/weapons/sword.png" % ROOT)
 
 
-## 防具種類：plate | leather | veil | cloth | ""
+## 防具種類：plate | leather | veil | cloth | ""（類型 fallback）
 static func player_armor_kind() -> String:
 	var line := _equip_line("armor")
 	var inst := _equip_inst("armor")
@@ -150,6 +176,13 @@ static func player_armor_kind() -> String:
 
 
 static func player_armor_overlay() -> Texture2D:
+	## 1) 每件防具 base_id
+	var bid := _equip_base_id("armor")
+	if bid != "":
+		var unique := paperdoll_tex("armor", bid)
+		if unique:
+			return unique
+	## 2) 類型共用
 	var kind := player_armor_kind()
 	if kind == "":
 		return null
@@ -158,6 +191,18 @@ static func player_armor_overlay() -> Texture2D:
 
 ## 防具染色（疊在身體 modulate；外層 armor 貼圖另加）
 static func player_armor_modulate() -> Color:
+	## 有專用甲片時只做極輕染色，避免蓋掉繪製色
+	var bid := _equip_base_id("armor")
+	if bid != "" and paperdoll_tex("armor", bid) != null:
+		match bid:
+			"star_veil":
+				return Color(0.96, 0.94, 1.04, 1)
+			"knight_plate":
+				return Color(0.94, 0.96, 1.02, 1)
+			"ash_mail":
+				return Color(0.96, 0.95, 0.94, 1)
+			_:
+				return Color(1, 1, 1, 1)
 	var kind := player_armor_kind()
 	match kind:
 		"veil":
@@ -177,12 +222,19 @@ static func player_accessory_kind() -> String:
 	if inst.is_empty():
 		return ""
 	var blob := (str(inst.get("base_id", "")) + " " + str(inst.get("name", ""))).to_lower()
-	if blob.find("ring") >= 0 or blob.find("指環") >= 0 or blob.find("ring") >= 0:
+	if blob.find("ring") >= 0 or blob.find("指環") >= 0:
 		return "ring"
 	return "pendant"  ## 預設墜飾
 
 
 static func player_accessory_overlay() -> Texture2D:
+	## 1) 每件飾品 base_id
+	var bid := _equip_base_id("accessory")
+	if bid != "":
+		var unique := paperdoll_tex("accessory", bid)
+		if unique:
+			return unique
+	## 2) 類型共用
 	var kind := player_accessory_kind()
 	if kind == "":
 		return null
@@ -196,7 +248,11 @@ static func equip_icon(base_id: String) -> Texture2D:
 	var t := tex("%s/equipment/%s.png" % [ROOT, base_id])
 	if t:
 		return t
-	## 依 line 回退到武器疊層圖
+	## 紙娃娃疊層也可當 icon 後備
+	for slot in ["weapon", "armor", "accessory"]:
+		var pd := paperdoll_tex(slot, base_id)
+		if pd:
+			return pd
 	return null
 
 
@@ -207,11 +263,16 @@ static func equip_icon_for_inst(inst: Dictionary) -> Texture2D:
 	var t := equip_icon(base_id)
 	if t:
 		return t
+	var slot := str(inst.get("slot", ""))
+	## 直接走紙娃娃路徑
+	if base_id != "" and slot != "":
+		var pd := paperdoll_tex(slot, base_id)
+		if pd:
+			return pd
 	var line := str(inst.get("line", ""))
 	var vis := _line_to_weapon_visual(line)
 	if vis != "":
 		return tex("%s/player/weapons/%s.png" % [ROOT, vis])
-	var slot := str(inst.get("slot", ""))
 	if slot == "armor":
 		return player_armor_overlay()
 	if slot == "accessory":

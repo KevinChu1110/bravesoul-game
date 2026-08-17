@@ -70,6 +70,9 @@ func _initialize() -> void:
 				ok = false
 			else:
 				print("OK armor_asset ", arm)
+		## 完整紙娃娃：equipment.json 每個 base_id 都要有 paperdoll 疊層
+		if not _check_paperdoll_coverage():
+			ok = false
 
 	if not _check_entity_coverage():
 		ok = false
@@ -234,4 +237,34 @@ func _check_entity_coverage() -> bool:
 	print("  ok 場景物件貼圖覆蓋率 %.1f%%（%d/%d 個放置點；%d 種仍是純色方塊）" % [
 		rate * 100.0, covered, total, blanks.size()
 	])
+	return true
+
+
+## 紙娃娃：equipment.json 每個 base_id 都要有 paperdoll/{slot}/{id}.png
+func _check_paperdoll_coverage() -> bool:
+	var path := "res://data/tables/equipment.json"
+	if not FileAccess.file_exists(path):
+		push_error("equipment.json missing")
+		return false
+	var raw := FileAccess.get_file_as_string(path)
+	var data = JSON.parse_string(raw)
+	if typeof(data) != TYPE_DICTIONARY:
+		push_error("equipment.json parse fail")
+		return false
+	var bases: Dictionary = data.get("bases", {})
+	var missing: PackedStringArray = []
+	var ok_n := 0
+	for bid in bases.keys():
+		var def: Dictionary = bases[bid]
+		var slot := str(def.get("slot", "weapon"))
+		var p := "res://assets/sprites/player/paperdoll/%s/%s.png" % [slot, bid]
+		if ResourceLoader.exists(p):
+			ok_n += 1
+		else:
+			missing.append("%s/%s" % [slot, bid])
+	if missing.size() > 0:
+		push_error("紙娃娃缺圖 %d：%s" % [missing.size(), ", ".join(missing)])
+		print("  FAIL paperdoll missing: ", ", ".join(missing))
+		return false
+	print("  ok paperdoll 全覆蓋 %d/%d" % [ok_n, bases.size()])
 	return true
