@@ -1,0 +1,72 @@
+{
+  "id": "ding",
+  "speaker": "Ding",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1
+      },
+      "lines": [
+        "¿Otra vez? Ceniza en el filo… ¿tocaste la llama? Da igual, yo forjo equipo, no vidas."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.demon_cleared"
+        ]
+      },
+      "lines": [
+        "Mientras quede hierro, bien. Y no me hagas enterrar el mismo hierro dos veces."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ding_debt_done"
+        ]
+      },
+      "lines": [
+        "Deuda vieja saldada. La fragua… tira algo más firme que antes.",
+        "Subir de nivel sigue costando oro. El cariño no arde en el horno."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "item.broken_blade"
+        ]
+      },
+      "lines": [
+        "Ese corte… ¿lo cogiste en el patio de armas? Dámelo."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ding_debt_asked"
+        ]
+      },
+      "lines": [
+        "La espada rota está junto al armero del patio de armas. No me digas que te has perdido."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c1_forged"
+        ]
+      },
+      "lines": [
+        "Filo Ínfimo. Feo nombre, pero cumple. Si quieres subirlo, trae oro.",
+        "…Si te sobra tiempo, échale un ojo al patio de armas. Deuda vieja."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "La puerta no está abierta para que los conejos hagan turismo."
+      ]
+    }
+  ]
+}

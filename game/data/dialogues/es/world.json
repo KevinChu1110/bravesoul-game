@@ -1,0 +1,130 @@
+{
+  "world.inspect_object": [
+    {
+      "speaker": "Narración",
+      "text": "Observas «{label}». Llega viento de algún punto de Cuiling."
+    }
+  ],
+  "world.miniboss_cleared": [
+    {
+      "speaker": "Narración",
+      "text": "Aquí solo queda la brisa. La prueba ya pasó."
+    }
+  ],
+  "world.scar_cleared": [
+    {
+      "speaker": "Narración",
+      "text": "La tierra herida ya no late. De las grietas quemadas brota algo de verde ceniciento, como una costra."
+    },
+    {
+      "speaker": "Pensamiento",
+      "text": "El apetito se cerró. Yo no lo alimenté."
+    }
+  ],
+  "world.mirror_cleared": [
+    {
+      "speaker": "Narración",
+      "text": "En la galería de espejos queda un solo reflejo: el tuyo. La grieta del atajo sigue ahí, pero ya no brilla."
+    },
+    {
+      "speaker": "Pensamiento",
+      "text": "La sombra verdadera pesa más. Pues caminaré con ese peso."
+    }
+  ],
+  "world.wreck_cleared": [
+    {
+      "speaker": "Narración",
+      "text": "El pecio se ha calmado. Las olas golpean la quilla como un reloj de agua."
+    },
+    {
+      "speaker": "Pensamiento",
+      "text": "El capitán duerme. El salvoconducto era… llegar vivo a la orilla."
+    }
+  ],
+  "world.road_note": [
+    {
+      "speaker": "Tablón",
+      "text": "«Hoy no hay sopa en la posada. Si ves un nido bajo el puente, no toques los huevos: el de plumas blandas lo cría un viajero.»"
+    },
+    {
+      "speaker": "Tablón",
+      "text": "Debajo, una línea nueva: «Se apagó la lámpara del cementerio. Quien tenga fuego, que la encienda. Gracias.»"
+    }
+  ],
+  "world.grave_b": [
+    {
+      "speaker": "Narración",
+      "text": "Ante la lápida vieja hay un ramo de flores secas. El viento les da la vuelta a los pétalos; una monedita de cobre los sujeta."
+    },
+    {
+      "speaker": "Pensamiento",
+      "text": "Alguien ha venido. El pueblo no se ha vaciado del todo."
+    }
+  ],
+  "world.scare_field": [
+    {
+      "speaker": "Narración",
+      "text": "El espantapájaros lleva gorro de niño y un remiendo en la manga. Dentro del gorro, media galleta seca: es para los pájaros, no para la gente."
+    },
+    {
+      "speaker": "Narración",
+      "text": "En el ala, con letra torcida: no os comáis las de Espiga."
+    }
+  ],
+  "world.camp_ash_road": [
+    {
+      "speaker": "Narración",
+      "text": "Las brasas de un caminante siguen tibias. Al lado, unas piedras forman una flecha: al este ciudad, al oeste humo."
+    },
+    {
+      "speaker": "Pensamiento",
+      "text": "Acaba de irse. Las pisadas son pequeñas; también iba con prisa."
+    }
+  ],
+  "world.chest_empty": [
+    {
+      "speaker": "Narración",
+      "text": "Vacío. Ya lo cogiste."
+    }
+  ],
+  "world.chest_open": [
+    {
+      "speaker": "Narración",
+      "text": "{found}"
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Obtienes {gold} de oro · {dust} de polvo{drop}"
+    }
+  ],
+  "world.skirmish_cleared": [
+    {
+      "speaker": "Narración",
+      "text": "Aquí ya hay calma."
+    }
+  ],
+  "region.mist_locked": [
+    {
+      "speaker": "Sistema",
+      "text": "La niebla queda lejos todavía. Cría antes tu espada en la fortaleza."
+    }
+  ],
+  "region.dojo_warn": [
+    {
+      "speaker": "Sistema",
+      "text": "En el dojo el aire pesa. Poder recomendado 26+ (tienes {power}). Pásate antes por Velo o entrena para subir de nivel."
+    }
+  ],
+  "region.forest_warn": [
+    {
+      "speaker": "Sistema",
+      "text": "El viento del bosque va rápido. Poder recomendado 30+ (tienes {power}). Puedes curtirte antes en el dojo o en los cotos."
+    }
+  ],
+  "region.coast_warn": [
+    {
+      "speaker": "Sistema",
+      "text": "El oleaje es fuerte. Poder recomendado 30+ (tienes {power})."
+    }
+  ]
+}

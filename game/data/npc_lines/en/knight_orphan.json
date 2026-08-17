@@ -1,0 +1,34 @@
+{
+  "id": "knight_orphan",
+  "speaker": "Orphan Boy",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "side.ding_debt_done"
+        ]
+      },
+      "lines": [
+        "The blacksmith doesn't yell as much now. He still yells. Just softer."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ding_debt_asked"
+        ]
+      },
+      "lines": [
+        "The broken sword? Over by the rack. I don't dare touch it, the smith would get angry.",
+        "My father was… in the order too, once. Now there's only sand."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "The training yard used to be loud. Now it's only wind.",
+        "Greybeard says: while the banner still hangs, no one gets to fall first."
+      ]
+    }
+  ]
+}

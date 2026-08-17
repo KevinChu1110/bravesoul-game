@@ -1,0 +1,33 @@
+{
+  "id": "tide_roar_idle",
+  "speaker": "Tideroar",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "boss.stonefist_cleared"
+        ]
+      },
+      "lines": [
+        "Hahaha! Your strength has a direction now. Go to the tower!"
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c5_entered"
+        ]
+      },
+      "lines": [
+        "When it charges, don't run — meet it. Head on.",
+        "Peel the rock plate off layer by layer. When rocks fall, crouch into the bright patch."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "The shore wind is salty. Can your blade… ring one more time?"
+      ]
+    }
+  ]
+}

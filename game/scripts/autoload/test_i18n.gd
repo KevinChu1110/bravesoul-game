@@ -1,16 +1,19 @@
 extends SceneTree
 ## 翻譯表的把關測試：godot --headless -s res://scripts/autoload/test_i18n.gd
 ##
-## 守兩件事：
-##   1. 兩張表的 key 要一模一樣。少一個 key 不會報錯 —— Loc.t() 查不到就
-##      **回傳 key 本身**，玩家會直接看到 "panel.world_map" 這種字串。
+## 守三件事：
+##   1. 每張語言表的 key 都要跟繁中一模一樣。少一個 key 不會報錯 ——
+##      Loc.t() 查不到就**回傳 key 本身**，玩家會直接看到 "panel.world_map"。
 ##   2. 程式裡 Loc.t("...") 用到的 key 都要在表裡。同上，漏了不會當掉，
 ##      只會在畫面上冒出一個看起來像亂碼的英文字。
+##   3. 劇情檔（dialogues／npc_lines）每個語言都要補齊。介面翻完但劇情沒翻，
+##      玩家切過去會看到半英半中 —— 比整份沒翻更像 bug。
 ##
 ## 這支不管「翻得好不好」（那要人看），只管「有沒有漏」。
 
-const ZH := "res://../game/data/i18n/zh_TW.json"
-const EN := "res://../game/data/i18n/en.json"
+## 繁中是原文，其餘都要對齊它
+const LOCALES := ["zh_CN", "en", "ja", "ko", "es"]
+const STORY_DIRS := ["res://data/dialogues", "res://data/npc_lines"]
 
 var _ok := true
 
@@ -31,27 +34,37 @@ func _load(path: String) -> Dictionary:
 
 func _initialize() -> void:
 	var zh := _load("res://data/i18n/zh_TW.json")
-	var en := _load("res://data/i18n/en.json")
-	if zh.is_empty() or en.is_empty():
-		_fail("讀不到翻譯表（zh %d／en %d）" % [zh.size(), en.size()])
+	if zh.is_empty():
+		_fail("讀不到繁中翻譯表")
 		return _finish()
 
-	## 1) 兩邊 key 對齊
-	var only_zh: PackedStringArray = []
-	var only_en: PackedStringArray = []
-	for k in zh.keys():
-		if not en.has(k):
-			only_zh.append(str(k))
-	for k in en.keys():
-		if not zh.has(k):
-			only_en.append(str(k))
-	if only_zh.size() > 0 or only_en.size() > 0:
-		_fail("兩張表對不齊 —— 只有中文有：%s；只有英文有：%s" % [
-			", ".join(only_zh), ", ".join(only_en)])
+	## 1) 每個語言的 key 都要跟繁中對齊
+	for code in LOCALES:
+		var tbl := _load("res://data/i18n/%s.json" % code)
+		if tbl.is_empty():
+			_fail("讀不到 %s 的翻譯表" % code)
+			continue
+		var missing: PackedStringArray = []
+		var extra: PackedStringArray = []
+		for k in zh.keys():
+			if str(tbl.get(k, "")) == "":
+				missing.append(str(k))
+		for k in tbl.keys():
+			if not zh.has(k):
+				extra.append(str(k))
+		if missing.size() > 0 or extra.size() > 0:
+			_fail("%s 對不齊 —— 缺：%s；多出來：%s" % [
+				code, ", ".join(missing), ", ".join(extra)])
+	if not _ok:
 		return _finish()
-	print("  ok 兩張表都是 %d 個 key，完全對齊" % zh.size())
+	print("  ok %d 個語言各 %d 個 key，全部對齊" % [LOCALES.size() + 1, zh.size()])
 
-	## 2) 程式用到的 key 都要在表裡
+	## 2) 劇情檔要補齊
+	_check_story()
+	if not _ok:
+		return _finish()
+
+	## 3) 程式用到的 key 都要在表裡
 	var used: Dictionary = {}
 	_scan_dir("res://scripts", used)
 	if used.is_empty():
@@ -66,6 +79,38 @@ func _initialize() -> void:
 		return _finish()
 	print("  ok 程式用到的 %d 個 key 都在表裡" % used.size())
 	_finish()
+
+
+## 劇情檔：每個語言的子目錄都要有跟原文一樣多的檔，而且每個檔的 key 要對齊。
+## 只比檔名不比內容的話，一個空殼 json 也算過關。
+func _check_story() -> void:
+	for d in STORY_DIRS:
+		var base := DirAccess.open(d)
+		if base == null:
+			_fail("讀不到劇情目錄 %s" % d)
+			continue
+		var names: PackedStringArray = []
+		for f in base.get_files():
+			if f.ends_with(".json"):
+				names.append(f)
+		if names.is_empty():
+			_fail("%s 裡一個劇情檔都沒有" % d)
+			continue
+		for code in LOCALES:
+			for f in names:
+				var src := _load("%s/%s" % [d, f])
+				var tr := _load("%s/%s/%s" % [d, code, f])
+				if tr.is_empty():
+					_fail("%s/%s/%s 缺檔或是空的" % [d, code, f])
+					continue
+				var miss: PackedStringArray = []
+				for k in src.keys():
+					if not tr.has(k):
+						miss.append(str(k))
+				if miss.size() > 0:
+					_fail("%s/%s/%s 漏了：%s" % [d, code, f, ", ".join(miss)])
+	if _ok:
+		print("  ok 劇情檔 %d 個語言都補齊了" % LOCALES.size())
 
 
 func _scan_dir(path: String, used: Dictionary) -> void:

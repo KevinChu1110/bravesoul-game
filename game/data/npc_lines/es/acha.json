@@ -1,0 +1,24 @@
+{
+  "id": "acha",
+  "speaker": "Acha",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "boss.abo_cleared"
+        ]
+      },
+      "lines": [
+        "(Se frota los ojos, sonriendo) Esta mañana se sirvió el té él solo. Hacía tres años que no.",
+        "Pásate antes de subir a la torre. Te guardo una tetera."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "No temas. La guardia del maestro es dura: hay que romperla a puñetazos antes de hacerle daño.",
+        "Las técnicas rompen su guardia más rápido que los golpes normales."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "side.guard_dog": [
+    {
+      "speaker": "수레지기 개",
+      "text": "멍. （꼬리를 한 번 친다. 「돈부터」라고 말하는 것 같다.）"
+    }
+  ],
+  "side.training_need_weapon": [
+    {
+      "speaker": "내레이션",
+      "text": "연무대 모래에 옛 발자국이 남아 있다. 먼저 딩딩에게서 검을 길러 온 뒤에 수련하자."
+    }
+  ],
+  "side.training_daily_cap": [
+    {
+      "speaker": "시스템",
+      "text": "오늘 수련은 한도에 도달했습니다. 야외나 사냥터에서 바람이라도 쐬세요."
+    }
+  ],
+  "side.training_result": [
+    {
+      "speaker": "시스템",
+      "text": "{msg}"
+    },
+    {
+      "speaker": "시스템",
+      "text": "전투력이 {power} 이 되었습니다. 재료는 딩딩에게 맡기거나 호박에게 팔 수 있습니다."
+    }
+  ],
+  "side.weapon_rack_untasked": [
+    {
+      "speaker": "내레이션",
+      "text": "무기 걸이가 절반 넘게 비었다. 부러진 검 하나가 모래에 반쯤 묻혀 있다——날이 몹시 낡았다."
+    }
+  ],
+  "side.broken_blade_gone": [
+    {
+      "speaker": "내레이션",
+      "text": "여기엔 더 이상 딩딩이 원하는 물건이 없다."
+    }
+  ],
+  "side.amber_has_letter": [
+    {
+      "speaker": "호박",
+      "text": "오？네 손에 그 편지……무은의 인장인가？두령에게 넘겨. 난 금만 받지 남의 속사정은 안 받아."
+    },
+    {
+      "speaker": "호박",
+      "text": "재료상은 그대로 연다. 제작재도 붉은 물도 현물로 있어."
+    }
+  ],
+  "side.amber_shop_open": [
+    {
+      "speaker": "호박",
+      "text": "재료상 개시. 철 부스러기, 별모래, 참나무 진, 기사 조각쇠——사냥에서 떨어진 건 사고, 모자란 건 판다."
+    },
+    {
+      "speaker": "호박",
+      "text": "셈은 할 줄 알아야지：나가서 잡고, 떨어진 걸 나한테 팔고, 그 돈으로 벼려. 모자라면 사서 또 나가고. 토끼도 장부는 봐야 해."
+    }
+  ],
+  "side.ronin_guard_fire": [
+    {
+      "speaker": "흑염 낭인",
+      "portrait": "road_bandit",
+      "text": "난 여기서 불을 지킨다. 올라가는 자는……나처럼 불꽃을 장작 삼지 마라."
+    },
+    {
+      "speaker": "흑염 낭인",
+      "text": "쓰러지면 끌어다 놓아 주지.——딱 한 번이다."
+    }
+  ],
+  "side.ronin_gone": [
+    {
+      "speaker": "내레이션",
+      "text": "땅엔 탄 신발 자국만 남았다. 낭인은 이미 없다."
+    }
+  ],
+  "side.ronin_too_early": [
+    {
+      "speaker": "흑염 낭인",
+      "text": "……아직 이르다. 네 사자부터 잡고 와."
+    }
+  ],
+  "side.ronin_defeated": [
+    {
+      "speaker": "흑염 낭인",
+      "text": "……강해져서……뭐 하나……불꽃은 여전히 비었는데……"
+    },
+    {
+      "speaker": "시스템",
+      "text": "흑염 낭인 격파. 골드 55 · 별가루 3 · 경험 {xp}{level_up}. 그가 쓰러진 자리의 신발 자국은 더는 타지 않는다."
+    }
+  ],
+  "side.ding_debt_remind": [
+    {
+      "speaker": "딩딩",
+      "text": "부러진 검은 아직 연무장에 있다. 쓸데없는 소리 말고."
+    }
+  ]
+}

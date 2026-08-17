@@ -1,0 +1,66 @@
+{
+  "id": "fog_hide",
+  "speaker": "Velo de Niebla",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1,
+        "flags": [
+          "boss.white_fog_cleared"
+        ]
+      },
+      "lines": [
+        "En la segunda vuelta la niebla se ríe más. Espera a que el cuerpo real destelle en blanco. Sin prisa."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.fog_letter_done"
+        ]
+      },
+      "lines": [
+        "La carta verdadera llegó. Una capa menos de niebla falsa.",
+        "Tus ojos sirven más que la primera vez."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "item.true_letter"
+        ]
+      },
+      "lines": [
+        "La carta la llevas tú. Entrega la auténtica en la posta de la Encrucijada."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.white_fog_cleared"
+        ]
+      },
+      "lines": [
+        "La niebla se ha ido. Tus ojos, bueno, valen.",
+        "…Queda otra carta verdadera. Hay demasiadas falsas: la buena se entrega en mano."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c2_wheat_letter"
+        ]
+      },
+      "lines": [
+        "Golpea la sombra y la sombra se ríe. Busca el fallo: el instante en que el filo se alza es el real.",
+        "La galería de espejismos está al este del pueblo. La Niebla espera a que te pierdas."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "Ve primero a la posada. Alguien fue pasando esa carta hasta aquí… demasiado despacio."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "star",
+  "speaker": "Lector de Estrellas",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1
+      },
+      "lines": [
+        "En las capas del eco la carta astral tiembla. Cuantas más huellas se apilan, más precisa se vuelve la lectura, y más ávida."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ronin_spared"
+        ]
+      },
+      "lines": [
+        "En la encrucijada dos rastros se separan y vuelven a juntarse. Alguien no se tragó la llama del todo."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c1_soul_intro"
+        ]
+      },
+      "lines": [
+        "Las huellas volverán a cruzarse. Cuando reúnas polvo estelar, ven a observar."
+      ]
+    },
+    {
+      "when": {},
+      "lines": []
+    }
+  ]
+}

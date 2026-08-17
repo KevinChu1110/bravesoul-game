@@ -1,0 +1,33 @@
+{
+  "id": "ronin",
+  "speaker": "Black Flame Ronin",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "side.ronin_spared"
+        ]
+      },
+      "lines": [
+        "…Blade's away. The road's long. Don't do what I did and burn the flame like firewood."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ronin_defeated"
+        ]
+      },
+      "lines": [
+        "(Collapsed on the ground) …Strong… and then what…"
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "Stop there. You come to 'get stronger' too?",
+        "The Black Flame taught me: soften your heart and it eats you whole. I won't soften again."
+      ]
+    }
+  ]
+}

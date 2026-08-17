@@ -1,0 +1,70 @@
+{
+  "id": "greybeard",
+  "speaker": "Greybeard",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1,
+        "flags": [
+          "boss.leo_cleared"
+        ]
+      },
+      "lines": [
+        "Again. Your footprints laid over the old road. Do you remember pulling three times before the sword came free?",
+        "The lion in the echo is angrier. Don't loosen your parry."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.demon_cleared"
+        ]
+      },
+      "lines": [
+        "A corner of the tower fell. And you're still standing. …Hmph. Come in, have some tea.",
+        "If your techniques still have room to grow, the training's still open."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.leo_cleared",
+          "boss.white_fog_cleared"
+        ]
+      },
+      "lines": [
+        "You saw through the mist too? Eyes grow before the sword does.",
+        "The tower is waiting. Don't be the fool who mistakes flame for firewood."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.leo_cleared"
+        ]
+      },
+      "lines": [
+        "(Back turned) The gate opens for you.",
+        "There's mist to the southeast. Letters may be late — you shouldn't be."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c1_forged"
+        ]
+      },
+      "lines": [
+        "You have an edge now. The lion in the sanctum doesn't listen to words. It listens to steel.",
+        "You're not going to prove you're strong. You're going to make it remember what it was supposed to guard."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "The Sacred Lion is in the sanctum. If you're not going there to die, raise your sword first.",
+        "Techniques aren't for looking at. They only grow when they land."
+      ]
+    }
+  ]
+}

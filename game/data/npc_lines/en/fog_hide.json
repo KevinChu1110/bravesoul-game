@@ -1,0 +1,66 @@
+{
+  "id": "fog_hide",
+  "speaker": "Veilfog",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1,
+        "flags": [
+          "boss.white_fog_cleared"
+        ]
+      },
+      "lines": [
+        "The mist laughs more the second time around. Wait for the real body to flare white. Don't rush."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.fog_letter_done"
+        ]
+      },
+      "lines": [
+        "The true letter arrived. One layer less of false fog.",
+        "Your eyes work better than they did the first time."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "item.true_letter"
+        ]
+      },
+      "lines": [
+        "You're carrying the letter. Hand the real one over at the trader post on the Crossroads."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.white_fog_cleared"
+        ]
+      },
+      "lines": [
+        "The mist has lifted. Your eyes will do.",
+        "…There's one more true letter. Too many forgeries — the real one goes by hand."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c2_wheat_letter"
+        ]
+      },
+      "lines": [
+        "Strike a shadow and the shadow laughs at you. Look for the tell: the instant the blade lifts, that one is real.",
+        "The mirror hall is east of the village. White Fog is waiting for you to get lost."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "Go to the inn first. Someone passed that letter all the way here… too slowly."
+      ]
+    }
+  ]
+}

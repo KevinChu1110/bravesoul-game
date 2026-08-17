@@ -1,0 +1,34 @@
+{
+  "id": "wind_ear_idle",
+  "speaker": "Oídoviento",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "boss.shadowwind_cleared"
+        ]
+      },
+      "lines": [
+        "El viento ha querido parar. Tu oído afina más que el arco.",
+        "La costa sigue rugiendo. Ir o no ir, tú decides."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c4_entered"
+        ]
+      },
+      "lines": [
+        "La Sombra Veloz no te espera. El cuerpo real sí, un instante nada más.",
+        "No persigas las estelas. Espera al silencio del compás y dispara."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "El bosque reconoce pisadas, no nombres. Caminas despacio. Está bien."
+      ]
+    }
+  ]
+}

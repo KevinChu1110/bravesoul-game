@@ -1,0 +1,24 @@
+{
+  "id": "acha",
+  "speaker": "Acha",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "boss.abo_cleared"
+        ]
+      },
+      "lines": [
+        "(Rubs her eyes, smiling) He poured his own tea this morning. Hasn't done that in three years.",
+        "Come back before you go to the tower. I'll keep a pot warm."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "Don't be afraid. The master's guard is hard — you have to run your fist into it and break it before anything lands.",
+        "Techniques break his guard faster than plain attacks."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "maisui_village",
+  "speaker": "Espiga",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1
+      },
+      "lines": [
+        "…Otra vez de pie entre las cenizas. Esta vez tampoco olvides correr.",
+        "La carta ya la escribí. El olor sigue ahí. Vete."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c2_wheat_letter"
+        ]
+      },
+      "lines": [
+        "(Un recuerdo como un espejismo) Sigo aquí. Y no por la profecía."
+      ]
+    },
+    {
+      "when": {},
+      "lines": []
+    }
+  ]
+}

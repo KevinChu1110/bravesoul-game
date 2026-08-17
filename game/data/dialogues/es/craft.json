@@ -1,0 +1,126 @@
+{
+  "skill.learned": [
+    {
+      "speaker": "Barbagrís",
+      "text": "Ya está. Recuerda el tacto, no el nombre de la técnica."
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Aprendes [{skill}]"
+    }
+  ],
+  "skill.not_yet": [
+    {
+      "speaker": "Barbagrís",
+      "text": "Aún no es el momento."
+    }
+  ],
+  "skill.tutor_deny": [
+    {
+      "speaker": "Barbagrís",
+      "text": "Oro, o es que ya has tocado techo."
+    }
+  ],
+  "soul.equipped": [
+    {
+      "speaker": "Sistema",
+      "text": "Alma engarzada. El filo ha cambiado de carácter."
+    }
+  ],
+  "soul.ritual_not_enough": [
+    {
+      "speaker": "Lector de Estrellas",
+      "text": "Con ese polvo no se enciende ni una esquina."
+    }
+  ],
+  "soul.fused": [
+    {
+      "speaker": "Lector de Estrellas",
+      "text": "Tres de la misma órbita se funden en una estrella más brillante."
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Fusión → {soul}"
+    }
+  ],
+  "soul.fuse_requirement": [
+    {
+      "speaker": "Lector de Estrellas",
+      "text": "Hacen falta tres de la misma estrella, calidad y grado, y sin engarzar."
+    }
+  ],
+  "forge.need_rusty_first": [
+    {
+      "speaker": "Ding",
+      "text": "Primero enséñame ese hierro oxidado."
+    }
+  ],
+  "forge.path_chosen": [
+    {
+      "speaker": "Sistema",
+      "text": "Estilo de arma elegido: [{path}]."
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Cómo se juega: {play}. {pro}"
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Para las almas, ve al Lector de Estrellas. Poder {power}."
+    }
+  ],
+  "forge.wood_sword_no_gold": [
+    {
+      "speaker": "Ding",
+      "text": "Veinte de oro. Sin dinero, no me ocupes la fragua."
+    }
+  ],
+  "forge.wood_sword_owned": [
+    {
+      "speaker": "Ding",
+      "text": "¿La espada de madera? Si ya te la llevaste."
+    }
+  ],
+  "forge.tier_max": [
+    {
+      "speaker": "Ding",
+      "text": "Ya basta. Ve a cortarle algo a ese león."
+    }
+  ],
+  "forge.no_gold": [
+    {
+      "speaker": "Ding",
+      "text": "¿Y el oro? Date una vuelta fuera de la ciudad."
+    }
+  ],
+  "forge.success": [
+    {
+      "speaker": "Ding",
+      "text": "Hecho. T{tier}. {scrap}"
+    }
+  ],
+  "forge.pity_break": [
+    {
+      "speaker": "Ding",
+      "text": "(Estampa el martillo en el yunque) ¡Basta! ¡El hierro tiene más paciencia que tú!"
+    },
+    {
+      "speaker": "Sistema",
+      "text": "El martillo cae junto a la fragua y saltan chispas."
+    },
+    {
+      "speaker": "Ding",
+      "text": "…Toma, una torta para el disgusto. Vuelve mañana y hoy no me enseñes esa cara."
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Recuperas algo de vida. El contador de fallos vuelve a cero."
+    }
+  ],
+  "forge.failed": [
+    {
+      "speaker": "Ding",
+      "text": "Fallo. El nivel se queda. Los materiales, no."
+    }
+  ]
+}

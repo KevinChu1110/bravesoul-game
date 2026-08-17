@@ -1,0 +1,556 @@
+{
+  "c6.refugee": [
+    {
+      "speaker": "Refugee",
+      "text": "The tower gate opened… we don't dare go up. Are you… that rabbit?"
+    }
+  ],
+  "c6.scroll_pile": [
+    {
+      "speaker": "Scroll",
+      "text": "«The weakest may reach the summit. The line unwritten: should the heart covet strength, the flame arrives first.»"
+    }
+  ],
+  "c6.tower_gate": [
+    {
+      "speaker": "Narration",
+      "text": "The tower gate stands open. First time in a thousand years. The Black Flame breathes in the gap."
+    }
+  ],
+  "c0.shrine_stub": [
+    {
+      "speaker": "Shrine",
+      "text": "The incense ash is cold. Did the gods flee too — or did the people leave first?"
+    }
+  ],
+  "c0.field_west": [
+    {
+      "speaker": "Narration",
+      "text": "Night has bitten through the field paths and the fences. The world is bigger than the village — and you've only just taken the first step."
+    }
+  ],
+  "c0.leave_without_sword": [
+    {
+      "speaker": "System",
+      "text": "Empty-handed. At the very least… pick up that sword."
+    }
+  ],
+  "c0.road_east": [
+    {
+      "speaker": "Narration",
+      "text": "The long road runs east. Cuiling is larger than the map draws it."
+    }
+  ],
+  "c1.flag_paw": [
+    {
+      "speaker": "System",
+      "text": "A crooked rabbit paw in charcoal on the banner. «Someone drew a rabbit. The ears are a bit off; the courage isn't.»"
+    }
+  ],
+  "c1.flag_grey": [
+    {
+      "speaker": "System",
+      "text": "The grey banner hangs limp. Everyone in the city is waiting on an impossible miracle."
+    }
+  ],
+  "c1.outer_ward": [
+    {
+      "speaker": "Narration",
+      "text": "The outer ward is wider than you pictured. The knights' domain was Cuiling's backbone once — now it's stone and wind."
+    }
+  ],
+  "c1.save_stone": [
+    {
+      "speaker": "System",
+      "text": "Progress written to the save stone. Your wounds have settled too. {extra}"
+    },
+    {
+      "speaker": "System",
+      "text": "(You can browse the title wall)"
+    }
+  ],
+  "c1.sprout_after_leo": [
+    {
+      "speaker": "Sprout",
+      "text": "I drew the rabbit on the banner! The ears came out crooked, but the courage is right!"
+    },
+    {
+      "speaker": "Sprout",
+      "text": "I practise with a wooden sword every day. When I grow up I'll guard the gate! Fierce like Greybeard — but also not fierce, like you."
+    }
+  ],
+  "c1.sprout_thanks": [
+    {
+      "speaker": "Sprout",
+      "text": "The wooden sword swings great! Thank you! So… is the lion big? Are you really going?"
+    }
+  ],
+  "c1.sprout_wish": [
+    {
+      "speaker": "Sprout",
+      "text": "Ding could make one, I think it's about twenty gold. Or give me thirty and I'll go buy it myself!"
+    },
+    {
+      "speaker": "Sprout",
+      "text": "I'm not being greedy! I want to practise and show everyone!"
+    }
+  ],
+  "c1.wild_need_forge": [
+    {
+      "speaker": "System",
+      "text": "The rusty sword's edge has rolled. Go find Ding first."
+    }
+  ],
+  "c1.burnt_field": [
+    {
+      "speaker": "Narration",
+      "text": "Burnt wheat field. There's a raw sweetness of Black Flame in the wind. You grip the Meager Edge tighter."
+    }
+  ],
+  "c1.tower_empty": [
+    {
+      "speaker": "System",
+      "text": "The watchtower is empty. Only wind."
+    }
+  ],
+  "c1.wild_shrine": [
+    {
+      "speaker": "Shrine",
+      "text": "«What's guarded is not the gate. It's the little light behind it.»"
+    },
+    {
+      "speaker": "Thought",
+      "text": "…Leo should remember this too."
+    }
+  ],
+  "c1.crate_empty": [
+    {
+      "speaker": "System",
+      "text": "The crate is empty."
+    }
+  ],
+  "c1.leo_gate_cleared": [
+    {
+      "speaker": "System",
+      "text": "The Sacred Lion has woken. The sanctum has gone quiet. The misty road to the southeast is open."
+    }
+  ],
+  "c1.leo_win": [
+    {
+      "speaker": "Leo",
+      "text": "So this is it… a true knight is the courage not to retreat, however small you are."
+    },
+    {
+      "speaker": "Leo",
+      "text": "Go, rabbit — the fortress gate opens for you."
+    },
+    {
+      "speaker": "Leo",
+      "text": "The Black Flame doesn't want your life. It wants your wanting. Don't feed it."
+    },
+    {
+      "speaker": "System",
+      "text": "80 gold, 4 stardust, +10 max health. Gold runs through your fur. Rage Thunder and Counterstrike wake with it."
+    }
+  ],
+  "c2.arrive": [
+    {
+      "speaker": "Veilfog",
+      "text": "In the mist, true and false are the same colour. Lend me your eyes."
+    },
+    {
+      "speaker": "Veilfog",
+      "text": "Stay the night first. Those who walk at night break inside before anything else."
+    },
+    {
+      "speaker": "System",
+      "text": "Something seems to be waiting for you… by the inn's campfire."
+    }
+  ],
+  "c2.lantern": [
+    {
+      "speaker": "Narration",
+      "text": "The mist lantern lights three paces. Past that, you go by your own eyes."
+    }
+  ],
+  "c2.well_fog": [
+    {
+      "speaker": "Narration",
+      "text": "There's no water in the well — only thicker mist. They say if you fall in, you dream of yourself."
+    }
+  ],
+  "c2.laundry": [
+    {
+      "speaker": "Narration",
+      "text": "The clothes are still wet and there's nobody around. Does the mist hang the laundry for people?"
+    }
+  ],
+  "c2.cat_shadow": [
+    {
+      "speaker": "Shadow Cat",
+      "text": "…Mrow?"
+    },
+    {
+      "speaker": "Thought",
+      "text": "A real cat, or a cry the mist learned?"
+    }
+  ],
+  "c2.shrine": [
+    {
+      "speaker": "Mist Shrine",
+      "text": "«The true, one instant. The false, a thousand layers.»"
+    },
+    {
+      "speaker": "Thought",
+      "text": "One instant is enough. I only want that instant."
+    }
+  ],
+  "c2.train_need_letter": [
+    {
+      "speaker": "System",
+      "text": "Your mind is unsettled. Head back to the inn first."
+    }
+  ],
+  "c2.train_tip": [
+    {
+      "speaker": "Veilfog",
+      "text": "Shadows lie. The real body flares once. Remember that once."
+    },
+    {
+      "speaker": "System",
+      "text": "You can only land a hit in the instant the real body flares white. Switch targets with Tab or 1/2/3."
+    }
+  ],
+  "c2.letter_reread": [
+    {
+      "speaker": "System",
+      "text": "The letter is still in your journal."
+    },
+    {
+      "speaker": "Journal",
+      "text": "«I'm still here. Not because of the prophecy — because you haven't come back yet.» — Wheatear"
+    }
+  ],
+  "c2.fog_need_letter": [
+    {
+      "speaker": "Veilfog",
+      "text": "There's still a letter owed inside you. Go back to the inn."
+    }
+  ],
+  "c2.fog_cleared": [
+    {
+      "speaker": "System",
+      "text": "The mirror hall is still. You can return to the village or carry on."
+    }
+  ],
+  "c2.fog_win": [
+    {
+      "speaker": "White Fog",
+      "text": "You saw through it… how dull."
+    },
+    {
+      "speaker": "White Fog",
+      "text": "The mist is gone, the road's right in front of you — go on."
+    },
+    {
+      "speaker": "System",
+      "text": "70 gold, 4 stardust, +8 max health. Your coat takes the colour of mist. A bell rings from the mountain…"
+    }
+  ],
+  "c3.soft_warn": [
+    {
+      "speaker": "System",
+      "text": "You can climb without having seen through White Fog — Abo won't go easy on you for it. Power {power}."
+    },
+    {
+      "speaker": "System",
+      "text": "If it's not enough, forge and read stars in the city, or train at the yard or the Starpath hunting grounds."
+    }
+  ],
+  "c3.arrive": [
+    {
+      "speaker": "Acha",
+      "text": "A guest out of the mist? The master's in the trial hall. He doesn't strike first. He asks first."
+    },
+    {
+      "speaker": "System",
+      "text": "The dojo is open to explore. Challenge Abo in the trial hall."
+    }
+  ],
+  "c3.gate_bell": [
+    {
+      "speaker": "Narration",
+      "text": "The bell rings once. The valley hands the echo back: what do you fight for?"
+    }
+  ],
+  "c3.dummy_done": [
+    {
+      "speaker": "System",
+      "text": "There's a fresh fist print on the wooden dummy. Yours."
+    }
+  ],
+  "c3.scroll_wall": [
+    {
+      "speaker": "Fist Manual",
+      "text": "«Guard is broken by diligence, not by anger.»"
+    },
+    {
+      "speaker": "Fist Manual",
+      "text": "«Anger full, fist scattered. Fist scattered, guard broken.»"
+    }
+  ],
+  "c3.stone_garden": [
+    {
+      "speaker": "Narration",
+      "text": "The stones are laid out in the shape of a fist. Someone moves one every day — until the mind is still."
+    }
+  ],
+  "c3.abo_cleared": [
+    {
+      "speaker": "System",
+      "text": "The trial hall is empty. Abo sits on the threshold drinking tea."
+    }
+  ],
+  "c4.arrive": [
+    {
+      "speaker": "Windear",
+      "text": "If you want to meet Swiftshadow — learn to wait first. The beat where the wind stops, that's the real one."
+    },
+    {
+      "speaker": "System",
+      "text": "The Ranger Forest is open. Swiftshadow's nest lies east."
+    }
+  ],
+  "c4.treehouse": [
+    {
+      "speaker": "Narration",
+      "text": "The treehouses are linked by vine rope. A kite string is tangled on the railing, its end still trembling."
+    },
+    {
+      "speaker": "Child",
+      "text": "(From far off) My kite… the wind took it!"
+    }
+  ],
+  "c4.kite_freed": [
+    {
+      "speaker": "System",
+      "text": "The kite is back with the child. The string is wound up neatly."
+    }
+  ],
+  "c4.stream": [
+    {
+      "speaker": "Narration",
+      "text": "The stream runs clear. Leaf shadows on the surface — no purple crack. A rare thing."
+    }
+  ],
+  "c4.owl_post": [
+    {
+      "speaker": "Owl",
+      "text": "…"
+    },
+    {
+      "speaker": "Thought",
+      "text": "It's watching the wind, not me."
+    }
+  ],
+  "c4.arrow_path_done": [
+    {
+      "speaker": "System",
+      "text": "The arrow path is quiet. Now and then the wind still cuts across the grass tips."
+    }
+  ],
+  "c4.watch_tower": [
+    {
+      "speaker": "Inscription",
+      "text": "«Swiftshadow guards the wind. The wind guards those who walk the road.»"
+    },
+    {
+      "speaker": "Inscription",
+      "text": "«If the wind goes mad — wait until it remembers that it, too, once stopped for someone.»"
+    },
+    {
+      "speaker": "Thought",
+      "text": "Waiting… isn't weakness. It's seeing clearly."
+    }
+  ],
+  "c4.herb_looted": [
+    {
+      "speaker": "System",
+      "text": "The dew on the herb slope has already been gathered."
+    }
+  ],
+  "c4.falcon_cleared": [
+    {
+      "speaker": "System",
+      "text": "The nest is empty. Only wind, and a tuft of silver feathers."
+    }
+  ],
+  "c4.falcon_win": [
+    {
+      "speaker": "Swiftshadow",
+      "text": "You caught the wind… what an interesting creature."
+    },
+    {
+      "speaker": "Swiftshadow",
+      "text": "Take the silver feather. Not a reward — a reminder: someone is willing to stop for you."
+    },
+    {
+      "speaker": "Windear",
+      "text": "(In the distance) …Go. The coast is still roaring."
+    },
+    {
+      "speaker": "System",
+      "text": "85 gold, 4 stardust, +8 max health. Your coat turns the grey of wind."
+    }
+  ],
+  "c5.arrive": [
+    {
+      "speaker": "Tideroar",
+      "text": "Stonefist isn't swinging to smash you. He forgot where the strength was supposed to go."
+    },
+    {
+      "speaker": "System",
+      "text": "The coast is open. Stonefist Cliff lies east."
+    }
+  ],
+  "c5.dock": [
+    {
+      "speaker": "Narration",
+      "text": "The dock town is nearly empty. Nets dry on the racks, as if no one dares put out to sea."
+    },
+    {
+      "speaker": "System",
+      "text": "Someone wrote on a board in charcoal: strength without direction is just surf on an empty shore."
+    }
+  ],
+  "c5.boat_wreck": [
+    {
+      "speaker": "Narration",
+      "text": "Half a sack of salt still sits in the broken hull. The salt is dry — the waves didn't take it; the people left first."
+    }
+  ],
+  "c5.net_rack": [
+    {
+      "speaker": "Narration",
+      "text": "The nets are crusted with salt crystals. As if someone wove the waves and forgot to bring them in."
+    }
+  ],
+  "c5.runestone": [
+    {
+      "speaker": "Runestone",
+      "text": "«Strength is for shelter, not for show.»"
+    },
+    {
+      "speaker": "Thought",
+      "text": "…The same thing Tideroar said."
+    }
+  ],
+  "c5.forge_tip_done": [
+    {
+      "speaker": "Tideroar",
+      "text": "(Echo) The axe's intent lives in the edge, not in the throat."
+    }
+  ],
+  "c5.cliff_path": [
+    {
+      "speaker": "Narration",
+      "text": "Old and new rockfall marks cross on the cliff path. The ground still carries the scorch of safe circles that once lit up."
+    },
+    {
+      "speaker": "System",
+      "text": "Before a rock falls, the ground lights up first. When you see it, press J to dodge."
+    }
+  ],
+  "c5.boar_cleared": [
+    {
+      "speaker": "System",
+      "text": "It's quiet on the cliff. Only the waves, like applause."
+    }
+  ],
+  "c5.boar_win": [
+    {
+      "speaker": "Stonefist",
+      "text": "Hahaha! The one still standing is you!"
+    },
+    {
+      "speaker": "Stonefist",
+      "text": "…Strength was for guarding the shore. Thank you for the reminder."
+    },
+    {
+      "speaker": "Tideroar",
+      "text": "(Roaring with laughter) Good rabbit! Go to the tower!"
+    },
+    {
+      "speaker": "System",
+      "text": "95 gold, 5 stardust, +10 max health. The tips of your fur burn a ring of fire colour."
+    }
+  ],
+  "c6.bell_not_rung": [
+    {
+      "speaker": "System",
+      "text": "The mountain bell hasn't rung. Go up to the dojo first."
+    }
+  ],
+  "c6.path_not_open": [
+    {
+      "speaker": "System",
+      "text": "The road isn't open yet. Finish the trial in front of you first."
+    }
+  ],
+  "c6.floor_shadow": [
+    {
+      "speaker": "Narration",
+      "text": "The shadow gallery. Someone is whispering behind the walls."
+    },
+    {
+      "speaker": "Phantom Voice",
+      "text": "Get strong and you can save everyone. Swallow the flame and the world will go quiet."
+    },
+    {
+      "speaker": "Thought",
+      "text": "…No. That isn't quiet. That's going out."
+    },
+    {
+      "speaker": "System",
+      "text": "You crossed the shadow gallery without drawing your sword."
+    }
+  ],
+  "c6.demon_win": [
+    {
+      "speaker": "Demon King",
+      "text": "Impossible… by a… rabbit…"
+    },
+    {
+      "speaker": "Predecessor",
+      "text": "…No. It's as it should be."
+    },
+    {
+      "speaker": "Predecessor",
+      "text": "Next time… don't walk my road."
+    },
+    {
+      "speaker": "Predecessor",
+      "text": "The sword is yours again. Or — give it to the next one as light as we were."
+    },
+    {
+      "speaker": "System",
+      "text": "150 gold, 8 stardust. Five threads of starlight rise and settle on your fur."
+    }
+  ],
+  "post.rift_not_open": [
+    {
+      "speaker": "System",
+      "text": "The rift hasn't overflowed yet. Finish the trial at the summit first."
+    }
+  ],
+  "post.rift_win": [
+    {
+      "speaker": "Faceless",
+      "text": "…………"
+    },
+    {
+      "speaker": "System",
+      "text": "«{mode}» has gone quiet for now. Wins: {wins}. {extra}"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "maisui_village",
+  "speaker": "Wheatear",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1
+      },
+      "lines": [
+        "…You're standing in the ashes again. Remember to run this time too.",
+        "I did write the letter. The smell's still on it. Go."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c2_wheat_letter"
+        ]
+      },
+      "lines": [
+        "(A memory like a mirage) I'm still here. Not because of the prophecy."
+      ]
+    },
+    {
+      "when": {},
+      "lines": []
+    }
+  ]
+}

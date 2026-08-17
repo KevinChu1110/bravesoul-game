@@ -1,0 +1,34 @@
+{
+  "id": "knight_orphan",
+  "speaker": "Huérfano del cuartel",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "side.ding_debt_done"
+        ]
+      },
+      "lines": [
+        "El herrero ya no grita tanto. Bueno, grita. Pero más flojo."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ding_debt_asked"
+        ]
+      },
+      "lines": [
+        "¿La espada rota? Junto al armero. Yo no la toco, que el herrero se enfada.",
+        "Mi padre también estuvo… en la orden. Ahora solo queda arena."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "El patio de armas era ruidoso. Ahora solo hay viento.",
+        "Barbagrís dice: mientras la bandera siga colgada, nadie puede caerse antes."
+      ]
+    }
+  ]
+}

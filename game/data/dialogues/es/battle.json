@@ -1,0 +1,100 @@
+{
+  "battle.wolf_win": [
+    {
+      "speaker": "Narración",
+      "text": "Al caer el lobo, la llama morada se deshace en ceniza. Parece… más flaco de lo que imaginabas."
+    },
+    {
+      "speaker": "Pensamiento",
+      "text": "Así que esto es la Llama Negra. Hasta las bestias…"
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Aprendes [Tajo horizontal]. 25 de oro, 2 de polvo estelar. A lo lejos, las murallas se recortan contra el amanecer."
+    }
+  ],
+  "battle.wolf_lose": [
+    {
+      "speaker": "Sistema",
+      "text": "Despiertas junto al camino. Alguien te echó una capa por encima; ya no hay nadie."
+    }
+  ],
+  "battle.leo_lose": [
+    {
+      "speaker": "Leo",
+      "text": "Vuelve a agarrarte a las raíces."
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Despiertas ya en la ciudad. Puedes volver cuando quieras."
+    }
+  ],
+  "battle.fog_lose": [
+    {
+      "speaker": "Niebla Blanca",
+      "text": "Te has perdido… ¿otra vez?"
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Alguien te llevó de vuelta a la aldea de Velo. La próxima, ataca cuando el cuerpo real destelle."
+    }
+  ],
+  "battle.demon_lose": [
+    {
+      "speaker": "Rey Demonio",
+      "text": "Sigue siendo demasiado leve…"
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Caes en los escalones de la torre. Basta con volver a subir desde abajo."
+    }
+  ],
+  "battle.abo_lose": [
+    {
+      "speaker": "Abo",
+      "text": "Aún no hay camino en tu puño. Otra vez."
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Te invitan a salir de la sala de pruebas. La puerta sigue abierta."
+    }
+  ],
+  "battle.falcon_lose": [
+    {
+      "speaker": "Sombra Veloz",
+      "text": "El viento te llevó… espera otra vez."
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Despiertas en la casa del árbol. La próxima, golpea cuando pare de aletear."
+    }
+  ],
+  "battle.boar_lose": [
+    {
+      "speaker": "Puño de Piedra",
+      "text": "Te falta fuerza. Aféntate y vuelve."
+    },
+    {
+      "speaker": "Sistema",
+      "text": "El oleaje te devuelve al muelle. La próxima, sal a su encuentro: así se raja la coraza."
+    }
+  ],
+  "battle.rift_lose": [
+    {
+      "speaker": "Sistema",
+      "text": "La Llama Negra te lanza al pie de la torre. {tip}"
+    }
+  ],
+  "battle.world_win": [
+    {
+      "speaker": "Sistema",
+      "text": "Derrotas a {enemy}. {gold} de oro{extra}."
+    }
+  ],
+  "battle.world_flee": [
+    {
+      "speaker": "Sistema",
+      "text": "Te zafas del combate. Vas malherido: busca una piedra de guardado."
+    }
+  ]
+}

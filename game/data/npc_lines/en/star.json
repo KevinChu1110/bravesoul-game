@@ -1,0 +1,38 @@
+{
+  "id": "star",
+  "speaker": "Starreader",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1
+      },
+      "lines": [
+        "In the echo layers the chart trembles. The thicker your footprints stack, the truer the reading — and the greedier."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ronin_spared"
+        ]
+      },
+      "lines": [
+        "Two sets of tracks part and walk side by side again on the Crossroads. Someone didn't swallow the flame all the way down."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c1_soul_intro"
+        ]
+      },
+      "lines": [
+        "The tracks will cross again. Come read the stars when you have enough dust."
+      ]
+    },
+    {
+      "when": {},
+      "lines": []
+    }
+  ]
+}

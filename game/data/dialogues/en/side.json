@@ -1,0 +1,101 @@
+{
+  "side.guard_dog": [
+    {
+      "speaker": "Guard Dog",
+      "text": "Woof. (One thump of the tail, as if to say: gold first.)"
+    }
+  ],
+  "side.training_need_weapon": [
+    {
+      "speaker": "Narration",
+      "text": "Old footprints still mark the sand of the training platform. Go have Ding raise your sword before you train."
+    }
+  ],
+  "side.training_daily_cap": [
+    {
+      "speaker": "System",
+      "text": "You've hit today's training limit. Go get some air in the field or a hunting ground."
+    }
+  ],
+  "side.training_result": [
+    {
+      "speaker": "System",
+      "text": "{msg}"
+    },
+    {
+      "speaker": "System",
+      "text": "Your power is now {power}. Take the materials to Ding, or sell them to Amber."
+    }
+  ],
+  "side.weapon_rack_untasked": [
+    {
+      "speaker": "Narration",
+      "text": "The rack is more than half empty. A broken sword lies half-buried in the sand — a very old edge."
+    }
+  ],
+  "side.broken_blade_gone": [
+    {
+      "speaker": "Narration",
+      "text": "There's nothing left here that Ding wants."
+    }
+  ],
+  "side.amber_has_letter": [
+    {
+      "speaker": "Amber",
+      "text": "Oh? That letter in your hand… the Veilfog seal? Give it to the captain. I take gold, not other people's troubles."
+    },
+    {
+      "speaker": "Amber",
+      "text": "Shop's open as usual. Forging stock and red water, both in."
+    }
+  ],
+  "side.amber_shop_open": [
+    {
+      "speaker": "Amber",
+      "text": "Materials shop, open. Scrap iron, star sand, oak resin, knight shards — I buy what drops and sell what you're short of."
+    },
+    {
+      "speaker": "Amber",
+      "text": "Learn to run the numbers: go fight, sell me the drops, forge with the gold; buy from me when you're short and head out again. Even a rabbit keeps books."
+    }
+  ],
+  "side.ronin_guard_fire": [
+    {
+      "speaker": "Black Flame Ronin",
+      "portrait": "road_bandit",
+      "text": "I watch the fire here. Whoever goes up… don't do what I did and burn the flame like firewood."
+    },
+    {
+      "speaker": "Black Flame Ronin",
+      "text": "If you fall, I'll drag you back. Once."
+    }
+  ],
+  "side.ronin_gone": [
+    {
+      "speaker": "Narration",
+      "text": "Only scorched bootprints are left on the ground. The ronin is gone."
+    }
+  ],
+  "side.ronin_too_early": [
+    {
+      "speaker": "Black Flame Ronin",
+      "text": "…Too early. Go fight your lion first."
+    }
+  ],
+  "side.ronin_defeated": [
+    {
+      "speaker": "Black Flame Ronin",
+      "text": "…Strong… and what of it… the flame is still empty…"
+    },
+    {
+      "speaker": "System",
+      "text": "Defeated the Black Flame Ronin. 55 gold · 3 stardust · {xp} exp{level_up}. Where he fell, the bootprints no longer burn."
+    }
+  ],
+  "side.ding_debt_remind": [
+    {
+      "speaker": "Ding",
+      "text": "The broken sword is still in the training yard. Don't waste my breath."
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "side.guard_dog": [
+    {
+      "speaker": "Perro guardián",
+      "text": "Guau. (Un golpe de cola, como diciendo: primero el oro.)"
+    }
+  ],
+  "side.training_need_weapon": [
+    {
+      "speaker": "Narración",
+      "text": "Quedan pisadas viejas en la arena del patio. Ve antes a que Ding te críe la espada."
+    }
+  ],
+  "side.training_daily_cap": [
+    {
+      "speaker": "Sistema",
+      "text": "Has llegado al límite de entrenamiento de hoy. Cambia de aire en el campo o en un coto."
+    }
+  ],
+  "side.training_result": [
+    {
+      "speaker": "Sistema",
+      "text": "{msg}"
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Tu poder es ahora {power}. Lleva los materiales a Ding o véndeselos a Ámbar."
+    }
+  ],
+  "side.weapon_rack_untasked": [
+    {
+      "speaker": "Narración",
+      "text": "El armero está medio vacío. Una espada rota asoma de la arena: el filo es muy viejo."
+    }
+  ],
+  "side.broken_blade_gone": [
+    {
+      "speaker": "Narración",
+      "text": "Aquí ya no queda nada que Ding quiera."
+    }
+  ],
+  "side.amber_has_letter": [
+    {
+      "speaker": "Ámbar",
+      "text": "¿Ah, sí? Esa carta que llevas… ¿lleva el sello de Velo? Dásela al capitán; yo cobro en oro, no en penas ajenas."
+    },
+    {
+      "speaker": "Ámbar",
+      "text": "La tienda sigue abierta. Material de forja y agua roja, en stock."
+    }
+  ],
+  "side.amber_shop_open": [
+    {
+      "speaker": "Ámbar",
+      "text": "Tienda de materiales abierta. Chatarra, arena estelar, resina de roble, hierro de caballero: te compro lo que sueltan y te vendo lo que falte."
+    },
+    {
+      "speaker": "Ámbar",
+      "text": "Aprende a echar cuentas: sal a cazar, véndeme lo que caiga, forja con ese oro; si falta, cómprame y vuelve a salir. Hasta un conejo lleva libros."
+    }
+  ],
+  "side.ronin_guard_fire": [
+    {
+      "speaker": "Errante de Llama Negra",
+      "portrait": "road_bandit",
+      "text": "Yo vigilo el fuego aquí. Los que suban… que no hagan como yo, que quemé la llama como leña."
+    },
+    {
+      "speaker": "Errante de Llama Negra",
+      "text": "Si caes, te arrastro de vuelta. Una vez."
+    }
+  ],
+  "side.ronin_gone": [
+    {
+      "speaker": "Narración",
+      "text": "Solo quedan huellas de botas quemadas. El errante ya no está."
+    }
+  ],
+  "side.ronin_too_early": [
+    {
+      "speaker": "Errante de Llama Negra",
+      "text": "…Aún es pronto. Ve a por tu león primero."
+    }
+  ],
+  "side.ronin_defeated": [
+    {
+      "speaker": "Errante de Llama Negra",
+      "text": "…Fuerte… ¿y qué…? La llama sigue vacía…"
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Vences al Errante de Llama Negra. 55 de oro · 3 de polvo · {xp} de experiencia{level_up}. Donde cayó, las huellas ya no arden."
+    }
+  ],
+  "side.ding_debt_remind": [
+    {
+      "speaker": "Ding",
+      "text": "La espada rota sigue en el patio de armas. No me marees."
+    }
+  ]
+}

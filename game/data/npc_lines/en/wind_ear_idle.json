@@ -1,0 +1,34 @@
+{
+  "id": "wind_ear_idle",
+  "speaker": "Windear",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "boss.shadowwind_cleared"
+        ]
+      },
+      "lines": [
+        "The wind's willing to stop. Your ears aim better than your bow.",
+        "The coast is still roaring. Go or don't — that's yours to decide."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c4_entered"
+        ]
+      },
+      "lines": [
+        "Swiftshadow won't wait for you. The real body will, for one short beat.",
+        "Don't chase the afterimages. Wait for the pause, then shoot."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "The forest knows footsteps, not names. You walk slowly. That's good."
+      ]
+    }
+  ]
+}

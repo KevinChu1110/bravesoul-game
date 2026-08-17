@@ -1,0 +1,60 @@
+{
+  "hub.candle_need_online": [
+    {
+      "speaker": "System",
+      "text": "Connect as a guest in the online settings first to sync the candles."
+    }
+  ],
+  "hub.candle_already_lit": [
+    {
+      "speaker": "Narration",
+      "text": "You already lit it. The flame is still there."
+    }
+  ],
+  "hub.candle_lit": [
+    {
+      "speaker": "Narration",
+      "text": "The flame gives a small jump. Somewhere far off, someone seems to see it at the same moment.\n(Worldwide: {total})"
+    }
+  ],
+  "hub.hunt_abandoned": [
+    {
+      "speaker": "System",
+      "text": "You have abandoned this hunt."
+    }
+  ],
+  "hub.online_health_ok": [
+    {
+      "speaker": "System",
+      "text": "Connection healthy: {msg}"
+    }
+  ],
+  "hub.online_health_fail": [
+    {
+      "speaker": "System",
+      "text": "Connection problem: {msg}"
+    }
+  ],
+  "shop.not_enough_gold": [
+    {
+      "speaker": "Amber",
+      "text": "Not enough gold. Go hunt something, or sell me materials."
+    }
+  ],
+  "shop.bought": [
+    {
+      "speaker": "Amber",
+      "text": "Sold. Don't die out there — I'd like to make money off you again."
+    },
+    {
+      "speaker": "System",
+      "text": "Bought [{item}] ×1 (-{price} gold)"
+    }
+  ],
+  "hub.ng_plus_not_yet": [
+    {
+      "speaker": "System",
+      "text": "Not finished yet. Go see Dawnlight first."
+    }
+  ]
+}

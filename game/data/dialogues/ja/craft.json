@@ -1,0 +1,126 @@
+{
+  "skill.learned": [
+    {
+      "speaker": "灰鬚",
+      "text": "よし。手の感覚を覚えろ。技の名を暗記するな。"
+    },
+    {
+      "speaker": "システム",
+      "text": "【{skill}】を習得"
+    }
+  ],
+  "skill.not_yet": [
+    {
+      "speaker": "灰鬚",
+      "text": "まだ時ではない。"
+    }
+  ],
+  "skill.tutor_deny": [
+    {
+      "speaker": "灰鬚",
+      "text": "金を出すか、さもなくばもう頭打ちだ。"
+    }
+  ],
+  "soul.equipped": [
+    {
+      "speaker": "システム",
+      "text": "戦魂が枠に入った。刃の性格が変わった。"
+    }
+  ],
+  "soul.ritual_not_enough": [
+    {
+      "speaker": "星読",
+      "text": "星屑では一角も灯せない。"
+    }
+  ],
+  "soul.fused": [
+    {
+      "speaker": "星読",
+      "text": "同じ軌の三つが、より明るい一つの星になる。"
+    },
+    {
+      "speaker": "システム",
+      "text": "合成 → {soul}"
+    }
+  ],
+  "soul.fuse_requirement": [
+    {
+      "speaker": "星読",
+      "text": "同じ星、同じ品、同じ階の三つ、しかも未入魂のものが要る。"
+    }
+  ],
+  "forge.need_rusty_first": [
+    {
+      "speaker": "釘釘",
+      "text": "まずその錆鉄を俺に見せろ。"
+    }
+  ],
+  "forge.path_chosen": [
+    {
+      "speaker": "システム",
+      "text": "武器流派【{path}】を選びました。"
+    },
+    {
+      "speaker": "システム",
+      "text": "戦い方：{play}。{pro}"
+    },
+    {
+      "speaker": "システム",
+      "text": "戦魂は星読のところで観星を。戦力 {power}。"
+    }
+  ],
+  "forge.wood_sword_no_gold": [
+    {
+      "speaker": "釘釘",
+      "text": "二十金だ。金がないなら炉を塞ぐな。"
+    }
+  ],
+  "forge.wood_sword_owned": [
+    {
+      "speaker": "釘釘",
+      "text": "木剣？もう持っていっただろう。"
+    }
+  ],
+  "forge.tier_max": [
+    {
+      "speaker": "釘釘",
+      "text": "十分だ。まず獅子を斬りに行け。"
+    }
+  ],
+  "forge.no_gold": [
+    {
+      "speaker": "釘釘",
+      "text": "金は？城の外をひと回りしてこい。"
+    }
+  ],
+  "forge.success": [
+    {
+      "speaker": "釘釘",
+      "text": "できた。T{tier}。{scrap}"
+    }
+  ],
+  "forge.pity_break": [
+    {
+      "speaker": "釘釘",
+      "text": "（槌を台に叩きつける）もういい！鉄のほうがお前より辛抱強いわ！"
+    },
+    {
+      "speaker": "システム",
+      "text": "槌が炉端に投げ出され、火の粉が跳ねた。"
+    },
+    {
+      "speaker": "釘釘",
+      "text": "……持っていけ、機嫌直しの餅だ。明日また来い。今日はその面を見せるな。"
+    },
+    {
+      "speaker": "システム",
+      "text": "体力が少し回復した。連敗カウントはゼロに戻った。"
+    }
+  ],
+  "forge.failed": [
+    {
+      "speaker": "釘釘",
+      "text": "失敗だ。階は残る。素材は消えた。"
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "world.inspect_object": [
+    {
+      "speaker": "Narration",
+      "text": "You study the {label}. Wind comes in from somewhere in Cuiling."
+    }
+  ],
+  "world.miniboss_cleared": [
+    {
+      "speaker": "Narration",
+      "text": "Only a clear breeze here now. The trial is over."
+    }
+  ],
+  "world.scar_cleared": [
+    {
+      "speaker": "Narration",
+      "text": "The scarred ground has stopped pulsing. A little grey-green pushes up through the burnt cracks — like a wound scabbing over."
+    },
+    {
+      "speaker": "Thought",
+      "text": "The appetite closed. I didn't feed it."
+    }
+  ],
+  "world.mirror_cleared": [
+    {
+      "speaker": "Narration",
+      "text": "One reflection left in the mirror hall: yours. The crack of the shortcut is still there, but it no longer glows."
+    },
+    {
+      "speaker": "Thought",
+      "text": "The true shadow is heavier — then I'll walk with the weight."
+    }
+  ],
+  "world.wreck_cleared": [
+    {
+      "speaker": "Narration",
+      "text": "The wreck has gone quiet. Waves knock at the keel like a water clock keeping time."
+    },
+    {
+      "speaker": "Thought",
+      "text": "The captain sleeps. The pass was… making it ashore alive."
+    }
+  ],
+  "world.road_note": [
+    {
+      "speaker": "Notice Board",
+      "text": "«No soup at the inn today. If you see a nest under the bridge, leave the eggs — the soft-feathered one belongs to a traveller.»"
+    },
+    {
+      "speaker": "Notice Board",
+      "text": "A newer line below: «The graveyard lamp went out. Whoever has fire, light it. Thanks.»"
+    }
+  ],
+  "world.grave_b": [
+    {
+      "speaker": "Narration",
+      "text": "A bunch of dried wildflowers leans against the old stone. The wind turns the petals; a small copper coin holds them down."
+    },
+    {
+      "speaker": "Thought",
+      "text": "Someone came. The village isn't entirely empty."
+    }
+  ],
+  "world.scare_field": [
+    {
+      "speaker": "Narration",
+      "text": "The scarecrow wears a child's cap, a patch sewn at the cuff. Half a dry biscuit sits inside the cap — for the birds, not for people."
+    },
+    {
+      "speaker": "Narration",
+      "text": "Crooked letters on the brim: don't eat Wheatear's."
+    }
+  ],
+  "world.camp_ash_road": [
+    {
+      "speaker": "Narration",
+      "text": "A traveller's embers are still warm. Stones beside them form an arrow: city to the east, smoke to the west."
+    },
+    {
+      "speaker": "Thought",
+      "text": "Someone just left. Small footprints — in a hurry too, by the look of it."
+    }
+  ],
+  "world.chest_empty": [
+    {
+      "speaker": "Narration",
+      "text": "Empty. You already took it."
+    }
+  ],
+  "world.chest_open": [
+    {
+      "speaker": "Narration",
+      "text": "{found}"
+    },
+    {
+      "speaker": "System",
+      "text": "Gained {gold} gold · {dust} stardust{drop}"
+    }
+  ],
+  "world.skirmish_cleared": [
+    {
+      "speaker": "Narration",
+      "text": "It's quiet here now."
+    }
+  ],
+  "region.mist_locked": [
+    {
+      "speaker": "System",
+      "text": "The mist is still too far. Raise your sword at the knight fortress first."
+    }
+  ],
+  "region.dojo_warn": [
+    {
+      "speaker": "System",
+      "text": "The air in the dojo is heavy. Power 26+ recommended (you're at {power}). Try Veilfog first, or train up a few levels."
+    }
+  ],
+  "region.forest_warn": [
+    {
+      "speaker": "System",
+      "text": "The forest wind runs fast. Power 30+ recommended (you're at {power}). The dojo or a hunting ground would toughen you up first."
+    }
+  ],
+  "region.coast_warn": [
+    {
+      "speaker": "System",
+      "text": "The surf runs heavy. Power 30+ recommended (you're at {power})."
+    }
+  ]
+}

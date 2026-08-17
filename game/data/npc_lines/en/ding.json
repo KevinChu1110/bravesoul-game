@@ -1,0 +1,72 @@
+{
+  "id": "ding",
+  "speaker": "Ding",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1
+      },
+      "lines": [
+        "Again? Ash on the blade… you touched the flame, didn't you? Never mind. I raise steel, not lives."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.demon_cleared"
+        ]
+      },
+      "lines": [
+        "Good, the iron's still there. Don't make me bury the same iron twice."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ding_debt_done"
+        ]
+      },
+      "lines": [
+        "Old debt's paid. The fire burns… a little steadier than before.",
+        "Upgrading still costs gold. Sentiment doesn't burn as coal."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "item.broken_blade"
+        ]
+      },
+      "lines": [
+        "That break… you picked it up in the training yard? Give it here."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ding_debt_asked"
+        ]
+      },
+      "lines": [
+        "The broken sword's near the weapon rack in the training yard. Don't tell me you got lost."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c1_forged"
+        ]
+      },
+      "lines": [
+        "Meager Edge. Ugly name, works fine. Bring gold if you want it upgraded.",
+        "…If you've a moment, go take a look at the training yard for me. Old debt."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "The door's not open so rabbits can sightsee."
+      ]
+    }
+  ]
+}

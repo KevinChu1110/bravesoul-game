@@ -1,0 +1,60 @@
+{
+  "hub.candle_need_online": [
+    {
+      "speaker": "Sistema",
+      "text": "Conéctate como invitado en los ajustes en línea para sincronizar las velas."
+    }
+  ],
+  "hub.candle_already_lit": [
+    {
+      "speaker": "Narración",
+      "text": "Ya la encendiste. El fuego sigue ahí."
+    }
+  ],
+  "hub.candle_lit": [
+    {
+      "speaker": "Narración",
+      "text": "La llama dio un salto. Parece que alguien lejos la vio a la vez.\n(En todo el mundo: {total})"
+    }
+  ],
+  "hub.hunt_abandoned": [
+    {
+      "speaker": "Sistema",
+      "text": "Has abandonado esta cacería."
+    }
+  ],
+  "hub.online_health_ok": [
+    {
+      "speaker": "Sistema",
+      "text": "Conexión correcta: {msg}"
+    }
+  ],
+  "hub.online_health_fail": [
+    {
+      "speaker": "Sistema",
+      "text": "Problema de conexión: {msg}"
+    }
+  ],
+  "shop.not_enough_gold": [
+    {
+      "speaker": "Ámbar",
+      "text": "No te llega el oro. Vete a cazar algo o véndeme materiales."
+    }
+  ],
+  "shop.bought": [
+    {
+      "speaker": "Ámbar",
+      "text": "Trato hecho. No te mueras ahí fuera, que quiero cobrarte otra vez."
+    },
+    {
+      "speaker": "Sistema",
+      "text": "Compras [{item}] ×1 (-{price} oro)"
+    }
+  ],
+  "hub.ng_plus_not_yet": [
+    {
+      "speaker": "Sistema",
+      "text": "Aún no has terminado. Ve primero con Alba."
+    }
+  ]
+}

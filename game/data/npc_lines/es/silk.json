@@ -1,0 +1,47 @@
+{
+  "id": "silk",
+  "speaker": "Terciopelo",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "boss.demon_cleared"
+        ]
+      },
+      "lines": [
+        "Los registros de la torre… completé media página. «El más débil rechazó la fuerza».",
+        "¿Se equivocó la profecía? No: la leyeron mal."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.leo_cleared",
+          "c2_wheat_letter"
+        ]
+      },
+      "lines": [
+        "La Llama Negra se alimenta de ambición. La letra de Espiga… es más cierta que los tratados.",
+        "La versión popular dice que el primer «más débil» entró en la torre. La oficial borró esa segunda mitad."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c1_forged"
+        ]
+      },
+      "lines": [
+        "¿Filo Ínfimo? Si Ding todavía reconoce el hierro, el mundo no se ha acabado.",
+        "Tras la puerta del archivo: las tres teorías de la Llama Negra, la orden de disolución de los caballeros y una página arrancada sobre «el más débil»."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "¿Un conejo? Vienen pocos a buscar libros y muchos a buscar excusas.",
+        "La profecía dice «el más débil llegará a la torre». No corras a darte por aludido: lee primero hasta las contradicciones."
+      ]
+    }
+  ]
+}

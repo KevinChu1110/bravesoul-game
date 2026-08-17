@@ -1,0 +1,100 @@
+{
+  "battle.wolf_win": [
+    {
+      "speaker": "Narration",
+      "text": "As the wolf falls, the purple flame scatters into ash. It looks… thinner than you imagined."
+    },
+    {
+      "speaker": "Thought",
+      "text": "So this is the Black Flame. Even the beasts…"
+    },
+    {
+      "speaker": "System",
+      "text": "Learned [Wide Slash]. 25 gold, 2 stardust. Far off, stone walls stand in the morning light."
+    }
+  ],
+  "battle.wolf_lose": [
+    {
+      "speaker": "System",
+      "text": "You wake by the roadside. Someone laid a cloak over you — they're already gone."
+    }
+  ],
+  "battle.leo_lose": [
+    {
+      "speaker": "Leo",
+      "text": "Go back to clutching grass roots."
+    },
+    {
+      "speaker": "System",
+      "text": "You wake up back in the city. Return whenever you like."
+    }
+  ],
+  "battle.fog_lose": [
+    {
+      "speaker": "White Fog",
+      "text": "Lost, are we… want to try again?"
+    },
+    {
+      "speaker": "System",
+      "text": "Someone carried you back to Veilfog Village. Next time, wait for the real body to flare white."
+    }
+  ],
+  "battle.demon_lose": [
+    {
+      "speaker": "Demon King",
+      "text": "Still too light…"
+    },
+    {
+      "speaker": "System",
+      "text": "You collapse on the tower steps. Just climb again from the bottom."
+    }
+  ],
+  "battle.abo_lose": [
+    {
+      "speaker": "Abo",
+      "text": "There's no way in your fist yet. Again."
+    },
+    {
+      "speaker": "System",
+      "text": "You were politely shown out of the trial hall. The door isn't shut."
+    }
+  ],
+  "battle.falcon_lose": [
+    {
+      "speaker": "Swiftshadow",
+      "text": "The wind carried you off… wait one more time."
+    },
+    {
+      "speaker": "System",
+      "text": "You wake in the treehouse. Next time, strike when the wingbeats pause."
+    }
+  ],
+  "battle.boar_lose": [
+    {
+      "speaker": "Stonefist",
+      "text": "Not enough strength. Plant your feet and come back."
+    },
+    {
+      "speaker": "System",
+      "text": "The waves push you back to the docks. Next time meet the charge head on — that's what cracks the rock plate."
+    }
+  ],
+  "battle.rift_lose": [
+    {
+      "speaker": "System",
+      "text": "The Black Flame flings you back to the foot of the tower. {tip}"
+    }
+  ],
+  "battle.world_win": [
+    {
+      "speaker": "System",
+      "text": "Defeated {enemy}. {gold} gold{extra}."
+    }
+  ],
+  "battle.world_flee": [
+    {
+      "speaker": "System",
+      "text": "You tear yourself free of the fight. You're badly hurt — find a save stone."
+    }
+  ]
+}

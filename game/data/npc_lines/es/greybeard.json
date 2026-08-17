@@ -1,0 +1,70 @@
+{
+  "id": "greybeard",
+  "speaker": "Barbagrís",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1,
+        "flags": [
+          "boss.leo_cleared"
+        ]
+      },
+      "lines": [
+        "Otra vez. Tus huellas se posan sobre el camino viejo. ¿Recuerdas que la primera vez tiraste tres veces de la espada?",
+        "El león del eco está más rabioso. No aflojes el parry."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.demon_cleared"
+        ]
+      },
+      "lines": [
+        "A la torre le falta una esquina. Y tú sigues en pie. …Bah. Pasa a tomar té.",
+        "Si aún quieres pulir técnicas, el entrenamiento del viaje sigue abierto."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.leo_cleared",
+          "boss.white_fog_cleared"
+        ]
+      },
+      "lines": [
+        "¿También calaste la niebla? Los ojos crecen antes que la espada.",
+        "La torre espera. No imites al necio que confunde la llama con leña."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.leo_cleared"
+        ]
+      },
+      "lines": [
+        "(De espaldas) La puerta se abre para ti.",
+        "Hay niebla al sudeste. Las cartas llegan tarde; tú no."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c1_forged"
+        ]
+      },
+      "lines": [
+        "Ya tienes filo. Al león del santuario no le hablan las palabras. Le habla el acero.",
+        "No vas a demostrar que eres fuerte. Vas a hacerle recordar qué debía proteger."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "El León Sagrado está en el santuario. Si no vas a morir allí, primero cría tu espada.",
+        "Las técnicas no se miran. Solo crecen si aciertan."
+      ]
+    }
+  ]
+}

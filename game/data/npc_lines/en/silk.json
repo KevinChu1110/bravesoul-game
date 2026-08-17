@@ -1,0 +1,47 @@
+{
+  "id": "silk",
+  "speaker": "Velvet",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "boss.demon_cleared"
+        ]
+      },
+      "lines": [
+        "The tower's records… I filled in half a page. 'The weakest refused strength.'",
+        "Was the prophecy wrong? No — it was read wrong."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.leo_cleared",
+          "c2_wheat_letter"
+        ]
+      },
+      "lines": [
+        "The Black Flame feeds on ambition. Wheatear's handwriting is… truer than the canon.",
+        "The folk version says the first weakest one entered the tower. The official version cut that second half."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c1_forged"
+        ]
+      },
+      "lines": [
+        "Meager Edge? If Ding still recognises iron, the world isn't finished.",
+        "Behind the archive door: three theories of the Black Flame, the order of disbandment, and a torn-out page about 'the weakest'."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "A rabbit? Few come looking for books. Many come looking for excuses.",
+        "The prophecy says 'the weakest shall reach the tower'. Don't be so quick to see yourself in it — read as far as the contradictions first."
+      ]
+    }
+  ]
+}

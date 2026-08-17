@@ -1,0 +1,60 @@
+{
+  "hub.candle_need_online": [
+    {
+      "speaker": "システム",
+      "text": "燭火を同期するには、まずオンライン設定でゲスト接続してください。"
+    }
+  ],
+  "hub.candle_already_lit": [
+    {
+      "speaker": "ナレーション",
+      "text": "もう灯している。火はまだある。"
+    }
+  ],
+  "hub.candle_lit": [
+    {
+      "speaker": "ナレーション",
+      "text": "炎がひとつ跳ねた。遠くの誰かも同時に見た気がする。\n（全体：{total}）"
+    }
+  ],
+  "hub.hunt_abandoned": [
+    {
+      "speaker": "システム",
+      "text": "この狩りを放棄しました。"
+    }
+  ],
+  "hub.online_health_ok": [
+    {
+      "speaker": "システム",
+      "text": "接続は正常：{msg}"
+    }
+  ],
+  "hub.online_health_fail": [
+    {
+      "speaker": "システム",
+      "text": "接続に異常：{msg}"
+    }
+  ],
+  "shop.not_enough_gold": [
+    {
+      "speaker": "琥珀",
+      "text": "金が足りないね。雑魚を狩るか、素材を売っておいで。"
+    }
+  ],
+  "shop.bought": [
+    {
+      "speaker": "琥珀",
+      "text": "商談成立。外で死ぬんじゃないよ——もう一回稼がせてもらいたいからね。"
+    },
+    {
+      "speaker": "システム",
+      "text": "【{item}】×1 を購入（-{price}金）"
+    }
+  ],
+  "hub.ng_plus_not_yet": [
+    {
+      "speaker": "システム",
+      "text": "まだ終わっていません。まず晨光のところへ。"
+    }
+  ]
+}

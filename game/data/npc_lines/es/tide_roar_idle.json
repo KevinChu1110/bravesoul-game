@@ -1,0 +1,33 @@
+{
+  "id": "tide_roar_idle",
+  "speaker": "Bramamarea",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "boss.stonefist_cleared"
+        ]
+      },
+      "lines": [
+        "¡Jajaja! Tu fuerza ya tiene rumbo. ¡A la torre!"
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c5_entered"
+        ]
+      },
+      "lines": [
+        "Cuando embista, no huyas: sal a su encuentro. De frente.",
+        "La coraza de roca se pela capa a capa. Métete agachado en la zona clara de los desprendimientos."
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "El viento de la costa sabe a sal. Tu filo… ¿puede sonar una vez más?"
+      ]
+    }
+  ]
+}

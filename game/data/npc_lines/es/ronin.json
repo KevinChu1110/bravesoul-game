@@ -1,0 +1,33 @@
+{
+  "id": "ronin",
+  "speaker": "Errante de Llama Negra",
+  "rules": [
+    {
+      "when": {
+        "flags": [
+          "side.ronin_spared"
+        ]
+      },
+      "lines": [
+        "…Envaino. El camino es largo. No hagas como yo, que quemé la llama como leña."
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.ronin_defeated"
+        ]
+      },
+      "lines": [
+        "(Caído en el suelo) …Ser fuerte… ¿y qué…?"
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "Alto. ¿Tú también vienes a «hacerte fuerte»?",
+        "La Llama Negra me enseñó: si ablandas el corazón, te devora entero. Yo ya no me ablando."
+      ]
+    }
+  ]
+}
