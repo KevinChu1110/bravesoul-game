@@ -21,7 +21,7 @@ grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
 stretch_mode = 6
-modulate = Color(0.75, 0.75, 0.8, 1)
+modulate = Color(0.92, 0.92, 0.95, 1)
 
 [node name="BGDim" type="ColorRect" parent="."]
 layout_mode = 1
@@ -31,7 +31,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.05, 0.04, 0.08, 0.35)
+color = Color(0.05, 0.04, 0.08, 0.15)
 
 [node name="TelegraphFlash" type="ColorRect" parent="."]
 unique_name_in_owner = true
@@ -176,7 +176,7 @@ anchor_bottom = 1.0
 offset_left = 48.0
 offset_top = 148.0
 offset_right = -48.0
-offset_bottom = -200.0
+offset_bottom = -163.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 80
@@ -186,7 +186,14 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-alignment = 1
+alignment = 2
+
+[node name="PlayerTag" type="Label" parent="Arena/PlayerSlot"]
+layout_mode = 2
+text = "我方"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
 
 [node name="PlayerBody" type="TextureRect" parent="Arena/PlayerSlot"]
 custom_minimum_size = Vector2(200, 250)
@@ -197,18 +204,18 @@ expand_mode = 1
 stretch_mode = 5
 texture_filter = 0
 
-[node name="PlayerTag" type="Label" parent="Arena/PlayerSlot"]
-layout_mode = 2
-text = "我方"
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
-
 [node name="EnemySlot" type="VBoxContainer" parent="Arena"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-alignment = 1
+alignment = 2
+
+[node name="EnemyTag" type="Label" parent="Arena/EnemySlot"]
+layout_mode = 2
+text = "敵方"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 0.55, 0.5, 1)
 
 [node name="EnemyBody" type="TextureRect" parent="Arena/EnemySlot"]
 custom_minimum_size = Vector2(260, 290)
@@ -218,13 +225,6 @@ size_flags_vertical = 4
 expand_mode = 1
 stretch_mode = 5
 texture_filter = 0
-
-[node name="EnemyTag" type="Label" parent="Arena/EnemySlot"]
-layout_mode = 2
-text = "敵方"
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-theme_override_colors/font_color = Color(1, 0.55, 0.5, 1)
 
 [node name="HazardFX" type="TextureRect" parent="."]
 unique_name_in_owner = true
