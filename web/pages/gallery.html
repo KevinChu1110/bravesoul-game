@@ -7,6 +7,7 @@
   <meta name="description" content="勇者之魂實機畫面與世界印象。" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/site.css" />
+  <link rel="stylesheet" href="../css/sections.css" />
   <script src="../config.js"></script>
 </head>
 <body data-page="gallery">
@@ -14,55 +15,177 @@
     <div class="container">
       <div class="breadcrumb"><a href="../index.html">首頁</a> / 畫面</div>
       <h1>畫面圖庫</h1>
-      <p>實機截圖（0.14 風格鎖定）與世界印象。</p>
+      <p>實機截圖與世界印象。點圖可放大。</p>
     </div>
   </header>
-  <main class="page">
+
+  <section class="band band--paper">
     <div class="container">
-      <h2 class="section-h2"><span class="accent"></span><span>實機畫面</span></h2>
-      <p class="section-sub">Godot 實機 · 探索與系統</p>
-      <div class="gallery-grid">
-        <figure><img src="../media/shots/proof_01_title.png" alt="標題" loading="lazy" /><figcaption>標題</figcaption></figure>
-        <figure><img src="../media/shots/proof_02_explore_town.png" alt="騎士堡" loading="lazy" /><figcaption>騎士堡</figcaption></figure>
-        <figure><img src="../media/shots/proof_12_village.png" alt="故鄉" loading="lazy" /><figcaption>故鄉村</figcaption></figure>
-        <figure><img src="../media/shots/proof_04_mist.png" alt="霧隱" loading="lazy" /><figcaption>霧隱村</figcaption></figure>
-        <figure><img src="../media/shots/proof_13_dojo.png" alt="道場" loading="lazy" /><figcaption>道場</figcaption></figure>
-        <figure><img src="../media/shots/proof_22_dojo_peak.png" alt="峰頂" loading="lazy" /><figcaption>道場峰頂</figcaption></figure>
-        <figure><img src="../media/shots/proof_06_forest.png" alt="森林" loading="lazy" /><figcaption>遊俠森林</figcaption></figure>
-        <figure><img src="../media/shots/proof_18_forest_lake.png" alt="湖" loading="lazy" /><figcaption>森林湖</figcaption></figure>
-        <figure><img src="../media/shots/proof_07_coast.png" alt="海岸" loading="lazy" /><figcaption>維京海岸</figcaption></figure>
-        <figure><img src="../media/shots/proof_19_harbor.png" alt="港" loading="lazy" /><figcaption>深港</figcaption></figure>
-        <figure><img src="../media/shots/proof_14_tower.png" alt="塔" loading="lazy" /><figcaption>法師塔</figcaption></figure>
-        <figure><img src="../media/shots/proof_17_starfall.png" alt="星隕" loading="lazy" /><figcaption>星隕原</figcaption></figure>
-        <figure><img src="../media/shots/proof_24_caravan.png" alt="商隊" loading="lazy" /><figcaption>商隊營</figcaption></figure>
-        <figure><img src="../media/shots/proof_15_market.png" alt="市集" loading="lazy" /><figcaption>市集</figcaption></figure>
-        <figure><img src="../media/shots/proof_03_inventory.png" alt="物品欄" loading="lazy" /><figcaption>物品欄</figcaption></figure>
-        <figure><img src="../media/shots/proof_08_forge.png" alt="鐵匠" loading="lazy" /><figcaption>鐵匠</figcaption></figure>
-        <figure><img src="../media/shots/proof_11_battle.png" alt="戰鬥" loading="lazy" /><figcaption>戰鬥</figcaption></figure>
+      <div class="gallery-hero" data-lb>
+        <img src="../media/shots/proof_02_explore_town.png" alt="騎士堡" />
+        <div class="cap">
+          <strong>騎士堡 · 實機</strong>
+          <span>0.14 風格鎖定後的探索畫面</span>
+        </div>
       </div>
-
-      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>主角 · 小白</span></h2>
-      <div class="gallery-grid">
-        <figure><img src="../media/hero/rabbit_idle.png" alt="小白" loading="lazy" /><figcaption>兔勇者 · 小白</figcaption></figure>
+      <div class="sec-head">
+        <p class="sec-kicker">In-game</p>
+        <h2 class="sec-title">六域與系統</h2>
+        <p class="sec-lead">橫向滑動快速掃過，或直接點進下方網格。</p>
       </div>
+    </div>
+    <div class="rail-wrap">
+      <div class="rail" id="rail-shots"></div>
+    </div>
+  </section>
 
-      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>世界印象</span></h2>
-      <p class="section-sub">宣傳用氣氛圖</p>
-      <div class="gallery-grid">
-        <figure><img src="../media/gemini/keyart_hero.png" alt="主視覺" loading="lazy" /><figcaption>主視覺</figcaption></figure>
-        <figure><img src="../media/gemini/keyart_leo.png" alt="雷歐" loading="lazy" /><figcaption>雷歐對峙</figcaption></figure>
-        <figure><img src="../media/gemini/keyart_dojo.png" alt="道場" loading="lazy" /><figcaption>雲海道場</figcaption></figure>
-        <figure><img src="../media/gemini/keyart_starfall.png" alt="星隕" loading="lazy" /><figcaption>星隕觀星</figcaption></figure>
-        <figure><img src="../media/gemini/keyart_tower.png" alt="塔" loading="lazy" /><figcaption>法師之塔</figcaption></figure>
-        <figure><img src="../media/gemini/keyart_mist.png" alt="霧" loading="lazy" /><figcaption>霧隱燈火</figcaption></figure>
+  <section class="band band--cream band--edge">
+    <div class="container">
+      <div class="sec-head">
+        <p class="sec-kicker">Grid</p>
+        <h2 class="sec-title">完整截圖</h2>
       </div>
+      <div class="gallery-grid" id="shot-grid"></div>
+    </div>
+  </section>
 
+  <section class="band band--soft-key">
+    <div class="container">
+      <div class="feature">
+        <div class="feature__media">
+          <img src="../media/hero/rabbit_idle.png" alt="小白" style="object-fit:contain;background:var(--warm);padding:2rem" />
+          <span class="feature__badge">主角</span>
+        </div>
+        <div class="feature__copy">
+          <h3>小白 · 不慕強權的兔子</h3>
+          <p>全作視覺錨點。裝備疊層、武器外觀、戰鬥立繪都以 chibi 風格統一。</p>
+          <a class="btn btn-primary" href="download.html">下載遇見小白</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--paper">
+    <div class="container">
+      <div class="sec-head">
+        <p class="sec-kicker">Key art</p>
+        <h2 class="sec-title">世界印象</h2>
+        <p class="sec-lead">宣傳氣氛圖（與實機 chibi 分開欣賞）。</p>
+      </div>
+      <div class="bento" id="keyart-bento"></div>
       <p style="margin-top:1.5rem">
         <a class="btn btn-primary" href="download.html">下載遊戲</a>
         <a class="btn btn-ghost" href="equipment.html">裝備圖鑑</a>
       </p>
     </div>
-  </main>
+  </section>
+
+  <div class="lb" id="lb" hidden>
+    <button type="button" class="lb-close" id="lb-close" aria-label="關閉">×</button>
+    <img id="lb-img" alt="" />
+  </div>
+
+  <style>
+    .lb {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(20, 16, 22, 0.9);
+      display: grid; place-items: center;
+      padding: 1.5rem;
+      cursor: zoom-out;
+    }
+    .lb[hidden] { display: none !important; }
+    .lb img {
+      max-width: min(1100px, 100%);
+      max-height: 88vh;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .lb-close {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 44px; height: 44px; border: 0; border-radius: 50%;
+      background: rgba(255,255,255,0.15); color: #fff;
+      font-size: 1.5rem; cursor: pointer;
+    }
+    .lb-close:hover { background: rgba(255,255,255,0.28); }
+  </style>
+
   <script src="../js/site.js"></script>
+  <script>
+    (function () {
+      var shots = [
+        ["proof_01_title.png", "標題"],
+        ["proof_02_explore_town.png", "騎士堡"],
+        ["proof_12_village.png", "故鄉村"],
+        ["proof_04_mist.png", "霧隱村"],
+        ["proof_13_dojo.png", "道場"],
+        ["proof_22_dojo_peak.png", "道場峰頂"],
+        ["proof_06_forest.png", "遊俠森林"],
+        ["proof_18_forest_lake.png", "森林湖"],
+        ["proof_07_coast.png", "維京海岸"],
+        ["proof_19_harbor.png", "深港"],
+        ["proof_14_tower.png", "法師塔"],
+        ["proof_17_starfall.png", "星隕原"],
+        ["proof_24_caravan.png", "商隊營"],
+        ["proof_15_market.png", "市集"],
+        ["proof_03_inventory.png", "物品欄"],
+        ["proof_08_forge.png", "鐵匠"],
+        ["proof_11_battle.png", "戰鬥"],
+        ["proof_05_crossroads.png", "岔路"],
+        ["proof_10_soul.png", "魂系統"],
+      ];
+      var rail = document.getElementById("rail-shots");
+      var grid = document.getElementById("shot-grid");
+      shots.forEach(function (s) {
+        var src = "../media/shots/" + s[0];
+        rail.innerHTML +=
+          '<a class="rail__card" href="#" data-full="' + src + '">' +
+          '<img src="' + src + '" alt="' + s[1] + '" loading="lazy" />' +
+          '<div class="body"><div class="title">' + s[1] + '</div><p class="meta">實機</p></div></a>';
+        grid.innerHTML +=
+          '<figure data-full="' + src + '"><img src="' + src + '" alt="' + s[1] + '" loading="lazy" /><figcaption>' + s[1] + "</figcaption></figure>";
+      });
+      var keyarts = [
+        ["keyart_hero.png", "主視覺", "span 7"],
+        ["keyart_leo.png", "雷歐", "span 5"],
+        ["keyart_mist.png", "霧", "span 4"],
+        ["keyart_harbor.png", "港", "span 4"],
+        ["keyart_tower.png", "塔", "span 4"],
+      ];
+      var bento = document.getElementById("keyart-bento");
+      keyarts.forEach(function (k, i) {
+        var cls = i === 0 ? "bento__item--lg" : i === 1 ? "bento__item--md" : "bento__item--sm";
+        bento.innerHTML +=
+          '<div class="bento__item ' + cls + '" data-full="../media/gemini/' + k[0] + '">' +
+          '<img src="../media/gemini/' + k[0] + '" alt="' + k[1] + '" loading="lazy" />' +
+          '<div class="cap"><strong>' + k[1] + '</strong><span>氣氛圖</span></div></div>';
+      });
+
+      var lb = document.getElementById("lb");
+      var lbImg = document.getElementById("lb-img");
+      function openLb(src) {
+        lbImg.src = src;
+        lb.hidden = false;
+      }
+      function closeLb() {
+        lb.hidden = true;
+        lbImg.src = "";
+      }
+      document.body.addEventListener("click", function (e) {
+        var t = e.target.closest("[data-full]");
+        if (t) {
+          e.preventDefault();
+          openLb(t.getAttribute("data-full"));
+        }
+      });
+      document.getElementById("lb-close").addEventListener("click", closeLb);
+      lb.addEventListener("click", function (e) {
+        if (e.target === lb) closeLb();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeLb();
+      });
+      if (window.BS_refreshMotion) window.BS_refreshMotion();
+    })();
+  </script>
 </body>
 </html>

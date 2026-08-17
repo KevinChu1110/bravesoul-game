@@ -11,16 +11,17 @@
   <meta property="og:image" content="media/gemini/keyart_hero.png" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/sections.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐇</text></svg>" />
   <script src="config.js"></script>
 </head>
 <body data-page="home">
   <header class="hero">
-    <img class="bg" src="media/gemini/keyart_hero.png" alt="" />
+    <img class="bg parallax-media" src="media/gemini/keyart_hero.png" alt="" data-parallax="0.12" />
     <div class="hero-overlay"></div>
     <div class="hero-copy">
       <div class="eyebrow" style="margin-bottom:0.75rem">
-        <span class="tag tag-play">Brave Soul</span>
+        <span class="tag tag-play">Brave Soul · 0.15</span>
       </div>
       <h1>一隻不慕強權的兔子<br />以器／魂／招走過六域</h1>
       <p>十種武器流派、鍛造與觀星、自由路線。不登入也能走完整趟；登入之後多了雲端存檔與旅人交會。</p>
@@ -28,90 +29,180 @@
         <a class="btn btn-primary" href="pages/download.html">下載遊戲</a>
         <a class="btn btn-ghost" href="pages/walkthrough.html" style="color:#fff;border-color:rgba(255,255,255,0.35);background:rgba(255,255,255,0.08)">完整攻略</a>
         <a class="btn btn-ghost" href="pages/gallery.html" style="color:#fff;border-color:rgba(255,255,255,0.35);background:rgba(255,255,255,0.08)">實機畫面</a>
-        <a class="btn btn-ghost" href="pages/account.html" style="color:#fff;border-color:rgba(255,255,255,0.35);background:rgba(255,255,255,0.08)">帳號</a>
       </div>
     </div>
   </header>
 
-  <main class="page">
+  <!-- 數字賣點 -->
+  <section class="band band--ink">
     <div class="container">
-      <h2 class="section-h2"><span class="accent"></span><span>實機畫面</span></h2>
-      <p class="section-sub">0.14 風格鎖定後 · 點進圖庫看更多</p>
-      <div class="card-grid">
-        <a class="card" href="pages/gallery.html">
-          <div class="thumb"><img src="media/shots/proof_02_explore_town.png" alt="騎士堡" /></div>
-          <div class="body"><div class="title">騎士堡</div><div class="meta">實機探索</div></div>
-        </a>
-        <a class="card" href="pages/gallery.html">
-          <div class="thumb"><img src="media/shots/proof_13_dojo.png" alt="道場" /></div>
-          <div class="body"><div class="title">道場</div><div class="meta">實機探索</div></div>
-        </a>
-        <a class="card" href="pages/gallery.html">
-          <div class="thumb"><img src="media/shots/proof_06_forest.png" alt="森林" /></div>
-          <div class="body"><div class="title">遊俠森林</div><div class="meta">實機探索</div></div>
-        </a>
-        <a class="card" href="pages/gallery.html">
-          <div class="thumb"><img src="media/shots/proof_19_harbor.png" alt="港" /></div>
-          <div class="body"><div class="title">維京深港</div><div class="meta">實機探索</div></div>
-        </a>
-        <a class="card" href="pages/gallery.html">
-          <div class="thumb"><img src="media/shots/proof_04_mist.png" alt="霧隱" /></div>
-          <div class="body"><div class="title">霧隱村</div><div class="meta">實機探索</div></div>
-        </a>
-        <a class="card" href="pages/download.html">
-          <div class="thumb"><img src="media/hero/rabbit_idle.png" alt="下載" /></div>
-          <div class="body"><div class="title">下載試玩</div><div class="meta">Win · Mac · Linux</div></div>
-        </a>
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat__n" data-count="10">10</div>
+          <div class="stat__l">武器流派</div>
+        </div>
+        <div class="stat">
+          <div class="stat__n">3</div>
+          <div class="stat__l">器 · 魂 · 招</div>
+        </div>
+        <div class="stat">
+          <div class="stat__n">6</div>
+          <div class="stat__l">域界旅途</div>
+        </div>
+        <div class="stat">
+          <div class="stat__n">∞</div>
+          <div class="stat__l">離線可通關</div>
+        </div>
       </div>
+    </div>
+  </section>
 
-      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>探索更多</span></h2>
-      <p class="section-sub">玩法與帳號</p>
-      <div class="card-grid">
-        <a class="card" href="pages/weapons.html">
-          <div class="thumb"><img src="media/gemini/keyart_weapons.png" alt="" /></div>
-          <div class="body">
-            <div class="title">十種武器流派</div>
-            <div class="meta">劍 · 弓 · 法 · 拳 · 斧 · 鎚 · 槍 · 銃 · 鏢 · 晶</div>
-          </div>
+  <!-- 故事切入：交錯大圖 -->
+  <section class="band band--soft-key">
+    <div class="container">
+      <div class="sec-head">
+        <p class="sec-kicker">World</p>
+        <h2 class="sec-title">翠嶺不需要最強的人</h2>
+        <p class="sec-lead">黑焰嗜野心。五方聖獸守塔千年，預言卻指向一隻不慕強權的兔子——真正的力量，往往不在體型。</p>
+      </div>
+      <div class="feature">
+        <div class="feature__media parallax-media" data-parallax="0.08">
+          <img src="media/shots/proof_12_village.png" alt="翠谷村" />
+          <span class="feature__badge">序章 · 翠谷</span>
+        </div>
+        <div class="feature__copy">
+          <h3>從餘燼後的村子出發</h3>
+          <p>火災夜後的拾劍、荒路上的第一戰、騎士堡的鐵匠與星讀——每一步都寫進心，而不是堆數值。</p>
+          <ul class="feature__list">
+            <li>主線敘事優先，日常戰鬥如呼吸</li>
+            <li>聖獸試煉才要求讀招與格擋</li>
+            <li>不連線也能走到法師之塔</li>
+          </ul>
+          <a class="btn btn-primary" href="pages/walkthrough.html">讀世界觀與攻略</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--cream band--edge">
+    <div class="container">
+      <div class="feature feature--flip">
+        <div class="feature__media">
+          <img src="media/gemini/keyart_soul.png" alt="器魂招" />
+          <span class="feature__badge">養成 · 正交</span>
+        </div>
+        <div class="feature__copy">
+          <h3>器 · 魂 · 招，不是選一個</h3>
+          <p>鐵匠釘釘養<strong>器</strong>，星讀觀星養<strong>魂</strong>，旅途戰鬥養<strong>招</strong>。武器流派只決定手感，三線可同時疊、可換刃帶走戰魂。</p>
+          <ul class="feature__list">
+            <li>鍛造失敗不掉階</li>
+            <li>戰魂可嵌可拆</li>
+            <li>十流派各有簽名招</li>
+          </ul>
+          <a class="btn btn-ghost" href="pages/systems.html">看養成設計</a>
+          <a class="btn btn-primary" href="pages/weapons.html" style="margin-left:0.4rem">看十流派</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bento 世界 -->
+  <section class="band band--paper">
+    <div class="container">
+      <div class="sec-head">
+        <p class="sec-kicker">Explore</p>
+        <h2 class="sec-title">六域不是選單，是走得出去的地圖</h2>
+        <p class="sec-lead">騎士堡、霧隱、道場、森林、海岸、法師之塔——岔路自訂順序，Boss 依戰力挑戰。</p>
+      </div>
+      <div class="bento">
+        <a class="bento__item bento__item--lg" href="pages/gallery.html">
+          <img src="media/shots/proof_02_explore_town.png" alt="騎士堡" loading="lazy" />
+          <div class="cap"><strong>騎士堡壘</strong><span>榮譽、演武、釘釘與雷歐</span></div>
         </a>
-        <a class="card" href="pages/equipment.html">
-          <div class="thumb"><img src="media/gemini/keyart_forge.png" alt="" /></div>
-          <div class="body">
-            <div class="title">裝備圖鑑</div>
-            <div class="meta">武器 · 防具 · 飾品 · 鍛造</div>
-          </div>
+        <a class="bento__item bento__item--md" href="pages/gallery.html">
+          <img src="media/shots/proof_04_mist.png" alt="霧隱" loading="lazy" />
+          <div class="cap"><strong>霧隱村</strong><span>真假同色 · 白霧試煉</span></div>
         </a>
-        <a class="card" href="pages/systems.html">
-          <div class="thumb"><img src="media/gemini/keyart_soul.png" alt="" /></div>
-          <div class="body">
-            <div class="title">器 · 魂 · 招</div>
-            <div class="meta">鍛造 · 觀星 · 熟練</div>
-          </div>
+        <a class="bento__item bento__item--sm" href="pages/gallery.html">
+          <img src="media/shots/proof_13_dojo.png" alt="道場" loading="lazy" />
+          <div class="cap"><strong>武鬥道場</strong><span>拳理 · 阿波</span></div>
         </a>
-        <a class="card" href="pages/walkthrough.html">
-          <div class="thumb"><img src="media/gemini/keyart_tower.png" alt="" /></div>
-          <div class="body">
-            <div class="title">完整攻略</div>
-            <div class="meta">十二章 · 圖文互動 · 流派測驗</div>
-          </div>
+        <a class="bento__item bento__item--sm" href="pages/gallery.html">
+          <img src="media/shots/proof_06_forest.png" alt="森林" loading="lazy" />
+          <div class="cap"><strong>遊俠森林</strong><span>等風 · 疾影</span></div>
         </a>
-        <a class="card" href="pages/guide.html">
-          <div class="thumb"><img src="media/gemini/keyart_village.png" alt="" /></div>
-          <div class="body">
-            <div class="title">精簡指南</div>
-            <div class="meta">操作 · 節奏 · Boss 速查</div>
-          </div>
+        <a class="bento__item bento__item--sm" href="pages/gallery.html">
+          <img src="media/shots/proof_19_harbor.png" alt="港" loading="lazy" />
+          <div class="cap"><strong>維京深港</strong><span>浪火 · 石拳</span></div>
         </a>
-        <a class="card" href="pages/account.html">
-          <div class="thumb"><img src="media/gemini/keyart_hero.png" alt="" /></div>
-          <div class="body">
-            <div class="title">帳號與下載</div>
-            <div class="meta">Email · 第三方登入</div>
-          </div>
+        <a class="bento__item bento__item--wide" href="pages/gallery.html">
+          <img src="media/shots/proof_14_tower.png" alt="塔" loading="lazy" />
+          <div class="cap"><strong>法師之塔</strong><span>終焉與回憶層層</span></div>
+        </a>
+        <a class="bento__item bento__item--sm" href="pages/gallery.html">
+          <img src="media/shots/proof_11_battle.png" alt="戰鬥" loading="lazy" />
+          <div class="cap"><strong>即時戰鬥</strong><span>平時呼吸，關鍵心跳</span></div>
         </a>
       </div>
     </div>
-  </main>
+  </section>
+
+  <!-- 橫向軌道：實機 -->
+  <section class="band band--warm band--edge">
+    <div class="container">
+      <div class="sec-head">
+        <p class="sec-kicker">Footage</p>
+        <h2 class="sec-title">實機畫面 · 橫向漫遊</h2>
+        <p class="sec-lead">左右滑動瀏覽；點進圖庫看完整集。</p>
+      </div>
+    </div>
+    <div class="rail-wrap">
+      <div class="rail">
+        <a class="rail__card" href="pages/gallery.html">
+          <img src="media/shots/proof_08_forge.png" alt="鍛造" loading="lazy" />
+          <div class="body"><div class="title">鐵匠工坊</div><p class="meta">釘釘 · 器</p></div>
+        </a>
+        <a class="rail__card" href="pages/gallery.html">
+          <img src="media/shots/proof_10_soul.png" alt="魂" loading="lazy" />
+          <div class="body"><div class="title">觀星與戰魂</div><p class="meta">星讀 · 魂</p></div>
+        </a>
+        <a class="rail__card" href="pages/gallery.html">
+          <img src="media/shots/proof_09_weapon_paths.png" alt="流派" loading="lazy" />
+          <div class="body"><div class="title">十種武器</div><p class="meta">手感各異</p></div>
+        </a>
+        <a class="rail__card" href="pages/gallery.html">
+          <img src="media/shots/proof_03_inventory.png" alt="物品" loading="lazy" />
+          <div class="body"><div class="title">裝備外觀</div><p class="meta">換裝即見</p></div>
+        </a>
+        <a class="rail__card" href="pages/gallery.html">
+          <img src="media/shots/proof_17_starfall.png" alt="星落" loading="lazy" />
+          <div class="body"><div class="title">星落平原</div><p class="meta">秘境與星屑</p></div>
+        </a>
+        <a class="rail__card" href="pages/gallery.html">
+          <img src="media/shots/proof_05_crossroads.png" alt="岔路" loading="lazy" />
+          <div class="body"><div class="title">六域岔路</div><p class="meta">自由選序</p></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 開始旅程 CTA -->
+  <section class="band band--paper">
+    <div class="container">
+      <div class="cta-finale">
+        <img class="cta-finale__bg" src="media/gemini/keyart_tower.png" alt="" />
+        <div class="cta-finale__shade"></div>
+        <h2>塔還在。你來不來？</h2>
+        <p>免費下載 · Windows / macOS / Linux。主線可離線；帳號可選。</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="pages/download.html">立即下載</a>
+          <a class="btn btn-ghost" href="pages/account.html" style="color:#fff;border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.1)">建立帳號</a>
+          <a class="btn btn-ghost" href="pages/guide.html" style="color:#fff;border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.1)">快速指南</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <script src="js/site.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* 共用導覽、頁尾、進場動效 */
+/* 共用導覽、頁尾、全站動效（捲動 / 游標 / 進場） */
 (function () {
   var cfg = window.BRAVESOUL || {};
   var brand = cfg.name || "勇者之魂";
@@ -18,12 +18,29 @@
   var active = document.body.getAttribute("data-page") || "home";
   var reduceMotion =
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fineHover = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
   function el(html) {
     var t = document.createElement("template");
     t.innerHTML = html.trim();
     return t.content.firstChild;
   }
+
+  /* 確保 sections.css 有載入（舊頁沒手寫 link 時補上） */
+  (function ensureSectionsCss() {
+    var href = depth + "/css/sections.css";
+    var found = false;
+    Array.prototype.forEach.call(document.styleSheets, function () {});
+    Array.prototype.forEach.call(document.querySelectorAll('link[rel="stylesheet"]'), function (l) {
+      if ((l.getAttribute("href") || "").indexOf("sections.css") >= 0) found = true;
+    });
+    if (!found) {
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = href;
+      document.head.appendChild(link);
+    }
+  })();
 
   var nav = el(
     '<nav class="gnb" aria-label="主選單"><div class="container gnb-inner">' +
@@ -36,7 +53,7 @@
       '<div class="gnb-actions">' +
       '<a class="btn btn-primary" href="' +
       depth +
-      '/pages/account.html">開始旅程</a></div>' +
+      '/pages/download.html">下載</a></div>' +
       "</div></nav>"
   );
   document.body.insertBefore(nav, document.body.firstChild);
@@ -62,6 +79,8 @@
       depth +
       '/index.html">首頁</a> · <a href="' +
       depth +
+      '/pages/download.html">下載</a> · <a href="' +
+      depth +
       '/pages/account.html">帳號</a>' +
       social +
       "</div>" +
@@ -69,28 +88,91 @@
   );
   document.body.appendChild(foot);
 
-  /* ── 導覽列滾動陰影 ── */
+  /* 頂部捲動進度 */
+  var bar = document.createElement("div");
+  bar.className = "scroll-progress";
+  document.body.appendChild(bar);
+
+  /* 游標光暈 */
+  var glow = null;
+  if (fineHover && !reduceMotion) {
+    glow = document.createElement("div");
+    glow.className = "cursor-glow";
+    document.body.appendChild(glow);
+    var gx = 0,
+      gy = 0,
+      tx = 0,
+      ty = 0;
+    document.addEventListener(
+      "pointermove",
+      function (e) {
+        tx = e.clientX;
+        ty = e.clientY;
+        glow.classList.add("is-on");
+      },
+      { passive: true }
+    );
+    document.addEventListener(
+      "pointerleave",
+      function () {
+        glow.classList.remove("is-on");
+      },
+      { passive: true }
+    );
+    function tickGlow() {
+      gx += (tx - gx) * 0.12;
+      gy += (ty - gy) * 0.12;
+      glow.style.transform = "translate(" + gx + "px," + gy + "px)";
+      requestAnimationFrame(tickGlow);
+    }
+    requestAnimationFrame(tickGlow);
+  }
+
   function onScroll() {
     if (window.scrollY > 8) nav.classList.add("is-scrolled");
     else nav.classList.remove("is-scrolled");
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - doc.clientHeight;
+    var p = max > 0 ? (window.scrollY / max) * 100 : 0;
+    bar.style.width = p + "%";
   }
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
 
-  /* ── 進場揭示：卡片／區塊淡入上浮 ── */
+  /* 視差 */
+  function setupParallax() {
+    if (reduceMotion) return;
+    var nodes = document.querySelectorAll(".parallax-media");
+    if (!nodes.length) return;
+    function update() {
+      var vh = window.innerHeight;
+      nodes.forEach(function (n) {
+        var speed = parseFloat(n.getAttribute("data-parallax") || "0.1");
+        var r = n.getBoundingClientRect();
+        var mid = r.top + r.height / 2 - vh / 2;
+        var y = mid * speed * -0.15;
+        n.style.transform = "translate3d(0," + y.toFixed(1) + "px,0) scale(1.05)";
+      });
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+  }
+
   function setupReveal() {
+    document.querySelectorAll(".band").forEach(function (b) {
+      if (!b.classList.contains("reveal-band")) b.classList.add("reveal-band");
+    });
     var candidates = document.querySelectorAll(
       "main.page .section-h2, main.page .section-sub, main.page .card-grid > *, " +
         "main.page .weapon-grid > *, main.page .sys-grid > *, main.page .equip-grid > *, " +
-        "main.page .gallery-grid > *, main.page .panel, main.page .wt-layout, " +
-        "main.page .card-grid, main.page .weapon-grid"
+        "main.page .gallery-grid > *, main.page .panel, " +
+        ".feature, .pillar, .bento__item, .tl-item, .stat, .keycap, .platform, " +
+        ".sec-head, .weapon-spotlight, .gallery-hero, .cta-finale, .rail__card"
     );
     candidates.forEach(function (node) {
       if (!node.classList.contains("reveal")) node.classList.add("reveal");
     });
-
-    /* 網格子項錯開 */
-    document.querySelectorAll(".card-grid, .weapon-grid, .sys-grid, .equip-grid, .gallery-grid").forEach(function (grid) {
+    document.querySelectorAll(".card-grid, .weapon-grid, .sys-grid, .equip-grid, .gallery-grid, .bento, .stats-row, .keys, .platform-stage").forEach(function (grid) {
       grid.classList.add("reveal-stagger");
       Array.prototype.forEach.call(grid.children, function (child) {
         if (!child.classList.contains("reveal")) child.classList.add("reveal");
@@ -98,7 +180,7 @@
     });
 
     if (reduceMotion || !("IntersectionObserver" in window)) {
-      document.querySelectorAll(".reveal").forEach(function (n) {
+      document.querySelectorAll(".reveal, .reveal-band").forEach(function (n) {
         n.classList.add("is-in");
       });
       return;
@@ -113,24 +195,31 @@
           }
         });
       },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }
+      { rootMargin: "0px 0px -6% 0px", threshold: 0.06 }
     );
-    document.querySelectorAll(".reveal").forEach(function (n) {
+    document.querySelectorAll(".reveal, .reveal-band").forEach(function (n) {
       io.observe(n);
     });
   }
 
-  /* ── 滑鼠微傾（桌面卡片，很克制）── */
   function setupTilt() {
-    if (reduceMotion || window.matchMedia("(hover: none)").matches) return;
-    var cards = document.querySelectorAll("a.card, .weapon-card, .sys-card, .equip-card");
+    if (reduceMotion || !fineHover) return;
+    var cards = document.querySelectorAll(
+      "a.card, .weapon-card, .sys-card, .equip-card, .platform, .rail__card, .bento__item"
+    );
     cards.forEach(function (card) {
+      if (card.__tiltBound) return;
+      card.__tiltBound = true;
       card.addEventListener("pointermove", function (e) {
         var r = card.getBoundingClientRect();
         var x = (e.clientX - r.left) / r.width - 0.5;
         var y = (e.clientY - r.top) / r.height - 0.5;
         card.style.transform =
-          "translateY(-6px) rotateX(" + (-y * 4).toFixed(2) + "deg) rotateY(" + (x * 5).toFixed(2) + "deg)";
+          "translateY(-6px) rotateX(" +
+          (-y * 5).toFixed(2) +
+          "deg) rotateY(" +
+          (x * 6).toFixed(2) +
+          "deg)";
         card.classList.add("is-hover");
       });
       card.addEventListener("pointerleave", function () {
@@ -138,19 +227,25 @@
         card.classList.remove("is-hover");
       });
     });
-    /* 透視父層 */
-    document.querySelectorAll(".card-grid, .weapon-grid, .sys-grid, .equip-grid").forEach(function (g) {
-      g.style.perspective = "900px";
+    document.querySelectorAll(".card-grid, .weapon-grid, .sys-grid, .equip-grid, .bento, .platform-stage, .rail").forEach(function (g) {
+      g.style.perspective = "1000px";
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function () {
-      setupReveal();
-      setupTilt();
-    });
-  } else {
+  function boot() {
     setupReveal();
     setupTilt();
+    setupParallax();
+  }
+
+  window.BS_refreshMotion = function () {
+    setupReveal();
+    setupTilt();
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
   }
 })();

@@ -7,6 +7,7 @@
   <meta name="description" content="勇者之魂：器、魂、招，三條能同時養的線。" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/site.css" />
+  <link rel="stylesheet" href="../css/sections.css" />
   <script src="../config.js"></script>
 </head>
 <body data-page="systems">
@@ -14,42 +15,103 @@
     <div class="container">
       <div class="breadcrumb"><a href="../index.html">首頁</a> / 養成</div>
       <h1>器 · 魂 · 招</h1>
-      <p><strong>鐵匠養器 · 觀星養魂 · 旅途養招</strong>。跟你選哪種武器流派互不影響，可以自由疊加。</p>
+      <p><strong>鐵匠養器 · 觀星養魂 · 旅途養招</strong>。跟武器流派正交，可自由疊加、換刃帶走。</p>
     </div>
   </header>
-  <main class="page">
-    <div class="container">
-      <div class="sys-grid">
-        <article class="sys-card">
-          <img src="../media/gemini/keyart_forge.png" alt="鐵匠鍛造" />
-          <div class="body">
-            <h3>器 · 鍛造升階</h3>
-            <p>找<strong>釘釘</strong>鍛造武器。材料來自野外掉落與<strong>琥珀材料行</strong>；失敗不會掉階。</p>
-          </div>
-        </article>
-        <article class="sys-card">
-          <img src="../media/gemini/keyart_starfall.png" alt="星途觀星" />
-          <div class="body">
-            <h3>魂 · 星途觀星</h3>
-            <p>路上收集<strong>星屑</strong>，找<strong>星讀</strong>舉行觀星，獲得可嵌可拆的戰魂，調整暴擊、攻防等傾向。</p>
-          </div>
-        </article>
-        <article class="sys-card">
-          <img src="../media/gemini/keyart_leo.png" alt="旅途養招" />
-          <div class="body">
-            <h3>招 · 技能熟練</h3>
-            <p>戰鬥與演武場累積熟練、自動升級。不同武器流派會解鎖對應招式線。</p>
-          </div>
-        </article>
-      </div>
 
-      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>怎麼一起用？</span></h2>
-      <div class="panel">
-        <p>例如：選<strong>弓</strong>（遠距）＋戰魂偏暴擊＋鍛造升階＋提升招式熟練。之後換槍，戰魂仍可拆到新武器上。</p>
-        <p style="margin-bottom:0"><a class="btn btn-primary" href="weapons.html">看十種武器流派</a></p>
+  <section class="band band--soft-key">
+    <div class="container">
+      <div class="sec-head">
+        <p class="sec-kicker">Philosophy</p>
+        <h2 class="sec-title">不是三選一，是三條同時走</h2>
+        <p class="sec-lead">很多 RPG 逼你專精一條。這裡故意把「手感」與「成長」拆開——選弓只影響站位與招式線，戰魂與鍛造永遠可調。</p>
+      </div>
+      <div class="stats-row" style="margin-bottom:0">
+        <div class="stat"><div class="stat__n">器</div><div class="stat__l">鍛造升階</div></div>
+        <div class="stat"><div class="stat__n">魂</div><div class="stat__l">觀星入魂</div></div>
+        <div class="stat"><div class="stat__n">招</div><div class="stat__l">熟練成長</div></div>
+        <div class="stat"><div class="stat__n">十</div><div class="stat__l">武器流派</div></div>
       </div>
     </div>
-  </main>
+  </section>
+
+  <section class="band band--cream">
+    <div class="container">
+      <article class="pillar">
+        <div class="pillar__media">
+          <img src="../media/gemini/keyart_forge.png" alt="鍛造" />
+        </div>
+        <div class="pillar__body">
+          <div class="pillar__num">01 · 器</div>
+          <h3>鐵匠釘釘 · 鍛造升階</h3>
+          <p>材料來自野外與琥珀材料行。失敗<strong>不會掉階</strong>——只耗料與金幣。主手優先，大 Boss 前檢查一輪防具。</p>
+          <p style="margin-top:1rem;margin-bottom:0">
+            <a class="btn btn-primary" href="equipment.html">裝備圖鑑</a>
+          </p>
+        </div>
+      </article>
+      <article class="pillar">
+        <div class="pillar__media">
+          <img src="../media/gemini/keyart_starfall.png" alt="觀星" />
+        </div>
+        <div class="pillar__body">
+          <div class="pillar__num">02 · 魂</div>
+          <h3>星讀 · 觀星凝魂</h3>
+          <p>收集星屑，舉行觀星，得到可嵌可拆的戰魂。偏暴擊、血防、技能——依下一場試煉輪換，不要一套用到塔頂。</p>
+        </div>
+      </article>
+      <article class="pillar">
+        <div class="pillar__media">
+          <img src="../media/gemini/keyart_leo.png" alt="招式" />
+        </div>
+        <div class="pillar__body">
+          <div class="pillar__num">03 · 招</div>
+          <h3>旅途與演武場 · 技能熟練</h3>
+          <p>戰鬥自動累積；危急恢復、滿怒大招、各流派簽名技。換流派後第一件事：回演武場熱手。</p>
+          <p style="margin-top:1rem;margin-bottom:0">
+            <a class="btn btn-ghost" href="weapons.html">十種武器流派</a>
+          </p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="band band--paper band--edge">
+    <div class="container">
+      <div class="feature">
+        <div class="feature__media">
+          <img src="../media/shots/proof_09_weapon_paths.png" alt="流派" />
+          <span class="feature__badge">正交設計</span>
+        </div>
+        <div class="feature__copy">
+          <h3>怎麼一起用？</h3>
+          <p>例：選<strong>弓</strong>（遠距手感）＋暴擊向戰魂＋鍛造升階＋招式熟練。之後改槍，戰魂可拆到新武器——養成不會整組作廢。</p>
+          <ul class="feature__list">
+            <li>流派 = 手感與被動</li>
+            <li>器魂招 = 數值與節奏</li>
+            <li>秘境魂器 = 後期調味</li>
+          </ul>
+          <a class="btn btn-primary" href="walkthrough.html">攻略：三重養成章</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--warm">
+    <div class="container">
+      <div class="cta-finale">
+        <img class="cta-finale__bg" src="../media/gemini/keyart_forge.png" alt="" />
+        <div class="cta-finale__shade"></div>
+        <h2>鍛一階，再上路</h2>
+        <p>下載後先進騎士堡找釘釘與星讀——養成的門就在那裡。</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="download.html">下載遊戲</a>
+          <a class="btn btn-ghost" href="guide.html" style="color:#fff;border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.1)">前 30 分鐘</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <script src="../js/site.js"></script>
 </body>
 </html>

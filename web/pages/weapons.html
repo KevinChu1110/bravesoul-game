@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>武器流派 — 勇者之魂</title>
   <meta name="description" content="勇者之魂十種武器流派：劍弓法拳斧鎚槍銃鏢晶。" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/site.css" />
+  <link rel="stylesheet" href="../css/sections.css" />
   <script src="../config.js"></script>
 </head>
 <body data-page="weapons">
@@ -15,31 +15,68 @@
     <div class="container">
       <div class="breadcrumb"><a href="../index.html">首頁</a> / 武器流派</div>
       <h1>十種武器流派</h1>
-      <p>選的是<strong>武器手感</strong>，不是鎖死職業。可與器／魂／招並存；旅途中也能換流派。</p>
+      <p>選的是<strong>武器手感</strong>，不是鎖死職業。可與器／魂／招並存；旅途中也能換刃。</p>
     </div>
   </header>
-  <main class="page">
-    <div class="container">
-      <h2 class="section-h2"><span class="accent"></span><span>和養成怎麼疊？</span></h2>
-      <div class="panel" style="margin-bottom:1.5rem">
-        <table>
-          <thead><tr><th>系統</th><th>作用</th></tr></thead>
-          <tbody>
-            <tr><td><strong>武器流派</strong></td><td>劍／弓／法／拳／斧／鎚／槍／銃／鏢／水晶 — 手感與被動</td></tr>
-            <tr><td><strong>器</strong></td><td>鐵匠鍛造、升階、裝備素質</td></tr>
-            <tr><td><strong>魂</strong></td><td>觀星凝出戰魂，各有偏重的屬性，可以拆下來換</td></tr>
-            <tr><td><strong>招</strong></td><td>技能習得與熟練升級</td></tr>
-          </tbody>
-        </table>
-      </div>
 
-      <h2 class="section-h2"><span class="accent"></span><span>流派一覽</span></h2>
-      <p class="section-sub">遊戲內鍛造後可選擇</p>
+  <section class="band band--soft-key">
+    <div class="container">
+      <div class="weapon-spotlight">
+        <div class="mark" style="background:linear-gradient(145deg,#e4849c,#a83e55)">刃</div>
+        <div>
+          <p class="sec-kicker" style="margin:0 0 0.35rem">不是職業表</p>
+          <h2 class="sec-title" style="font-size:1.35rem;margin:0 0 0.4rem">流派決定「你怎麼打」</h2>
+          <p class="sec-lead" style="font-size:0.98rem">遠距、坦克、爆發、看破——挑一種脾氣。數值與戰魂仍由器／魂／招養。</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature__media">
+          <img src="../media/gemini/keyart_weapons.png" alt="武器" />
+          <span class="feature__badge">十刃</span>
+        </div>
+        <div class="feature__copy">
+          <h3>和養成怎麼疊？</h3>
+          <ul class="feature__list">
+            <li><strong>武器流派</strong> — 手感、被動、簽名招</li>
+            <li><strong>器</strong> — 鍛造、升階、裝備素質</li>
+            <li><strong>魂</strong> — 觀星戰魂，可拆換</li>
+            <li><strong>招</strong> — 技能熟練與優先技</li>
+          </ul>
+          <a class="btn btn-ghost" href="systems.html">養成詳解</a>
+          <a class="btn btn-primary" href="walkthrough.html" style="margin-left:0.4rem">流派測驗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--cream band--edge">
+    <div class="container">
+      <div class="sec-head">
+        <p class="sec-kicker">Catalog</p>
+        <h2 class="sec-title">流派一覽</h2>
+        <p class="sec-lead">遊戲內鍛造後可選。滑過卡片看優缺點。</p>
+      </div>
       <div class="weapon-grid" id="weapon-grid">
         <p class="muted">載入中…</p>
       </div>
     </div>
-  </main>
+  </section>
+
+  <section class="band band--paper">
+    <div class="container">
+      <div class="cta-finale">
+        <img class="cta-finale__bg" src="../media/shots/proof_09_weapon_paths.png" alt="" />
+        <div class="cta-finale__shade"></div>
+        <h2>不確定選哪個？</h2>
+        <p>完整攻略有四題測驗，依你的站位與風險偏好推薦第一流派。</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="walkthrough.html#ch5">去做流派測驗</a>
+          <a class="btn btn-ghost" href="download.html" style="color:#fff;border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.1)">下載試玩</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <script src="../js/site.js"></script>
   <script>
     fetch("../data/weapon_classes.json")
@@ -65,10 +102,11 @@
             "</div>";
           root.appendChild(card);
         });
+        if (window.BS_refreshMotion) window.BS_refreshMotion();
       })
       .catch(function () {
         document.getElementById("weapon-grid").innerHTML =
-          '<p class="msg err">無法載入流派資料。請確認 <code>web/data/weapon_classes.json</code> 存在。</p>';
+          '<p class="msg err">無法載入流派資料。</p>';
       });
   </script>
 </body>

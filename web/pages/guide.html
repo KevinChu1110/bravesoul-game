@@ -7,6 +7,7 @@
   <meta name="description" content="勇者之魂新手節奏、操作與 Boss 提示。" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/site.css" />
+  <link rel="stylesheet" href="../css/sections.css" />
   <script src="../config.js"></script>
 </head>
 <body data-page="guide">
@@ -14,68 +15,136 @@
     <div class="container">
       <div class="breadcrumb"><a href="../index.html">首頁</a> / 指南</div>
       <h1>遊戲指南</h1>
-      <p>起步節奏、操作與試煉提示。需要圖文長篇請看完整攻略。</p>
+      <p>起步節奏、操作與試煉提示。長篇圖文請看完整攻略。</p>
     </div>
   </header>
-  <main class="page">
+
+  <section class="band band--soft-key">
     <div class="container">
-      <div class="panel" style="margin-bottom:1.5rem;display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;justify-content:space-between">
-        <div>
-          <strong style="font-size:1.05rem">完整攻略（十二章）</strong>
-          <p style="margin:0.25rem 0 0;color:var(--ink-soft)">世界觀 · 流派測驗 · 六域 · Boss 摺疊 · 閱讀進度追蹤</p>
+      <div class="feature">
+        <div class="feature__media">
+          <img src="../media/gemini/keyart_tower.png" alt="攻略" />
+          <span class="feature__badge">十二章</span>
         </div>
-        <a class="btn btn-primary" href="walkthrough.html">打開完整攻略</a>
+        <div class="feature__copy">
+          <h3>完整攻略 · 圖文互動</h3>
+          <p>世界觀、流派測驗、六域、Boss 摺疊、閱讀進度追蹤。建議新玩家先看前三章。</p>
+          <a class="btn btn-primary" href="walkthrough.html">打開完整攻略</a>
+        </div>
       </div>
+    </div>
+  </section>
 
-      <h2 class="section-h2"><span class="accent"></span><span>前 30 分鐘</span></h2>
-      <div class="panel">
-        <ol>
-          <li>翠谷拾劍 → 荒路首戰</li>
-          <li>騎士堡找<strong>釘釘</strong>初鍛 → 選擇武器流派</li>
-          <li>找<strong>星讀</strong>學會觀星</li>
-          <li>演武場練功、野外收集材料</li>
-          <li>鍛造後可走六域岔路；Boss 依戰力自選順序</li>
-        </ol>
+  <section class="band band--cream">
+    <div class="container">
+      <div class="sec-head">
+        <p class="sec-kicker">First 30 min</p>
+        <h2 class="sec-title">前 30 分鐘時間線</h2>
+        <p class="sec-lead">照順序走完，通常就能穩進六域岔路。</p>
       </div>
-
-      <h2 class="section-h2" style="margin-top:1.5rem"><span class="accent"></span><span>操作</span></h2>
-      <div class="panel">
-        <table>
-          <thead><tr><th>鍵</th><th>作用</th></tr></thead>
-          <tbody>
-            <tr><td>WASD / 方向鍵</td><td>移動</td></tr>
-            <tr><td>E / 空白</td><td>互動</td></tr>
-            <tr><td><strong>J</strong></td><td>格擋／躍出／連招</td></tr>
-            <tr><td>Esc</td><td>選單 · 裝備 · 連線</td></tr>
-            <tr><td>1–8 / I</td><td>快捷欄 · 物品欄</td></tr>
-          </tbody>
-        </table>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot">1</div>
+          <div class="tl-body">
+            <h3>翠谷拾劍</h3>
+            <p>聽完開場、拿到第一把武器，熟悉移動與對話。</p>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot">2</div>
+          <div class="tl-body">
+            <h3>荒路首戰</h3>
+            <p>練普攻與節奏；不必硬衝，可繞道。</p>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot">3</div>
+          <div class="tl-body">
+            <h3>釘釘初鍛 · 選流派</h3>
+            <p>騎士堡找鐵匠升一階，再選十種武器之一。</p>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot">4</div>
+          <div class="tl-body">
+            <h3>星讀觀星</h3>
+            <p>學會魂系統，之後星屑才有去處。</p>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot">5</div>
+          <div class="tl-body">
+            <h3>演武場 · 六域岔路</h3>
+            <p>安全練招後出發；Boss 依戰力自訂順序。</p>
+          </div>
+        </div>
       </div>
+    </div>
+  </section>
 
-      <h2 class="section-h2" style="margin-top:1.5rem"><span class="accent"></span><span>試煉提示</span></h2>
-      <div class="panel">
-        <table>
-          <thead><tr><th>對手</th><th>記住</th></tr></thead>
-          <tbody>
-            <tr><td>雷歐</td><td>王者斬用 J 格擋</td></tr>
-            <tr><td>白霧</td><td>等本體發白再打</td></tr>
-            <tr><td>阿波</td><td>技能灌破防</td></tr>
-            <tr><td>疾影</td><td>等停拍，別追殘影</td></tr>
-            <tr><td>石拳</td><td>對撞剝岩甲 · 落岩進安全區</td></tr>
-          </tbody>
-        </table>
+  <section class="band band--paper band--edge">
+    <div class="container">
+      <div class="sec-head">
+        <p class="sec-kicker">Controls</p>
+        <h2 class="sec-title">操作</h2>
+        <p class="sec-lead">手把：搖桿移動 · A 互動 · B／肩鍵格擋 · Start 選單</p>
       </div>
+      <div class="keys">
+        <div class="keycap"><kbd>WASD</kbd><span>移動</span></div>
+        <div class="keycap"><kbd>E</kbd><span>互動 · 對話</span></div>
+        <div class="keycap"><kbd>J</kbd><span>格擋／連招（Boss 關鍵）</span></div>
+        <div class="keycap"><kbd>Esc</kbd><span>選單 · 裝備 · 設定</span></div>
+        <div class="keycap"><kbd>I · 1–8</kbd><span>物品欄 · 快捷</span></div>
+        <div class="keycap"><kbd>F11</kbd><span>全螢幕</span></div>
+      </div>
+    </div>
+  </section>
 
-      <h2 class="section-h2" style="margin-top:1.5rem"><span class="accent"></span><span>延伸</span></h2>
+  <section class="band band--warm">
+    <div class="container">
+      <div class="sec-head">
+        <p class="sec-kicker">Boss</p>
+        <h2 class="sec-title">試煉一句話</h2>
+      </div>
+      <div class="bento">
+        <div class="bento__item bento__item--sm" style="min-height:160px;background:linear-gradient(145deg,#2b2630,#3a2430);display:grid;place-items:center;padding:1.25rem;text-align:center;color:#fff">
+          <div><strong style="font-size:1.15rem">雷歐</strong><br /><span style="opacity:.85">王者斬用 J 格擋</span></div>
+        </div>
+        <div class="bento__item bento__item--sm" style="min-height:160px;background:linear-gradient(145deg,#2b2630,#24303a);display:grid;place-items:center;padding:1.25rem;text-align:center;color:#fff">
+          <div><strong style="font-size:1.15rem">白霧</strong><br /><span style="opacity:.85">等本體發白再打</span></div>
+        </div>
+        <div class="bento__item bento__item--sm" style="min-height:160px;background:linear-gradient(145deg,#2b2630,#303024);display:grid;place-items:center;padding:1.25rem;text-align:center;color:#fff">
+          <div><strong style="font-size:1.15rem">阿波</strong><br /><span style="opacity:.85">技能灌破防</span></div>
+        </div>
+        <div class="bento__item bento__item--sm" style="min-height:160px;background:linear-gradient(145deg,#2b2630,#243a28);display:grid;place-items:center;padding:1.25rem;text-align:center;color:#fff">
+          <div><strong style="font-size:1.15rem">疾影</strong><br /><span style="opacity:.85">等停拍，別追影</span></div>
+        </div>
+        <div class="bento__item bento__item--sm" style="min-height:160px;background:linear-gradient(145deg,#2b2630,#3a3024);display:grid;place-items:center;padding:1.25rem;text-align:center;color:#fff">
+          <div><strong style="font-size:1.15rem">石拳</strong><br /><span style="opacity:.85">剝岩甲 · 落岩進安全區</span></div>
+        </div>
+        <div class="bento__item bento__item--sm" style="min-height:160px;background:linear-gradient(145deg,#c25e73,#a83e55);display:grid;place-items:center;padding:1.25rem;text-align:center;color:#fff">
+          <div><strong style="font-size:1.15rem">詳解</strong><br /><span style="opacity:.9">攻略第 8 章</span></div>
+        </div>
+      </div>
+      <p style="margin-top:1.25rem">
+        <a class="btn btn-primary" href="walkthrough.html#ch8">Boss 完整攻略</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--paper">
+    <div class="container">
+      <div class="ornament">繼續探索</div>
       <div class="card-grid">
         <a class="card" href="walkthrough.html"><div class="body"><div class="title">完整攻略</div><div class="meta">十二章圖文互動</div></div></a>
         <a class="card" href="weapons.html"><div class="body"><div class="title">武器流派</div><div class="meta">十種優缺點</div></div></a>
         <a class="card" href="equipment.html"><div class="body"><div class="title">裝備圖鑑</div><div class="meta">武器 · 防具 · 鍛造</div></div></a>
-        <a class="card" href="systems.html"><div class="body"><div class="title">器魂招</div><div class="meta">三條養成線</div></div></a>
-        <a class="card" href="account.html"><div class="body"><div class="title">帳號</div><div class="meta">登入與下載</div></div></a>
+        <a class="card" href="systems.html"><div class="body"><div class="title">器魂招</div><div class="meta">三重養成</div></div></a>
+        <a class="card" href="download.html"><div class="body"><div class="title">下載</div><div class="meta">Win · Mac · Linux</div></div></a>
       </div>
     </div>
-  </main>
+  </section>
+
   <script src="../js/site.js"></script>
 </body>
 </html>
