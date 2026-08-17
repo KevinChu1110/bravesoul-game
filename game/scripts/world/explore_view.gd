@@ -47,6 +47,39 @@ var _wall_map: TileMapLayer  ## 牆／實心視覺
 ## 有手繪底圖時不畫牆磚 —— 底圖已經畫好房子與岩石了，再鋪一層灰色牆磚
 ## 就會在畫面上多出一堆格線方框（翠谷村左下那棟屋、右上帳篷就是這樣來的）。
 var _has_scenic_bg := false
+## 目前地圖底圖的 art id —— walkmask 是以 art 為 key（多張地圖共用同一張底圖）
+var _art_id := ""
+
+## 可走區遮罩：art id → {"walk": [PackedVector2Array...], "block": [...]}
+## 正規化座標（0..1）相對底圖左上角。載一次快取。
+static var _walkmask_cache: Dictionary = {}
+static var _walkmask_loaded := false
+
+
+static func _walkmask_for(art: String) -> Dictionary:
+	if not _walkmask_loaded:
+		_walkmask_loaded = true
+		var f := FileAccess.open("res://data/walkmask.json", FileAccess.READ)
+		if f != null:
+			var raw = JSON.parse_string(f.get_as_text())
+			if typeof(raw) == TYPE_DICTIONARY:
+				for k in (raw as Dictionary).keys():
+					if str(k).begins_with("_"):
+						continue
+					var entry = raw[k]
+					if typeof(entry) != TYPE_DICTIONARY:
+						continue
+					var out := {"walk": [], "block": []}
+					for field in ["walk", "block"]:
+						for poly in (entry as Dictionary).get(field, []):
+							var pts := PackedVector2Array()
+							for pt in poly:
+								if typeof(pt) == TYPE_ARRAY and (pt as Array).size() >= 2:
+									pts.append(Vector2(float(pt[0]), float(pt[1])))
+							if pts.size() >= 3:
+								out[field].append(pts)
+					_walkmask_cache[str(k)] = out
+	return _walkmask_cache.get(art, {})
 var _banner: TextureRect
 var _vignette: ColorRect
 var _scroll: Control  ## 攝影機層：整塊世界內容
@@ -595,6 +628,7 @@ func _apply_map_art(id: String) -> void:
 					break
 	var has_scenic_bg := bg_tex != null
 	_has_scenic_bg = has_scenic_bg
+	_art_id = art_id
 	if has_scenic_bg:
 		## 完整顯示手繪底圖。必須 STRETCH_SCALE 對齊 FLOOR_RECT，
 		## 否則 COVERED 裁切會讓美術建築與 entity／碰撞座標錯位（看起來像穿模）。
@@ -781,9 +815,38 @@ func _rebuild_collision() -> void:
 		## 碰撞偏上：只擋軀幹，底部 12px 可站
 		var r := Rect2(ox + 4.0, oy + 4.0, maxf(12.0, hit_w - 8.0), maxf(12.0, hit_h * 0.62))
 		_stamp_solid_rect(r, paint)
-	## 3) 風景圖額外結構擋塊（減少走進畫上的山／屋）
-	for r2 in _scenic_blockers(map_id):
-		_stamp_solid_rect(r2, false)
+	## 3) 可走區：有 walkmask 就用它，否則退回舊的百分比方塊
+	##
+	## 舊做法是每張地圖手寫一兩個 Rect2 百分比（「上緣 8% 是遠山」），
+	## 跟畫面上實際畫了什麼幾乎無關 —— 兔子照樣走上城牆與屋頂。
+	## walkmask 是照著底圖描出來的多邊形，能站的地方才是能站的地方。
+	var mask := _walkmask_for(_art_id)
+	var walk_polys: Array = mask.get("walk", [])
+	if walk_polys.is_empty():
+		for r2 in _scenic_blockers(map_id):
+			_stamp_solid_rect(r2, false)
+	else:
+		## 逐格判定：格心不在任何 walk 多邊形內 → 實心
+		for cy in _map_rows:
+			for cx in _map_cols:
+				var uv := Vector2(
+					(float(cx) + 0.5) / float(maxi(1, _map_cols)),
+					(float(cy) + 0.5) / float(maxi(1, _map_rows)))
+				var inside := false
+				for poly in walk_polys:
+					if Geometry2D.is_point_in_polygon(uv, poly):
+						inside = true
+						break
+				if not inside:
+					_set_solid(Vector2i(cx, cy), true, false)
+		for poly in mask.get("block", []):
+			for cy in _map_rows:
+				for cx in _map_cols:
+					var uv2 := Vector2(
+						(float(cx) + 0.5) / float(maxi(1, _map_cols)),
+						(float(cy) + 0.5) / float(maxi(1, _map_rows)))
+					if Geometry2D.is_point_in_polygon(uv2, poly):
+						_set_solid(Vector2i(cx, cy), true, false)
 	## 確保玩家出生點不在實心上
 	_unstuck_player()
 
