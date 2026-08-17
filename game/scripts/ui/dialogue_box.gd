@@ -58,13 +58,13 @@ func _apply_look() -> void:
 		panel.offset_left = 48.0
 		panel.offset_right = -48.0
 	if speaker_label:
-		speaker_label.add_theme_color_override("font_color", UiStyle.KEY_STRONG)
+		speaker_label.add_theme_color_override("font_color", Color(0.95, 0.78, 0.48))
 		speaker_label.add_theme_font_size_override("font_size", 15)
 	if body_label:
-		body_label.add_theme_color_override("default_color", UiStyle.INK)
+		body_label.add_theme_color_override("default_color", Color(0.95, 0.93, 0.88))
 		body_label.add_theme_font_size_override("normal_font_size", 15)
 	if continue_hint:
-		continue_hint.add_theme_color_override("font_color", UiStyle.INK_FAINT)
+		continue_hint.add_theme_color_override("font_color", Color(0.70, 0.65, 0.60))
 		continue_hint.add_theme_font_size_override("font_size", 11)
 		continue_hint.text = "▼ Space / E"
 	if accent:

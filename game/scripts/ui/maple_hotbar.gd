@@ -55,15 +55,15 @@ func _build() -> void:
 	_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_bar.mouse_filter = Control.MOUSE_FILTER_STOP
 	var bs := StyleBoxFlat.new()
-	bs.bg_color = Color(1, 1, 1, 0.94)
-	bs.border_color = UiStyle.LINE
+	bs.bg_color = Color(0.13, 0.12, 0.15, 0.92)
+	bs.border_color = Color(0.75, 0.60, 0.45, 0.85)
 	bs.set_border_width_all(1)
 	bs.set_corner_radius_all(10)
 	bs.content_margin_left = 8
 	bs.content_margin_right = 8
 	bs.content_margin_top = 6
 	bs.content_margin_bottom = 6
-	bs.shadow_color = Color(0.17, 0.16, 0.20, 0.12)
+	bs.shadow_color = Color(0.05, 0.04, 0.06, 0.35)
 	bs.shadow_size = 6
 	bs.shadow_offset = Vector2(0, 2)
 	_bar.add_theme_stylebox_override("panel", bs)
@@ -105,7 +105,7 @@ func _build() -> void:
 		glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		glyph.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		glyph.add_theme_font_size_override("font_size", 16)
-		glyph.add_theme_color_override("font_color", UiStyle.INK)
+		glyph.add_theme_color_override("font_color", Color(0.95, 0.90, 0.85))
 		glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		stack.add_child(glyph)
 		_glyphs.append(glyph)
@@ -116,8 +116,8 @@ func _build() -> void:
 		cnt.offset_top = -16
 		cnt.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		cnt.add_theme_font_size_override("font_size", 10)
-		cnt.add_theme_color_override("font_color", UiStyle.INK)
-		cnt.add_theme_color_override("font_shadow_color", Color(1, 1, 1, 0.8))
+		cnt.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
+		cnt.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 		cnt.add_theme_constant_override("shadow_offset_x", 1)
 		cnt.add_theme_constant_override("shadow_offset_y", 1)
 		cnt.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -127,10 +127,10 @@ func _build() -> void:
 		var key := Label.new()
 		key.text = str(i + 1)
 		key.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-		key.offset_left = 2
-		key.offset_top = 0
+		key.offset_left = 3
+		key.offset_top = 1
 		key.add_theme_font_size_override("font_size", 9)
-		key.add_theme_color_override("font_color", UiStyle.GOLD)
+		key.add_theme_color_override("font_color", Color(0.95, 0.75, 0.45))
 		key.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		stack.add_child(key)
 		_keys.append(key)
@@ -164,22 +164,22 @@ func refresh() -> void:
 			glyph.text = ""
 			cnt.text = ""
 			var empty := StyleBoxFlat.new()
-			empty.bg_color = Color(0.88, 0.84, 0.76, 1)
-			empty.border_color = UiStyle.WOOD
-			empty.set_border_width_all(2)
-			empty.set_corner_radius_all(2)
+			empty.bg_color = Color(0.18, 0.16, 0.20, 0.9)
+			empty.border_color = Color(0.40, 0.35, 0.30, 0.7)
+			empty.set_border_width_all(1)
+			empty.set_corner_radius_all(4)
 			slot.add_theme_stylebox_override("panel", empty)
 			continue
 		var def: Dictionary = inv.call("catalog", id)
 		glyph.text = str(def.get("glyph", "·"))
-		glyph.add_theme_color_override("font_color", def.get("color", UiStyle.INK))
+		glyph.add_theme_color_override("font_color", Color(0.98, 0.95, 0.90))
 		var n := int(GameState.inventory.get(id, 0))
 		cnt.text = str(n) if n > 1 else ""
 		var filled := StyleBoxFlat.new()
-		filled.bg_color = Color(0.94, 0.90, 0.82, 1)
-		filled.border_color = def.get("color", UiStyle.WOOD) as Color
+		filled.bg_color = Color(0.25, 0.20, 0.28, 0.95)
+		filled.border_color = Color(0.85, 0.65, 0.40, 0.9)
 		filled.set_border_width_all(2)
-		filled.set_corner_radius_all(2)
+		filled.set_corner_radius_all(4)
 		slot.add_theme_stylebox_override("panel", filled)
 
 

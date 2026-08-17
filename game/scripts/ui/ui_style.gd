@@ -62,23 +62,27 @@ static func panel_style(accent: Color = LINE) -> StyleBoxFlat:
 
 
 static func panel_style_dark() -> StyleBoxFlat:
-	## HUD 浮層：白底半透明
-	var s := panel_style(LINE)
-	s.bg_color = Color(1, 1, 1, 0.94)
+	## HUD / 面板：深色暖木／金邊質感框
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.13, 0.12, 0.15, 0.92)
+	s.border_color = Color(0.75, 0.60, 0.45, 0.85)
+	s.set_border_width_all(1)
+	s.set_corner_radius_all(8)
 	s.content_margin_left = 10
 	s.content_margin_right = 10
 	s.content_margin_top = 8
 	s.content_margin_bottom = 8
-	s.set_corner_radius_all(8)
-	s.shadow_size = 6
+	s.shadow_color = Color(0.05, 0.04, 0.06, 0.35)
+	s.shadow_size = 8
+	s.shadow_offset = Vector2(0, 3)
 	return s
 
 
 static func header_style() -> StyleBoxFlat:
-	## 標題列（粉柔）
+	## 標題列（暗粉赤木）
 	var s := StyleBoxFlat.new()
-	s.bg_color = KEY_SOFT
-	s.border_color = Color(0.949, 0.788, 0.827, 1.0)
+	s.bg_color = Color(0.22, 0.16, 0.20, 0.96)
+	s.border_color = Color(0.76, 0.37, 0.45, 0.9)
 	s.set_border_width_all(0)
 	s.border_width_bottom = 1
 	s.set_corner_radius_all(0)
@@ -94,64 +98,64 @@ static func header_style() -> StyleBoxFlat:
 static func interact_badge_style() -> StyleBoxFlat:
 	## 靠近互動物件時的「E」框
 	var s := StyleBoxFlat.new()
-	s.bg_color = Color(1.0, 0.96, 0.90, 0.96)
-	s.border_color = KEY_STRONG
+	s.bg_color = Color(0.20, 0.16, 0.14, 0.96)
+	s.border_color = Color(0.92, 0.75, 0.45, 1.0)
 	s.set_border_width_all(2)
 	s.set_corner_radius_all(8)
 	s.content_margin_left = 8
 	s.content_margin_right = 8
 	s.content_margin_top = 4
 	s.content_margin_bottom = 4
-	s.shadow_color = Color(0.17, 0.12, 0.14, 0.22)
-	s.shadow_size = 4
+	s.shadow_color = Color(0.05, 0.04, 0.06, 0.4)
+	s.shadow_size = 6
 	s.shadow_offset = Vector2(0, 2)
 	return s
 
 
 static func interact_name_style() -> StyleBoxFlat:
-	## 靠近時才顯示的名稱小牌（平常不掛滿場字）
+	## 靠近時才顯示的名稱小牌
 	var s := StyleBoxFlat.new()
-	s.bg_color = Color(1, 1, 1, 0.92)
-	s.border_color = LINE
+	s.bg_color = Color(0.14, 0.13, 0.16, 0.92)
+	s.border_color = Color(0.75, 0.60, 0.45, 0.7)
 	s.set_border_width_all(1)
 	s.set_corner_radius_all(6)
 	s.content_margin_left = 8
 	s.content_margin_right = 8
 	s.content_margin_top = 3
 	s.content_margin_bottom = 3
-	s.shadow_color = Color(0.1, 0.08, 0.12, 0.18)
-	s.shadow_size = 3
+	s.shadow_color = Color(0.05, 0.04, 0.06, 0.3)
+	s.shadow_size = 4
 	return s
 
 
 static func hint_bar_style() -> StyleBoxFlat:
-	## 底部操作提示框（比 chip 更像「互動框」）
-	var s := panel_style(KEY)
-	s.bg_color = Color(1, 1, 1, 0.94)
+	## 底部操作提示框
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.12, 0.11, 0.14, 0.92)
+	s.border_color = Color(0.75, 0.60, 0.45, 0.75)
 	s.set_border_width_all(1)
-	s.border_color = Color(0.949, 0.788, 0.827, 1.0)
 	s.set_corner_radius_all(10)
 	s.content_margin_left = 14
 	s.content_margin_right = 14
 	s.content_margin_top = 8
 	s.content_margin_bottom = 8
+	s.shadow_color = Color(0.05, 0.04, 0.06, 0.35)
 	s.shadow_size = 6
 	return s
 
 
 static func dialogue_style() -> StyleBoxFlat:
-	var s := panel_style(KEY_STRONG)
-	s.bg_color = Color(1, 1, 1, 0.98)
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.12, 0.11, 0.15, 0.95)
+	s.border_color = Color(0.85, 0.68, 0.48, 0.9)
 	s.set_border_width_all(2)
-	s.border_color = Color(0.949, 0.788, 0.827, 1.0)
 	s.set_corner_radius_all(12)
 	s.content_margin_left = 16
 	s.content_margin_right = 16
 	s.content_margin_top = 12
 	s.content_margin_bottom = 10
-	s.border_color = LINE
-	s.set_border_width_all(1)
-	s.shadow_size = 12
+	s.shadow_color = Color(0.04, 0.03, 0.05, 0.5)
+	s.shadow_size = 14
 	return s
 
 
@@ -298,3 +302,31 @@ static func slot_style() -> StyleBoxFlat:
 	s.set_border_width_all(1)
 	s.set_corner_radius_all(6)
 	return s
+
+
+static func add_button_juice(btn: Button) -> void:
+	if btn == null or not is_instance_valid(btn):
+		return
+	btn.pivot_offset = btn.size * 0.5
+	btn.mouse_entered.connect(func():
+		if btn and is_instance_valid(btn):
+			btn.pivot_offset = btn.size * 0.5
+			var tw := btn.create_tween()
+			tw.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.1).set_trans(Tween.TRANS_SINE)
+	)
+	btn.mouse_exited.connect(func():
+		if btn and is_instance_valid(btn):
+			var tw := btn.create_tween()
+			tw.tween_property(btn, "scale", Vector2.ONE, 0.1)
+	)
+	btn.button_down.connect(func():
+		if btn and is_instance_valid(btn):
+			btn.pivot_offset = btn.size * 0.5
+			var tw := btn.create_tween()
+			tw.tween_property(btn, "scale", Vector2(0.95, 0.95), 0.05)
+	)
+	btn.button_up.connect(func():
+		if btn and is_instance_valid(btn):
+			var tw := btn.create_tween()
+			tw.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
+	)

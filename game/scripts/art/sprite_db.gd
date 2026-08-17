@@ -610,13 +610,13 @@ static func explore_entity_path(entity_id: String) -> String:
 			return "%s/props/forge.png" % ROOT
 		"path_mist", "path_dojo", "path_forest", "path_coast", "path_tower", "path_tower_c5", "arrow_path", "cliff_path", "sign_east", "trail_mark":
 			return "%s/props/path.png" % ROOT
-		"market", "cart", "burnt_field":
-			return "%s/props/camp.png" % ROOT
+		"market", "cart", "burnt_field", "stall_frame", "stall":
+			return "%s/props/crate.png" % ROOT if ResourceLoader.exists("%s/props/crate.png" % ROOT) else "%s/props/camp.png" % ROOT
 		"look_back", "ash_pile", "dawn_glow":
-			return "%s/props/fire.png" % ROOT
+			return "%s/props/campfire.png" % ROOT if ResourceLoader.exists("%s/props/campfire.png" % ROOT) else "%s/props/fire.png" % ROOT
 		"well", "fountain", "bench", "well_fog", "keep_well":
 			return "%s/props/well.png" % ROOT if ResourceLoader.exists("%s/props/well.png" % ROOT) else "%s/props/save.png" % ROOT
-		"rubble", "road_stone", "bush_a", "bush_b", "scarecrow", "rock", "ruin_pillar":
+		"rubble", "road_stone", "bush_a", "bush_b", "scarecrow", "scare_field", "rock", "ruin_pillar", "woodpile", "orchard":
 			return "%s/props/rock.png" % ROOT if ResourceLoader.exists("%s/props/rock.png" % ROOT) else "%s/props/herb.png" % ROOT
 		"tree", "pine", "treehouse":
 			return "%s/props/tree.png" % ROOT if ResourceLoader.exists("%s/props/tree.png" % ROOT) else "%s/props/camp.png" % ROOT
@@ -632,9 +632,9 @@ static func explore_entity_path(entity_id: String) -> String:
 			return "%s/props/shrine.png" % ROOT if ResourceLoader.exists("%s/props/shrine.png" % ROOT) else "%s/props/bell.png" % ROOT
 		"boat", "boat_wreck":
 			return "%s/props/boat.png" % ROOT if ResourceLoader.exists("%s/props/boat.png" % ROOT) else "%s/props/dock.png" % ROOT
-		"hut_a", "hut_b", "hut_c", "inn", "dorm", "stable", "chapel":
+		"hut_a", "hut_b", "hut_c", "inn", "dorm", "stable", "chapel", "half_house":
 			return "%s/props/hut.png" % ROOT if ResourceLoader.exists("%s/props/hut.png" % ROOT) else "%s/props/camp.png" % ROOT
-		"gate_arch", "tower_gate":
+		"gate_arch", "tower_gate", "windmill", "fence_row":
 			return "%s/props/gate.png" % ROOT if ResourceLoader.exists("%s/props/gate.png" % ROOT) else "%s/props/tower.png" % ROOT
 		"banner":
 			return "%s/props/banner.png" % ROOT if ResourceLoader.exists("%s/props/banner.png" % ROOT) else "%s/props/flag.png" % ROOT
