@@ -1,0 +1,126 @@
+{
+  "skill.learned": [
+    {
+      "speaker": "灰须",
+      "text": "成了。记住手感，别死记招名。"
+    },
+    {
+      "speaker": "系统",
+      "text": "习得【{skill}】"
+    }
+  ],
+  "skill.not_yet": [
+    {
+      "speaker": "灰须",
+      "text": "时机未到。"
+    }
+  ],
+  "skill.tutor_deny": [
+    {
+      "speaker": "灰须",
+      "text": "金币，或你已经顶了。"
+    }
+  ],
+  "soul.equipped": [
+    {
+      "speaker": "系统",
+      "text": "战魂入槽。刃的性格变了。"
+    }
+  ],
+  "soul.ritual_not_enough": [
+    {
+      "speaker": "星读",
+      "text": "星屑还不够点亮一角。"
+    }
+  ],
+  "soul.fused": [
+    {
+      "speaker": "星读",
+      "text": "三颗同轨，并作一层更亮的星。"
+    },
+    {
+      "speaker": "系统",
+      "text": "合成 → {soul}"
+    }
+  ],
+  "soul.fuse_requirement": [
+    {
+      "speaker": "星读",
+      "text": "要三颗同星、同品、同阶，且未入魂。"
+    }
+  ],
+  "forge.need_rusty_first": [
+    {
+      "speaker": "钉钉",
+      "text": "先让我认你那把锈铁。"
+    }
+  ],
+  "forge.path_chosen": [
+    {
+      "speaker": "系统",
+      "text": "选定武器流派【{path}】。"
+    },
+    {
+      "speaker": "系统",
+      "text": "玩法：{play}。{pro}"
+    },
+    {
+      "speaker": "系统",
+      "text": "战魂还是去找星读观星。战力 {power}。"
+    }
+  ],
+  "forge.wood_sword_no_gold": [
+    {
+      "speaker": "钉钉",
+      "text": "二十金。没钱就别来占炉。"
+    }
+  ],
+  "forge.wood_sword_owned": [
+    {
+      "speaker": "钉钉",
+      "text": "木剑？你不是拿过了。"
+    }
+  ],
+  "forge.tier_max": [
+    {
+      "speaker": "钉钉",
+      "text": "够了，先去砍狮子。"
+    }
+  ],
+  "forge.no_gold": [
+    {
+      "speaker": "钉钉",
+      "text": "金币呢？出城晃两下。"
+    }
+  ],
+  "forge.success": [
+    {
+      "speaker": "钉钉",
+      "text": "成了。T{tier}。{scrap}"
+    }
+  ],
+  "forge.pity_break": [
+    {
+      "speaker": "钉钉",
+      "text": "（锤砸台面）够了！铁都比你有耐心！"
+    },
+    {
+      "speaker": "系统",
+      "text": "锤被摔在炉边，火星乱窜。"
+    },
+    {
+      "speaker": "钉钉",
+      "text": "……拿去，消气饼。明天再来，别让我看到你这张脸。"
+    },
+    {
+      "speaker": "系统",
+      "text": "体力回了一些。连败计数清零。"
+    }
+  ],
+  "forge.failed": [
+    {
+      "speaker": "钉钉",
+      "text": "失败。阶还在。材料没了。"
+    }
+  ]
+}

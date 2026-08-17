@@ -1,0 +1,66 @@
+{
+  "id": "fog_hide",
+  "speaker": "雾隐",
+  "rules": [
+    {
+      "when": {
+        "ng_plus_min": 1,
+        "flags": [
+          "boss.white_fog_cleared"
+        ]
+      },
+      "lines": [
+        "二周目的雾更会笑。等本体发白，别急。"
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "side.fog_letter_done"
+        ]
+      },
+      "lines": [
+        "真信送达了。假的雾少了一层。",
+        "你的眼睛比第一次好用了。"
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "item.true_letter"
+        ]
+      },
+      "lines": [
+        "信在你身上。岔路的行商驿站，把真的交出去。"
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "boss.white_fog_cleared"
+        ]
+      },
+      "lines": [
+        "雾散了。你的眼睛，还算能用。",
+        "……还有一封真信。假的太多，真的要亲手送。"
+      ]
+    },
+    {
+      "when": {
+        "flags": [
+          "c2_wheat_letter"
+        ]
+      },
+      "lines": [
+        "打影子，影子笑你。看破绽：刃擡起的那一瞬，才是真的。",
+        "幻廊在村东。白雾等你迷路。"
+      ]
+    },
+    {
+      "when": {},
+      "lines": [
+        "先去客栈。有人把信一路转到这里……慢了。"
+      ]
+    }
+  ]
+}

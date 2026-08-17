@@ -1,0 +1,100 @@
+{
+  "battle.wolf_win": [
+    {
+      "speaker": "旁白",
+      "text": "狼倒下时，紫焰散成灰。它看起来……比想像中瘦。"
+    },
+    {
+      "speaker": "内心",
+      "text": "这就是黑焰吗。连野兽都……"
+    },
+    {
+      "speaker": "系统",
+      "text": "学会了【横斩】。金 25、星屑 2。远方，石墙立在晨光里。"
+    }
+  ],
+  "battle.wolf_lose": [
+    {
+      "speaker": "系统",
+      "text": "醒来时在路旁。有人用斗篷盖过你——已不见人影。"
+    }
+  ],
+  "battle.leo_lose": [
+    {
+      "speaker": "雷欧",
+      "text": "回去握草根吧。"
+    },
+    {
+      "speaker": "系统",
+      "text": "醒来时已经在城里。想再去，随时。"
+    }
+  ],
+  "battle.fog_lose": [
+    {
+      "speaker": "白雾",
+      "text": "迷路了呀……再来一次？"
+    },
+    {
+      "speaker": "系统",
+      "text": "有人把你擡回雾隐村。下次等本体发白再出手。"
+    }
+  ],
+  "battle.demon_lose": [
+    {
+      "speaker": "魔王",
+      "text": "还是太轻了……"
+    },
+    {
+      "speaker": "系统",
+      "text": "你倒在塔阶上。从塔下再爬一次就是了。"
+    }
+  ],
+  "battle.abo_lose": [
+    {
+      "speaker": "阿波",
+      "text": "拳里还没有道。再来。"
+    },
+    {
+      "speaker": "系统",
+      "text": "你被请出了试炼堂。门没关。"
+    }
+  ],
+  "battle.falcon_lose": [
+    {
+      "speaker": "疾影",
+      "text": "风把你带走了……再等一次。"
+    },
+    {
+      "speaker": "系统",
+      "text": "醒来时在树屋里。下次等牠停拍再打。"
+    }
+  ],
+  "battle.boar_lose": [
+    {
+      "speaker": "石拳",
+      "text": "力气不够。站稳再来。"
+    },
+    {
+      "speaker": "系统",
+      "text": "浪把你推回码头。下次迎上去撞，岩甲才会裂。"
+    }
+  ],
+  "battle.rift_lose": [
+    {
+      "speaker": "系统",
+      "text": "黑焰把你掀回塔下。{tip}"
+    }
+  ],
+  "battle.world_win": [
+    {
+      "speaker": "系统",
+      "text": "击败{enemy}。金 {gold}{extra}。"
+    }
+  ],
+  "battle.world_flee": [
+    {
+      "speaker": "系统",
+      "text": "你挣脱了战斗。伤势不轻——先找存盘石。"
+    }
+  ]
+}

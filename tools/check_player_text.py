@@ -62,6 +62,10 @@ ALLOW = [
     ("里程碑", "里程碑上"),    # 同上，敘述文字
 ]
 
+# 語言選單上的名字要用該語言自己的寫法 —— 「简体中文」本來就該是簡體，
+# 那是給簡中玩家認的。這幾個字是刻意的，不是漏網。
+LOCALE_LABEL_LINES = ("简体中文", "日本語", "한국어", "Español")
+
 # 簡體專用字 → 正體。只列「兩岸寫法不同」的，正簡同形字（走、向、台…）不列，
 # 否則會掃出上千個假警報。發現新的就往這裡加。
 SIMPLIFIED = {
@@ -126,6 +130,21 @@ def allowed(term: str, line: str) -> bool:
     return any(t == term and ctx in line for t, ctx in ALLOW)
 
 
+## 非繁中的語言檔：data/i18n/<code>.json、data/**/<code>/*.json
+OTHER_LOCALES = ("zh_CN", "en", "ja", "ko", "es")
+
+
+def is_zh_tw_file(rel: str) -> bool:
+    """這個檔裡的文字是不是「應該是繁中」的。"""
+    parts = rel.replace("\\", "/").split("/")
+    base = parts[-1]
+    if base.endswith(".json") and base[:-5] in OTHER_LOCALES:
+        return False            # data/i18n/ja.json
+    if any(seg in OTHER_LOCALES for seg in parts[:-1]):
+        return False            # data/dialogues/zh_CN/chapter.json
+    return True
+
+
 def collect():
     files = []
     for p in glob.glob(os.path.join(ROOT, "game/scripts/**/*.gd"), recursive=True):
@@ -153,7 +172,17 @@ def main() -> None:
     simp = []
     for path, body in collect():
         rel = os.path.relpath(path, ROOT)
+        ## 簡體字／陸語詞這條只適用於**繁中**的文字。
+        ##
+        ## 加了 zh_CN / ja / ko / es 之後，這條會把簡中譯文整份判成違規，
+        ## 也會把日文漢字（黄・体・当）當成簡體字 —— 那是它們正確的寫法。
+        ## 所以先認出這個檔屬於哪個語言，非繁中的直接跳過這一項；
+        ## 上面的「開發用語」檢查仍然對所有語言生效。
+        if not is_zh_tw_file(rel):
+            continue
         for line in body.split("\n"):
+            if any(lbl in line for lbl in LOCALE_LABEL_LINES):
+                continue
             bad = sorted({c for c in line if c in SIMPLIFIED})
             if bad:
                 fix = "、".join(f"{c}→{SIMPLIFIED[c]}" for c in bad)

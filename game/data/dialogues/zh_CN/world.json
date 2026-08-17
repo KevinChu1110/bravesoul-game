@@ -1,0 +1,130 @@
+{
+  "world.inspect_object": [
+    {
+      "speaker": "旁白",
+      "text": "你端详「{label}」。风从翠岭某处吹来。"
+    }
+  ],
+  "world.miniboss_cleared": [
+    {
+      "speaker": "旁白",
+      "text": "这里只剩清风。试炼已过。"
+    }
+  ],
+  "world.scar_cleared": [
+    {
+      "speaker": "旁白",
+      "text": "疤地不再跳动。焦土裂缝里长出一点灰绿——像伤口结痂。"
+    },
+    {
+      "speaker": "内心",
+      "text": "胃口闭了。我没有喂它。"
+    }
+  ],
+  "world.mirror_cleared": [
+    {
+      "speaker": "旁白",
+      "text": "镜廊只剩你一个倒影。捷径的裂痕还在，但不发光了。"
+    },
+    {
+      "speaker": "内心",
+      "text": "真影比较沉——那就沉着走。"
+    }
+  ],
+  "world.wreck_cleared": [
+    {
+      "speaker": "旁白",
+      "text": "船骸安静下来。浪拍龙骨，像准点的水钟。"
+    },
+    {
+      "speaker": "内心",
+      "text": "船长睡了。通行证……是活着上岸。"
+    }
+  ],
+  "world.road_note": [
+    {
+      "speaker": "留言板",
+      "text": "「客栈今日无汤。若见桥下鸟巢，别掏蛋——羽软的那窝是过路人养的。」"
+    },
+    {
+      "speaker": "留言板",
+      "text": "下方另有一行新字：「墓园长明灯灭了。谁有火，点一下。谢。」"
+    }
+  ],
+  "world.grave_b": [
+    {
+      "speaker": "旁白",
+      "text": "旧碑前插着一束干野花。花瓣被风翻过，还压着一枚小铜板。"
+    },
+    {
+      "speaker": "内心",
+      "text": "有人来过。村子没有全空。"
+    }
+  ],
+  "world.scare_field": [
+    {
+      "speaker": "旁白",
+      "text": "稻草人戴着童帽，袖口缝了补丁。帽子里塞着半块干粮——给鸟的，不是给人的。"
+    },
+    {
+      "speaker": "旁白",
+      "text": "帽沿写着歪字：别吃麦穗的。"
+    }
+  ],
+  "world.camp_ash_road": [
+    {
+      "speaker": "旁白",
+      "text": "路人余烬还温。旁边石头排成箭头：东边有城，西边有烟。"
+    },
+    {
+      "speaker": "内心",
+      "text": "有人刚走。脚印不大，像也是赶路的。"
+    }
+  ],
+  "world.chest_empty": [
+    {
+      "speaker": "旁白",
+      "text": "空了。你已经拿过了。"
+    }
+  ],
+  "world.chest_open": [
+    {
+      "speaker": "旁白",
+      "text": "{found}"
+    },
+    {
+      "speaker": "系统",
+      "text": "获得 金 {gold} · 星屑 {dust}{drop}"
+    }
+  ],
+  "world.skirmish_cleared": [
+    {
+      "speaker": "旁白",
+      "text": "这里已经平静了。"
+    }
+  ],
+  "region.mist_locked": [
+    {
+      "speaker": "系统",
+      "text": "雾还太远。先在骑士堡把剑养起来。"
+    }
+  ],
+  "region.dojo_warn": [
+    {
+      "speaker": "系统",
+      "text": "道场气压重。建议战力 26+（你 {power}），或先走雾隐／升等练功。"
+    }
+  ],
+  "region.forest_warn": [
+    {
+      "speaker": "系统",
+      "text": "林风很急。建议战力 30+（你 {power}）。可先道场／猎场练。"
+    }
+  ],
+  "region.coast_warn": [
+    {
+      "speaker": "系统",
+      "text": "岸浪重。建议战力 30+（你 {power}）。"
+    }
+  ]
+}

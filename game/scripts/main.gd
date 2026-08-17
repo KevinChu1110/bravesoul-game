@@ -1870,10 +1870,17 @@ func _go_title() -> void:
 	var online_lbl := "連線設定 · 純單機" if OnlineGate.offline_only else "連線設定 · 星途"
 	buttons.append({"text": online_lbl, "cb": _go_online_panel})
 	buttons.append({"text": "顯示設定 · %s" % DisplaySettings.mode_label(), "cb": _go_display_settings})
-	## 語言切換
-	## 標成部分翻譯：en.json 只有 64 個 key，而程式裡有近 800 句硬編碼中文。
-	## 不標的話玩家切過去會以為遊戲壞了。
-	var lang_label := "Language: English (partial)" if Loc.locale == "zh_TW" else "語言：繁體中文"
+	## 語言切換：按一次換下一個語言，按鈕上寫「下一個是誰」。
+	##
+	## 完成度是算出來的，不是寫死的 —— 劇情台詞還沒全譯，
+	## 標 100% 會讓玩家切過去以為遊戲壞了。算出來的數字至少不會說謊。
+	var nxt_i: int = (Loc.locale_index() + 1) % Loc.LOCALES.size()
+	var nxt_code := str(Loc.LOCALES[nxt_i]["code"])
+	var nxt_name := str(Loc.LOCALES[nxt_i]["label"])
+	var cov := Loc.coverage(nxt_code)
+	var lang_label := "%s → %s" % [Loc.locale_label(), nxt_name]
+	if cov < 0.995:
+		lang_label += "（%d%%）" % int(round(cov * 100.0))
 	buttons.append({"text": lang_label, "cb": _toggle_locale})
 	var ng_line := ""
 	if GameState.ng_plus > 0:
@@ -1897,10 +1904,10 @@ func _go_title() -> void:
 
 
 func _toggle_locale() -> void:
-	if Loc.locale == "zh_TW":
-		Loc.set_locale("en")
-	else:
-		Loc.set_locale("zh_TW")
+	Loc.cycle_locale()
+	## 台詞是另一套資料，切語言之後要重載 —— 不然畫面語言變了、對白還是舊的
+	DialogLines.reload()
+	NpcLines.reload()
 	AudioManager.play_ui()
 	_go_title()
 

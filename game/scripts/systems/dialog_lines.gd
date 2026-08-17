@@ -61,13 +61,49 @@ static func _fill(text: String, vars: Dictionary, key: String) -> String:
 	return out
 
 
+## 目前載進來的是哪個語言。切語言時要重載。
+static var _loaded_locale := ""
+
+
+static func current_locale() -> String:
+	var t := Engine.get_main_loop()
+	if t is SceneTree and (t as SceneTree).root != null:
+		var loc: Node = (t as SceneTree).root.get_node_or_null("Loc")
+		if loc != null:
+			return str(loc.get("locale"))
+	return "zh_TW"
+
+
+## 切語言之後要叫這支，不然畫面語言變了、台詞還是舊的。
+static func reload() -> void:
+	_loaded = false
+	_table.clear()
+
+
 static func _ensure_loaded() -> void:
-	if _loaded:
+	var lc := current_locale()
+	if _loaded and _loaded_locale == lc:
 		return
+	if _loaded_locale != lc:
+		_table.clear()
 	_loaded = true
-	var d := DirAccess.open(DIR)
+	_loaded_locale = lc
+	## 先鋪中文原文當底，再用該語言的檔覆蓋 ——
+	## 這樣某一句還沒翻的時候，玩家看到的是原文而不是空白或 key。
+	_load_dir(DIR, false)
+	if lc != "zh_TW":
+		## 譯文層是「刻意要蓋掉原文」的，所以這一層允許覆寫。
+		## 底層（同一個目錄裡兩個檔定義同一個 key）仍然算撞名錯誤。
+		_load_dir("%s/%s" % [DIR, lc], true)
+
+
+## allow_override=true 時，這一層的 key 會蓋掉先前載入的（譯文層用）。
+static func _load_dir(dir_path: String, allow_override: bool) -> void:
+	var d := DirAccess.open(dir_path)
 	if d == null:
-		push_error("dialogues: 開不了 %s" % DIR)
+		## 譯文目錄不存在是正常的（那個語言還沒翻），不要報錯
+		if not allow_override:
+			push_error("dialogues: 開不了 %s" % dir_path)
 		return
 	for f in d.get_files():
 		## 匯出後 .json 會變成 .json.remap，兩種都要認
@@ -76,7 +112,7 @@ static func _ensure_loaded() -> void:
 			name = name.substr(0, name.length() - 6)
 		if not name.ends_with(".json"):
 			continue
-		var path := "%s/%s" % [DIR, name]
+		var path := "%s/%s" % [dir_path, name]
 		var fh := FileAccess.open(path, FileAccess.READ)
 		if fh == null:
 			push_error("dialogues: 讀不到 %s" % path)
@@ -86,7 +122,7 @@ static func _ensure_loaded() -> void:
 			push_error("dialogues: %s 不是合法 JSON 物件" % path)
 			continue
 		for k in (data as Dictionary).keys():
-			if _table.has(k):
+			if _table.has(k) and not allow_override:
 				push_error("dialogues: key 撞名 %s（%s）" % [k, path])
 				continue
 			_table[k] = data[k]

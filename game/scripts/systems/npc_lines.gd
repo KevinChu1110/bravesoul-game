@@ -80,10 +80,31 @@ static func _matches(when: Variant) -> bool:
 	return true
 
 
+## 切語言之後要叫這支，不然畫面語言變了、NPC 台詞還是舊的
+static func reload() -> void:
+	_cache.clear()
+
+
+static func _locale_path(npc_id: String) -> String:
+	## 該語言有翻就用翻的，沒有就退回中文原文 ——
+	## 只翻一半的時候，玩家看到的是原文而不是空白
+	var t := Engine.get_main_loop()
+	var lc := "zh_TW"
+	if t is SceneTree and (t as SceneTree).root != null:
+		var loc: Node = (t as SceneTree).root.get_node_or_null("Loc")
+		if loc != null:
+			lc = str(loc.get("locale"))
+	if lc != "zh_TW":
+		var lp := "%s/%s/%s.json" % [DIR, lc, npc_id]
+		if FileAccess.file_exists(lp):
+			return lp
+	return "%s/%s.json" % [DIR, npc_id]
+
+
 static func _load(npc_id: String) -> Dictionary:
 	if _cache.has(npc_id):
 		return _cache[npc_id]
-	var path := "%s/%s.json" % [DIR, npc_id]
+	var path := _locale_path(npc_id)
 	if not FileAccess.file_exists(path):
 		_cache[npc_id] = {}
 		return {}
