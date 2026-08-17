@@ -27,7 +27,7 @@ var _player: TextureRect
 var _player_armor: TextureRect  ## 防具疊層
 var _player_weapon: TextureRect  ## 裝備武器疊層
 var _player_accessory: TextureRect  ## 飾品
-var _player_shadow: ColorRect
+var _player_shadow: TextureRect
 var _hint: Label
 var _title: Label
 var _minimap_root: PanelContainer
@@ -44,6 +44,9 @@ var _floor_tint: ColorRect
 var _tile_host: Node2D  ## TileMap 掛點
 var _tile_map: TileMapLayer  ## 地面
 var _wall_map: TileMapLayer  ## 牆／實心視覺
+## 有手繪底圖時不畫牆磚 —— 底圖已經畫好房子與岩石了，再鋪一層灰色牆磚
+## 就會在畫面上多出一堆格線方框（翠谷村左下那棟屋、右上帳篷就是這樣來的）。
+var _has_scenic_bg := false
 var _banner: TextureRect
 var _vignette: ColorRect
 var _scroll: Control  ## 攝影機層：整塊世界內容
@@ -451,9 +454,12 @@ func _build_chrome() -> void:
 	_hint.text = _t("移動靠近目標 · 按 E 互動")
 	hint_bar.add_child(_hint)
 
-	_player_shadow = ColorRect.new()
-	_player_shadow.size = Vector2(36, 10)
-	_player_shadow.color = Color(0, 0, 0, 0.4)
+	_player_shadow = TextureRect.new()
+	_player_shadow.texture = _shadow_tex()
+	_player_shadow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_player_shadow.stretch_mode = TextureRect.STRETCH_SCALE
+	_player_shadow.size = Vector2(36, 12)
+	_player_shadow.modulate = Color(0, 0, 0, 0.42)
 	_player_shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_world.add_child(_player_shadow)
 
@@ -522,6 +528,47 @@ func _on_equipment_visual_changed() -> void:
 	_update_player_visual()
 
 
+## 接地陰影用的柔邊橢圓。原本是 ColorRect —— 硬邊矩形，看起來像腳下墊了一塊
+## 黑板，反而更浮。程序生成一張帶羽化的橢圓，畫一次快取起來重複用。
+static var _shadow_tex_cache: Texture2D = null
+
+
+static func _shadow_tex() -> Texture2D:
+	if _shadow_tex_cache != null:
+		return _shadow_tex_cache
+	var w := 64
+	var h := 32
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	var cx := (w - 1) * 0.5
+	var cy := (h - 1) * 0.5
+	for y in h:
+		for x in w:
+			## 橢圓內外的正規化距離：1.0 剛好在邊緣
+			var dx := (x - cx) / cx
+			var dy := (y - cy) / cy
+			var d := sqrt(dx * dx + dy * dy)
+			## smoothstep 羽化，中心最濃、邊緣化開
+			var a := clampf(1.0 - d, 0.0, 1.0)
+			a = a * a * (3.0 - 2.0 * a)
+			img.set_pixel(x, y, Color(0, 0, 0, a))
+	_shadow_tex_cache = ImageTexture.create_from_image(img)
+	return _shadow_tex_cache
+
+
+## 依 y 座標給一點深度縮放：越靠畫面上方（遠）越小。
+## 幅度刻意很小 —— 手繪底圖的透視本來就不是嚴格的，拉太多會更假。
+## 只影響「顯示」，碰撞仍用 e.size／PLAYER_SIZE，不會改變手感。
+const DEPTH_SCALE_NEAR := 1.05
+const DEPTH_SCALE_FAR := 0.90
+
+
+func _depth_scale(world_y: float) -> float:
+	var top := FLOOR_RECT.position.y
+	var hgt := maxf(1.0, FLOOR_RECT.size.y)
+	var t := clampf((world_y - top) / hgt, 0.0, 1.0)
+	return lerpf(DEPTH_SCALE_FAR, DEPTH_SCALE_NEAR, t)
+
+
 func _apply_map_art(id: String) -> void:
 	var floor_rect := FLOOR_RECT
 	_floor.position = floor_rect.position
@@ -547,6 +594,7 @@ func _apply_map_art(id: String) -> void:
 				if bg_tex:
 					break
 	var has_scenic_bg := bg_tex != null
+	_has_scenic_bg = has_scenic_bg
 	if has_scenic_bg:
 		## 完整顯示手繪底圖。必須 STRETCH_SCALE 對齊 FLOOR_RECT，
 		## 否則 COVERED 裁切會讓美術建築與 entity／碰撞座標錯位（看起來像穿模）。
@@ -711,12 +759,13 @@ func _rebuild_collision() -> void:
 		_map_cols = int(FLOOR_RECT.size.x / TILE_PX)
 		_map_rows = int(FLOOR_RECT.size.y / TILE_PX)
 	## 1) 地圖邊界一圈實心牆
+	var paint := not _has_scenic_bg
 	for x in _map_cols:
-		_set_solid(Vector2i(x, 0), true, true)
-		_set_solid(Vector2i(x, _map_rows - 1), true, true)
+		_set_solid(Vector2i(x, 0), true, paint)
+		_set_solid(Vector2i(x, _map_rows - 1), true, paint)
 	for y in _map_rows:
-		_set_solid(Vector2i(0, y), true, true)
-		_set_solid(Vector2i(_map_cols - 1, y), true, true)
+		_set_solid(Vector2i(0, y), true, paint)
+		_set_solid(Vector2i(_map_cols - 1, y), true, paint)
 	## 2) 建築／大型 prop 佔位（上半身實心，腳邊可站可互動）
 	for e in _entities:
 		if not _entity_is_solid(e):
@@ -731,7 +780,7 @@ func _rebuild_collision() -> void:
 		var oy := pos.y + sz.y - hit_h  ## 對齊腳底
 		## 碰撞偏上：只擋軀幹，底部 12px 可站
 		var r := Rect2(ox + 4.0, oy + 4.0, maxf(12.0, hit_w - 8.0), maxf(12.0, hit_h * 0.62))
-		_stamp_solid_rect(r, true)
+		_stamp_solid_rect(r, paint)
 	## 3) 風景圖額外結構擋塊（減少走進畫上的山／屋）
 	for r2 in _scenic_blockers(map_id):
 		_stamp_solid_rect(r2, false)
@@ -915,11 +964,15 @@ func _rebuild_entities() -> void:
 		root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_world.add_child(root)
 
-		## 底座陰影
-		var shadow := ColorRect.new()
-		shadow.size = Vector2(e.size.x * 0.7, 8)
-		shadow.position = Vector2(e.size.x * 0.15, e.size.y - 6)
-		shadow.color = Color(0, 0, 0, 0.35)
+		## 底座陰影。原本是 ColorRect，硬邊矩形看起來像腳下墊了塊黑板；
+		## 而且尺寸用 e.size 算，但有貼圖時 root.size 會被改成 disp，
+		## 於是大建築的陰影只有一小條、小物件的陰影卻超出去。
+		## 改成柔邊橢圓，並在拿到顯示尺寸之後才擺。
+		var shadow := TextureRect.new()
+		shadow.texture = _shadow_tex()
+		shadow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		shadow.stretch_mode = TextureRect.STRETCH_SCALE
+		shadow.modulate = Color(0, 0, 0, 0.34)
 		shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		root.add_child(shadow)
 
@@ -938,8 +991,16 @@ func _rebuild_entities() -> void:
 			root.add_child(spr)
 			## 腳底對齊原 catalog 錨點底部
 			var foot_y: float = e.pos.y + e.size.y
+			var dk := _depth_scale(foot_y)
+			disp *= dk
+			root.size = disp
+			spr.size = disp
 			root.position = Vector2(e.pos.x + e.size.x * 0.5 - disp.x * 0.5, foot_y - disp.y)
 			root.set_meta("sort_y", foot_y)
+			## 陰影：寬度取顯示寬的七成，壓在 root 底部
+			var shw: float = disp.x * 0.70
+			shadow.size = Vector2(shw, maxf(7.0, shw * 0.26))
+			shadow.position = Vector2(disp.x * 0.5 - shw * 0.5, disp.y - shadow.size.y * 0.60)
 		else:
 			var sb := StyleBoxFlat.new()
 			sb.bg_color = Color(e.color.r, e.color.g, e.color.b, 0.45)
@@ -952,6 +1013,9 @@ func _rebuild_entities() -> void:
 			box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			root.add_child(box)
 			root.set_meta("sort_y", e.pos.y + e.size.y)
+			var bw: float = e.size.x * 0.70
+			shadow.size = Vector2(bw, maxf(6.0, bw * 0.26))
+			shadow.position = Vector2(e.size.x * 0.5 - bw * 0.5, e.size.y - shadow.size.y * 0.60)
 
 		## 名稱牌：預設隱藏，只在靠近時顯示（避免滿場白字「好花」）
 		var name_chip := PanelContainer.new()
@@ -1340,9 +1404,15 @@ func _update_player_visual() -> void:
 		else:
 			_player_accessory.visible = false
 	if _player_shadow:
-		_player_shadow.position = player_pos + Vector2(6, PLAYER_SIZE.y - 6)
-		_player_shadow.size = Vector2(PLAYER_SIZE.x - 12, 10)
-		_player_shadow.set_meta("sort_y", player_pos.y + PLAYER_SIZE.y - 1.0)
+		## 陰影跟著深度一起縮，遠處的腳印才不會比近處還大
+		var sh_k := _depth_scale(foot_y)
+		var sh_w := (PLAYER_SIZE.x - 8.0) * sh_k
+		var sh_h := 12.0 * sh_k
+		_player_shadow.size = Vector2(sh_w, sh_h)
+		_player_shadow.position = Vector2(
+			player_pos.x + PLAYER_SIZE.x * 0.5 - sh_w * 0.5,
+			foot_y - sh_h * 0.62)
+		_player_shadow.set_meta("sort_y", foot_y - 1.0)
 	var tag := _world.get_node_or_null("PlayerNameTag") as Control
 	if tag:
 		tag.position = player_pos + Vector2(PLAYER_SIZE.x * 0.5 - 28, -16)
