@@ -155,6 +155,20 @@ func sign_out() -> void:
 	status_changed.emit()
 
 
+## ⚠ `_cb_*` 的參數順序：**cb 一定要放最後一個**。
+##
+## 送出時寫的是 `_cb_xxx.bind(cb)`，而 Godot 的 `Callable.bind()` 是把綁定的參數
+## 接在**呼叫端參數的後面**，不是前面。HTTP 回來時呼叫的是 `cb.call(ok, body)`，
+## 所以實際簽名是 `(ok, body, cb)`。
+##
+## 這十支原本全部宣告成 `(cb, ok, body)` —— 第一個參數就型別不符，
+## Godot 只噴一行 "Invalid type in function" 然後把整個回呼丟掉。
+## 結果是連線面板每一顆按鈕都毫無反應：不是「連不上會失敗」，
+## 是**連失敗都通知不到玩家**，狀態列永遠停在「尚未檢測」。
+##
+## 這種錯不會讓遊戲當掉，也不會讓測試變紅（離線路徑根本走不到 _cb_*），
+## 所以加一支 test_online_callbacks.gd 直接對簽名下斷言。
+
 ## ── 公開 API（全部可在離線時安全呼叫）──
 
 func sign_in_anonymous(cb: Callable = Callable()) -> void:
@@ -206,7 +220,7 @@ func sign_in_email(email: String, password: String, cb: Callable = Callable()) -
 	)
 
 
-func _cb_sign_in(cb: Callable, ok: bool, body: Variant) -> void:
+func _cb_sign_in(ok: bool, body: Variant, cb: Callable) -> void:
 	if ok:
 		_parse_auth(body, cb)
 	else:
@@ -266,7 +280,7 @@ func push_cloud_save(cb: Callable = Callable()) -> void:
 	)
 
 
-func _cb_push_save(cb: Callable, ok: bool, body: Variant) -> void:
+func _cb_push_save(ok: bool, body: Variant, cb: Callable) -> void:
 	var row := _rpc_row(body)
 	if not ok or str(row.get("error", "")) != "":
 		_fail(_rpc_error(ok, row, "推送失敗"), cb)
@@ -282,7 +296,7 @@ func pull_cloud_save(cb: Callable = Callable()) -> void:
 	_request("GET", "/rest/v1/saves?user_id=eq.%s&select=*" % user_id, null, true, _cb_pull_save.bind(cb))
 
 
-func _cb_pull_save(cb: Callable, ok: bool, body: Variant) -> void:
+func _cb_pull_save(ok: bool, body: Variant, cb: Callable) -> void:
 	if not ok:
 		_fail(last_error if last_error != "" else "拉取失敗", cb)
 		return
@@ -352,7 +366,7 @@ func post_message(place: String, body_text: String, cb: Callable = Callable()) -
 	_request("POST", "/rest/v1/messages", body, true, _cb_msg_post.bind(cb), "return=minimal")
 
 
-func _cb_msg_post(cb: Callable, ok: bool, _b: Variant) -> void:
+func _cb_msg_post(ok: bool, _b: Variant, cb: Callable) -> void:
 	if ok:
 		_ok({"msg": "已留下足跡"}, cb)
 	else:
@@ -367,7 +381,7 @@ func fetch_messages(place: String, cb: Callable = Callable()) -> void:
 	_request("GET", path, null, true, _cb_list.bind(cb))
 
 
-func _cb_list(cb: Callable, ok: bool, body: Variant) -> void:
+func _cb_list(ok: bool, body: Variant, cb: Callable) -> void:
 	var list: Array = []
 	if ok and body is Array:
 		list = body
@@ -381,7 +395,7 @@ func candle_increment(cb: Callable = Callable()) -> void:
 	_request("POST", "/rest/v1/rpc/candle_increment", {}, true, _cb_candle.bind(cb))
 
 
-func _cb_candle(cb: Callable, ok: bool, body: Variant) -> void:
+func _cb_candle(ok: bool, body: Variant, cb: Callable) -> void:
 	if ok:
 		_ok({"total": body}, cb)
 	else:
@@ -425,7 +439,7 @@ func leaderboard_submit(board: String, score: int, cb: Callable = Callable()) ->
 	)
 
 
-func _cb_leaderboard(cb: Callable, ok: bool, body: Variant) -> void:
+func _cb_leaderboard(ok: bool, body: Variant, cb: Callable) -> void:
 	var row := _rpc_row(body)
 	if not ok or str(row.get("error", "")) != "":
 		_fail(_rpc_error(ok, row, "上榜失敗"), cb)
@@ -449,7 +463,7 @@ func fetch_ledger(cb: Callable = Callable()) -> void:
 	_request("POST", "/rest/v1/rpc/econ_state", {}, true, _cb_ledger.bind(cb))
 
 
-func _cb_ledger(cb: Callable, ok: bool, body: Variant) -> void:
+func _cb_ledger(ok: bool, body: Variant, cb: Callable) -> void:
 	var row := _rpc_row(body)
 	if not ok or str(row.get("error", "")) != "":
 		_fail(_rpc_error(ok, row, "查詢餘額失敗"), cb)
@@ -567,7 +581,7 @@ func health_check(cb: Callable = Callable()) -> void:
 	)
 
 
-func _cb_health_auth(cb: Callable, ok: bool, body: Variant) -> void:
+func _cb_health_auth(ok: bool, body: Variant, cb: Callable) -> void:
 	if not ok:
 		last_health_ok = false
 		last_health = humanize_error(last_error if last_error != "" else "Auth 探活失敗")
@@ -584,7 +598,7 @@ func _cb_health_auth(cb: Callable, ok: bool, body: Variant) -> void:
 	)
 
 
-func _cb_health_rest(cb: Callable, ok: bool, body: Variant) -> void:
+func _cb_health_rest(ok: bool, body: Variant, cb: Callable) -> void:
 	last_health_ms = Time.get_ticks_msec() - _health_t0
 	if not ok:
 		var err := humanize_error(last_error)
