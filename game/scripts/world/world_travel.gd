@@ -47,7 +47,10 @@ static func links() -> Dictionary:
 		"exit_wild": {"map": "wild", "screen": "C1_WILD"},
 		"exit_wild_inner": {"map": "wild", "screen": "C1_WILD"},
 		"to_wild_ravine": {"map": "wild_ravine", "screen": "C1_WILD"},
-		"to_leo_court": {"map": "wild_leo_court", "screen": "C1_WILD"},
+		## 內殿前院要先鍛造。正門 exit_wild 一直有這道門檻（「鏽劍捲刃了，先去找釘釘」），
+		## 這條側路沒有 —— 玩家可以拿著鏽劍直接走到雷歐面前，而戰敗收尾接的是
+		## _go_c1_wild，它又被同一個旗標擋下 return，畫面就停在打完的戰鬥上。
+		"to_leo_court": {"map": "wild_leo_court", "screen": "C1_WILD", "need_flag": "c1_forged", "deny": "鏽劍捲刃了。先去找釘釘。"},
 		"back_wild": {"map": "wild", "screen": "C1_WILD"},
 
 		## ── 岔路（0.12：鍛造後即可練功／自由探索，不必先打雷歐）──

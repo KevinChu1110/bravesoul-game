@@ -502,7 +502,18 @@ func _build_pause_layer() -> void:
 		sub.text = Loc.t("pause.export_ok", {"path": path}) if path != "" else Loc.t("pause.export_fail")
 		AudioManager.play_ui()
 	)
+	## 匯入會直接覆蓋當前存檔，所以要按兩次。
+	## 旁邊的「旅途紀錄」刪除格子就是兩段式（save_slots_panel），
+	## 同一份資料在這裡卻能一鍵蓋掉，兩處標準不一致。
+	## 而且這顆就緊貼著「匯出備份」，手滑的代價是整趟進度。
+	var import_armed := [false]
 	_pause_btn(box, Loc.t("pause.import"), func():
+		if not import_armed[0]:
+			import_armed[0] = true
+			sub.text = "匯入會覆蓋目前的進度。要繼續就再按一次。"
+			AudioManager.play_ui()
+			return
+		import_armed[0] = false
 		var err := SaveManager.import_backup()
 		sub.text = Loc.t("pause.import_ok") if err == OK else Loc.t("pause.import_fail")
 		AudioManager.play_ui()
@@ -1343,7 +1354,32 @@ func ui_refresh_hud() -> void:
 	_refresh_hud()
 
 
+## 戰鬥還在進行中嗎。
+##
+## 「host 底下有 Battle 節點」不夠 —— 戰鬥結束後那個節點還在，
+## 而勝利收尾本來就要開面板（裂縫勝利 → 通關後中樞）。要看的是它打完了沒。
+func _battle_is_live() -> bool:
+	if host == null:
+		return false
+	for c in host.get_children():
+		if c.has_method("setup") and c.get("sim") != null:
+			return not bool(c.get("_ended"))
+	return false
+
+
 func _panel(title: String, body: String, buttons: Array) -> void:
+	## 戰鬥進行中不准開面板。
+	##
+	## _panel() 第一件事就是 _clear_host()，而戰鬥節點就掛在 host 底下 ——
+	## 打到一半按 Esc 點「顯示設定」，整場戰鬥當場被釋放，Boss 剩一滴血也一樣，
+	## 沒有任何確認。而 _current 還停在 BATTLE，狀態機根本不知道戰鬥不見了。
+	## Esc 是標題頁自己教的按鍵，暫停選單看起來就像可以隨便逛。
+	##
+	## 擋在這裡而不是逐顆按鈕擋：_clear_host() 才是真正吃掉戰鬥的地方，
+	## 擋在源頭，之後新增的入口也不必記得再擋一次。
+	if _battle_is_live():
+		_show_toast("戰鬥中不能開這個。先打完，或按「逃離」。")
+		return
 	_clear_host()
 	_reset_fade()
 	## 進選單時確保沒有殘留過場擋滑鼠
