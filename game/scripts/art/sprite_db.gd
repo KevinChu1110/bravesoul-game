@@ -693,27 +693,46 @@ const _TOKEN_PROP := [
 
 
 static func _fallback_prop_path(entity_id: String) -> String:
-	var toks := entity_id.split("_", false)
-	if toks.is_empty():
-		return ""
-	var name := ""
-	if _HEAD_PROP.has(toks[0]):
-		name = str(_HEAD_PROP[toks[0]])
-	else:
-		for rule in _TOKEN_PROP:
-			var keys: Array = rule[0]
-			var hit := false
-			for tk in toks:
-				if tk in keys:
-					hit = true
-					break
-			if hit:
-				name = str(rule[1])
-				break
+	var name := prop_kind(entity_id)
 	if name == "":
 		return ""
 	var path := "%s/props/%s.png" % [ROOT, name]
 	return path if ResourceLoader.exists(path) else ""
+
+
+## 手繪底圖已經畫過的「景物」類別。
+##
+## 底圖是一整張場景插畫：房子、樹、岩石、船骸都畫在裡面了。實體層若再疊一張
+## prop sprite 上去，畫面就會出現「底圖有一棟燒毀的屋、旁邊又擺一棟完好的小屋」
+## 這種重複（翠谷村左下、沉船灣那兩艘小船都是）。
+##
+## 所以有底圖時這些類別只留互動熱區，不畫圖。留著的是：
+##   · 會動的（campfire／fire）—— 底圖畫不出跳動的火
+##   · 小物件與可拿的（sign／barrel／herb／nest／sword／tea…）—— 底圖不一定畫得到，
+##     玩家要看得到才知道有東西
+##   · 玩法標記（dummy／forge／bell）—— 找不到就卡關
+const _SCENERY_PROPS := ["hut", "tower", "gate", "well", "boat", "cliff",
+	"pine", "tree", "rock", "camp", "shrine"]
+
+
+static func is_scenery_prop(entity_id: String) -> bool:
+	var name := prop_kind(entity_id)
+	return name != "" and name in _SCENERY_PROPS
+
+
+## entity id → prop 類別名（跟 _fallback_prop_path 用同一張表，避免兩處各判一套）
+static func prop_kind(entity_id: String) -> String:
+	var toks := entity_id.split("_", false)
+	if toks.is_empty():
+		return ""
+	if _HEAD_PROP.has(toks[0]):
+		return str(_HEAD_PROP[toks[0]])
+	for rule in _TOKEN_PROP:
+		var keys: Array = rule[0]
+		for tk in toks:
+			if tk in keys:
+				return str(rule[1])
+	return ""
 
 
 static func explore_entity_tex(entity_id: String) -> Texture2D:

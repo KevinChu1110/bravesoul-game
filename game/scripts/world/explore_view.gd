@@ -977,7 +977,18 @@ func _rebuild_entities() -> void:
 		root.add_child(shadow)
 
 		var tex := SpriteDB.explore_entity_tex(e.id)
-		if tex:
+		## 底圖已經畫過的景物（房子／樹／岩石／船骸…）不再疊一張 prop 上去，
+		## 只留互動熱區 —— 走近了名稱牌與 E 提示照樣會跳出來。
+		## 沒有底圖的地圖仍要畫，否則畫面上根本看不到東西。
+		##
+		## 注意這裡不能只把 tex 設成 null：那會掉進下面的色塊 fallback，
+		## 變成在漂亮底圖上畫一個半透明彩色方框，比疊 sprite 還糟。
+		var hide_scenery := _has_scenic_bg and SpriteDB.is_scenery_prop(str(e.id))
+		if hide_scenery:
+			## 看不見的東西不該有影子
+			shadow.visible = false
+			root.set_meta("sort_y", e.pos.y + e.size.y)
+		elif tex:
 			## 依貼圖比例放大顯示，避免 48px 框塞大建築圖卻仍像色塊
 			var disp := _entity_display_size(e, tex)
 			root.size = disp
