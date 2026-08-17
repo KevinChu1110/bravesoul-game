@@ -3800,11 +3800,26 @@ func _go_craft_panel() -> void:
 	for r in recipes:
 		lines.append(EquipmentSystem.recipe_line(r))
 	body += "\n".join(lines)
+	## 26 個配方全部列得出來。
+	##
+	## 原本只做前 10 個（說明區卻把 26 個全列給玩家看），做不出來的 16 個裡
+	## 包含**全部的防具與飾品**，以及鎚流派的三把鎚 —— 選了鎚的玩家
+	## 一把自己的武器都打不出來，而裝備面板還寫著「野外掉落或找釘釘鍛造」。
+	##
+	## 當初封 10 個大概是因為面板放不下；現在按鈕列會捲動了，不必再砍。
+	## 自己流派的排前面，不用在 26 顆裡面找。
+	var my_line := GameState.path_style
+	var order: Array = []
+	for i in recipes.size():
+		var rr: Dictionary = recipes[i]
+		var bl := str(EquipmentSystem.base_def(str(rr.get("base_id", ""))).get("line", ""))
+		order.append({"i": i, "own": bl != "" and bl == my_line})
+	order.sort_custom(func(a2, b2): return bool(a2["own"]) and not bool(b2["own"]))
 	var buttons: Array = []
-	for i in mini(10, recipes.size()):
-		var rec: Dictionary = recipes[i]
+	for o in order:
+		var idx: int = int(o["i"])
+		var rec: Dictionary = recipes[idx]
 		var nm := str(EquipmentSystem.base_def(str(rec.get("base_id", ""))).get("name", "?"))
-		var idx := i
 		buttons.append({"text": Loc.t("forge.craft_btn", {"name": nm}), "cb": func(): _do_craft(idx)})
 	buttons.append({"text": Loc.t("forge.back_menu"), "cb": _show_forge_panel})
 	_panel(Loc.t("forge.craft_title"), body, buttons)
@@ -3969,9 +3984,16 @@ func _go_c1_wild() -> void:
 	## 起步安全網：第一次進荒野時若身上不夠打一把器，補一筆。
 	## 原本沒有旗標，於是每次金幣低於 100 走進荒野就 +120 —— 那是個無限水龍頭，
 	## 玩家永遠不會缺錢，經濟的下限直接消失。
-	if GameState.gold < 100 and not GameState.has_flag("meta.wild_stipend"):
+	## 補到 120，而不是「不足就 +120」。
+	##
+	## 原本是「金幣 < 100 就加 120」，於是在荒野入口身上有 100~189 金的玩家
+	## 反而比什麼都不撿的玩家窮 —— 什麼都不撿 70+120=190，
+	## 撿了一個 40 金寶箱變成 110、拿不到補助。安全網懲罰了會探索的人，
+	## 而且完全看不見。改成「補到 120」：撿得多的一定不會比較少。
+	if not GameState.has_flag("meta.wild_stipend"):
 		GameState.set_flag("meta.wild_stipend", true)
-		GameState.add_gold(120)
+		if GameState.gold < 120:
+			GameState.add_gold(120 - GameState.gold)
 	_open_explore("wild", Screen.C1_WILD)
 
 

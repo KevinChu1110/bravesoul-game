@@ -45,8 +45,12 @@ var fog_vuln_left: float = 0.0
 ## 加上兩隻打不死的幻影一起輸出，實測 Lv40 也只有 7% 勝率。
 ##
 ## 破綻拉到 38% 的時間佔比，讓這場變成「看準破綻集中輸出」而不是擲骰子。
-const FOG_VULN_INTERVAL := 2.2
-const FOG_VULN_DURATION := 1.35
+## 破綻佔比 = DURATION / (INTERVAL + DURATION)。
+## 加了週期抖動之後，玩家不再能「湊巧」卡到好相位 —— 原本 38% 的名目佔比
+## 在好相位時實際接近全中、壞相位幾乎全落空，平均下來比帳面高。
+## 抖動把運氣拿掉了，所以要把名目佔比補上來，難度才回到設計值。
+const FOG_VULN_INTERVAL := 2.0
+const FOG_VULN_DURATION := 1.7
 
 ## 魔王模式：血量階段誘惑暫停
 var demon_mode: bool = false
@@ -217,6 +221,19 @@ func step(dt: float) -> void:
 	_check_end()
 
 
+## Boss 的破綻窗不可以是節拍器。
+##
+## ATB 也是固定節拍（玩家沒辦法決定自己何時出手），兩個固定週期湊在一起就會
+## 相位鎖 —— 實測白霧在速度 14/15/17 是 100%，16 掉到 15%、19 掉到 5%。
+## 玩家照著遊戲教的去練等、去挑快流派，同一個王卻從穩過變成打不過，
+## 而他做的每件事都是對的。他會歸因到自己，然後卡在那裡。
+##
+## 每次重排時給週期一點隨機，兩條線就咬不死。抖動走 sim.rng，
+## 所以同一個 seed 仍然可重現（測試才量得準）。
+func _cycle_jitter(base: float, ratio: float = 0.22) -> float:
+	return base * (1.0 + rng.randf_range(-ratio, ratio))
+
+
 func _step_fog_vuln(dt: float) -> void:
 	var real_u := get_unit("white_fog")
 	if real_u == null or not real_u.is_alive():
@@ -232,7 +249,7 @@ func _step_fog_vuln(dt: float) -> void:
 		real_u.vulnerable = false
 		fog_vuln_cd -= dt
 		if fog_vuln_cd <= 0.0:
-			fog_vuln_cd = FOG_VULN_INTERVAL
+			fog_vuln_cd = _cycle_jitter(FOG_VULN_INTERVAL)
 			fog_vuln_left = FOG_VULN_DURATION
 			real_u.vulnerable = true
 			_emit("fog_reveal", {"id": real_u.id, "duration": FOG_VULN_DURATION})
@@ -677,7 +694,7 @@ func _step_falcon_stop(dt: float) -> void:
 		f.vulnerable = false
 		falcon_stop_cd -= dt
 		if falcon_stop_cd <= 0.0:
-			falcon_stop_cd = FALCON_STOP_INTERVAL
+			falcon_stop_cd = _cycle_jitter(FALCON_STOP_INTERVAL)
 			## 低血停拍略短
 			var dur := FALCON_STOP_DURATION
 			if float(f.hp) / float(f.max_hp) < 0.4:
