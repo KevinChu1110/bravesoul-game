@@ -3,10 +3,17 @@ class_name WorldContent
 ## 廣域內容：寶箱、雜魚遭遇、秘境小 Boss、探索計數。
 ## 互動 id 對應；進度寫入 GameState.flags。
 
-## ── 雜魚／小 Boss 數值定義（battle mode key）──
 const ContentLoc := preload("res://scripts/systems/content_loc.gd")
 
 
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
+
+
+## ── 雜魚／小 Boss 數值定義（battle mode key）──
 ## 敵人名在非繁中會被 ContentLoc 換掉。enemy_def() 是唯一入口，翻在這裡
 ## 戰鬥畫面、日誌、掉落訊息就全都吃得到。
 static func enemy_def(mode: String) -> Dictionary:
@@ -87,44 +94,44 @@ static func art_fallback(mode: String) -> String:
 ## entity id → 寶箱（經濟 0.15：單次略收，合計約 −12%；不重砍，主線探索仍要有摸箱爽感）
 static func chests() -> Dictionary:
 	return {
-		"sealed_chest": {"flag": "loot.chest.road_ruins", "gold": 40, "dust": 2, "text": "封箱裂開：古驛的通行費，如今歸你。"},
-		"chest_root": {"flag": "loot.chest.forest_ruins", "gold": 44, "dust": 3, "text": "根纏箱打開：遊俠留下的箭矢錢。"},
-		"chest_half": {"flag": "loot.chest.coast_wreck", "gold": 48, "dust": 2, "text": "半埋箱：海水泡過的金幣仍作響。"},
-		"supply_crate": {"flag": "loot.chest.wild_supply", "gold": 26, "dust": 1, "text": "補給箱：乾糧與幾枚城徽幣。"},
-		"hidden_cache": {"flag": "loot.chest.forest_cache", "gold": 35, "dust": 2, "text": "獵人藏匿處：藥草與銅板。"},
-		"cellar_hatch": {"flag": "loot.chest.road_inn", "gold": 30, "dust": 1, "text": "地窖底：客棧老闆藏的小費罐。"},
-		"ore_cart": {"flag": "loot.chest.village_cave", "gold": 22, "dust": 2, "text": "礦車夾層：半袋未熔的星屑礦砂。"},
-		"fresh_earth": {"flag": "loot.chest.village_grave", "gold": 18, "dust": 1, "text": "新土下露出小盒——村民的護身符錢。"},
-		"goods_pile": {"flag": "loot.chest.caravan", "gold": 35, "dust": 2, "text": "行商允你摸一層貨——規矩內的謝禮。"},
-		"scroll_pile": {"flag": "loot.chest.tower_scrolls", "gold": 30, "dust": 3, "text": "卷軸間夾著星屑袋。斷頁說過：拿吧。"},
-		"obsidian": {"flag": "loot.chest.scar_obsidian", "gold": 52, "dust": 4, "text": "黑曜碎中封著濃縮星屑——燙手，但有用。"},
-		"scale_table": {"flag": "loot.chest.market_scale", "gold": 24, "dust": 1, "text": "天秤台抽屜：商會遺落的零錢。"},
-		"guest_bed": {"flag": "loot.chest.inn_bed", "gold": 14, "dust": 1, "text": "塌床底下：旅客來不及拿走的錢袋。"},
-		"nest_mark": {"flag": "loot.chest.forest_feather", "gold": 30, "dust": 2, "text": "羽痕石縫：疾影屬下遺落的戰利。"},
-		"pirate_mark": {"flag": "loot.chest.coast_pirate", "gold": 42, "dust": 2, "text": "海盜標記下埋著箱——他們不會回來了。"},
-		"mosaic": {"flag": "loot.chest.star_mosaic", "gold": 36, "dust": 3, "text": "馬賽克中央撬起：古驛的星途通行符與金幣。"},
+		"sealed_chest": {"flag": "loot.chest.road_ruins", "gold": 40, "dust": 2, "text": _t("封箱裂開：古驛的通行費，如今歸你。")},
+		"chest_root": {"flag": "loot.chest.forest_ruins", "gold": 44, "dust": 3, "text": _t("根纏箱打開：遊俠留下的箭矢錢。")},
+		"chest_half": {"flag": "loot.chest.coast_wreck", "gold": 48, "dust": 2, "text": _t("半埋箱：海水泡過的金幣仍作響。")},
+		"supply_crate": {"flag": "loot.chest.wild_supply", "gold": 26, "dust": 1, "text": _t("補給箱：乾糧與幾枚城徽幣。")},
+		"hidden_cache": {"flag": "loot.chest.forest_cache", "gold": 35, "dust": 2, "text": _t("獵人藏匿處：藥草與銅板。")},
+		"cellar_hatch": {"flag": "loot.chest.road_inn", "gold": 30, "dust": 1, "text": _t("地窖底：客棧老闆藏的小費罐。")},
+		"ore_cart": {"flag": "loot.chest.village_cave", "gold": 22, "dust": 2, "text": _t("礦車夾層：半袋未熔的星屑礦砂。")},
+		"fresh_earth": {"flag": "loot.chest.village_grave", "gold": 18, "dust": 1, "text": _t("新土下露出小盒——村民的護身符錢。")},
+		"goods_pile": {"flag": "loot.chest.caravan", "gold": 35, "dust": 2, "text": _t("行商允你摸一層貨——規矩內的謝禮。")},
+		"scroll_pile": {"flag": "loot.chest.tower_scrolls", "gold": 30, "dust": 3, "text": _t("卷軸間夾著星屑袋。斷頁說過：拿吧。")},
+		"obsidian": {"flag": "loot.chest.scar_obsidian", "gold": 52, "dust": 4, "text": _t("黑曜碎中封著濃縮星屑——燙手，但有用。")},
+		"scale_table": {"flag": "loot.chest.market_scale", "gold": 24, "dust": 1, "text": _t("天秤台抽屜：商會遺落的零錢。")},
+		"guest_bed": {"flag": "loot.chest.inn_bed", "gold": 14, "dust": 1, "text": _t("塌床底下：旅客來不及拿走的錢袋。")},
+		"nest_mark": {"flag": "loot.chest.forest_feather", "gold": 30, "dust": 2, "text": _t("羽痕石縫：疾影屬下遺落的戰利。")},
+		"pirate_mark": {"flag": "loot.chest.coast_pirate", "gold": 42, "dust": 2, "text": _t("海盜標記下埋著箱——他們不會回來了。")},
+		"mosaic": {"flag": "loot.chest.star_mosaic", "gold": 36, "dust": 3, "text": _t("馬賽克中央撬起：古驛的星途通行符與金幣。")},
 	}
 
 
 ## entity id → 可重複或單次雜魚
 static func skirmishes() -> Dictionary:
 	return {
-		"deep_dark": {"mode": "ash_rat", "once_flag": "", "intro": "黑暗裡兩點紅光——灰燼鼠撲來。"},
-		"bone_pile": {"mode": "ash_rat", "once_flag": "", "intro": "獸骨堆動了。不是風。"},
-		"bush_b": {"mode": "road_bandit", "once_flag": "skirmish.road_bush", "intro": "黑刺叢後竄出殘兵！"},
-		"rat_nest": {"mode": "sewer_slime", "once_flag": "", "intro": "黏液從管口湧出。"},
-		"slime_pool": {"mode": "sewer_slime", "once_flag": "skirmish.sewer_pool", "intro": "池面鼓起人形……不，是黏漿。"},
-		"cat_shadow": {"mode": "fog_shade", "once_flag": "skirmish.mist_cat", "intro": "影貓化作霧影撲向你。"},
-		"false_exit": {"mode": "fog_shade", "once_flag": "", "intro": "假出口合攏——霧影從鏡裡踏出。"},
-		"hidden_spar": {"mode": "bamboo_spirit", "once_flag": "skirmish.bamboo", "intro": "竹影拳靈求一戰。"},
-		"kite_stuck": {"mode": "forest_sprite", "once_flag": "skirmish.kite", "intro": "風箏線上纏著風妖。"},
-		"owl_post": {"mode": "forest_sprite", "once_flag": "skirmish.owl", "intro": "貓頭鷹樁後，風妖尖叫。"},
-		"boat_wreck": {"mode": "coast_raider", "once_flag": "skirmish.boat", "intro": "破船骸裡爬出海盜影。"},
-		"deep_water": {"mode": "coast_raider", "once_flag": "", "intro": "深水翻湧——潮襲者上岸。"},
-		"flame_vent": {"mode": "scar_wisp", "once_flag": "", "intro": "焰口噴出疤地焰靈！"},
-		"black_vein": {"mode": "scar_wisp", "once_flag": "skirmish.black_vein", "intro": "黑焰脈紋凝成靈體。"},
-		"echo_canyon": {"mode": "ash_rat", "once_flag": "skirmish.ravine", "intro": "回音峽傳出獸吼——灰燼鼠群。"},
-		"alley_dark": {"mode": "road_bandit", "once_flag": "skirmish.market_alley", "intro": "窄巷裡有刀光。"},
+		"deep_dark": {"mode": "ash_rat", "once_flag": "", "intro": _t("黑暗裡兩點紅光——灰燼鼠撲來。")},
+		"bone_pile": {"mode": "ash_rat", "once_flag": "", "intro": _t("獸骨堆動了。不是風。")},
+		"bush_b": {"mode": "road_bandit", "once_flag": "skirmish.road_bush", "intro": _t("黑刺叢後竄出殘兵！")},
+		"rat_nest": {"mode": "sewer_slime", "once_flag": "", "intro": _t("黏液從管口湧出。")},
+		"slime_pool": {"mode": "sewer_slime", "once_flag": "skirmish.sewer_pool", "intro": _t("池面鼓起人形……不，是黏漿。")},
+		"cat_shadow": {"mode": "fog_shade", "once_flag": "skirmish.mist_cat", "intro": _t("影貓化作霧影撲向你。")},
+		"false_exit": {"mode": "fog_shade", "once_flag": "", "intro": _t("假出口合攏——霧影從鏡裡踏出。")},
+		"hidden_spar": {"mode": "bamboo_spirit", "once_flag": "skirmish.bamboo", "intro": _t("竹影拳靈求一戰。")},
+		"kite_stuck": {"mode": "forest_sprite", "once_flag": "skirmish.kite", "intro": _t("風箏線上纏著風妖。")},
+		"owl_post": {"mode": "forest_sprite", "once_flag": "skirmish.owl", "intro": _t("貓頭鷹樁後，風妖尖叫。")},
+		"boat_wreck": {"mode": "coast_raider", "once_flag": "skirmish.boat", "intro": _t("破船骸裡爬出海盜影。")},
+		"deep_water": {"mode": "coast_raider", "once_flag": "", "intro": _t("深水翻湧——潮襲者上岸。")},
+		"flame_vent": {"mode": "scar_wisp", "once_flag": "", "intro": _t("焰口噴出疤地焰靈！")},
+		"black_vein": {"mode": "scar_wisp", "once_flag": "skirmish.black_vein", "intro": _t("黑焰脈紋凝成靈體。")},
+		"echo_canyon": {"mode": "ash_rat", "once_flag": "skirmish.ravine", "intro": _t("回音峽傳出獸吼——灰燼鼠群。")},
+		"alley_dark": {"mode": "road_bandit", "once_flag": "skirmish.market_alley", "intro": _t("窄巷裡有刀光。")},
 	}
 
 
@@ -135,20 +142,20 @@ static func minibosses() -> Dictionary:
 			"mode": "scar_lord",
 			"flag": "boss.scar_lord_cleared",
 			"need_flag": "boss.abo_cleared",
-			"deny": "疤主的氣壓太重。至少先通過道場試煉。",
+			"deny": _t("疤主的氣壓太重。至少先通過道場試煉。"),
 			"cleared_dialog": "world.scar_cleared",
 			"intro": [
-				{"speaker": "旁白", "text": "疤地中央，黑焰聚成人形——沒有臉，只有胃口。"},
-				{"speaker": "旁白", "text": "焦土一跳一跳，像還在流血的傷口。"},
-				{"speaker": "黑焰疤主", "portrait": "scar_lord", "text": "……弱者……也配踏入我的傷口？"},
-				{"speaker": "黑焰疤主", "portrait": "scar_lord", "text": "野心……香味……過來。讓我把它從你身上撕開。"},
+				{"speaker": _t("旁白"), "text": _t("疤地中央，黑焰聚成人形——沒有臉，只有胃口。")},
+				{"speaker": _t("旁白"), "text": _t("焦土一跳一跳，像還在流血的傷口。")},
+				{"speaker": _t("黑焰疤主"), "portrait": "scar_lord", "text": _t("……弱者……也配踏入我的傷口？")},
+				{"speaker": _t("黑焰疤主"), "portrait": "scar_lord", "text": _t("野心……香味……過來。讓我把它從你身上撕開。")},
 			],
 			"win": [
-				{"speaker": "疤主", "portrait": "scar_lord", "text": "傷口……合上了嗎……"},
-				{"speaker": "疤主", "portrait": "scar_lord", "text": "……你沒有餵我。奇怪。……"},
-				{"speaker": "系統", "text": "戰勝【黑焰疤主】。金 90 · 星屑 5。稱號「疤地行者」進度。"},
+				{"speaker": _t("疤主"), "portrait": "scar_lord", "text": _t("傷口……合上了嗎……")},
+				{"speaker": _t("疤主"), "portrait": "scar_lord", "text": _t("……你沒有餵我。奇怪。……")},
+				{"speaker": _t("系統"), "text": _t("戰勝【黑焰疤主】。金 90 · 星屑 5。稱號「疤地行者」進度。")},
 			],
-			"lose": "黑焰把你掀回岔路。疤地仍在跳動脈搏。",
+			"lose": _t("黑焰把你掀回岔路。疤地仍在跳動脈搏。"),
 			"gold": 90, "dust": 5, "hp": 12,
 			"lose_map": "crossroads", "lose_screen": "C1_WILD",
 			"win_map": "blackflame_scar", "win_screen": "C1_WILD",
@@ -157,20 +164,20 @@ static func minibosses() -> Dictionary:
 			"mode": "mirror_wraith",
 			"flag": "boss.mirror_wraith_cleared",
 			"need_flag": "c2_entered",
-			"deny": "鏡廊拒絕外人。先被霧隱接納。",
+			"deny": _t("鏡廊拒絕外人。先被霧隱接納。"),
 			"cleared_dialog": "world.mirror_cleared",
 			"intro": [
-				{"speaker": "旁白", "text": "所有鏡子同時亮起——裡頭的你，比你更像獵人。"},
-				{"speaker": "旁白", "text": "倒影先動了一步。你還沒拔劍。"},
-				{"speaker": "鏡廊殘影", "portrait": "mirror_wraith", "text": "我才是敢走捷徑的那一個。"},
-				{"speaker": "鏡廊殘影", "portrait": "mirror_wraith", "text": "你把懦弱叫作慈悲。來——讓我替你變強。"},
+				{"speaker": _t("旁白"), "text": _t("所有鏡子同時亮起——裡頭的你，比你更像獵人。")},
+				{"speaker": _t("旁白"), "text": _t("倒影先動了一步。你還沒拔劍。")},
+				{"speaker": _t("鏡廊殘影"), "portrait": "mirror_wraith", "text": _t("我才是敢走捷徑的那一個。")},
+				{"speaker": _t("鏡廊殘影"), "portrait": "mirror_wraith", "text": _t("你把懦弱叫作慈悲。來——讓我替你變強。")},
 			],
 			"win": [
-				{"speaker": "殘影", "portrait": "mirror_wraith", "text": "……原來真影比較沉。"},
-				{"speaker": "殘影", "portrait": "mirror_wraith", "text": "捷徑……碎了。你自己走吧。"},
-				{"speaker": "系統", "text": "戰勝【鏡廊殘影】。金 80 · 星屑 5。"},
+				{"speaker": _t("殘影"), "portrait": "mirror_wraith", "text": _t("……原來真影比較沉。")},
+				{"speaker": _t("殘影"), "portrait": "mirror_wraith", "text": _t("捷徑……碎了。你自己走吧。")},
+				{"speaker": _t("系統"), "text": _t("戰勝【鏡廊殘影】。金 80 · 星屑 5。")},
 			],
-			"lose": "你被自己的倒影推回霧隱村。",
+			"lose": _t("你被自己的倒影推回霧隱村。"),
 			"gold": 80, "dust": 5, "hp": 10,
 			"lose_map": "mist_village", "lose_screen": "C2_MIST",
 			"win_map": "mist_mirror", "win_screen": "C2_MIST",
@@ -179,20 +186,20 @@ static func minibosses() -> Dictionary:
 			"mode": "wreck_captain",
 			"flag": "boss.wreck_captain_cleared",
 			"need_flag": "c5_entered",
-			"deny": "船長影只認海上來的人。先踏上維京海岸。",
+			"deny": _t("船長影只認海上來的人。先踏上維京海岸。"),
 			"cleared_dialog": "world.wreck_cleared",
 			"intro": [
-				{"speaker": "旁白", "text": "沉船龍骨站起——船長帽下沒有臉，只有浪聲。"},
-				{"speaker": "旁白", "text": "潮水退半尺，像在給你登船的時間。很短。"},
-				{"speaker": "沉船船長影", "portrait": "wreck_captain", "text": "這船是我的墳。訪客，留下通行證——或骨頭。"},
-				{"speaker": "沉船船長影", "portrait": "wreck_captain", "text": "海不認弱者的名字。報上你的，或沉下去。"},
+				{"speaker": _t("旁白"), "text": _t("沉船龍骨站起——船長帽下沒有臉，只有浪聲。")},
+				{"speaker": _t("旁白"), "text": _t("潮水退半尺，像在給你登船的時間。很短。")},
+				{"speaker": _t("沉船船長影"), "portrait": "wreck_captain", "text": _t("這船是我的墳。訪客，留下通行證——或骨頭。")},
+				{"speaker": _t("沉船船長影"), "portrait": "wreck_captain", "text": _t("海不認弱者的名字。報上你的，或沉下去。")},
 			],
 			"win": [
-				{"speaker": "船長影", "portrait": "wreck_captain", "text": "……潮水……準時……"},
-				{"speaker": "船長影", "portrait": "wreck_captain", "text": "……船……可以再睡一次。……去吧，岸上的。"},
-				{"speaker": "系統", "text": "戰勝【沉船船長影】。金 95 · 星屑 5。"},
+				{"speaker": _t("船長影"), "portrait": "wreck_captain", "text": _t("……潮水……準時……")},
+				{"speaker": _t("船長影"), "portrait": "wreck_captain", "text": _t("……船……可以再睡一次。……去吧，岸上的。")},
+				{"speaker": _t("系統"), "text": _t("戰勝【沉船船長影】。金 95 · 星屑 5。")},
 			],
-			"lose": "浪把你送回碼頭。船骸仍張著口。",
+			"lose": _t("浪把你送回碼頭。船骸仍張著口。"),
 			"gold": 95, "dust": 5, "hp": 12,
 			"lose_map": "coast", "lose_screen": "C5_COAST",
 			"win_map": "coast_wreck", "win_screen": "C5_COAST",

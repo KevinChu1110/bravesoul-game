@@ -2,13 +2,21 @@ extends Node
 ## 離線「公會／聯盟」社交層：貢獻、位階、佈告、週目標。
 ## 非連線；體感是單機裡的盟約社群（NPC 盟友留言）。
 
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
 const FLAG_JOINED := "guild.joined"
 const FLAG_CONTRIB := "guild.contrib"
 const FLAG_NAME := "guild.name"
 const FLAG_BOARD := "guild.board_idx"
 
-const ContentLoc := preload("res://scripts/systems/content_loc.gd")
 const GUILD_TEXT_FIELDS: PackedStringArray = ["name", "motto"]
+
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
+
 
 ## 公會名與箴言在非繁中會被 ContentLoc 換掉。要顯示給玩家的地方走 guilds()，
 ## 內部判定用 GUILDS 就好。
@@ -67,7 +75,7 @@ func join(gid: String) -> Dictionary:
 			found = g
 			break
 	if found.is_empty():
-		return {"ok": false, "msg": "找不到這個盟約。"}
+		return {"ok": false, "msg": _t("找不到這個盟約。")}
 	guild_id = gid
 	GameState.set_flag(FLAG_JOINED, true)
 	GameState.set_flag("guild.id", gid)
@@ -76,7 +84,7 @@ func join(gid: String) -> Dictionary:
 		contrib = 10
 		GameState.set_flag(FLAG_CONTRIB, contrib)
 	SaveManager.save_game()
-	return {"ok": true, "msg": "你加入了【%s】。\n「%s」" % [found.get("name", gid), found.get("motto", "")]}
+	return {"ok": true, "msg": _t("你加入了【%s】。\n「%s」") % [found.get("name", gid), found.get("motto", "")]}
 
 
 func add_contrib(n: int) -> void:
@@ -89,14 +97,14 @@ func add_contrib(n: int) -> void:
 
 func rank_name() -> String:
 	if contrib >= 300:
-		return "盟主候補"
+		return _t("盟主候補")
 	if contrib >= 150:
-		return "資深旅者"
+		return _t("資深旅者")
 	if contrib >= 60:
-		return "正式成員"
+		return _t("正式成員")
 	if contrib >= 10:
-		return "見習"
-	return "訪客"
+		return _t("見習")
+	return _t("訪客")
 
 
 func board_line() -> String:
@@ -104,7 +112,7 @@ func board_line() -> String:
 	var line := BOARD[idx % BOARD.size()]
 	## NG+ 額外留言
 	if GameState.ng_plus > 0 and idx % 3 == 0:
-		line = "【迴響】二周目的你，腳印疊在舊路上——盟約記得。"
+		line = _t("【迴響】二周目的你，腳印疊在舊路上——盟約記得。")
 	return line
 
 
@@ -117,12 +125,12 @@ func next_board() -> String:
 func status_bbcode() -> String:
 	_load_from_state()
 	if not is_joined():
-		var s := "[b]尚未加入盟約[/b]\n選一個理念相近的公會，解鎖佈告與貢獻補給。\n\n"
+		var s := _t("[b]尚未加入盟約[/b]\n選一個理念相近的公會，解鎖佈告與貢獻補給。\n\n")
 		for g in GUILDS:
 			s += "· %s\n  %s\n" % [g.get("name", ""), g.get("motto", "")]
 		return s
 	var gname := str(GameState.get_flag(FLAG_NAME, guild_id))
-	return "[b]%s[/b]  ·  %s\n貢獻 %d　位階：%s\n\n佈告：\n%s" % [
+	return _t("[b]%s[/b]  ·  %s\n貢獻 %d　位階：%s\n\n佈告：\n%s") % [
 		gname, rank_name(), contrib, rank_name(), board_line()
 	]
 
@@ -135,13 +143,13 @@ func buy_supply() -> Dictionary:
 	## 花 30 貢獻換補給
 	_load_from_state()
 	if not is_joined():
-		return {"ok": false, "msg": "尚未加入盟約。"}
+		return {"ok": false, "msg": _t("尚未加入盟約。")}
 	if contrib < 30:
-		return {"ok": false, "msg": "貢獻不足 30。"}
+		return {"ok": false, "msg": _t("貢獻不足 30。")}
 	contrib -= 30
 	GameState.set_flag(FLAG_CONTRIB, contrib)
 	GameState.add_gold(40)
 	GameState.add_stardust(2)
 	GameState.hp = GameState.effective_max_hp()
 	SaveManager.save_game()
-	return {"ok": true, "msg": "公庫補給：金 40 · 星屑 2 · 傷勢回穩。貢獻 −30。"}
+	return {"ok": true, "msg": _t("公庫補給：金 40 · 星屑 2 · 傷勢回穩。貢獻 −30。")}

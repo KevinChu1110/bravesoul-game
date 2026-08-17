@@ -6,21 +6,23 @@ extends Node
 signal status_changed
 signal save_conflict(local_updated: String, cloud_updated: String, cloud_payload: Dictionary)
 
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
 const SaveMigration = preload("res://scripts/autoload/save_migration.gd")
 
 const SETTINGS_PATH := "user://online_settings.json"
 const SESSION_PATH := "user://online_session.json"
 
 var offline_only: bool = true
-var display_name: String = "星途旅人"
+var display_name: String = _t("星途旅人")
 var supabase_url: String = ""
 var supabase_anon_key: String = ""
 
 var user_id: String = ""
 var access_token: String = ""
 var last_error: String = ""
-var last_status: String = "純單機"
-var last_health: String = "尚未檢測"
+var last_status: String = _t("純單機")
+var last_health: String = _t("尚未檢測")
 var last_health_ok: bool = false
 var last_health_ms: int = -1
 ## 伺服器認定的可交易金幣（影子帳）。市集買東西是扣這一筆，不是扣存檔裡的數字。
@@ -31,6 +33,13 @@ var _pending: Callable = Callable()
 var _queue: Array = []  ## [{method, path, body, auth, prefer, cb}]
 var _health_t0: int = 0
 
+
+
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
 
 func _ready() -> void:
 	_http = HTTPRequest.new()
@@ -53,7 +62,7 @@ func load_settings() -> void:
 	if typeof(data) != TYPE_DICTIONARY:
 		return
 	offline_only = bool(data.get("offline_only", true))
-	display_name = str(data.get("display_name", "星途旅人"))
+	display_name = str(data.get("display_name", _t("星途旅人")))
 	supabase_url = str(data.get("supabase_url", "")).strip_edges()
 	supabase_anon_key = str(data.get("supabase_anon_key", "")).strip_edges()
 
@@ -80,7 +89,7 @@ func set_offline_only(v: bool) -> void:
 func set_display_name(n: String) -> void:
 	display_name = n.strip_edges()
 	if display_name == "":
-		display_name = "星途旅人"
+		display_name = _t("星途旅人")
 	save_settings()
 	status_changed.emit()
 
@@ -111,13 +120,13 @@ func status_line() -> String:
 
 func _refresh_status() -> void:
 	if offline_only:
-		last_status = "純單機（連線已關）"
+		last_status = _t("純單機（連線已關）")
 	elif not is_configured():
-		last_status = "連線關 · 未設定後端"
+		last_status = _t("連線關 · 未設定後端")
 	elif user_id == "":
-		last_status = "可上線 · 未登入"
+		last_status = _t("可上線 · 未登入")
 	else:
-		last_status = "已上線 · %s" % user_id.substr(0, mini(8, user_id.length()))
+		last_status = _t("已上線 · %s") % user_id.substr(0, mini(8, user_id.length()))
 
 
 func _save_session() -> void:
@@ -173,7 +182,7 @@ func sign_out() -> void:
 
 func sign_in_anonymous(cb: Callable = Callable()) -> void:
 	if not is_online_enabled():
-		_fail("純單機或未設定後端", cb)
+		_fail(_t("純單機或未設定後端"), cb)
 		return
 	_request(
 		"POST",
@@ -187,11 +196,11 @@ func sign_in_anonymous(cb: Callable = Callable()) -> void:
 ## Email + 密碼註冊（Supabase Auth）
 func sign_up_email(email: String, password: String, cb: Callable = Callable()) -> void:
 	if not is_online_enabled():
-		_fail("純單機或未設定後端", cb)
+		_fail(_t("純單機或未設定後端"), cb)
 		return
 	email = email.strip_edges()
 	if email.find("@") < 1 or password.length() < 6:
-		_fail("信箱無效或密碼少於 6 字", cb)
+		_fail(_t("信箱無效或密碼少於 6 字"), cb)
 		return
 	_request(
 		"POST",
@@ -205,11 +214,11 @@ func sign_up_email(email: String, password: String, cb: Callable = Callable()) -
 ## Email + 密碼登入
 func sign_in_email(email: String, password: String, cb: Callable = Callable()) -> void:
 	if not is_online_enabled():
-		_fail("純單機或未設定後端", cb)
+		_fail(_t("純單機或未設定後端"), cb)
 		return
 	email = email.strip_edges()
 	if email.find("@") < 1 or password.length() < 1:
-		_fail("請輸入信箱與密碼", cb)
+		_fail(_t("請輸入信箱與密碼"), cb)
 		return
 	_request(
 		"POST",
@@ -224,12 +233,12 @@ func _cb_sign_in(ok: bool, body: Variant, cb: Callable) -> void:
 	if ok:
 		_parse_auth(body, cb)
 	else:
-		_fail("訪客登入失敗：請在 Supabase 開啟 Anonymous Auth。%s" % last_error, cb)
+		_fail(_t("訪客登入失敗：請在 Supabase 開啟 Anonymous Auth。%s") % last_error, cb)
 
 
 func _parse_auth(body: Variant, cb: Callable) -> void:
 	if typeof(body) != TYPE_DICTIONARY:
-		_fail("登入回應無效", cb)
+		_fail(_t("登入回應無效"), cb)
 		return
 	access_token = str(body.get("access_token", ""))
 	var user: Variant = body.get("user", {})
@@ -238,7 +247,7 @@ func _parse_auth(body: Variant, cb: Callable) -> void:
 	if user_id == "" and body.has("id"):
 		user_id = str(body.get("id", ""))
 	if access_token == "" or user_id == "":
-		_fail("登入缺 token／user", cb)
+		_fail(_t("登入缺 token／user"), cb)
 		return
 	_save_session()
 	last_error = ""
@@ -267,7 +276,7 @@ func upsert_profile() -> void:
 
 func push_cloud_save(cb: Callable = Callable()) -> void:
 	if not is_signed_in():
-		_fail("未上線", cb)
+		_fail(_t("未上線"), cb)
 		return
 	var payload: Dictionary = GameState.to_dict()
 	## 存檔只能經 save_push 進資料庫；伺服器同時更新可交易金幣／物品的帳
@@ -283,25 +292,25 @@ func push_cloud_save(cb: Callable = Callable()) -> void:
 func _cb_push_save(ok: bool, body: Variant, cb: Callable) -> void:
 	var row := _rpc_row(body)
 	if not ok or str(row.get("error", "")) != "":
-		_fail(_rpc_error(ok, row, "推送失敗"), cb)
+		_fail(_rpc_error(ok, row, _t("推送失敗")), cb)
 		return
 	ledger_gold = int(row.get("ledger_gold", ledger_gold))
-	_ok({"msg": "雲存檔已推送", "ledger_gold": ledger_gold}, cb)
+	_ok({"msg": _t("雲存檔已推送"), "ledger_gold": ledger_gold}, cb)
 
 
 func pull_cloud_save(cb: Callable = Callable()) -> void:
 	if not is_signed_in():
-		_fail("未上線", cb)
+		_fail(_t("未上線"), cb)
 		return
 	_request("GET", "/rest/v1/saves?user_id=eq.%s&select=*" % user_id, null, true, _cb_pull_save.bind(cb))
 
 
 func _cb_pull_save(ok: bool, body: Variant, cb: Callable) -> void:
 	if not ok:
-		_fail(last_error if last_error != "" else "拉取失敗", cb)
+		_fail(last_error if last_error != "" else _t("拉取失敗"), cb)
 		return
 	if body is Array and (body as Array).is_empty():
-		_ok({"empty": true, "msg": "雲端尚無存檔"}, cb)
+		_ok({"empty": true, "msg": _t("雲端尚無存檔")}, cb)
 		return
 	var row: Dictionary = {}
 	if body is Array:
@@ -310,18 +319,18 @@ func _cb_pull_save(ok: bool, body: Variant, cb: Callable) -> void:
 		row = body
 	var cloud_payload: Variant = row.get("payload", {})
 	if typeof(cloud_payload) != TYPE_DICTIONARY:
-		_fail("雲存檔格式錯誤", cb)
+		_fail(_t("雲存檔格式錯誤"), cb)
 		return
 	var cloud_t := str(row.get("updated_at", ""))
 	## 雲端那份可能是別台機器、更早的版本推上來的，跟本地檔一樣要先升級。
 	## 這裡漏掉的話，跨裝置同步會變成把舊格式直接灌進 GameState。
 	var res: Dictionary = SaveMigration.migrate(cloud_payload)
 	if not bool(res.get("ok", false)):
-		_fail("雲存檔來自更新的版本" if bool(res.get("future", false)) else "雲存檔格式錯誤", cb)
+		_fail(_t("雲存檔來自更新的版本") if bool(res.get("future", false)) else _t("雲存檔格式錯誤"), cb)
 		return
 	GameState.from_dict(res.get("data", {}))
 	SaveManager.save_game()
-	_ok({"msg": "已套用雲存檔", "updated_at": cloud_t}, cb)
+	_ok({"msg": _t("已套用雲存檔"), "updated_at": cloud_t}, cb)
 
 
 func push_presence(map_id: String, chapter: String = "") -> void:
@@ -356,11 +365,11 @@ func fetch_presence(map_id: String, cb: Callable = Callable()) -> void:
 
 func post_message(place: String, body_text: String, cb: Callable = Callable()) -> void:
 	if not is_signed_in():
-		_fail("未上線", cb)
+		_fail(_t("未上線"), cb)
 		return
 	var t := body_text.strip_edges()
 	if t.length() < 1 or t.length() > 80:
-		_fail("留言需 1～80 字", cb)
+		_fail(_t("留言需 1～80 字"), cb)
 		return
 	var body := {"user_id": user_id, "place": place, "body": t}
 	_request("POST", "/rest/v1/messages", body, true, _cb_msg_post.bind(cb), "return=minimal")
@@ -368,9 +377,9 @@ func post_message(place: String, body_text: String, cb: Callable = Callable()) -
 
 func _cb_msg_post(ok: bool, _b: Variant, cb: Callable) -> void:
 	if ok:
-		_ok({"msg": "已留下足跡"}, cb)
+		_ok({"msg": _t("已留下足跡")}, cb)
 	else:
-		_fail(last_error if last_error != "" else "留言失敗", cb)
+		_fail(last_error if last_error != "" else _t("留言失敗"), cb)
 
 
 func fetch_messages(place: String, cb: Callable = Callable()) -> void:
@@ -390,7 +399,7 @@ func _cb_list(ok: bool, body: Variant, cb: Callable) -> void:
 
 func candle_increment(cb: Callable = Callable()) -> void:
 	if not is_signed_in():
-		_fail("未上線", cb)
+		_fail(_t("未上線"), cb)
 		return
 	_request("POST", "/rest/v1/rpc/candle_increment", {}, true, _cb_candle.bind(cb))
 
@@ -399,7 +408,7 @@ func _cb_candle(ok: bool, body: Variant, cb: Callable) -> void:
 	if ok:
 		_ok({"total": body}, cb)
 	else:
-		_fail("點燈失敗", cb)
+		_fail(_t("點燈失敗"), cb)
 
 
 ## ── RPC 小工具 ──
@@ -428,7 +437,7 @@ func _rpc_error(http_ok: bool, row: Dictionary, fallback: String) -> String:
 
 func leaderboard_submit(board: String, score: int, cb: Callable = Callable()) -> void:
 	if not is_signed_in():
-		_fail("未上線", cb)
+		_fail(_t("未上線"), cb)
 		return
 	_request(
 		"POST",
@@ -442,9 +451,9 @@ func leaderboard_submit(board: String, score: int, cb: Callable = Callable()) ->
 func _cb_leaderboard(ok: bool, body: Variant, cb: Callable) -> void:
 	var row := _rpc_row(body)
 	if not ok or str(row.get("error", "")) != "":
-		_fail(_rpc_error(ok, row, "上榜失敗"), cb)
+		_fail(_rpc_error(ok, row, _t("上榜失敗")), cb)
 		return
-	_ok({"msg": "已記錄", "score": int(row.get("score", 0))}, cb)
+	_ok({"msg": _t("已記錄"), "score": int(row.get("score", 0))}, cb)
 
 
 func leaderboard_fetch(board: String, cb: Callable = Callable()) -> void:
@@ -466,7 +475,7 @@ func fetch_ledger(cb: Callable = Callable()) -> void:
 func _cb_ledger(ok: bool, body: Variant, cb: Callable) -> void:
 	var row := _rpc_row(body)
 	if not ok or str(row.get("error", "")) != "":
-		_fail(_rpc_error(ok, row, "查詢餘額失敗"), cb)
+		_fail(_rpc_error(ok, row, _t("查詢餘額失敗")), cb)
 		return
 	ledger_gold = int(row.get("gold", 0))
 	var items: Variant = row.get("items", {})
@@ -479,27 +488,27 @@ func _cb_ledger(ok: bool, body: Variant, cb: Callable) -> void:
 
 func panel_bbcode() -> String:
 	var lines: PackedStringArray = []
-	lines.append("[b]連線／星途[/b]")
+	lines.append(_t("[b]連線／星途[/b]"))
 	var lamp := "●" if last_health_ok else "○"
 	var lamp_c := "#6c6" if last_health_ok else "#a55"
-	lines.append("狀態：%s" % last_status)
-	lines.append("健康：[color=%s]%s %s[/color]" % [lamp_c, lamp, last_health])
+	lines.append(_t("狀態：%s") % last_status)
+	lines.append(_t("健康：[color=%s]%s %s[/color]") % [lamp_c, lamp, last_health])
 	if last_health_ms >= 0:
-		lines.append("延遲：約 %d ms" % last_health_ms)
+		lines.append(_t("延遲：約 %d ms") % last_health_ms)
 	if last_error != "":
-		lines.append("[color=#a55]最近錯誤：%s[/color]" % humanize_error(last_error))
+		lines.append(_t("[color=#a55]最近錯誤：%s[/color]") % humanize_error(last_error))
 	if is_signed_in() and ledger_gold >= 0:
-		lines.append("伺服器記錄的金幣：%d" % ledger_gold)
-	lines.append("顯示名：%s" % display_name)
-	lines.append("純單機：%s" % ("是" if offline_only else "否"))
-	lines.append("後端：%s" % ("已設定" if is_configured() else "未設定"))
+		lines.append(_t("伺服器記錄的金幣：%d") % ledger_gold)
+	lines.append(_t("顯示名：%s") % display_name)
+	lines.append(_t("純單機：%s") % (_t("是") if offline_only else _t("否")))
+	lines.append(_t("後端：%s") % (_t("已設定") if is_configured() else _t("未設定")))
 	if is_configured():
 		var host := supabase_url.replace("https://", "").replace("http://", "")
 		if host.length() > 28:
 			host = host.substr(0, 28) + "…"
 		lines.append("URL：%s" % host)
 	lines.append("")
-	lines.append("不連線也能走完整趟旅途。連上之後多了：雲端存檔、旅人殘影、留言石、通關蠟燭。")
+	lines.append(_t("不連線也能走完整趟旅途。連上之後多了：雲端存檔、旅人殘影、留言石、通關蠟燭。"))
 	return "\n".join(lines)
 
 
@@ -511,44 +520,44 @@ func humanize_error(raw: String) -> String:
 	var low := s.to_lower()
 	## 伺服器判定（supabase/economy.sql 會回的每一種）
 	if "not signed in" in low:
-		return "尚未登入，請先上線"
+		return _t("尚未登入，請先上線")
 	if "bad payload" in low:
-		return "存檔內容有問題，無法上傳"
+		return _t("存檔內容有問題，無法上傳")
 	if "payload too large" in low:
-		return "存檔太大，無法上傳"
+		return _t("存檔太大，無法上傳")
 	if "bad board" in low:
-		return "榜別不對"
+		return _t("榜別不對")
 	if "score out of range" in low:
-		return "分數超出合理範圍"
+		return _t("分數超出合理範圍")
 	if "message rate limit" in low:
-		return "留言太頻繁，喘口氣再說"
+		return _t("留言太頻繁，喘口氣再說")
 	if "anonymous_provider_disabled" in low or "anonymous sign-ins are disabled" in low:
-		return "訪客登入未開啟（請在 Supabase Auth 開啟 Anonymous）"
+		return _t("訪客登入未開啟（請在 Supabase Auth 開啟 Anonymous）")
 	if "email_address_invalid" in low:
-		return "Email 格式無效，請用真實信箱格式"
+		return _t("Email 格式無效，請用真實信箱格式")
 	if "invalid_credentials" in low or "invalid login" in low:
-		return "帳號或密碼錯誤"
+		return _t("帳號或密碼錯誤")
 	if "user_already_exists" in low or "already registered" in low:
-		return "此 Email 已註冊，請直接登入"
+		return _t("此 Email 已註冊，請直接登入")
 	if "email_not_confirmed" in low:
-		return "信箱尚未驗證（開發可在 Dashboard 關閉 Confirm email）"
+		return _t("信箱尚未驗證（開發可在 Dashboard 關閉 Confirm email）")
 	if "pgrst205" in low or "could not find the table" in low:
-		return "資料表尚未建立（需執行 supabase/schema.sql）"
+		return _t("資料表尚未建立（需執行 supabase/schema.sql）")
 	if "jwt" in low and ("expired" in low or "invalid" in low):
-		return "登入已過期，請重新登入"
+		return _t("登入已過期，請重新登入")
 	if "permission" in low or "rls" in low or "42501" in low:
-		return "沒有權限（請確認已登入且 RLS 政策正確）"
+		return _t("沒有權限（請確認已登入且 RLS 政策正確）")
 	if "network" in low or "failed to connect" in low or "timed out" in low:
-		return "網路連不上後端，請檢查網址與網路"
+		return _t("網路連不上後端，請檢查網址與網路")
 	if "secret api key required" in low:
-		return "金鑰類型不對（請用 publishable／anon key，不要用 service_role）"
-	if "未設定後端" in s or "純單機" in s:
+		return _t("金鑰類型不對（請用 publishable／anon key，不要用 service_role）")
+	if _t("未設定後端") in s or _t("純單機") in s:
 		return s
 	if s.begins_with("HTTP "):
 		## 截短
 		if s.length() > 100:
-			return "伺服器回應異常：" + s.substr(0, 100) + "…"
-		return "伺服器回應異常：" + s
+			return _t("伺服器回應異常：") + s.substr(0, 100) + "…"
+		return _t("伺服器回應異常：") + s
 	if s.length() > 120:
 		return s.substr(0, 120) + "…"
 	return s
@@ -558,14 +567,14 @@ func humanize_error(raw: String) -> String:
 func health_check(cb: Callable = Callable()) -> void:
 	if offline_only:
 		last_health_ok = false
-		last_health = "純單機模式（未連線）"
+		last_health = _t("純單機模式（未連線）")
 		last_health_ms = -1
 		if cb.is_valid():
 			cb.call({"ok": false, "msg": last_health, "health": last_health})
 		return
 	if not is_configured():
 		last_health_ok = false
-		last_health = "未設定 URL／金鑰"
+		last_health = _t("未設定 URL／金鑰")
 		last_health_ms = -1
 		if cb.is_valid():
 			cb.call({"ok": false, "msg": last_health, "error": true, "health": last_health})
@@ -584,7 +593,7 @@ func health_check(cb: Callable = Callable()) -> void:
 func _cb_health_auth(ok: bool, body: Variant, cb: Callable) -> void:
 	if not ok:
 		last_health_ok = false
-		last_health = humanize_error(last_error if last_error != "" else "Auth 探活失敗")
+		last_health = humanize_error(last_error if last_error != "" else _t("Auth 探活失敗"))
 		last_health_ms = Time.get_ticks_msec() - _health_t0
 		_fail(last_health, cb)
 		return
@@ -603,16 +612,16 @@ func _cb_health_rest(ok: bool, body: Variant, cb: Callable) -> void:
 	if not ok:
 		var err := humanize_error(last_error)
 		## 表不存在特別標
-		if "PGRST205" in last_error or "找不到" in err or "could not find the table" in last_error.to_lower():
-			last_health = "後端通，但缺資料表（請跑 schema）"
+		if "PGRST205" in last_error or _t("找不到") in err or "could not find the table" in last_error.to_lower():
+			last_health = _t("後端通，但缺資料表（請跑 schema）")
 		else:
-			last_health = err if err != "" else "REST 探活失敗"
+			last_health = err if err != "" else _t("REST 探活失敗")
 		last_health_ok = false
 		_fail(last_health, cb)
 		return
 	last_health_ok = true
-	var who := "已登入" if is_signed_in() else "未登入（僅探活）"
-	last_health = "正常 · %s · %d ms" % [who, last_health_ms]
+	var who := _t("已登入") if is_signed_in() else _t("未登入（僅探活）")
+	last_health = _t("正常 · %s · %d ms") % [who, last_health_ms]
 	_refresh_status()
 	status_changed.emit()
 	_ok({"ok": true, "msg": last_health, "ms": last_health_ms, "health": last_health}, cb)
@@ -660,7 +669,7 @@ func _pump_queue() -> void:
 	if not is_configured():
 		var job0: Dictionary = _queue.pop_front()
 		var cb0: Callable = job0.get("cb", Callable())
-		_fail("未設定後端", cb0)
+		_fail(_t("未設定後端"), cb0)
 		_pump_queue()
 		return
 	var job: Dictionary = _queue.pop_front()
@@ -686,7 +695,7 @@ func _pump_queue() -> void:
 			err = _http.request(url, headers, HTTPClient.METHOD_DELETE)
 		_:
 			_busy = false
-			_fail("未知 method", _pending)
+			_fail(_t("未知 method"), _pending)
 			_pending = Callable()
 			_pump_queue()
 			return
@@ -694,7 +703,7 @@ func _pump_queue() -> void:
 		_busy = false
 		var pcb := _pending
 		_pending = Callable()
-		_fail("HTTP 啟動失敗 %s" % err, pcb)
+		_fail(_t("HTTP 啟動失敗 %s") % err, pcb)
 		_pump_queue()
 
 

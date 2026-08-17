@@ -3,6 +3,15 @@ class_name WorldTravel
 ## 全域路標：entity id → 目標地圖與章節畫面鍵（main 再轉 Screen）。
 ## need_flag 有值時需已立旗；deny 為未解鎖提示。
 
+
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
+
 static func links() -> Dictionary:
 	return {
 		## ── 翠谷 ──
@@ -17,12 +26,12 @@ static func links() -> Dictionary:
 		"trail_east": {
 			"map": "road", "screen": "C0_ROAD",
 			"need_flag": "item.rusty_sword",
-			"deny": "空手走不遠。先回村撿劍。",
+			"deny": _t("空手走不遠。先回村撿劍。"),
 		},
 		"mill_to_road": {
 			"map": "road", "screen": "C0_ROAD",
 			"need_flag": "item.rusty_sword",
-			"deny": "沒有武器不建議上荒路。",
+			"deny": _t("沒有武器不建議上荒路。"),
 		},
 
 		## ── 荒路 ──
@@ -50,39 +59,39 @@ static func links() -> Dictionary:
 		## 內殿前院要先鍛造。正門 exit_wild 一直有這道門檻（「鏽劍捲刃了，先去找釘釘」），
 		## 這條側路沒有 —— 玩家可以拿著鏽劍直接走到雷歐面前，而戰敗收尾接的是
 		## _go_c1_wild，它又被同一個旗標擋下 return，畫面就停在打完的戰鬥上。
-		"to_leo_court": {"map": "wild_leo_court", "screen": "C1_WILD", "need_flag": "c1_forged", "deny": "鏽劍捲刃了。先去找釘釘。"},
+		"to_leo_court": {"map": "wild_leo_court", "screen": "C1_WILD", "need_flag": "c1_forged", "deny": _t("鏽劍捲刃了。先去找釘釘。")},
 		"back_wild": {"map": "wild", "screen": "C1_WILD"},
 
 		## ── 岔路（0.12：鍛造後即可練功／自由探索，不必先打雷歐）──
 		"path_crossroads": {
 			"map": "crossroads", "screen": "C1_WILD",
 			"need_flag": "c1_forged",
-			"deny": "岔路仍封著。先找釘釘把劍養好。",
+			"deny": _t("岔路仍封著。先找釘釘把劍養好。"),
 		},
 		"exit_cross_m": {
 			"map": "crossroads", "screen": "C1_WILD",
 			"need_flag": "c1_forged",
-			"deny": "岔路仍封著。先找釘釘把劍養好。",
+			"deny": _t("岔路仍封著。先找釘釘把劍養好。"),
 		},
 		"exit_cross_d": {
 			"map": "crossroads", "screen": "C1_WILD",
 			"need_flag": "c1_forged",
-			"deny": "岔路仍封著。",
+			"deny": _t("岔路仍封著。"),
 		},
 		"exit_cross_f": {
 			"map": "crossroads", "screen": "C1_WILD",
 			"need_flag": "c1_forged",
-			"deny": "岔路仍封著。",
+			"deny": _t("岔路仍封著。"),
 		},
 		"exit_cross_c": {
 			"map": "crossroads", "screen": "C1_WILD",
 			"need_flag": "c1_forged",
-			"deny": "岔路仍封著。",
+			"deny": _t("岔路仍封著。"),
 		},
 		"exit_cross_t": {
 			"map": "crossroads", "screen": "C1_WILD",
 			"need_flag": "c1_forged",
-			"deny": "岔路仍封著。",
+			"deny": _t("岔路仍封著。"),
 		},
 		"to_cross_north": {"map": "cross_north", "screen": "C1_WILD"},
 		"to_cross_east": {"map": "cross_east", "screen": "C1_WILD"},
@@ -91,12 +100,12 @@ static func links() -> Dictionary:
 		"to_hunt": {
 			"map": "hunting_grounds", "screen": "C1_WILD",
 			"need_flag": "c1_entered_city",
-			"deny": "獵場在堡外溢地。先進騎士堡再說。",
+			"deny": _t("獵場在堡外溢地。先進騎士堡再說。"),
 		},
 		"to_blackflame_scar": {
 			"map": "blackflame_scar", "screen": "C1_WILD",
 			"need_flag": "boss.abo_cleared",
-			"deny": "黑焰疤地太危險。至少先通過道場試煉。",
+			"deny": _t("黑焰疤地太危險。至少先通過道場試煉。"),
 		},
 		"back_cross": {"map": "crossroads", "screen": "C1_WILD"},
 

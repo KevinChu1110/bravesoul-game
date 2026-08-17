@@ -1,6 +1,8 @@
 extends Node
 ## 戰魂：探索星屑 → 觀星凝魂 → 入魂槽。非 gacha。
 
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
 const STARS: Array[Dictionary] = [
 	{"id": "破軍", "stat": "atk", "label": "攻", "base": 2},
 	{"id": "七殺", "stat": "atk", "label": "銳", "base": 1},  ## 另加微量速度感用 atk
@@ -63,6 +65,13 @@ const SECRET_RELICS: Dictionary = {
 const SLOT_TIERS: Array[int] = [1, 6, 11]
 
 
+
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
+
 func slot_count() -> int:
 	var t: int = GameState.weapon_tier
 	var n := 0
@@ -92,19 +101,25 @@ func find_soul(sid: String) -> Dictionary:
 	return {}
 
 
+## 星曜與品質的 id 本身就是中文（"破軍"／"凡"），而且會寫進存檔、拿來跟
+## STARS／QUALITIES 比對，所以 id 一律留原文，只在要顯示的時候查譯文。
+func soul_word(id: String) -> String:
+	return ContentLoc.text("soul", id)
+
+
 func soul_display(s: Dictionary) -> String:
 	if s.is_empty():
-		return "（空）"
+		return _t("（空）")
 	if bool(s.get("relic", false)):
 		var dn := str(s.get("display", s.get("star", "秘境魂")))
 		var lv: int = int(s.get("level", 0))
 		var lv_s := "" if lv <= 0 else "·%d" % lv
-		return "秘·%s%s" % [dn, lv_s]
+		return _t("秘·%s%s") % [soul_word(dn), lv_s]
 	var q: String = str(s.get("quality", "凡"))
 	var star: String = str(s.get("star", "？"))
 	var lv2: int = int(s.get("level", 0))
 	var lv_s2 := "" if lv2 <= 0 else "·%d" % lv2
-	return "%s·%s%s" % [q, star, lv_s2]
+	return "%s·%s%s" % [soul_word(q), soul_word(star), lv_s2]
 
 
 func soul_bonus_line(s: Dictionary) -> String:
@@ -113,11 +128,11 @@ func soul_bonus_line(s: Dictionary) -> String:
 	var b: Dictionary = calc_soul_bonus(s)
 	var parts: PackedStringArray = []
 	if int(b.get("atk", 0)) != 0:
-		parts.append("攻+%d" % int(b.get("atk", 0)))
+		parts.append(_t("攻+%d") % int(b.get("atk", 0)))
 	if int(b.get("def", 0)) != 0:
-		parts.append("防+%d" % int(b.get("def", 0)))
+		parts.append(_t("防+%d") % int(b.get("def", 0)))
 	if int(b.get("hp", 0)) != 0:
-		parts.append("血+%d" % int(b.get("hp", 0)))
+		parts.append(_t("血+%d") % int(b.get("hp", 0)))
 	return " ".join(parts)
 
 
@@ -171,13 +186,13 @@ func calc_soul_bonus(s: Dictionary) -> Dictionary:
 func grant_secret_relic(boss_mode: String) -> Dictionary:
 	## 回傳 {ok, soul?, msg, dust?}
 	if not SECRET_RELICS.has(boss_mode):
-		return {"ok": false, "msg": "沒有對應秘境魂器。"}
+		return {"ok": false, "msg": _t("沒有對應秘境魂器。")}
 	var def: Dictionary = SECRET_RELICS[boss_mode]
 	var flag := str(def.get("unique_flag", ""))
 	if flag != "" and GameState.has_flag(flag):
 		## 已有：補償星屑
 		GameState.add_stardust(3)
-		return {"ok": true, "duplicate": true, "dust": 3, "msg": "你已持有此秘境魂器。改獲星屑 3。"}
+		return {"ok": true, "duplicate": true, "dust": 3, "msg": _t("你已持有此秘境魂器。改獲星屑 3。")}
 	var soul := {
 		"id": "relic_%s_%d" % [boss_mode, Time.get_ticks_msec()],
 		"star": str(def.get("star", "秘")),
@@ -203,7 +218,7 @@ func grant_secret_relic(boss_mode: String) -> Dictionary:
 		"ok": true,
 		"duplicate": false,
 		"soul": soul,
-		"msg": "獲得秘境魂器【%s】！%s" % [str(def.get("display", "")), str(def.get("lore", ""))],
+		"msg": _t("獲得秘境魂器【%s】！%s") % [soul_word(str(def.get("display", ""))), _t(str(def.get("lore", "")))],
 	}
 
 
@@ -290,20 +305,20 @@ func can_ritual() -> bool:
 func ritual_footprint_line() -> String:
 	var parts: PackedStringArray = []
 	if GameState.has_flag("boss.leo_cleared"):
-		parts.append("騎士域·勇／攻")
+		parts.append(_t("騎士域·勇／攻"))
 	if GameState.has_flag("boss.white_fog_cleared"):
-		parts.append("霧痕·衡")
+		parts.append(_t("霧痕·衡"))
 	if GameState.has_flag("boss.abo_cleared"):
-		parts.append("拳山·防")
+		parts.append(_t("拳山·防"))
 	if GameState.has_flag("c0_care") or GameState.has_wheat_stalk or GameState.wheat_stalk_broken:
-		parts.append("麥稈·梁／血")
+		parts.append(_t("麥稈·梁／血"))
 	if GameState.has_flag("boss.shadowwind_cleared"):
-		parts.append("林風·銳")
+		parts.append(_t("林風·銳"))
 	if GameState.has_flag("boss.stonefist_cleared"):
-		parts.append("岸岩·血")
+		parts.append(_t("岸岩·血"))
 	if parts.is_empty():
-		return "星圖仍暗——但你的腳步已經在畫線。"
-	return "足跡連線亮起：%s。" % " · ".join(parts)
+		return _t("星圖仍暗——但你的腳步已經在畫線。")
+	return _t("足跡連線亮起：%s。") % " · ".join(parts)
 
 
 func ritual() -> Dictionary:
@@ -338,7 +353,7 @@ func _ritual_success_hooks(soul: Dictionary) -> void:
 		return
 	var gl: Node = (tree as SceneTree).root.get_node_or_null("GameLog")
 	if gl != null and gl.has_method("system"):
-		gl.call("system", "觀星凝出 %s（%s）" % [soul_display(soul), soul_bonus_line(soul)])
+		gl.call("system", _t("觀星凝出 %s（%s）") % [soul_display(soul), soul_bonus_line(soul)])
 
 
 func unequip_all_of(sid: String) -> void:
@@ -362,10 +377,10 @@ func equip_soul(sid: String, slot: int) -> String:
 	## 回傳錯誤訊息；空字串＝成功
 	ensure_slots()
 	if slot < 0 or slot >= GameState.soul_slots.size():
-		return "沒有這個魂槽。"
+		return _t("沒有這個魂槽。")
 	var s: Dictionary = find_soul(sid)
 	if s.is_empty():
-		return "找不到這顆戰魂。"
+		return _t("找不到這顆戰魂。")
 	if bool(s.get("equipped", false)):
 		unequip_all_of(sid)
 	## 槽上原魂卸下
@@ -455,29 +470,29 @@ func panel_status_bbcode() -> String:
 	ensure_slots()
 	var bonus: Dictionary = total_equipped_bonus()
 	var lines: PackedStringArray = []
-	lines.append("[b]星途 · 戰魂[/b]")
-	lines.append("星屑：%d（觀星一次耗 %d）" % [GameState.stardust, RITUAL_COST])
-	lines.append("武器：%s  T%d · 魂槽 %d" % [GameState.weapon_name, GameState.weapon_tier, slot_count()])
-	lines.append("入魂加成：攻+%d  防+%d  血+%d" % [
+	lines.append(_t("[b]星途 · 戰魂[/b]"))
+	lines.append(_t("星屑：%d（觀星一次耗 %d）") % [GameState.stardust, RITUAL_COST])
+	lines.append(_t("武器：%s  T%d · 魂槽 %d") % [GameState.weapon_display(), GameState.weapon_tier, slot_count()])
+	lines.append(_t("入魂加成：攻+%d  防+%d  血+%d") % [
 		int(bonus.get("atk", 0)), int(bonus.get("def", 0)), int(bonus.get("hp", 0))
 	])
 	lines.append("")
-	lines.append("[b]已入魂[/b]")
+	lines.append(_t("[b]已入魂[/b]"))
 	if slot_count() <= 0:
-		lines.append("（器階不足，尚無魂槽。先找釘釘養器。）")
+		lines.append(_t("（器階不足，尚無魂槽。先找釘釘養器。）"))
 	else:
 		for i in GameState.soul_slots.size():
 			var sid: String = str(GameState.soul_slots[i])
 			if sid == "":
-				lines.append("  槽%d：空" % (i + 1))
+				lines.append(_t("  槽%d：空") % (i + 1))
 			else:
 				var s: Dictionary = find_soul(sid)
-				lines.append("  槽%d：%s（%s）" % [i + 1, soul_display(s), soul_bonus_line(s)])
+				lines.append(_t("  槽%d：%s（%s）") % [i + 1, soul_display(s), soul_bonus_line(s)])
 	lines.append("")
-	lines.append("[b]背包戰魂[/b]")
+	lines.append(_t("[b]背包戰魂[/b]"))
 	var bag: Array = bag_souls()
 	if bag.is_empty():
-		lines.append("  （空）")
+		lines.append(_t("  （空）"))
 	else:
 		for s in bag:
 			lines.append("  · %s  %s" % [soul_display(s), soul_bonus_line(s)])

@@ -14,6 +14,7 @@ key 對不上就靜靜地掉回中文，測試全綠、玩家看到半英半中�
     python3 tools/check_content_loc.py --list   # 只列出，不當成失敗
 """
 
+import glob
 import io
 import json
 import os
@@ -26,6 +27,23 @@ CONTENT = os.path.join(ROOT, "game/data/i18n/content")
 
 ## 以「原文」當 key 的 domain：從哪個檔、用哪些 regex 抓原文
 SOURCES = {
+    ## _t("…") 包起來的介面字串，散在 main.gd 與各系統檔裡
+    "ui": [("__ALL_GD__", [r'\b_t\("((?:[^"\\\\]|\\\\.)*)"\)'])],
+    ## 星曜與品質的 id 本身是中文，存檔存原文、顯示查譯文
+    "soul": [("game/scripts/systems/soul_system.gd", [
+        r'\{"id": "([^"]+)", "stat":',
+        r'\{"id": "([^"]+)", "mult":',
+        r'"star": "([^"]+)"',
+        r'"quality": "([^"]+)"',
+        r'"display": "([^"]+)"',
+    ])],
+    ## weapon_name 也是存原文、顯示查譯文
+    "weapon": [("game/scripts/autoload/game_state.gd", [
+        r'weapon_name[^=\n]*=\s*"([^"]*[\u4e00-\u9fff][^"]*)"',
+        r'weapon_name", "([^"]*[\u4e00-\u9fff][^"]*)"',
+    ]), ("game/scripts/main.gd", [
+        r'weapon_name\s*=\s*"([^"]*[\u4e00-\u9fff][^"]*)"',
+    ])],
     "cosmetic": [
         ("game/scripts/systems/title_catalog.gd", [
             r'\{"flag": "cosmetic\.\w+", "name": "([^"]+)"\}',
@@ -60,10 +78,26 @@ EXTRA = {
 def sources_for(domain: str) -> set:
     out = set()
     for rel, patterns in SOURCES[domain]:
-        src = io.open(os.path.join(ROOT, rel), encoding="utf-8").read()
-        for pat in patterns:
-            for m in re.finditer(pat, src):
-                out.add(m.group(1))
+        if rel == "__ALL_GD__":
+            ## 只掃「自己定義了 ContentLoc 版 _t()」的檔。
+            ## display_settings.gd 也有一支叫 _t 的 helper，但那支包的是 Loc.t()，
+            ## 參數是介面 key（"common.off"）不是原文 —— 一起掃進來就會把
+            ## 那些 key 當成待翻的中文字串。
+            files = [
+                f for f in glob.glob(os.path.join(ROOT, "game/scripts/**/*.gd"), recursive=True)
+                if os.sep + "dev" + os.sep not in f
+                and not os.path.basename(f).startswith("test_")
+                and 'ContentLoc.text("ui", s)' in io.open(f, encoding="utf-8").read()
+            ]
+        else:
+            files = [os.path.join(ROOT, rel)]
+        for f in files:
+            src = io.open(f, encoding="utf-8").read()
+            ## 註解行不算 —— 這支自己的說明文字裡就寫著 _t("A %d")
+            body = "\n".join(ln for ln in src.split("\n") if not ln.strip().startswith("#"))
+            for pat in patterns:
+                for m in re.finditer(pat, body):
+                    out.add(m.group(1))
     out.update(EXTRA.get(domain, []))
     return out
 
@@ -83,6 +117,16 @@ CATALOGS = {
 }
 
 HAN = re.compile(r"[\u4e00-\u9fff]")
+
+## GDScript 的 `%` 代換：譯文的佔位符要跟原文完全一樣（數量與順序）。
+## 少一個就是 runtime error（"not enough arguments for format string"），
+## 多一個會印出垃圾。這是這套「以原文當 key」的做法最容易炸的地方，
+## 因為原文與譯文是分開兩個檔，改一邊很容易忘了另一邊。
+PLACEHOLDER = re.compile(r"%[-+ #0-9.]*[sdfxXoc%]")
+
+
+def placeholders(s: str) -> list:
+    return [m.group(0) for m in PLACEHOLDER.finditer(s) if m.group(0) != "%%"]
 
 
 def _block(rel: str, const_name: str) -> str:
@@ -134,6 +178,15 @@ def main() -> None:
             tbl = json.load(io.open(path, encoding="utf-8"))
             missing = sorted(s for s in want if not str(tbl.get(s, "")).strip())
             stale = sorted(k for k in tbl if k not in want)
+            for src_s in sorted(want):
+                tr = str(tbl.get(src_s, ""))
+                if not tr.strip():
+                    continue
+                if placeholders(tr) != placeholders(src_s):
+                    problems.append((code, domain, "佔位符對不上（會在執行時炸）", [
+                        "原文 %s → %s" % (placeholders(src_s), src_s[:50]),
+                        "譯文 %s → %s" % (placeholders(tr), tr[:50]),
+                    ]))
             if missing:
                 problems.append((code, domain, "漏翻 %d 條" % len(missing), missing))
             if stale:

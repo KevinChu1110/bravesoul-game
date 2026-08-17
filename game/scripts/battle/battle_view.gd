@@ -830,6 +830,17 @@ func _unhandled_input(event: InputEvent) -> void:
 			_shake = 0.3
 			_flash(player_body, Color(1, 0.95, 0.5))
 		get_viewport().set_input_as_handled()
+		return
+
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_1:
+			sim.switch_soul_style("sword")
+		elif event.keycode == KEY_2:
+			sim.switch_soul_style("axe")
+		elif event.keycode == KEY_3:
+			sim.switch_soul_style("dagger")
+		elif event.keycode == KEY_4 or event.keycode == KEY_F:
+			sim.trigger_fury_awakening()
 
 
 ## ── 戰鬥中的 HP 權威 ──
@@ -1505,15 +1516,23 @@ func _on_event(kind: String, data: Dictionary) -> void:
 						_set_player_pose("idle")
 				)
 		"hit":
-			var crit_s := _t("暴擊") if data.get("crit", false) else ""
+			var is_crit: bool = bool(data.get("crit", false))
+			var crit_s := _t("暴擊") if is_crit else ""
 			var ks := _t("【王者斬】") if data.get("king_slash", false) else ""
 			_append_log(_t("%s%s 造成 %s 傷害 %s") % [ks, data.get("attacker"), data.get("damage"), crit_s])
-			_spawn_float(str(data.get("defender")), str(data.get("damage")), Color(1, 0.4, 0.35))
-			_flash(_body_of(str(data.get("defender"))), Color(1, 0.3, 0.3))
+			if is_crit:
+				_spawn_float(str(data.get("defender")), str(data.get("damage")), Color(1.0, 0.85, 0.2), true)
+				_shake = 0.35
+				trigger_hit_stop(0.08)
+				_flash(_body_of(str(data.get("defender"))), Color(2.5, 0.6, 0.4))
+			else:
+				_spawn_float(str(data.get("defender")), str(data.get("damage")), Color(1, 0.4, 0.35))
+				_flash(_body_of(str(data.get("defender"))), Color(1, 0.3, 0.3))
 			if data.get("defender") == "player":
 				_try_wheat_save(int(data.get("hp", 0)))
 			if data.get("king_slash", false):
 				_shake = 0.4
+				trigger_hit_stop(0.1)
 				countdown.visible = false
 				countdown_sub.visible = false
 				_set_boss_pose("attack", true)
@@ -1521,6 +1540,31 @@ func _on_event(kind: String, data: Dictionary) -> void:
 					if is_instance_valid(self) and not _ended:
 						_set_boss_pose("idle")
 				)
+		"part_broken":
+			var boss_id := str(data.get("boss_id", "enemy"))
+			var pname := str(data.get("part_name", _t("部位")))
+			_append_log(_t("[color=#fc0]💥 部位破壞！【%s】打破擊暈！[/color]") % pname)
+			_spawn_float(boss_id, _t("💥 部位破壞！"), Color(1.0, 0.85, 0.15), false, true)
+			_shake = 0.5
+			trigger_hit_stop(0.12)
+			_flash(_body_of(boss_id), Color(3.0, 2.5, 1.0))
+			_set_boss_pose("recover")
+			get_tree().create_timer(0.8).timeout.connect(func():
+				if is_instance_valid(self) and not _ended:
+					_set_boss_pose("idle")
+			)
+		"soul_style_switched":
+			var st := str(data.get("style", "sword")).to_upper()
+			var skn := str(data.get("skill_name", _t("橫斬")))
+			_append_log(_t("[color=#8ff]⚔️ 切換器魂姿態：%s（技能：%s）[/color]") % [st, skn])
+			_spawn_float("player", _t("切換：%s") % st, Color(0.4, 0.9, 1.0))
+			_flash(player_body, Color(0.5, 0.8, 1.0))
+		"fury_awakening":
+			_append_log(_t("[color=#f52]🔥 器魂覺醒！進入暴怒狀態（8秒攻速與傷害加成）[/color]"))
+			_spawn_float("player", _t("🔥 暴怒覺醒！"), Color(1.0, 0.4, 0.1), true)
+			_shake = 0.35
+			trigger_hit_stop(0.1)
+			_flash(player_body, Color(3.0, 1.5, 0.5))
 		"miss":
 			_append_log(_t("%s 未中") % data.get("attacker"))
 			_spawn_float(str(data.get("defender")), _t("未中"), Color(0.7, 0.7, 0.8))
@@ -1755,26 +1799,53 @@ func _pulse_enemy() -> void:
 	tw.tween_property(enemy_body, "scale", Vector2.ONE, 0.3)
 
 
-func _spawn_float(target_id: String, text: String, color: Color) -> void:
+func trigger_hit_stop(duration: float = 0.08) -> void:
+	if not is_inside_tree() or _ended:
+		return
+	var orig_scale := sim.time_scale if sim != null else 1.0
+	Engine.time_scale = 0.08
+	get_tree().create_timer(duration, true, false, true).timeout.connect(func():
+		Engine.time_scale = orig_scale
+	)
+
+
+func _spawn_float(target_id: String, text: String, color: Color, is_crit: bool = false, is_break: bool = false) -> void:
 	var body := _body_of(target_id)
 	if body == null:
 		return
 	var lab := Label.new()
-	lab.text = text
-	lab.add_theme_font_size_override("font_size", 24)
+	var font_sz := 24
+	var pop_scale := Vector2(1.12, 1.12)
+	var display_txt := text
+
+	if is_break:
+		font_sz = 34
+		pop_scale = Vector2(1.6, 1.6)
+		lab.add_theme_color_override("font_outline_color", Color(0.8, 0.2, 0.0))
+		lab.add_theme_constant_override("outline_size", 4)
+	elif is_crit:
+		font_sz = 30
+		pop_scale = Vector2(1.4, 1.4)
+		display_txt = _t("暴擊 ") + text + "!"
+		lab.add_theme_color_override("font_outline_color", Color(0.6, 0.0, 0.0))
+		lab.add_theme_constant_override("outline_size", 3)
+
+	lab.text = display_txt
+	lab.add_theme_font_size_override("font_size", font_sz)
 	lab.add_theme_color_override("font_color", color)
 	lab.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
-	lab.add_theme_constant_override("shadow_offset_x", 1)
-	lab.add_theme_constant_override("shadow_offset_y", 1)
-	lab.position = body.global_position + Vector2(body.size.x * 0.25, -16)
-	lab.z_index = 20
+	lab.add_theme_constant_override("shadow_offset_x", 2)
+	lab.add_theme_constant_override("shadow_offset_y", 2)
+	lab.position = body.global_position + Vector2(body.size.x * 0.2, -20)
+	lab.z_index = 30
 	add_child(lab)
-	var rise := lab.position + Vector2(randf_range(-12.0, 12.0), -52.0)
+
+	var rise := lab.position + Vector2(randf_range(-16.0, 16.0), -60.0)
 	var tw := create_tween()
 	tw.set_parallel(true)
-	tw.tween_property(lab, "position", rise, 0.55)
-	tw.tween_property(lab, "scale", Vector2(1.12, 1.12), 0.12)
-	tw.tween_property(lab, "modulate:a", 0.0, 0.4).set_delay(0.2)
+	tw.tween_property(lab, "position", rise, 0.6)
+	tw.tween_property(lab, "scale", pop_scale, 0.1)
+	tw.tween_property(lab, "modulate:a", 0.0, 0.35).set_delay(0.25)
 	tw.chain().tween_callback(lab.queue_free)
 
 

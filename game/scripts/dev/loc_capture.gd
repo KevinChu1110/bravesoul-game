@@ -2,7 +2,7 @@ extends SceneTree
 ## 同一張地圖，六個語言各截一張 —— 驗 ContentLoc 那層在實機上真的有換掉字。
 ## 必須開視窗跑（headless 的 viewport 是空的）：
 ##   godot --path game -s res://scripts/dev/loc_capture.gd
-const CODES := ["zh_TW", "en", "ja", "ko", "es"]
+const CODES := ["zh_TW", "zh_CN", "en", "ja", "ko", "es"]
 const MAP := "town"
 const CL := preload("res://scripts/systems/content_loc.gd")
 

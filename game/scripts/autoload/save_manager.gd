@@ -10,6 +10,8 @@ extends Node
 ##
 ## export／import 仍然只是開發／備份工具，不掛在玩家面。
 
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
 const SaveMigration = preload("res://scripts/autoload/save_migration.gd")
 
 const SLOT_COUNT := 4
@@ -41,6 +43,13 @@ const CHAPTER_NAMES := {
 	"cleared": "晨光之後",
 }
 
+
+
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
 
 func _ready() -> void:
 	_adopt_legacy_save()
@@ -115,7 +124,7 @@ func load_game(slot: int = -1) -> Error:
 
 	var res: Dictionary = SaveMigration.migrate(raw)
 	if not bool(res.get("ok", false)):
-		push_error("第 %d 格讀不起來：%s" % [s, str(res.get("reason", ""))])
+		push_error(_t("第 %d 格讀不起來：%s") % [s, str(res.get("reason", ""))])
 		return ERR_INVALID_DATA
 
 	GameState.from_dict(res.get("data", {}))
@@ -183,7 +192,7 @@ func delete_slot(slot: int) -> Error:
 		return ERR_FILE_NOT_FOUND
 	var err := DirAccess.remove_absolute(slot_path(slot))
 	if err != OK:
-		push_error("第 %d 格刪不掉：%s" % [slot, error_string(err)])
+		push_error(_t("第 %d 格刪不掉：%s") % [slot, error_string(err)])
 		return err
 	## 刪掉的是目前這一格的話，指標不能繼續留在那裡：
 	## 下一次無參數的 save_game() 會照著它把剛刪掉的紀錄原封不動寫回去，
@@ -228,14 +237,15 @@ func slot_summary(slot: int) -> Dictionary:
 	if raw.is_empty():
 		## 檔在、內容壞了。這種也要列出來，玩家至少知道那一格被占住了。
 		base["used"] = true
-		base["name"] = "（這格的內容讀不出來）"
+		base["name"] = _t("（這格的內容讀不出來）")
 		return base
 
 	var v := int(SaveMigration.version_of(raw))
 	base["used"] = true
-	base["name"] = str(raw.get("player_name", "無名"))
+	base["name"] = str(raw.get("player_name", _t("無名")))
 	base["chapter"] = str(raw.get("chapter", "title"))
-	base["place"] = str(CHAPTER_NAMES.get(base["chapter"], base["chapter"]))
+	## CHAPTER_NAMES 是 const（裡面不能呼叫函式），所以譯文查在讀的時候
+	base["place"] = _t(str(CHAPTER_NAMES.get(base["chapter"], base["chapter"])))
 	base["level"] = int(raw.get("level", 1))
 	base["gold"] = int(raw.get("gold", 0))
 	base["path"] = str(raw.get("path_style", ""))
@@ -255,28 +265,28 @@ static func format_play_time(sec: float) -> String:
 	var h := t / 3600
 	var m := (t % 3600) / 60
 	if h > 0:
-		return "%d 小時 %d 分" % [h, m]
+		return _t("%d 小時 %d 分") % [h, m]
 	if m > 0:
-		return "%d 分" % m
-	return "未滿 1 分"
+		return _t("%d 分") % m
+	return _t("未滿 1 分")
 
 
 ## 一律講相對時間，避免時區換算出錯讓玩家看到一個差了 8 小時的日期。
 ## 超過一週才退回日期，那時候「幾天前」已經沒有參考價值了。
 static func format_saved_at(unix_t: int) -> String:
 	if unix_t <= 0:
-		return "時間不明"
+		return _t("時間不明")
 	var diff := int(Time.get_unix_time_from_system()) - unix_t
 	if diff < 0:
-		return "時間不明"
+		return _t("時間不明")
 	if diff < 90:
-		return "剛剛"
+		return _t("剛剛")
 	if diff < 3600:
-		return "%d 分鐘前" % (diff / 60)
+		return _t("%d 分鐘前") % (diff / 60)
 	if diff < 86400:
-		return "%d 小時前" % (diff / 3600)
+		return _t("%d 小時前") % (diff / 3600)
 	if diff < 604800:
-		return "%d 天前" % (diff / 86400)
+		return _t("%d 天前") % (diff / 86400)
 	var bias := int(Time.get_time_zone_from_system().get("bias", 0))
 	var dt := Time.get_datetime_dict_from_unix_time(unix_t + bias * 60)
 	return "%d/%d/%d" % [int(dt.get("year", 0)), int(dt.get("month", 0)), int(dt.get("day", 0))]
@@ -306,7 +316,7 @@ func import_from_path(path: String) -> Error:
 	f.close()
 	var res: Dictionary = SaveMigration.migrate(parsed)
 	if not bool(res.get("ok", false)):
-		push_error("匯入失敗：%s" % str(res.get("reason", "")))
+		push_error(_t("匯入失敗：%s") % str(res.get("reason", "")))
 		return ERR_INVALID_DATA
 	GameState.from_dict(res.get("data", {}))
 	return save_game()
@@ -335,7 +345,7 @@ func _ensure_dir() -> bool:
 		return true
 	var err := DirAccess.make_dir_recursive_absolute(d)
 	if err != OK:
-		push_error("建不出存檔資料夾 %s：%s" % [d, error_string(err)])
+		push_error(_t("建不出存檔資料夾 %s：%s") % [d, error_string(err)])
 		return false
 	return true
 
@@ -350,7 +360,7 @@ func _write(slot: int, payload: Dictionary) -> Error:
 	var f := FileAccess.open(tmp_path, FileAccess.WRITE)
 	if f == null:
 		var err := FileAccess.get_open_error()
-		push_error("第 %d 格寫不進去：%s" % [slot, error_string(err)])
+		push_error(_t("第 %d 格寫不進去：%s") % [slot, error_string(err)])
 		return err
 	f.store_string(JSON.stringify(payload, "\t"))
 	f.close()
@@ -361,7 +371,7 @@ func _write(slot: int, payload: Dictionary) -> Error:
 	## 自己先刪只是在「舊的沒了、新的還沒就位」之間開一個原本不存在的空窗。
 	var rerr := dir.rename(tmp_path.get_file(), final_path.get_file())
 	if rerr != OK:
-		push_error("第 %d 格收尾失敗：%s" % [slot, error_string(rerr)])
+		push_error(_t("第 %d 格收尾失敗：%s") % [slot, error_string(rerr)])
 	return rerr
 
 

@@ -502,6 +502,8 @@ func _resolve_strike(u: BattleUnit) -> void:
 	if statue_mode and u.team == BattleUnit.Team.PLAYER:
 		dmg = _statue_filter_damage(target, dmg)
 	var dealt := target.take_damage(dmg)
+	if u.team == BattleUnit.Team.PLAYER and dealt > 0:
+		_process_part_damage(target, dealt, target.telegraph_active)
 	## 出手也累積戰意，否則戰意只能靠挨打累積，而挨到滿之前人就死了
 	if u.can_skill and dealt > 0:
 		u.rage = minf(RAGE_MAX, u.rage + Formulas.rage_from_strike())
@@ -1006,6 +1008,8 @@ func _perfect_parry(boss: BattleUnit) -> void:
 
 	var p := get_unit(player_id)
 	if p and p.is_alive() and boss.is_alive():
+		p.rage = minf(RAGE_MAX, p.rage + 40.0)
+		_process_part_damage(boss, maxi(15, int(boss.part_max_hp * 0.45)), true)
 		## 石拳對撞：剝岩甲 + 固傷，不走一般破甲過濾
 		if boar_mode and boss.id == "boar":
 			if boar_armor > 0:
@@ -1616,6 +1620,7 @@ static func make_leo_fight(player_stats: Dictionary) -> BattleSim:
 	leo.windup_time = 0.3
 	leo.recover_time = 0.45
 	leo.king_slash_cd = 2.5  ## 進半血後首發前的冷卻
+	_attach_boss_part(leo, _t("騎士重盾"), 0.35)
 	sim.add_unit(leo)
 	sim.setup_hazard("fire_ring", 5.5)  ## 副機制：火圈閃避
 	return sim
@@ -1651,6 +1656,7 @@ static func make_falcon_fight(player_stats: Dictionary) -> BattleSim:
 	f.speed = 16.0
 	f.windup_time = 0.2
 	f.recover_time = 0.35
+	_attach_boss_part(f, _t("疾影雙翼"), 0.30)
 	sim.add_unit(f)
 	sim.setup_hazard("wind_cut", 4.5)
 	return sim
@@ -1688,6 +1694,7 @@ static func make_boar_fight(player_stats: Dictionary) -> BattleSim:
 	b.speed = 7.5
 	b.windup_time = 0.35
 	b.recover_time = 0.5
+	_attach_boss_part(b, _t("石角堅岩"), 0.35)
 	sim.add_unit(b)
 	sim.setup_hazard("rockfall", 5.0)
 	return sim
@@ -1897,6 +1904,7 @@ static func make_abo_fight(player_stats: Dictionary) -> BattleSim:
 	abo.speed = 8.0
 	abo.windup_time = 0.32
 	abo.recover_time = 0.5
+	_attach_boss_part(abo, _t("鋼鐵護甲"), 0.30)
 	sim.add_unit(abo)
 	sim.abo_base_defense = abo.defense
 	return sim
@@ -1936,6 +1944,7 @@ static func make_demon_fight(player_stats: Dictionary) -> BattleSim:
 	demon.windup_time = 0.28
 	demon.recover_time = 0.42
 	demon.king_slash_cd = 4.0
+	_attach_boss_part(demon, _t("黑焰核心"), 0.30)
 	sim.add_unit(demon)
 	sim.setup_hazard("time_clock", 6.0)  ## 副機制：控時時鐘
 	return sim
@@ -2038,9 +2047,95 @@ static func make_world_fight(player_stats: Dictionary, mode: String) -> BattleSi
 		e.windup_time = float(def.get("windup", 0.3))
 		e.recover_time = float(def.get("recover", 0.45))
 		e.king_slash_cd = float(def.get("king_slash_cd", 3.0))
+		_attach_boss_part(e, _t("溢能核心"), 0.25)
 	sim.add_unit(e)
 
 	var hz := str(def.get("hazard", ""))
 	if hz != "":
 		sim.setup_hazard(hz, float(def.get("hazard_cd", 4.5)))
 	return sim
+
+
+static func _attach_boss_part(u: BattleUnit, part_name: String, ratio: float = 0.3) -> void:
+	if u == null or not u.is_boss:
+		return
+	u.has_part = true
+	u.part_name = part_name
+	u.part_max_hp = maxi(30, int(float(u.max_hp) * ratio))
+	u.part_hp = u.part_max_hp
+	u.part_broken = false
+
+
+func _process_part_damage(target: BattleUnit, dealt: int, is_telegraph: bool) -> void:
+	if target == null or not target.has_part or target.part_broken or dealt <= 0:
+		return
+	var part_dmg: int = int(round(float(dealt) * (1.6 if is_telegraph else 1.0)))
+	target.part_hp -= part_dmg
+	if target.part_hp <= 0:
+		target.part_hp = 0
+		target.part_broken = true
+		var was_telegraph: bool = target.telegraph_active
+		if was_telegraph:
+			target.telegraph_active = false
+			target.state = BattleUnit.State.RECOVER
+			target.state_timer = 1.2
+		_emit("part_broken", {
+			"boss_id": target.id,
+			"part_name": target.part_name,
+			"staggered": was_telegraph,
+			"hp": target.hp,
+			"max_hp": target.max_hp
+		})
+
+
+func switch_soul_style(style_id: String) -> bool:
+	var p := get_unit(player_id)
+	if p == null or not p.is_alive():
+		return false
+	match style_id:
+		"axe":
+			p.weapon_class = "axe"
+			p.windup_time = 0.38
+			p.recover_time = 0.55
+			p.skill_name = _t("重劈")
+			p.skill_mult = 2.4
+			p.skill_hits = 1
+		"dagger":
+			p.weapon_class = "dagger"
+			p.windup_time = 0.18
+			p.recover_time = 0.28
+			p.skill_name = _t("瞬斬")
+			p.skill_mult = 1.2
+			p.skill_hits = 2
+		_: # "sword"
+			p.weapon_class = "sword"
+			p.windup_time = 0.25
+			p.recover_time = 0.40
+			p.skill_name = _t("橫斬")
+			p.skill_mult = 1.8
+			p.skill_hits = 1
+	_emit("soul_style_switched", {
+		"style": style_id,
+		"skill_name": p.skill_name,
+		"windup": p.windup_time,
+		"recover": p.recover_time
+	})
+	return true
+
+
+func trigger_fury_awakening() -> bool:
+	var p := get_unit(player_id)
+	if p == null or not p.is_alive():
+		return false
+	if p.rage < RAGE_MAX and not p.fury_active:
+		return false
+	p.rage = 0.0
+	p.fury_active = true
+	p.fury_timer = 8.0
+	p.atk_buff_left = 8.0
+	p.atk_buff_mult = 1.35
+	_emit("fury_awakening", {
+		"player_id": p.id,
+		"duration": 8.0
+	})
+	return true

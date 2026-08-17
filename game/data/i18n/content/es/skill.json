@@ -1,10 +1,59 @@
 {
+  "anvil_slam": {
+    "desc": "Cae un yunque entero. Lento, pero inmoviliza.",
+    "lv2": "Caída más pesada.",
+    "lv3": "Onda por el suelo.",
+    "name": "Yunque en caída",
+    "unlock_hint": "Línea de martillo Nv7"
+  },
+  "arrow_storm": {
+    "desc": "★ Técnica de furia de nivel 16. Diez flechas cubren el suelo.",
+    "lv2": "Tormenta más feroz.",
+    "lv3": "La tormenta converge.",
+    "name": "Tormenta de flechas",
+    "unlock_hint": "Línea de arco Nv16"
+  },
+  "axe_split": {
+    "desc": "Técnica básica de hacha. Un golpe con peso.",
+    "lv2": "Golpe más pesado.",
+    "lv3": "A un paso del tope de daño.",
+    "name": "Tajo",
+    "unlock_hint": "Apertura de hacha"
+  },
+  "beowulf": {
+    "desc": "Golpe potenciado temprano de hacha-martillo: fuerza clavada en el filo.",
+    "lv2": "Fuerza más brutal.",
+    "lv3": "El rugido alarga la ventana de daño.",
+    "name": "Fuerza de Beowulf",
+    "unlock_hint": "Línea de hacha Nv7"
+  },
   "blade_dance": {
     "desc": "Sello de Espada: combo a media velocidad, la maestría sube rápido.",
     "lv2": "Combo más cerrado.",
     "lv3": "Remate más largo en el tercer corte.",
     "name": "Tres filos",
     "unlock_hint": "Elige el estilo de espada · o nivel 8"
+  },
+  "blood_petal": {
+    "desc": "★ Técnica de misión de garra. Cortes en forma de pétalo, en serie.",
+    "lv2": "Pétalos más densos.",
+    "lv3": "Filo final más largo.",
+    "name": "Pétalo de sangre",
+    "unlock_hint": "Línea de garra Nv13"
+  },
+  "claw_rake": {
+    "desc": "Apertura de garra: rasga la línea.",
+    "lv2": "Marcas más hondas.",
+    "lv3": "El zarpazo rompe la guardia.",
+    "name": "Zarpazo",
+    "unlock_hint": "Apertura de garra"
+  },
+  "combo_fist": {
+    "desc": "Apertura de tres puñetazos, tres impactos.",
+    "lv2": "Puños más cerrados.",
+    "lv3": "Remate en cadena.",
+    "name": "Puños en cadena",
+    "unlock_hint": "Apertura de puño"
   },
   "counter_strike": {
     "desc": "Muerde después de encajar. Multiplicador alto, ritmo más agresivo.",
@@ -13,12 +62,82 @@
     "name": "Contragolpe",
     "unlock_hint": "Tras Leo · o nivel 7"
   },
+  "crystal_prison": {
+    "desc": "★ Técnica de misión de cristal. Aprisiona y luego estalla.",
+    "lv2": "Prisión más dura.",
+    "lv3": "La rotura se propaga.",
+    "name": "Prisión de cristal",
+    "unlock_hint": "Cristal Nv13"
+  },
+  "crystal_tornado": {
+    "desc": "★ Técnica de misión de nivel 13. Vórtice de golpes, cuatro de daño puro.",
+    "lv2": "Vórtice más cerrado.",
+    "lv3": "Filo final de cristal.",
+    "name": "Tornado de cristal",
+    "unlock_hint": "Línea de daga Nv13"
+  },
+  "def_break": {
+    "desc": "★ Técnica de misión de nivel 13. Un golpe que rompe la defensa enemiga.",
+    "lv2": "Rompe más hondo.",
+    "lv3": "La onda posterior sube el daño.",
+    "name": "Quiebra defensa",
+    "unlock_hint": "Línea de hacha Nv13"
+  },
+  "doom_strike": {
+    "desc": "★ Técnica de furia de nivel 16. Lento, pesado, doloroso.",
+    "lv2": "Aún más pesado.",
+    "lv3": "A un paso del tope.",
+    "name": "Golpe funesto",
+    "unlock_hint": "Línea de hacha Nv16"
+  },
+  "double_tap": {
+    "desc": "Dos tiros seguidos; el segundo duele más.",
+    "lv2": "Par más estable.",
+    "lv3": "El segundo va al corazón.",
+    "name": "Doble disparo",
+    "unlock_hint": "Fusil Nv7"
+  },
+  "earth_breaker": {
+    "desc": "★ Técnica de furia de martillo. Un remate que abre la tierra.",
+    "lv2": "Grieta más ancha.",
+    "lv3": "El estruendo toca el tope.",
+    "name": "Rompesuelos",
+    "unlock_hint": "Línea de martillo Nv16"
+  },
   "emergency_heal": {
     "desc": "Suelta el aire y recupera vida. Prioridad automática en apuros.",
     "lv2": "Cura algo más.",
     "lv3": "Cura aún más: aguanta la crisis.",
     "name": "Recuperación de urgencia",
     "unlock_hint": "Tras forjar en C1, pregunta a Barbagrís"
+  },
+  "energy_beam": {
+    "desc": "★ Técnica de misión de nivel 13. La energía interior se vuelve rayo.",
+    "lv2": "Rayo más concentrado.",
+    "lv3": "Sobrecarga.",
+    "name": "Rayo de energía",
+    "unlock_hint": "Línea de puño Nv13"
+  },
+  "explosive_round": {
+    "desc": "★ Técnica de misión de fusil. Detona al impactar.",
+    "lv2": "Explosión mayor.",
+    "lv3": "Onda de metralla.",
+    "name": "Bala explosiva",
+    "unlock_hint": "Fusil Nv13"
+  },
+  "fatal_throw": {
+    "desc": "Golpe fuerte temprano de daga-dardo. Letal desde que sale.",
+    "lv2": "Lanzamiento más certero.",
+    "lv3": "Remate letal.",
+    "name": "Lanzamiento fatal",
+    "unlock_hint": "Línea de daga Nv7"
+  },
+  "fireball": {
+    "desc": "★ Técnica de misión de nivel 13. Una bola de fuego abrasadora.",
+    "lv2": "Bola más grande.",
+    "lv3": "Onda de la explosión.",
+    "name": "Bola de fuego",
+    "unlock_hint": "Báculo Nv13"
   },
   "heavy_cleave": {
     "desc": "Sello de Hacha: un golpe con peso detrás. Lento, pero duele.",
@@ -27,12 +146,33 @@
     "name": "Hachazo pesado",
     "unlock_hint": "Elige el estilo de hacha · o nivel 6"
   },
+  "hundred_flowers": {
+    "desc": "Combo temprano de puño-garra, cinco impactos.",
+    "lv2": "Flurry más veloz.",
+    "lv3": "Las flores se cierran en un golpe.",
+    "name": "Cien flores",
+    "unlock_hint": "Línea de puño Nv7"
+  },
+  "ice_lance": {
+    "desc": "Un carámbano atraviesa.",
+    "lv2": "Lanza más larga.",
+    "lv3": "La escarcha ralentiza (multiplicador↑).",
+    "name": "Lanza de hielo",
+    "unlock_hint": "Báculo Nv7"
+  },
   "iron_guard": {
     "desc": "Sello de Martillo/Hueso de Hierro: un respiro que estabiliza y salta antes.",
     "lv2": "Cura algo más.",
     "lv3": "Umbral de apuro más amplio, cura mayor.",
     "name": "Aliento de hueso de hierro",
     "unlock_hint": "Elige el estilo de martillo · o nivel 5"
+  },
+  "last_bullet": {
+    "desc": "★ Técnica de furia de fusil. Un disparo que lo decide todo.",
+    "lv2": "Más presión en la recámara.",
+    "lv3": "El remate toca el tope.",
+    "name": "La última bala",
+    "unlock_hint": "Fusil Nv16"
   },
   "line_thrust": {
     "desc": "Sello de Lanza: una estocada de intercepción que mantiene la distancia.",
@@ -41,12 +181,54 @@
     "name": "Estocada en línea",
     "unlock_hint": "Elige el estilo de lanza · o nivel 6"
   },
+  "magic_bolt": {
+    "desc": "Proyectil mágico básico.",
+    "lv2": "Proyectil más concentrado.",
+    "lv3": "Polvo estelar en su estela.",
+    "name": "Proyectil mágico",
+    "unlock_hint": "Apertura de báculo"
+  },
+  "meteor": {
+    "desc": "★ Técnica de furia de nivel 16. Bombardeo de meteoros.",
+    "lv2": "Meteoro más pesado.",
+    "lv3": "Estrellas en cadena.",
+    "name": "Meteoro",
+    "unlock_hint": "Báculo Nv16"
+  },
   "mist_needle": {
     "desc": "Sello de Dardo: una jugada veloz donde lo cierto y lo falso comparten color.",
     "lv2": "Estelas más cerradas.",
     "lv3": "Ve el fallo, más multiplicador.",
     "name": "Aguja de niebla",
     "unlock_hint": "Elige el estilo de dardo · o nivel 6"
+  },
+  "multi_shot": {
+    "desc": "★ Técnica de misión de nivel 13. Cuatro disparos reales seguidos.",
+    "lv2": "Número de flechas más estable.",
+    "lv3": "El múltiple remata.",
+    "name": "Disparo múltiple",
+    "unlock_hint": "Línea de arco Nv13"
+  },
+  "phalanx_sweep": {
+    "desc": "El asta barre medio círculo y aparta al que se pega.",
+    "lv2": "Barrido más amplio.",
+    "lv3": "El barrido rompe la guardia.",
+    "name": "Barrido de falange",
+    "unlock_hint": "Línea de lanza Nv7"
+  },
+  "phantom_rain": {
+    "desc": "★ Técnica de misión de dardo. Una lluvia de dardos indistinguibles.",
+    "lv2": "Lluvia más densa.",
+    "lv3": "Los fantasmas rematan.",
+    "name": "Lluvia fantasma",
+    "unlock_hint": "Línea de dardo Nv13"
+  },
+  "piercing_shot": {
+    "desc": "Flecha que atraviesa, hecha para corazas gruesas.",
+    "lv2": "Penetra más hondo.",
+    "lv3": "El remate también perfora.",
+    "name": "Flecha perforante",
+    "unlock_hint": "Línea de arco Nv7"
   },
   "powder_shot": {
     "desc": "Sello de Fusil: ráfaga a distancia que duele al acertar.",
@@ -62,12 +244,68 @@
     "name": "Puño rompeguardia",
     "unlock_hint": "Elige el estilo de puño · o nivel 6"
   },
+  "prism_nova": {
+    "desc": "★ Técnica de furia de cristal. Estallido refractado.",
+    "lv2": "Nova más brillante.",
+    "lv3": "Dispersión de siete colores.",
+    "name": "Nova prismática",
+    "unlock_hint": "Cristal Nv16"
+  },
   "prism_ward": {
     "desc": "Sello de Cristal: teje el escudo en un aliento; vida estable, vida larga.",
     "lv2": "Cura algo más.",
     "lv3": "Umbral de apuro más amplio.",
     "name": "Aliento de prisma",
     "unlock_hint": "Elige el estilo de cristal · o nivel 5"
+  },
+  "quake_slash": {
+    "desc": "★ Técnica de furia de nivel 16. Un golpe que desgarra la tierra.",
+    "lv2": "Grieta más ancha.",
+    "lv3": "Segundo impacto del vendaval.",
+    "name": "Tajo de vendaval",
+    "unlock_hint": "Línea de puño Nv16"
+  },
+  "quick_shot": {
+    "desc": "Apertura de arco: una flecha veloz.",
+    "lv2": "Cadencia↑.",
+    "lv3": "Disparos encadenados.",
+    "name": "Disparo rápido",
+    "unlock_hint": "Apertura de arco"
+  },
+  "quick_stab": {
+    "desc": "Apertura de daga: un golpe veloz.",
+    "lv2": "Estocada más rápida.",
+    "lv3": "La estocada lee la abertura.",
+    "name": "Estocada rápida",
+    "unlock_hint": "Apertura de daga"
+  },
+  "shadow_fan": {
+    "desc": "Un abanico de dardos de sombra que cubre los ángulos muertos.",
+    "lv2": "Abanico más abierto.",
+    "lv3": "Los dardos encadenan.",
+    "name": "Abanico de sombras",
+    "unlock_hint": "Línea de dardo Nv7"
+  },
+  "shard_bolt": {
+    "desc": "Apertura de cristal: esquirlas afiladas.",
+    "lv2": "Esquirlas más densas.",
+    "lv3": "La descarga se refracta.",
+    "name": "Descarga de esquirlas",
+    "unlock_hint": "Apertura de cristal"
+  },
+  "shinra": {
+    "desc": "★ Técnica de furia de nivel 16. Dieciséis estocadas encadenadas.",
+    "lv2": "Cadena más veloz.",
+    "lv3": "La última estocada nunca falla.",
+    "name": "Todas las cosas",
+    "unlock_hint": "Línea de daga Nv16"
+  },
+  "sky_lance": {
+    "desc": "★ Técnica de furia de lanza. Un golpe mortal caído desde lo alto.",
+    "lv2": "Caída más pesada.",
+    "lv3": "Onda de choque al impactar.",
+    "name": "Lanza celeste",
+    "unlock_hint": "Línea de lanza Nv16"
   },
   "slash": {
     "desc": "Un barrido. Sale solo cuando la Furia está llena. El primer golpe del viaje.",
@@ -76,6 +314,13 @@
     "name": "Tajo horizontal",
     "unlock_hint": "Primer combate o el consejo de Barbagrís"
   },
+  "spiral_pierce": {
+    "desc": "★ Técnica de misión de lanza. Una estocada giratoria que atraviesa la coraza.",
+    "lv2": "Penetra más hondo.",
+    "lv3": "Remate más largo.",
+    "name": "Perforación espiral",
+    "unlock_hint": "Línea de lanza Nv13"
+  },
   "star_pierce": {
     "desc": "Sello de Magia/Senda Estelar: una estocada al ritmo del crítico.",
     "lv2": "Luz más afilada.",
@@ -83,12 +328,40 @@
     "name": "Estocada estelar",
     "unlock_hint": "Elige el estilo de magia · o nivel 6"
   },
+  "stone_crush": {
+    "desc": "Apertura de martillo: un golpe como partir roca.",
+    "lv2": "Golpe más firme.",
+    "lv3": "Réplica en la piedra.",
+    "name": "Rompepiedras",
+    "unlock_hint": "Apertura de martillo"
+  },
+  "thousand_needles": {
+    "desc": "★ Técnica de furia de dardo. Mil agujas a la vez.",
+    "lv2": "Agujas más veloces.",
+    "lv3": "El entierro toca el tope.",
+    "name": "Mil agujas",
+    "unlock_hint": "Línea de dardo Nv16"
+  },
   "thunder_fury": {
     "desc": "Remate prioritario con la Furia llena. Se comprende tras la aprobación del león.",
     "lv2": "Trueno más fuerte.",
     "lv3": "Estela más larga, a un paso del tope de daño.",
     "name": "Furia del trueno",
     "unlock_hint": "Se aprende al vencer a Leo · o Espada Nv10"
+  },
+  "tiger_rush": {
+    "desc": "Salta bajo y desgarra con ambas garras.",
+    "lv2": "Salto más feroz.",
+    "lv3": "El rugido suprime.",
+    "name": "Salto del tigre",
+    "unlock_hint": "Línea de garra Nv7"
+  },
+  "void_rend": {
+    "desc": "★ Técnica de furia de garra. Un remate que abre el espacio.",
+    "lv2": "Desgarro más afilado.",
+    "lv3": "Onda del vacío.",
+    "name": "Desgarro del vacío",
+    "unlock_hint": "Línea de garra Nv16"
   },
   "wind_arrow": {
     "desc": "Sello de Arco: un disparo a distancia que monta el ritmo del crítico.",

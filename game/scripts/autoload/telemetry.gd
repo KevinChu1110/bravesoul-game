@@ -16,6 +16,8 @@ extends Node
 ##
 ## 設定：user://telemetry.json　　文件：docs/TELEMETRY.md
 
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
 const CONFIG_PATH := "user://telemetry.json"
 const ENDPOINT := "/rest/v1/rpc/telemetry_ingest"
 
@@ -70,6 +72,13 @@ var _battle_t0: int = 0
 var _battle_mode: String = ""
 var _gate: Node
 
+
+
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
 
 func _ready() -> void:
 	_gate = _resolve_gate()
@@ -409,22 +418,22 @@ func _new_uuid() -> String:
 ## 同意畫面的說明。講清楚送什麼、不送什麼、關掉會怎樣。
 func consent_prompt_bbcode() -> String:
 	var lines: PackedStringArray = []
-	lines.append("[b]幫忙讓這趟旅途更好走[/b]")
+	lines.append(_t("[b]幫忙讓這趟旅途更好走[/b]"))
 	lines.append("")
-	lines.append("打開之後，遊戲會回報幾個數字：你走到第幾章、在哪裡倒下、")
-	lines.append("哪一場打了幾次、教學看到第幾則、這次玩了多久。")
-	lines.append("我們靠這些知道哪一段太硬、哪一段太悶，然後去改它。")
+	lines.append(_t("打開之後，遊戲會回報幾個數字：你走到第幾章、在哪裡倒下、"))
+	lines.append(_t("哪一場打了幾次、教學看到第幾則、這次玩了多久。"))
+	lines.append(_t("我們靠這些知道哪一段太硬、哪一段太悶，然後去改它。"))
 	lines.append("")
-	lines.append("不會送出：你的名字、信箱、存檔、留言，任何看得出你是誰的東西。")
-	lines.append("連線關掉的時候，一個字也不會送。")
+	lines.append(_t("不會送出：你的名字、信箱、存檔、留言，任何看得出你是誰的東西。"))
+	lines.append(_t("連線關掉的時候，一個字也不會送。"))
 	lines.append("")
-	lines.append("不打開，遊戲一模一樣。隨時可以關，關了就立刻停。")
+	lines.append(_t("不打開，遊戲一模一樣。隨時可以關，關了就立刻停。"))
 	return "\n".join(lines)
 
 
 func status_line() -> String:
 	if not consent:
-		return "體驗回報：關閉"
+		return _t("體驗回報：關閉")
 	if not is_active():
-		return "體驗回報：已同意（目前離線，不會送出）"
-	return "體驗回報：開啟"
+		return _t("體驗回報：已同意（目前離線，不會送出）")
+	return _t("體驗回報：開啟")

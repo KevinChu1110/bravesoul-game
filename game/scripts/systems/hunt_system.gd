@@ -2,6 +2,8 @@ extends Node
 ## 狩獵場：單人波次、每日有獎 cap。後期可接多人房。
 ## Autoload：HuntSystem
 
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
 const DAILY_CAP := 5
 ## 練習場次（日 cap 用完後）的獎勵倍率：金、材料、經驗共用一個數字
 const PRACTICE_MULT := 0.35
@@ -13,6 +15,13 @@ const WAVES: Array[Dictionary] = [
 	{"mode": "scar_wisp", "label": "第三波 · 焰靈"},
 ]
 
+
+
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
 
 func _ready() -> void:
 	pass
@@ -63,28 +72,28 @@ func is_practice() -> bool:
 func status_bbcode() -> String:
 	_refresh_daily()
 	var lines: PackedStringArray = []
-	lines.append("[b]星途獵場[/b]")
-	lines.append("黑焰溢地的邊陲。主線不經此處——只為鍛鍊與材料。")
+	lines.append(_t("[b]星途獵場[/b]"))
+	lines.append(_t("黑焰溢地的邊陲。主線不經此處——只為鍛鍊與材料。"))
 	lines.append("")
 	if not is_unlocked():
-		lines.append("（進入騎士堡後解鎖）")
+		lines.append(_t("（進入騎士堡後解鎖）"))
 		return "\n".join(lines)
-	lines.append("今日有獎場次：%d／%d（剩餘 %d）" % [runs_today(), DAILY_CAP, daily_left()])
-	lines.append("每場：3 波雜魚。每波給經驗，通關再發材料與金。")
-	lines.append("有獎場次用完後仍可練習，但經驗與金都只剩三成五。")
+	lines.append(_t("今日有獎場次：%d／%d（剩餘 %d）") % [runs_today(), DAILY_CAP, daily_left()])
+	lines.append(_t("每場：3 波雜魚。每波給經驗，通關再發材料與金。"))
+	lines.append(_t("有獎場次用完後仍可練習，但經驗與金都只剩三成五。"))
 	if is_run_active():
-		lines.append("[color=#c96]進行中：第 %d／%d 波[/color]" % [current_wave() + 1, WAVES.size()])
+		lines.append(_t("[color=#c96]進行中：第 %d／%d 波[/color]") % [current_wave() + 1, WAVES.size()])
 	lines.append("")
-	lines.append("掉落：溢皮、焰骨、溢核（可在溢物回收換金）")
+	lines.append(_t("掉落：溢皮、焰骨、溢核（可在溢物回收換金）"))
 	return "\n".join(lines)
 
 
 ## 開始一場（有獎或練習）
 func start_run(force_practice: bool = false) -> Dictionary:
 	if not is_unlocked():
-		return {"ok": false, "msg": "尚未解鎖狩獵場。"}
+		return {"ok": false, "msg": _t("尚未解鎖狩獵場。")}
 	if is_run_active():
-		return {"ok": false, "msg": "已有進行中的狩獵。請先打完或放棄。"}
+		return {"ok": false, "msg": _t("已有進行中的狩獵。請先打完或放棄。")}
 	_refresh_daily()
 	var practice := force_practice or daily_left() <= 0
 	GameState.set_flag(_fk("active"), true)
@@ -92,12 +101,12 @@ func start_run(force_practice: bool = false) -> Dictionary:
 	GameState.set_flag(_fk("practice"), practice)
 	GameState.set_flag(_fk("waves_cleared"), 0)
 	SaveManager.save_game()
-	var msg := "狩獵開始（練習·獎勵減少）。" if practice else "狩獵開始（有獎）。"
+	var msg := _t("狩獵開始（練習·獎勵減少）。") if practice else _t("狩獵開始（有獎）。")
 	return {
 		"ok": true,
 		"practice": practice,
 		"mode": str(WAVES[0].get("mode", "ash_rat")),
-		"label": str(WAVES[0].get("label", "第一波")),
+		"label": _t(str(WAVES[0].get("label", "第一波"))),
 		"msg": msg,
 	}
 
@@ -113,7 +122,7 @@ func wave_label(index: int = -1) -> String:
 	var i := current_wave() if index < 0 else index
 	if i < 0 or i >= WAVES.size():
 		return ""
-	return str(WAVES[i].get("label", "波次"))
+	return _t(str(WAVES[i].get("label", "波次")))
 
 
 func wave_mode(index: int = -1) -> String:
@@ -140,7 +149,7 @@ func wave_xp(mode: String, practice: bool) -> int:
 
 func on_wave_won() -> Dictionary:
 	if not is_run_active():
-		return {"ok": false, "msg": "沒有進行中的狩獵。"}
+		return {"ok": false, "msg": _t("沒有進行中的狩獵。")}
 	var w := current_wave()
 	var practice := is_practice()
 	var cleared := int(GameState.get_flag(_fk("waves_cleared"), 0)) + 1
@@ -169,7 +178,7 @@ func on_wave_won() -> Dictionary:
 		"loot_msg": mid_loot,
 		"xp": xp_got,
 		"level_up": lv_up,
-		"msg": "擊破！%s" % wave_label(nw),
+		"msg": _t("擊破！%s") % wave_label(nw),
 	}
 
 
@@ -181,9 +190,9 @@ func on_wave_lost() -> Dictionary:
 	if cleared > 0 and not is_practice():
 		pity = _grant_items({"hunt_hide": 1})
 	abandon_run()
-	var msg := "狩獵中斷。"
+	var msg := _t("狩獵中斷。")
 	if pity != "":
-		msg += " 保底：%s" % pity
+		msg += _t(" 保底：%s") % pity
 	return {"ok": true, "msg": msg, "loot_msg": pity}
 
 
@@ -207,7 +216,7 @@ func _finish_run(full_clear: bool) -> Dictionary:
 			extra += _grant_items({"hunt_core": 1})
 		if randf() < 0.4:
 			InventorySystem.add_item("hp_s", 1)
-			extra += " 小紅水×1"
+			extra += _t(" 小紅水×1")
 		loot_msg = (loot_msg + " " + extra).strip_edges()
 	elif practice and full_clear:
 		loot_msg = _grant_items({"hunt_hide": 1})
@@ -220,7 +229,7 @@ func _finish_run(full_clear: bool) -> Dictionary:
 		"finished": true,
 		"gold": gold_n,
 		"loot_msg": loot_msg,
-		"msg": "狩獵完成！金 +%d。%s" % [gold_n, loot_msg],
+		"msg": _t("狩獵完成！金 +%d。%s") % [gold_n, loot_msg],
 		"practice": practice,
 	}
 
@@ -252,7 +261,7 @@ func _grant_items(bag: Dictionary) -> String:
 			parts.append("%s×%d" % [InventorySystem.item_name(str(id)), n])
 	if parts.is_empty():
 		return ""
-	return "獲得 " + "、".join(parts)
+	return _t("獲得 ") + "、".join(parts)
 
 
 ## NPC 回收價（假市集）
@@ -272,10 +281,10 @@ func recycle_price(item_id: String) -> int:
 func recycle_one(item_id: String) -> Dictionary:
 	var price := recycle_price(item_id)
 	if price <= 0:
-		return {"ok": false, "msg": "此物不收。"}
+		return {"ok": false, "msg": _t("此物不收。")}
 	if not InventorySystem.has_item(item_id, 1):
-		return {"ok": false, "msg": "沒有此物。"}
+		return {"ok": false, "msg": _t("沒有此物。")}
 	InventorySystem.remove_item(item_id, 1)
 	GameState.add_gold(price)
 	SaveManager.save_game()
-	return {"ok": true, "msg": "回收【%s】· 金 +%d" % [InventorySystem.item_name(item_id), price]}
+	return {"ok": true, "msg": _t("回收【%s】· 金 +%d") % [InventorySystem.item_name(item_id), price]}

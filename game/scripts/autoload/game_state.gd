@@ -36,6 +36,14 @@ var speed: int = 10
 
 ## 武器顯示名
 var weapon_name: String = "空手"
+## weapon_name 會寫進存檔，也被 sprite_db 拿來比對「是不是空手」，所以本身
+## 一律留中文。要顯示給玩家的地方走這支 —— 存的是資料，看的是譯文。
+const _ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
+
+func weapon_display() -> String:
+	return _ContentLoc.text("weapon", weapon_name)
+
 var weapon_atk: int = 0
 var weapon_tier: int = 0
 

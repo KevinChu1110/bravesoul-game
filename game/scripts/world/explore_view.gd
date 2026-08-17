@@ -3,6 +3,8 @@ extends Control
 ## 俯視可走場景（Control 座標，免物理）。WASD／方向鍵移動，靠近按 E 互動。
 ## 2D：地圖底圖 + TileMap 地磚 + 實心格碰撞 + 角色／NPC。
 
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
 const UiStyle = preload("res://scripts/ui/ui_style.gd")
 
 signal interacted(id: String)
@@ -68,6 +70,13 @@ var _ghosts: Array = []  ## {root, phase}
 var _presence_loaded: bool = false
 
 
+
+## 玩家看得到的中文字面值一律包這支（以原文當 key，譯文在
+## data/i18n/content/<locale>/ui.json）。務必包在格式化之前 ——
+## `_t("A %d") % [n]` 查得到表，`_t("A %d" % [n])` 查不到。
+static func _t(s: String) -> String:
+	return ContentLoc.text("ui", s)
+
 func _place_minimap_default() -> void:
 	if _minimap_root == null:
 		return
@@ -84,7 +93,7 @@ func _place_minimap_default() -> void:
 func show_guide_hint(text: String) -> void:
 	_guide_hint = text
 	if _hint and _near_id == "":
-		_hint.text = text if text != "" else "WASD／方向鍵移動 · 靠近後按 E 互動"
+		_hint.text = text if text != "" else _t("WASD／方向鍵移動 · 靠近後按 E 互動")
 		hint_changed.emit(_hint.text)
 
 
@@ -105,7 +114,7 @@ func setup(p_map_id: String) -> void:
 	_update_player_visual()
 	_ysort_world()
 	_update_camera()
-	hint_changed.emit("WASD 移動 · E 互動 · M 開關小地圖 · 路標切換分區")
+	hint_changed.emit(_t("WASD 移動 · E 互動 · M 開關小地圖 · 路標切換分區"))
 	call_deferred("_request_presence")
 
 
@@ -147,7 +156,7 @@ func _on_presence_result(res: Dictionary) -> void:
 		var uid := str(row.get("user_id", "g%d" % i))
 		if OnlineGate.user_id != "" and uid == OnlineGate.user_id:
 			continue
-		var name_s := str(row.get("display_name", "星途旅人"))
+		var name_s := str(row.get("display_name", _t("星途旅人")))
 		var pos := _ghost_pos_for(uid, i)
 		_spawn_ghost(pos, name_s, false)
 		i += 1
@@ -160,7 +169,7 @@ func _on_presence_result(res: Dictionary) -> void:
 
 func _spawn_offline_footprints() -> void:
 	## 氛圍用：非同步「可能有人來過」
-	var seeds := ["灰影", "無名人", "遠方的氣味"]
+	var seeds := [_t("灰影"), _t("無名人"), _t("遠方的氣味")]
 	for i in mini(2, seeds.size()):
 		var pos := _ghost_pos_for("offline_%s_%d" % [map_id, i], i + 3)
 		_spawn_ghost(pos, seeds[i], true)
@@ -309,17 +318,17 @@ func _process_bubbles(delta: float) -> void:
 func _try_ambient_bubble() -> void:
 	## 附近 NPC 偶爾冒泡（楓式氛圍）
 	var lines := {
-		"maisui": "……還活著就好。",
-		"greybeard": "哼。旗還在。",
-		"ding": "鐵還熱。",
-		"sprout": "我也想練劍……",
-		"star": "星屑不等人。",
-		"merchant": "六域的價碼我都懂。",
-		"fog_hide": "霧裡……有人在笑。",
-		"acha": "茶涼了再打。",
-		"wind_ear": "風說……有客。",
-		"tide_roar": "浪比人實在。",
-		"duanye": "卷末未寫完。",
+		"maisui": _t("……還活著就好。"),
+		"greybeard": _t("哼。旗還在。"),
+		"ding": _t("鐵還熱。"),
+		"sprout": _t("我也想練劍……"),
+		"star": _t("星屑不等人。"),
+		"merchant": _t("六域的價碼我都懂。"),
+		"fog_hide": _t("霧裡……有人在笑。"),
+		"acha": _t("茶涼了再打。"),
+		"wind_ear": _t("風說……有客。"),
+		"tide_roar": _t("浪比人實在。"),
+		"duanye": _t("卷末未寫完。"),
 	}
 	var pc := _player_center()
 	var candidates: Array = []
@@ -439,7 +448,7 @@ func _build_chrome() -> void:
 	_hint.add_theme_font_size_override("font_size", 13)
 	_hint.add_theme_color_override("font_color", UiStyle.INK)
 	_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_hint.text = "移動靠近目標 · 按 E 互動"
+	_hint.text = _t("移動靠近目標 · 按 E 互動")
 	hint_bar.add_child(_hint)
 
 	_player_shadow = ColorRect.new()
@@ -496,7 +505,7 @@ func _build_chrome() -> void:
 	name_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	name_tag.add_theme_stylebox_override("panel", UiStyle.name_tag_style())
 	var ntl := Label.new()
-	ntl.text = str(GameState.player_name) if str(GameState.player_name) != "" else "小白"
+	ntl.text = str(GameState.player_name) if str(GameState.player_name) != "" else _t("小白")
 	ntl.add_theme_font_size_override("font_size", 10)
 	ntl.add_theme_color_override("font_color", UiStyle.INK)
 	ntl.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -932,9 +941,14 @@ func _rebuild_entities() -> void:
 			root.position = Vector2(e.pos.x + e.size.x * 0.5 - disp.x * 0.5, foot_y - disp.y)
 			root.set_meta("sort_y", foot_y)
 		else:
-			var box := ColorRect.new()
+			var sb := StyleBoxFlat.new()
+			sb.bg_color = Color(e.color.r, e.color.g, e.color.b, 0.45)
+			sb.border_color = Color(e.color.r * 1.3, e.color.g * 1.3, e.color.b * 1.3, 0.8)
+			sb.set_border_width_all(1)
+			sb.set_corner_radius_all(4)
+			var box := Panel.new()
 			box.set_anchors_preset(Control.PRESET_FULL_RECT)
-			box.color = e.color
+			box.add_theme_stylebox_override("panel", sb)
 			box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			root.add_child(box)
 			root.set_meta("sort_y", e.pos.y + e.size.y)
@@ -1081,7 +1095,7 @@ func _build_minimap_ui() -> void:
 	head_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	head.add_child(head_row)
 	var ht := Label.new()
-	ht.text = "小地圖"
+	ht.text = _t("小地圖")
 	ht.add_theme_font_size_override("font_size", 11)
 	ht.add_theme_color_override("font_color", UiStyle.KEY_STRONG)
 	ht.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1155,7 +1169,7 @@ func _build_minimap_ui() -> void:
 	v.add_child(_mmap_label)
 
 	var legend := Label.new()
-	legend.text = "● 你  ·  路標  ·  NPC  ·  點"
+	legend.text = _t("● 你  ·  路標  ·  NPC  ·  點")
 	legend.add_theme_font_size_override("font_size", 10)
 	legend.add_theme_color_override("font_color", Color(0.5, 0.55, 0.6, 0.9))
 	legend.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1355,7 +1369,7 @@ func _update_near() -> void:
 			if _guide_hint != "":
 				_hint.text = _guide_hint
 			else:
-				_hint.text = "移動靠近目標 · 按 E 互動"
+				_hint.text = _t("移動靠近目標 · 按 E 互動")
 			_hint.modulate = Color(1, 1, 1, 0.9)
 			hint_changed.emit(_hint.text)
 		else:
@@ -1414,7 +1428,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		AudioManager.play_interact()
 		## 聊天泡泡：先冒一句再交主流程
 		var lab := entity_label(_near_id)
-		if lab != "" and not lab.begins_with("往") and not lab.begins_with("回"):
+		if lab != "" and not lab.begins_with(_t("往")) and not lab.begins_with(_t("回")):
 			show_entity_bubble(_near_id, lab, 1.6)
 		interacted.emit(_near_id)
 		get_viewport().set_input_as_handled()
