@@ -281,20 +281,34 @@ static func equip_icon_for_inst(inst: Dictionary) -> Texture2D:
 
 
 static func player_battle() -> Texture2D:
-	var idle := player_pose("idle")
+	## 與探索同一套 chibi 底圖（紙娃娃疊層才對得齊）
+	var idle := player_idle()
 	if idle:
 		return idle
 	return tex("%s/player/rabbit_battle.png" % ROOT)
 
 
 ## pose: idle | telegraph | attack | recover | skill
+## 戰鬥／探索統一：底圖一律 chibi idle／walk；動作感靠 battle_view 的 scale／lunge。
+## 舊 poses/*.png 保留檔案但不當預設（風格與 idle_x3 不一致）。
 static func player_pose(pose: String) -> Texture2D:
-	var t := tex("%s/player/poses/%s.png" % [ROOT, pose])
-	if t:
-		return t
-	if pose == "idle":
-		return tex("%s/player/rabbit_battle.png" % ROOT)
-	return null
+	match pose:
+		"attack", "skill":
+			## 略用步行幀做出「出手」感
+			var w := player_walk(1)
+			if w:
+				return w
+		"telegraph":
+			var w0 := player_walk(0)
+			if w0:
+				return w0
+		"recover":
+			var w2 := player_walk(2)
+			if w2:
+				return w2
+		_:
+			pass
+	return player_idle()
 
 
 static func boss(mode: String) -> Texture2D:
