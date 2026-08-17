@@ -1,0 +1,94 @@
+{
+  "title.claw_parry": {
+    "desc": "레오에게 완벽한 패링을 한 번 이상.",
+    "name": "검으로 발톱을 받다"
+  },
+  "title.cleared": {
+    "desc": "종장 클리어.",
+    "name": "아침빛 속의 토끼"
+  },
+  "title.debt_smith": {
+    "desc": "옛 주인의 부러진 칼을 딩딩의 화로로 돌려보냈다.",
+    "name": "빚 갚는 망치"
+  },
+  "title.echo_walker": {
+    "desc": "흑염 잔향의 어느 층에서든 다시 클리어.",
+    "name": "잔향을 걷는 자"
+  },
+  "title.featured_fan": {
+    "desc": "네 종류의 균열을 모두 한 번씩 진압했다.",
+    "name": "주간 초점 사냥꾼"
+  },
+  "title.fog_seer": {
+    "desc": "백무를 꿰뚫고 무은을 지나다.",
+    "name": "간파한 자"
+  },
+  "title.gale_chaser": {
+    "desc": "질영의 멈춤 박자를 끝까지 기다리다.",
+    "name": "바람을 쫓는 자"
+  },
+  "title.guard_breaker": {
+    "desc": "한 판에서 아파의 방어를 두 번 이상 무너뜨리다.",
+    "name": "자세를 깨는 자"
+  },
+  "title.lamp_keeper": {
+    "desc": "마을 뒤 묘지의 장명등을 다시 밝혔다.",
+    "name": "등을 지키는 자"
+  },
+  "title.lore_reader": {
+    "desc": "실크의 서가에 있는 흑염 삼설을 다 읽었다.",
+    "name": "모순을 읽는 자"
+  },
+  "title.mirror_break": {
+    "desc": "거울 회랑에서 제 지름길을 이겼다.",
+    "name": "거울을 깨는 자"
+  },
+  "title.no_worship": {
+    "desc": "마왕의 세 번의 유혹을 모두 거절하다.",
+    "name": "나는 강권을 흠모하지 않는다"
+  },
+  "title.rift_walker": {
+    "desc": "균열 승수 다섯 회 도달.",
+    "name": "균열을 걷는 자"
+  },
+  "title.ronin_path": {
+    "desc": "갈림길에서 흑염 낭인을 타이르다（또는 이기다）.",
+    "name": "칼을 거두는 자"
+  },
+  "title.scar_walker": {
+    "desc": "흑염 흉터의 주인을 밟고 넘었다.",
+    "name": "흉터를 걷는 자"
+  },
+  "title.shore_last": {
+    "desc": "석권이 힘의 방향을 인정할 때까지 서 있다.",
+    "name": "기슭에 마지막까지"
+  },
+  "title.star_wisher": {
+    "desc": "성락 얕은 못에서 한 가지 빌었다——입 밖에 낼 필요는 없다.",
+    "name": "소원 비는 토끼"
+  },
+  "title.treasure_rabbit": {
+    "desc": "세계 보물상자를 열두 개 열었다.",
+    "name": "주워 모으는 토끼"
+  },
+  "title.true_post": {
+    "desc": "무은의 진짜 편지를 행상 역참에 전했다.",
+    "name": "참된 전령"
+  },
+  "title.wheat_keeper": {
+    "desc": "밀대가 대신 일격을 받았다.",
+    "name": "대는 남았다"
+  },
+  "title.wood_mentor": {
+    "desc": "연습이라는 꿈을 새싹의 손에 쥐여 주었다.",
+    "name": "목검의 약속"
+  },
+  "title.world_wanderer": {
+    "desc": "서른 곳의 땅을 찾아갔다.",
+    "name": "취령의 만유자"
+  },
+  "title.wreck_end": {
+    "desc": "선장의 그림자를 한 번 더 가라앉혔다.",
+    "name": "침몰선의 끝"
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "d_craft": {
+    "desc": "Upgrade or forge a style weapon once",
+    "name": "Forge Homework"
+  },
+  "d_mats": {
+    "desc": "Sell 5 materials in total",
+    "name": "Material Recovery"
+  },
+  "d_shop": {
+    "desc": "Buy once at the materials shop",
+    "name": "A Trip to Market"
+  },
+  "d_skirmish": {
+    "desc": "Win 3 minor fights",
+    "name": "Clearing Contract"
+  },
+  "d_train": {
+    "desc": "Train 3 times at the yard",
+    "name": "Three Rounds"
+  },
+  "m_chests12": {
+    "desc": "Open 12 world chests",
+    "name": "Treasure Hunter of Cuiling"
+  },
+  "m_chests5": {
+    "desc": "Open 5 world chests",
+    "name": "Scavenger"
+  },
+  "m_clear": {
+    "desc": "Clear the final chapter",
+    "name": "Witnessed at Dawn"
+  },
+  "m_codex": {
+    "desc": "Finish reading Velvet's shelf",
+    "name": "Pages of Contradiction"
+  },
+  "m_ding_debt": {
+    "desc": "Recover the old master's blade and give it to Ding",
+    "name": "The Smith's Old Debt"
+  },
+  "m_first_boss": {
+    "desc": "Defeat Leo (or any sacred beast)",
+    "name": "First Cry"
+  },
+  "m_fog_incense": {
+    "desc": "Offer incense at the mist shrine's censer",
+    "name": "One Stick of Incense"
+  },
+  "m_fog_letter": {
+    "desc": "Deliver Veilfog's true letter to the trader post",
+    "name": "Letter Through the Mist"
+  },
+  "m_guild": {
+    "desc": "Reach 100 guild contribution",
+    "name": "Bond of the Pact"
+  },
+  "m_hearth": {
+    "desc": "Light the hearth at the roadside inn",
+    "name": "Warmth of a Rest Stop"
+  },
+  "m_hunt3": {
+    "desc": "Complete the hunting ground with a reward 3 times",
+    "name": "Starpath Hunter"
+  },
+  "m_lantern": {
+    "desc": "Relight the eternal lamp in the graveyard",
+    "name": "One Lasting Flame"
+  },
+  "m_letter": {
+    "desc": "Read Wheatear's letter in Veilfog",
+    "name": "Late Words"
+  },
+  "m_life5": {
+    "desc": "Do all five small things: lamp, nest, wish, incense, hearth",
+    "name": "Small Lights of Daily Life"
+  },
+  "m_mirror": {
+    "desc": "Defeat the mirror hall afterimage",
+    "name": "Mirrorbreaker"
+  },
+  "m_nest": {
+    "desc": "Care for the nest under the cliff bridge",
+    "name": "Soft Feathers Under the Bridge"
+  },
+  "m_ng1": {
+    "desc": "Enter the Black Flame Echo (NG+)",
+    "name": "Second Journey"
+  },
+  "m_optional": {
+    "desc": "Defeat Swiftshadow and Stonefist",
+    "name": "Wind and Stone"
+  },
+  "m_rift3": {
+    "desc": "Reach 3 rift victories",
+    "name": "Rift Trial"
+  },
+  "m_ronin": {
+    "desc": "Talk down or defeat the Black Flame Ronin",
+    "name": "Parted Blades"
+  },
+  "m_scar": {
+    "desc": "Defeat the Scar Lord of the Black Flame",
+    "name": "Scarwalker"
+  },
+  "m_side4": {
+    "desc": "Complete Sprout, the old debt, the letter and the ronin",
+    "name": "Four Kindnesses"
+  },
+  "m_skirmish10": {
+    "desc": "Win 10 minor fights",
+    "name": "Roadside Cleaner"
+  },
+  "m_sprout": {
+    "desc": "Complete Sprout's side story",
+    "name": "Promise of the Wooden Sword"
+  },
+  "m_star_wish": {
+    "desc": "Make a wish at the shallows on Starfall Plain",
+    "name": "A Wish at the Pool"
+  },
+  "m_three_kings": {
+    "desc": "Clear Leo, White Fog and Abo",
+    "name": "Three Domains"
+  },
+  "m_three_secrets": {
+    "desc": "Clear all three hidden minor bosses",
+    "name": "Three Secret Places"
+  },
+  "m_titles5": {
+    "desc": "Unlock 5 titles",
+    "name": "Title Collector"
+  },
+  "m_visit15": {
+    "desc": "Visit 15 different maps",
+    "name": "Rabbit on an Outing"
+  },
+  "m_visit30": {
+    "desc": "Visit 30 different maps",
+    "name": "Six-Domain Roamer"
+  },
+  "m_wreck": {
+    "desc": "Defeat the shadow of the wreck's captain",
+    "name": "Wreck's End"
+  }
+}

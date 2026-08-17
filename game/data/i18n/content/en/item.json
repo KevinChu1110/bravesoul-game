@@ -1,0 +1,78 @@
+{
+  "antidote": {
+    "desc": "Restores 10 health and lifts the spirits a little.",
+    "name": "Flameclear Dew"
+  },
+  "bread": {
+    "desc": "Restores 15 health. Something for the road.",
+    "name": "Dry Rations"
+  },
+  "dust_crumb": {
+    "desc": "Grants 1 stardust when used.",
+    "name": "Stardust Crumb"
+  },
+  "hp_m": {
+    "desc": "Restores 55 health.",
+    "name": "Medium Red Draught"
+  },
+  "hp_s": {
+    "desc": "Restores 25 health.",
+    "name": "Small Red Draught"
+  },
+  "hunt_bone": {
+    "desc": "Mid-tier hunting ground material.",
+    "name": "Flame Bone"
+  },
+  "hunt_core": {
+    "desc": "Rare hunting ground core. Best price at the surplus buyback.",
+    "name": "Spill Core"
+  },
+  "hunt_hide": {
+    "desc": "Hunting ground material. Trade it at the surplus buyback.",
+    "name": "Spill Hide"
+  },
+  "iron_scrap": {
+    "desc": "Basic forging material. Both the smith and the shop buy it.",
+    "name": "Scrap Iron"
+  },
+  "key_rusty": {
+    "desc": "The one you picked up at the village gate. Kept even after it was forged proper.",
+    "name": "Rusty Sword (keepsake)"
+  },
+  "knight_shard": {
+    "desc": "A forging fragment from the knights' domain. Makes the sabre line.",
+    "name": "Knight Iron Shard"
+  },
+  "map_scrap": {
+    "desc": "A corner the trader tore off for you. Good to look at, not to eat.",
+    "name": "Six-Domain Map Scrap"
+  },
+  "mist_shard": {
+    "desc": "Dropped by mist shades. Sells for 12 gold.",
+    "name": "Mist Crystal"
+  },
+  "oak_resin": {
+    "desc": "Material for stabilising and for accessories.",
+    "name": "Oak Resin"
+  },
+  "relic_token": {
+    "desc": "A mark left from clearing a hidden place. For the collection.",
+    "name": "Secret Place Token"
+  },
+  "scar_ember": {
+    "desc": "Dropped in the scar. Sells for 15 gold.",
+    "name": "Scar Ember"
+  },
+  "sea_shell": {
+    "desc": "Found on the coast. Sells for 10 gold.",
+    "name": "Tide Shell"
+  },
+  "star_ore": {
+    "desc": "Material for star reading and Starpath weapons.",
+    "name": "Star Sand Ore"
+  },
+  "wolf_fang": {
+    "desc": "Minor drop. Sells for 8 gold.",
+    "name": "Wolf Fang"
+  }
+}

@@ -7,6 +7,10 @@ const DAILY_STREAK := "meta.daily_streak"
 
 ## 每日委託（養成循環）：track 對應 track_day
 ## 經濟 0.15：刷怪／練功略降；鍛造委託維持較高獎勵，引導錢進爐。
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+## 任務名與說明在非繁中會被 ContentLoc 換掉
+const QUEST_TEXT_FIELDS: PackedStringArray = ["name", "desc"]
+
 const COMMISSIONS: Array[Dictionary] = [
 	{"id": "d_train", "name": "演武三巡", "desc": "演武場練功 3 次", "track": "train", "need": 3, "gold": 24, "dust": 1, "xp": 25},
 	{"id": "d_skirmish", "name": "清道委託", "desc": "雜魚勝 3 場", "track": "skirmish", "need": 3, "gold": 28, "dust": 1, "xp": 30},
@@ -109,6 +113,15 @@ func commission_done(c: Dictionary) -> bool:
 
 func commission_claimed(id: String) -> bool:
 	return GameState.has_flag("quest.dayclaim.%s" % id)
+
+
+## 讀目錄一律走這兩支，直接用常數會拿到未翻的原文
+func commissions() -> Array:
+	return ContentLoc.apply_all("quest", COMMISSIONS, QUEST_TEXT_FIELDS)
+
+
+func missions() -> Array:
+	return ContentLoc.apply_all("quest", MISSIONS, QUEST_TEXT_FIELDS)
 
 
 func claim_commission(id: String) -> Dictionary:

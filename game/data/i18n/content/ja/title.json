@@ -1,0 +1,94 @@
+{
+  "title.claw_parry": {
+    "desc": "レオに完璧なパリィを一度以上。",
+    "name": "剣もて爪を受く"
+  },
+  "title.cleared": {
+    "desc": "終章をクリア。",
+    "name": "朝光の中の兎"
+  },
+  "title.debt_smith": {
+    "desc": "旧主の折れた刃を釘釘の炉へ返した。",
+    "name": "借りを返す槌"
+  },
+  "title.echo_walker": {
+    "desc": "黒炎の残響のいずれかの層で再クリア。",
+    "name": "残響を歩む者"
+  },
+  "title.featured_fan": {
+    "desc": "四種の裂け目をすべて一度は鎮めた。",
+    "name": "週替わりの狩人"
+  },
+  "title.fog_seer": {
+    "desc": "白霧を見破り、霧隠を抜ける。",
+    "name": "看破せし者"
+  },
+  "title.gale_chaser": {
+    "desc": "疾影の停拍を待ち切る。",
+    "name": "風を追う者"
+  },
+  "title.guard_breaker": {
+    "desc": "一戦で阿波の構えを二度以上崩す。",
+    "name": "構えを崩す者"
+  },
+  "title.lamp_keeper": {
+    "desc": "村裏の墓地の長明灯を再び灯した。",
+    "name": "灯を守る者"
+  },
+  "title.lore_reader": {
+    "desc": "絲絨の書棚の黒炎三説を読み終えた。",
+    "name": "矛盾を読む者"
+  },
+  "title.mirror_break": {
+    "desc": "鏡廊で自分の近道に勝った。",
+    "name": "鏡を破る者"
+  },
+  "title.no_worship": {
+    "desc": "魔王の三度の誘いをすべて拒む。",
+    "name": "我、強権を慕わず"
+  },
+  "title.rift_walker": {
+    "desc": "裂け目の勝利が五回に到達。",
+    "name": "裂け目を歩む者"
+  },
+  "title.ronin_path": {
+    "desc": "岔路で黒炎の浪人を諭した（あるいは倒した）。",
+    "name": "刃を収める者"
+  },
+  "title.scar_walker": {
+    "desc": "黒炎の傷跡の主を踏み越えた。",
+    "name": "傷跡を歩む者"
+  },
+  "title.shore_last": {
+    "desc": "石拳が力の向きを認めるまで立ち続ける。",
+    "name": "岸に最後まで"
+  },
+  "title.star_wisher": {
+    "desc": "星落の浅池でひとつ願った——口に出さなくていい。",
+    "name": "願う兎"
+  },
+  "title.treasure_rabbit": {
+    "desc": "世界の宝箱を十二個開けた。",
+    "name": "拾い集める兎"
+  },
+  "title.true_post": {
+    "desc": "霧隠の真の手紙を行商の駅站へ届けた。",
+    "name": "真の使い"
+  },
+  "title.wheat_keeper": {
+    "desc": "麦の稈が一撃を代わりに受けた。",
+    "name": "稈、在り"
+  },
+  "title.wood_mentor": {
+    "desc": "稽古という夢を芽の手に渡した。",
+    "name": "木剣の約束"
+  },
+  "title.world_wanderer": {
+    "desc": "三十か所の土地を訪れた。",
+    "name": "翠嶺の漫遊者"
+  },
+  "title.wreck_end": {
+    "desc": "船長の影をもう一度沈めた。",
+    "name": "沈船の終わり"
+  }
+}

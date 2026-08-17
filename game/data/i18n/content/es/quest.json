@@ -1,0 +1,146 @@
+{
+  "d_craft": {
+    "desc": "Sube un nivel o forja un arma de estilo una vez",
+    "name": "Deberes de fragua"
+  },
+  "d_mats": {
+    "desc": "Vende 5 materiales en total",
+    "name": "Recuperar materiales"
+  },
+  "d_shop": {
+    "desc": "Compra una vez en la tienda de materiales",
+    "name": "Vuelta al mercado"
+  },
+  "d_skirmish": {
+    "desc": "Gana 3 combates menores",
+    "name": "Contrato de limpieza"
+  },
+  "d_train": {
+    "desc": "Entrena 3 veces en el patio",
+    "name": "Tres rondas"
+  },
+  "m_chests12": {
+    "desc": "Abre 12 cofres del mundo",
+    "name": "Buscatesoros de Cuiling"
+  },
+  "m_chests5": {
+    "desc": "Abre 5 cofres del mundo",
+    "name": "Rebuscador"
+  },
+  "m_clear": {
+    "desc": "Termina el capítulo final",
+    "name": "Testigo del amanecer"
+  },
+  "m_codex": {
+    "desc": "Termina de leer el estante de Terciopelo",
+    "name": "Páginas contradictorias"
+  },
+  "m_ding_debt": {
+    "desc": "Recupera la hoja del viejo maestro y dásela a Ding",
+    "name": "La deuda vieja del herrero"
+  },
+  "m_first_boss": {
+    "desc": "Vence a Leo (o a cualquier bestia sagrada)",
+    "name": "Primer grito"
+  },
+  "m_fog_incense": {
+    "desc": "Ofrece incienso en el incensario de la ermita de la niebla",
+    "name": "Una varilla de incienso"
+  },
+  "m_fog_letter": {
+    "desc": "Entrega la carta verdadera de Velo en la posta",
+    "name": "Carta a través de la niebla"
+  },
+  "m_guild": {
+    "desc": "Alcanza 100 de contribución al gremio",
+    "name": "Vínculo del pacto"
+  },
+  "m_hearth": {
+    "desc": "Enciende el hogar de la posada del camino",
+    "name": "El calor del descanso"
+  },
+  "m_hunt3": {
+    "desc": "Completa el coto con recompensa 3 veces",
+    "name": "Cazador de la Senda Estelar"
+  },
+  "m_lantern": {
+    "desc": "Enciende la lámpara eterna del cementerio",
+    "name": "Una llama que dura"
+  },
+  "m_letter": {
+    "desc": "Lee la carta de Espiga en Velo",
+    "name": "Palabras que llegan tarde"
+  },
+  "m_life5": {
+    "desc": "Haz las cinco cosas: lámpara, nido, deseo, incienso y hogar",
+    "name": "Pequeñas luces de cada día"
+  },
+  "m_mirror": {
+    "desc": "Vence a la estela de la galería de espejos",
+    "name": "Rompeespejos"
+  },
+  "m_nest": {
+    "desc": "Cuida el nido bajo el puente del barranco",
+    "name": "Plumas blandas bajo el puente"
+  },
+  "m_ng1": {
+    "desc": "Entra en el Eco de Llama Negra (NG+)",
+    "name": "Segunda partida"
+  },
+  "m_optional": {
+    "desc": "Vence a la Sombra Veloz y a Puño de Piedra",
+    "name": "Viento y piedra"
+  },
+  "m_rift3": {
+    "desc": "Alcanza 3 victorias en la grieta",
+    "name": "Prueba de la grieta"
+  },
+  "m_ronin": {
+    "desc": "Convence o vence al Errante de Llama Negra",
+    "name": "Filos que se separan"
+  },
+  "m_scar": {
+    "desc": "Vence al Señor de la Cicatriz",
+    "name": "Caminante de la cicatriz"
+  },
+  "m_side4": {
+    "desc": "Completa Brote, la deuda vieja, la carta y el errante",
+    "name": "Cuatro gestos"
+  },
+  "m_skirmish10": {
+    "desc": "Gana 10 combates menores",
+    "name": "Barrendero de caminos"
+  },
+  "m_sprout": {
+    "desc": "Completa la historia de Brote",
+    "name": "Promesa de la espada de madera"
+  },
+  "m_star_wish": {
+    "desc": "Pide un deseo en las aguas de la Llanura de Estrellas Caídas",
+    "name": "Un deseo en el estanque"
+  },
+  "m_three_kings": {
+    "desc": "Supera a Leo, Niebla Blanca y Abo",
+    "name": "Tres dominios"
+  },
+  "m_three_secrets": {
+    "desc": "Supera a los tres jefes menores escondidos",
+    "name": "Tres lugares ocultos"
+  },
+  "m_titles5": {
+    "desc": "Desbloquea 5 títulos",
+    "name": "Coleccionista de títulos"
+  },
+  "m_visit15": {
+    "desc": "Visita 15 mapas distintos",
+    "name": "Conejo de excursión"
+  },
+  "m_visit30": {
+    "desc": "Visita 30 mapas distintos",
+    "name": "Errante de los seis dominios"
+  },
+  "m_wreck": {
+    "desc": "Vence a la sombra del capitán del naufragio",
+    "name": "Fin del naufragio"
+  }
+}

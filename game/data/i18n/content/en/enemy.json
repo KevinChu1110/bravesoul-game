@@ -1,0 +1,38 @@
+{
+  "ash_rat": {
+    "name": "Ash Rat"
+  },
+  "bamboo_spirit": {
+    "name": "Bamboo Fist Spirit"
+  },
+  "black_ronin": {
+    "name": "Black Flame Ronin"
+  },
+  "coast_raider": {
+    "name": "Tide Raider"
+  },
+  "fog_shade": {
+    "name": "Mist Shade"
+  },
+  "forest_sprite": {
+    "name": "Forest Wind Sprite"
+  },
+  "mirror_wraith": {
+    "name": "Mirror Hall Afterimage"
+  },
+  "road_bandit": {
+    "name": "Waste Road Straggler"
+  },
+  "scar_lord": {
+    "name": "Scar Lord of the Black Flame"
+  },
+  "scar_wisp": {
+    "name": "Scar Flame Wisp"
+  },
+  "sewer_slime": {
+    "name": "Sewer Slime"
+  },
+  "wreck_captain": {
+    "name": "Shadow of the Wreck's Captain"
+  }
+}

@@ -1054,7 +1054,7 @@ func _go_daily_panel() -> void:
 		})
 	else:
 		buttons.append({"text": "簽到已領", "cb": _go_daily_panel})
-	for c in QuestSystem.COMMISSIONS:
+	for c in QuestSystem.commissions():
 		var cid := str(c.get("id", ""))
 		if QuestSystem.commission_done(c) and not QuestSystem.commission_claimed(cid):
 			var id2 := cid
@@ -1071,7 +1071,7 @@ func _go_daily_panel() -> void:
 func _go_quest_panel() -> void:
 	var body := "長遠任務（完成後可領獎）\n\n" + QuestSystem.list_missions_bbcode()
 	var buttons: Array = []
-	for m in QuestSystem.MISSIONS:
+	for m in QuestSystem.missions():
 		var id := str(m.get("id", ""))
 		if QuestSystem.mission_done(m) and not QuestSystem.mission_claimed(id):
 			var mid := id
@@ -1133,7 +1133,7 @@ func _go_guild_panel() -> void:
 	var body := GuildSystem.status_bbcode()
 	var buttons: Array = []
 	if not GuildSystem.is_joined():
-		for g in GuildSystem.GUILDS:
+		for g in GuildSystem.guilds():
 			var gid := str(g.get("id", ""))
 			var gname := str(g.get("name", gid))
 			## 加入之後沒有退出的路（GuildSystem 只有 join()），

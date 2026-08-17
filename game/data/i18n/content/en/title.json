@@ -1,0 +1,94 @@
+{
+  "title.claw_parry": {
+    "desc": "Land at least one perfect parry on Leo.",
+    "name": "Sword Against Claw"
+  },
+  "title.cleared": {
+    "desc": "Clear the final chapter.",
+    "name": "Rabbit in the Morning Light"
+  },
+  "title.debt_smith": {
+    "desc": "Return the old master's broken blade to Ding's fire.",
+    "name": "Hammer of Debts"
+  },
+  "title.echo_walker": {
+    "desc": "Clear the game again in any Black Flame Echo layer.",
+    "name": "Echowalker"
+  },
+  "title.featured_fan": {
+    "desc": "Put down all four rift sets at least once.",
+    "name": "Featured Hunter"
+  },
+  "title.fog_seer": {
+    "desc": "See through White Fog and walk out of Veilfog.",
+    "name": "One Who Sees Through"
+  },
+  "title.gale_chaser": {
+    "desc": "Wait out Swiftshadow's pause.",
+    "name": "Windchaser"
+  },
+  "title.guard_breaker": {
+    "desc": "Break Abo's guard twice or more in a single fight.",
+    "name": "Guardbreaker"
+  },
+  "title.lamp_keeper": {
+    "desc": "Relight the eternal lamp in the graveyard behind the village.",
+    "name": "Lampkeeper"
+  },
+  "title.lore_reader": {
+    "desc": "Read all three Black Flame theories on Velvet's shelf.",
+    "name": "Reader of Contradictions"
+  },
+  "title.mirror_break": {
+    "desc": "Beat your own shortcut in the mirror hall.",
+    "name": "Mirrorbreaker"
+  },
+  "title.no_worship": {
+    "desc": "All three refusals to the Demon King.",
+    "name": "I Bow to No Power"
+  },
+  "title.rift_walker": {
+    "desc": "Reach five rift victories.",
+    "name": "Riftwalker"
+  },
+  "title.ronin_path": {
+    "desc": "Talk down (or defeat) the Black Flame Ronin at the crossroads.",
+    "name": "One Who Sheathes"
+  },
+  "title.scar_walker": {
+    "desc": "Flatten the lord of the Black Flame Scar.",
+    "name": "Scarwalker"
+  },
+  "title.shore_last": {
+    "desc": "Stand until Stonefist admits where strength belongs.",
+    "name": "Last One Standing"
+  },
+  "title.star_wisher": {
+    "desc": "Make a wish at the Starfall shallows — no need to say it aloud.",
+    "name": "Wishing Rabbit"
+  },
+  "title.treasure_rabbit": {
+    "desc": "Open twelve world chests.",
+    "name": "Scavenger Rabbit"
+  },
+  "title.true_post": {
+    "desc": "Deliver Veilfog's true letter to the trader post.",
+    "name": "True Courier"
+  },
+  "title.wheat_keeper": {
+    "desc": "A wheat stalk took a blow for you.",
+    "name": "Still Standing"
+  },
+  "title.wood_mentor": {
+    "desc": "Put the dream of practice into Sprout's hands.",
+    "name": "Promise of the Wooden Sword"
+  },
+  "title.world_wanderer": {
+    "desc": "Visit thirty different places.",
+    "name": "Wanderer of Cuiling"
+  },
+  "title.wreck_end": {
+    "desc": "Sink the captain's shadow one more time.",
+    "name": "Wreck's End"
+  }
+}

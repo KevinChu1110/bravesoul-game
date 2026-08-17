@@ -32,6 +32,9 @@ const HOTBAR_SIZE := 8
 const BAG_SLOTS := 24  ## 顯示格數（4×6）
 
 ## id → {name, desc, kind, stack, heal?, dust?, gold?, key?, color}
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+const ITEM_TEXT_FIELDS: PackedStringArray = ["name", "desc"]
+
 const CATALOG: Dictionary = {
 	"hp_s": {
 		"name": "小紅水",
@@ -227,8 +230,17 @@ func ensure_hotbar() -> void:
 		GameState.inventory = {}
 
 
+## 道具名與說明在非繁中會被 ContentLoc 換掉。CATALOG 是 id → 資料，
+## 但每筆裡面沒有 id 欄位，所以補一個再交給 apply()。
 func catalog(id: String) -> Dictionary:
-	return CATALOG.get(id, {})
+	var d: Dictionary = CATALOG.get(id, {})
+	if d.is_empty() or ContentLoc.locale() == "zh_TW":
+		return d
+	var with_id := d.duplicate(true)
+	with_id["id"] = id
+	var out: Dictionary = ContentLoc.apply("item", with_id, ITEM_TEXT_FIELDS)
+	out.erase("id")
+	return out
 
 
 func item_name(id: String) -> String:

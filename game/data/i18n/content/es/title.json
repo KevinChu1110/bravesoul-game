@@ -1,0 +1,94 @@
+{
+  "title.claw_parry": {
+    "desc": "Para a Leo a la perfección al menos una vez.",
+    "name": "Espada contra zarpa"
+  },
+  "title.cleared": {
+    "desc": "Termina el capítulo final.",
+    "name": "El conejo del amanecer"
+  },
+  "title.debt_smith": {
+    "desc": "Devuelve la hoja rota del viejo maestro al fuego de Ding.",
+    "name": "El martillo de las deudas"
+  },
+  "title.echo_walker": {
+    "desc": "Vuelve a terminar el juego en cualquier capa del Eco de Llama Negra.",
+    "name": "Caminante del eco"
+  },
+  "title.featured_fan": {
+    "desc": "Somete al menos una vez los cuatro conjuntos de grieta.",
+    "name": "Cazador destacado"
+  },
+  "title.fog_seer": {
+    "desc": "Cala a la Niebla Blanca y cruza Velo.",
+    "name": "El que ve a través"
+  },
+  "title.gale_chaser": {
+    "desc": "Aguanta hasta la pausa de la Sombra Veloz.",
+    "name": "Perseguidor del viento"
+  },
+  "title.guard_breaker": {
+    "desc": "Rompe la guardia de Abo dos veces o más en un solo combate.",
+    "name": "Rompeguardias"
+  },
+  "title.lamp_keeper": {
+    "desc": "Vuelve a encender la lámpara eterna del cementerio.",
+    "name": "Guardián de la lámpara"
+  },
+  "title.lore_reader": {
+    "desc": "Lee las tres teorías de la Llama Negra en el estante de Terciopelo.",
+    "name": "Lector de contradicciones"
+  },
+  "title.mirror_break": {
+    "desc": "Vence a tu propio atajo en la galería de espejos.",
+    "name": "Rompeespejos"
+  },
+  "title.no_worship": {
+    "desc": "Rechaza las tres ofertas del Rey Demonio.",
+    "name": "No adoro al poder"
+  },
+  "title.rift_walker": {
+    "desc": "Alcanza cinco victorias en la grieta.",
+    "name": "Caminante de grietas"
+  },
+  "title.ronin_path": {
+    "desc": "Convence (o vence) al Errante de Llama Negra en la encrucijada.",
+    "name": "El que envaina"
+  },
+  "title.scar_walker": {
+    "desc": "Aplasta al señor de la Cicatriz de Llama Negra.",
+    "name": "Caminante de la cicatriz"
+  },
+  "title.shore_last": {
+    "desc": "Sigue en pie hasta que Puño de Piedra admita adónde va la fuerza.",
+    "name": "El último en la orilla"
+  },
+  "title.star_wisher": {
+    "desc": "Pide un deseo en las aguas de Estrellas Caídas; no hace falta decirlo en voz alta.",
+    "name": "Conejo que pide deseos"
+  },
+  "title.treasure_rabbit": {
+    "desc": "Abre doce cofres del mundo.",
+    "name": "Conejo rebuscador"
+  },
+  "title.true_post": {
+    "desc": "Entrega la carta verdadera de Velo en la posta de mercaderes.",
+    "name": "Mensajero fiel"
+  },
+  "title.wheat_keeper": {
+    "desc": "Un tallo de trigo encajó un golpe por ti.",
+    "name": "El tallo aguanta"
+  },
+  "title.wood_mentor": {
+    "desc": "Pon el sueño de practicar en manos de Brote.",
+    "name": "Promesa de la espada de madera"
+  },
+  "title.world_wanderer": {
+    "desc": "Visita treinta lugares distintos.",
+    "name": "Errante de Cuiling"
+  },
+  "title.wreck_end": {
+    "desc": "Hunde otra vez la sombra del capitán.",
+    "name": "Fin del naufragio"
+  }
+}

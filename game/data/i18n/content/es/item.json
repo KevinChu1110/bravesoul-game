@@ -1,0 +1,78 @@
+{
+  "antidote": {
+    "desc": "Restaura 10 de vida y levanta un poco el ánimo.",
+    "name": "Rocío apagallamas"
+  },
+  "bread": {
+    "desc": "Restaura 15 de vida. Algo para el camino.",
+    "name": "Ración seca"
+  },
+  "dust_crumb": {
+    "desc": "Al usarla obtienes 1 de polvo estelar.",
+    "name": "Migaja de polvo estelar"
+  },
+  "hp_m": {
+    "desc": "Restaura 55 de vida.",
+    "name": "Poción roja mediana"
+  },
+  "hp_s": {
+    "desc": "Restaura 25 de vida.",
+    "name": "Poción roja pequeña"
+  },
+  "hunt_bone": {
+    "desc": "Material intermedio del coto.",
+    "name": "Hueso llameante"
+  },
+  "hunt_core": {
+    "desc": "Núcleo raro del coto. El mejor precio en la compra de excedentes.",
+    "name": "Núcleo de derrame"
+  },
+  "hunt_hide": {
+    "desc": "Material del coto. Cámbialo en la compra de excedentes.",
+    "name": "Piel de derrame"
+  },
+  "iron_scrap": {
+    "desc": "Material básico de forja. Lo compran el herrero y la tienda.",
+    "name": "Chatarra de hierro"
+  },
+  "key_rusty": {
+    "desc": "La que recogiste a la entrada del pueblo. La guardas aun tras forjarla en condiciones.",
+    "name": "Espada oxidada (recuerdo)"
+  },
+  "knight_shard": {
+    "desc": "Fragmento de forja del dominio de los caballeros. Sirve para la línea de sables.",
+    "name": "Esquirla de hierro de caballero"
+  },
+  "map_scrap": {
+    "desc": "Una esquina que el mercader te arrancó. Se mira, no se come.",
+    "name": "Retazo del mapa de los seis dominios"
+  },
+  "mist_shard": {
+    "desc": "Lo sueltan las sombras de niebla. Se vende por 12 de oro.",
+    "name": "Cristal de niebla"
+  },
+  "oak_resin": {
+    "desc": "Material para estabilizar y para accesorios.",
+    "name": "Resina de roble"
+  },
+  "relic_token": {
+    "desc": "La marca de haber superado un lugar oculto. Para la colección.",
+    "name": "Sello del lugar oculto"
+  },
+  "scar_ember": {
+    "desc": "Botín de la cicatriz. Se vende por 15 de oro.",
+    "name": "Brasa de la cicatriz"
+  },
+  "sea_shell": {
+    "desc": "Se encuentra en la costa. Se vende por 10 de oro.",
+    "name": "Concha de marea"
+  },
+  "star_ore": {
+    "desc": "Material para lectura de estrellas y armas de la Senda Estelar.",
+    "name": "Mena de arena estelar"
+  },
+  "wolf_fang": {
+    "desc": "Botín menor. Se vende por 8 de oro.",
+    "name": "Colmillo de lobo"
+  }
+}

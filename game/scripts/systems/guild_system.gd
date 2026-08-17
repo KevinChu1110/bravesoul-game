@@ -7,6 +7,15 @@ const FLAG_CONTRIB := "guild.contrib"
 const FLAG_NAME := "guild.name"
 const FLAG_BOARD := "guild.board_idx"
 
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+const GUILD_TEXT_FIELDS: PackedStringArray = ["name", "motto"]
+
+## 公會名與箴言在非繁中會被 ContentLoc 換掉。要顯示給玩家的地方走 guilds()，
+## 內部判定用 GUILDS 就好。
+func guilds() -> Array:
+	return ContentLoc.apply_all("guild", GUILDS, GUILD_TEXT_FIELDS)
+
+
 const GUILDS: Array[Dictionary] = [
 	{"id": "ash", "name": "灰燼旅團", "motto": "不慕強權，只護一息火種。", "color": "#c97"},
 	{"id": "mist", "name": "薄霧書會", "motto": "真假同色時，我們互為眼睛。", "color": "#8ab"},

@@ -2,6 +2,16 @@ extends Node
 ## 稱號牆：條件判定 + 自動解鎖寫入 GameState.flags（title.*）
 
 ## 每筆：flag / name / desc / cond（內部條件鍵）
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+const TITLE_TEXT_FIELDS: PackedStringArray = ["name", "desc"]
+
+
+## 稱號名與說明在非繁中會被 ContentLoc 換掉。所有讀 ENTRIES 的地方都改走
+## 這支 —— 直接 for e in ENTRIES 會拿到未翻的原文。
+func entries() -> Array:
+	return ContentLoc.apply_all("title", ENTRIES, TITLE_TEXT_FIELDS, "flag")
+
+
 const ENTRIES: Array[Dictionary] = [
 	{
 		"flag": "title.claw_parry",
@@ -147,7 +157,7 @@ const ENTRIES: Array[Dictionary] = [
 func evaluate_all() -> Array[String]:
 	## 回傳本輪新解鎖的稱號名
 	var newly: Array[String] = []
-	for e in ENTRIES:
+	for e in entries():
 		var flag: String = str(e.get("flag", ""))
 		if flag == "":
 			continue
@@ -219,7 +229,7 @@ func _cond_met(cond: String) -> bool:
 
 func unlocked_count() -> int:
 	var n := 0
-	for e in ENTRIES:
+	for e in entries():
 		if is_unlocked(e):
 			n += 1
 	return n
@@ -240,9 +250,9 @@ func is_unlocked(entry: Dictionary) -> bool:
 func wall_bbcode() -> String:
 	evaluate_all()
 	var lines: PackedStringArray = []
-	lines.append("[b]稱號牆[/b]  %d／%d" % [unlocked_count(), total_count()])
+	lines.append("[b]%s[/b]  %d／%d" % [ContentLoc.text("ui", "稱號牆"), unlocked_count(), total_count()])
 	lines.append("")
-	for e in ENTRIES:
+	for e in entries():
 		var unlocked: bool = GameState.has_flag(str(e.get("flag", ""))) \
 			or _cond_met(str(e.get("cond", "")))
 		## 再寫一次確保
@@ -253,10 +263,10 @@ func wall_bbcode() -> String:
 		if unlocked:
 			lines.append("[color=#e8c86a]★ %s[/color]\n  %s" % [name_s, desc_s])
 		else:
-			lines.append("[color=#666]？ ？？？[/color]\n  [color=#555]（尚未解鎖）[/color]")
+			lines.append("[color=#666]？ ？？？[/color]\n  [color=#555]%s[/color]" % ContentLoc.text("ui", "（尚未解鎖）"))
 	## 外觀契機一覽（非稱號，附錄）
 	lines.append("")
-	lines.append("[b]外觀契機[/b]")
+	lines.append("[b]%s[/b]" % ContentLoc.text("ui", "外觀契機"))
 	var cosmetics: Array[Dictionary] = [
 		{"flag": "cosmetic.gold_mane", "name": "金鬃"},
 		{"flag": "cosmetic.mist_fur", "name": "霧影"},
@@ -269,7 +279,7 @@ func wall_bbcode() -> String:
 	for c in cosmetics:
 		var on: bool = GameState.has_flag(str(c.get("flag", "")))
 		if on:
-			lines.append("[color=#9cf]◆ %s[/color]" % str(c.get("name", "")))
+			lines.append("[color=#9cf]◆ %s[/color]" % ContentLoc.text("cosmetic", str(c.get("name", ""))))
 		else:
 			lines.append("[color=#555]◇ ？？？[/color]")
 	return "\n".join(lines)
@@ -278,9 +288,9 @@ func wall_bbcode() -> String:
 func unlocked_names_line() -> String:
 	evaluate_all()
 	var names: PackedStringArray = []
-	for e in ENTRIES:
+	for e in entries():
 		if GameState.has_flag(str(e.get("flag", ""))):
 			names.append(str(e.get("name", "")))
 	if names.is_empty():
-		return "尚無稱號"
+		return ContentLoc.text("ui", "尚無稱號")
 	return "、".join(names)

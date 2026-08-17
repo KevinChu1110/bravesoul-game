@@ -1,0 +1,38 @@
+{
+  "ash_rat": {
+    "name": "잿불 쥐"
+  },
+  "bamboo_spirit": {
+    "name": "죽영 권령"
+  },
+  "black_ronin": {
+    "name": "흑염 낭인"
+  },
+  "coast_raider": {
+    "name": "파도 습격 해적"
+  },
+  "fog_shade": {
+    "name": "안개 그림자"
+  },
+  "forest_sprite": {
+    "name": "숲속 바람 요괴"
+  },
+  "mirror_wraith": {
+    "name": "거울 회랑 잔영"
+  },
+  "road_bandit": {
+    "name": "황야길 패잔병"
+  },
+  "scar_lord": {
+    "name": "흑염 흉터의 주인"
+  },
+  "scar_wisp": {
+    "name": "흉터 불꽃 정령"
+  },
+  "sewer_slime": {
+    "name": "하수 점액"
+  },
+  "wreck_captain": {
+    "name": "침몰선 선장의 그림자"
+  }
+}

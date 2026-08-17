@@ -1,0 +1,94 @@
+{
+  "title.claw_parry": {
+    "desc": "对雷欧完美格挡至少一次。",
+    "name": "以剑抵爪"
+  },
+  "title.cleared": {
+    "desc": "通关终章。",
+    "name": "晨光中的兔子"
+  },
+  "title.debt_smith": {
+    "desc": "替钉钉把旧主断剑送回炉火。",
+    "name": "还债的锤"
+  },
+  "title.echo_walker": {
+    "desc": "黑焰回响任意层再通关。",
+    "name": "回响行者"
+  },
+  "title.featured_fan": {
+    "desc": "四套裂缝皆至少镇压过一次。",
+    "name": "周焦点猎人"
+  },
+  "title.fog_seer": {
+    "desc": "看破白雾，走过雾隐。",
+    "name": "看破者"
+  },
+  "title.gale_chaser": {
+    "desc": "等来疾影的停拍。",
+    "name": "追风的"
+  },
+  "title.guard_breaker": {
+    "desc": "单场对阿波破防两次以上。",
+    "name": "破架之人"
+  },
+  "title.lamp_keeper": {
+    "desc": "把村后墓园的长明灯重新点亮。",
+    "name": "守灯人"
+  },
+  "title.lore_reader": {
+    "desc": "读完丝绒典籍架上的黑焰三说。",
+    "name": "读矛盾的人"
+  },
+  "title.mirror_break": {
+    "desc": "在镜廊战胜自己的捷径。",
+    "name": "破镜之人"
+  },
+  "title.no_worship": {
+    "desc": "魔王三拒皆满。",
+    "name": "我不慕强权"
+  },
+  "title.rift_walker": {
+    "desc": "裂缝胜场达到五次。",
+    "name": "裂缝行者"
+  },
+  "title.ronin_path": {
+    "desc": "在岔路劝下（或战胜）黑焰浪人。",
+    "name": "收刃之人"
+  },
+  "title.scar_walker": {
+    "desc": "踏平黑焰疤地的主宰。",
+    "name": "疤地行者"
+  },
+  "title.shore_last": {
+    "desc": "站到石拳承认力气的方向。",
+    "name": "岸上最后"
+  },
+  "title.star_wisher": {
+    "desc": "在星落浅池许下一愿——不必说出口。",
+    "name": "许愿兔"
+  },
+  "title.treasure_rabbit": {
+    "desc": "打开十二个世界宝箱。",
+    "name": "拾荒兔"
+  },
+  "title.true_post": {
+    "desc": "把雾隐的真信送到行商驿站。",
+    "name": "真信使"
+  },
+  "title.wheat_keeper": {
+    "desc": "麦秆替你挡过一击。",
+    "name": "秆在"
+  },
+  "title.wood_mentor": {
+    "desc": "把练习的梦想交到小芽手里。",
+    "name": "木剑之约"
+  },
+  "title.world_wanderer": {
+    "desc": "造访三十处不同的土地。",
+    "name": "翠岭漫游者"
+  },
+  "title.wreck_end": {
+    "desc": "让船长影再沉一次。",
+    "name": "沉船终结者"
+  }
+}

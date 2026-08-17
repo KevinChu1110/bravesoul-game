@@ -1,0 +1,38 @@
+{
+  "ash_rat": {
+    "name": "Rata de ceniza"
+  },
+  "bamboo_spirit": {
+    "name": "Espíritu de puño del bambú"
+  },
+  "black_ronin": {
+    "name": "Errante de Llama Negra"
+  },
+  "coast_raider": {
+    "name": "Saqueador de la marea"
+  },
+  "fog_shade": {
+    "name": "Sombra de niebla"
+  },
+  "forest_sprite": {
+    "name": "Duende del viento del bosque"
+  },
+  "mirror_wraith": {
+    "name": "Estela de la galería de espejos"
+  },
+  "road_bandit": {
+    "name": "Rezagado del camino yermo"
+  },
+  "scar_lord": {
+    "name": "Señor de la Cicatriz"
+  },
+  "scar_wisp": {
+    "name": "Fuego fatuo de la cicatriz"
+  },
+  "sewer_slime": {
+    "name": "Limo de cloaca"
+  },
+  "wreck_captain": {
+    "name": "Sombra del capitán del naufragio"
+  }
+}

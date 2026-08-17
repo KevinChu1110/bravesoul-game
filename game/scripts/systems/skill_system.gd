@@ -29,6 +29,10 @@ const CLASS_SIGNATURE := {
 }
 
 ## 目錄：通用橫斬 + 劍系 + 十流派簽名 + 星／骨相容招
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+## 目錄裡要翻的欄位（其餘是數值與 id，不能動）
+const SKILL_TEXT_FIELDS: PackedStringArray = ["name", "desc", "lv2", "lv3", "unlock_hint"]
+
 const CATALOG: Array[Dictionary] = [
 	{
 		"id": "slash",
@@ -218,10 +222,12 @@ func ensure_skill_map() -> void:
 	_sync_legacy_slash()
 
 
+## 招式名與說明在非繁中會被 ContentLoc 換掉。翻在這裡而不是各個顯示點，
+## 是因為 def_of() 是整個目錄唯一的讀取入口 —— 下游怎麼用都吃得到。
 func def_of(id: String) -> Dictionary:
 	for d in CATALOG:
 		if str(d.get("id", "")) == id:
-			return d
+			return ContentLoc.apply("skill", d, SKILL_TEXT_FIELDS)
 	return {}
 
 

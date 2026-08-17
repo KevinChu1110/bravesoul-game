@@ -1,0 +1,38 @@
+{
+  "ash_rat": {
+    "name": "灰烬鼠"
+  },
+  "bamboo_spirit": {
+    "name": "竹影拳灵"
+  },
+  "black_ronin": {
+    "name": "黑焰浪人"
+  },
+  "coast_raider": {
+    "name": "潮袭海盗"
+  },
+  "fog_shade": {
+    "name": "雾影"
+  },
+  "forest_sprite": {
+    "name": "林间风妖"
+  },
+  "mirror_wraith": {
+    "name": "镜廊残影"
+  },
+  "road_bandit": {
+    "name": "荒路残兵"
+  },
+  "scar_lord": {
+    "name": "黑焰疤主"
+  },
+  "scar_wisp": {
+    "name": "疤地焰灵"
+  },
+  "sewer_slime": {
+    "name": "下水黏浆"
+  },
+  "wreck_captain": {
+    "name": "沉船船长影"
+  }
+}

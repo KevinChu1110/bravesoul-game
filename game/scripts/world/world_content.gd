@@ -4,7 +4,16 @@ class_name WorldContent
 ## 互動 id 對應；進度寫入 GameState.flags。
 
 ## ── 雜魚／小 Boss 數值定義（battle mode key）──
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
+
+
+## 敵人名在非繁中會被 ContentLoc 換掉。enemy_def() 是唯一入口，翻在這裡
+## 戰鬥畫面、日誌、掉落訊息就全都吃得到。
 static func enemy_def(mode: String) -> Dictionary:
+	return ContentLoc.apply("enemy", _enemy_def_raw(mode), PackedStringArray(["name"]))
+
+
+static func _enemy_def_raw(mode: String) -> Dictionary:
 	match mode:
 		## 雜魚
 		"ash_rat":
