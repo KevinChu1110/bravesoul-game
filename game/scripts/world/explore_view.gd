@@ -50,36 +50,7 @@ var _has_scenic_bg := false
 ## 目前地圖底圖的 art id —— walkmask 是以 art 為 key（多張地圖共用同一張底圖）
 var _art_id := ""
 
-## 可走區遮罩：art id → {"walk": [PackedVector2Array...], "block": [...]}
-## 正規化座標（0..1）相對底圖左上角。載一次快取。
-static var _walkmask_cache: Dictionary = {}
-static var _walkmask_loaded := false
-
-
-static func _walkmask_for(art: String) -> Dictionary:
-	if not _walkmask_loaded:
-		_walkmask_loaded = true
-		var f := FileAccess.open("res://data/walkmask.json", FileAccess.READ)
-		if f != null:
-			var raw = JSON.parse_string(f.get_as_text())
-			if typeof(raw) == TYPE_DICTIONARY:
-				for k in (raw as Dictionary).keys():
-					if str(k).begins_with("_"):
-						continue
-					var entry = raw[k]
-					if typeof(entry) != TYPE_DICTIONARY:
-						continue
-					var out := {"walk": [], "block": []}
-					for field in ["walk", "block"]:
-						for poly in (entry as Dictionary).get(field, []):
-							var pts := PackedVector2Array()
-							for pt in poly:
-								if typeof(pt) == TYPE_ARRAY and (pt as Array).size() >= 2:
-									pts.append(Vector2(float(pt[0]), float(pt[1])))
-							if pts.size() >= 3:
-								out[field].append(pts)
-					_walkmask_cache[str(k)] = out
-	return _walkmask_cache.get(art, {})
+const WalkMask := preload("res://scripts/world/walk_mask.gd")
 var _banner: TextureRect
 var _vignette: ColorRect
 var _scroll: Control  ## 攝影機層：整塊世界內容
@@ -820,33 +791,18 @@ func _rebuild_collision() -> void:
 	## 舊做法是每張地圖手寫一兩個 Rect2 百分比（「上緣 8% 是遠山」），
 	## 跟畫面上實際畫了什麼幾乎無關 —— 兔子照樣走上城牆與屋頂。
 	## walkmask 是照著底圖描出來的多邊形，能站的地方才是能站的地方。
-	var mask := _walkmask_for(_art_id)
-	var walk_polys: Array = mask.get("walk", [])
-	if walk_polys.is_empty():
+	if not WalkMask.has(_art_id):
 		for r2 in _scenic_blockers(map_id):
 			_stamp_solid_rect(r2, false)
 	else:
-		## 逐格判定：格心不在任何 walk 多邊形內 → 實心
+		## 逐格判定：格心不在可走區內 → 實心
 		for cy in _map_rows:
 			for cx in _map_cols:
 				var uv := Vector2(
 					(float(cx) + 0.5) / float(maxi(1, _map_cols)),
 					(float(cy) + 0.5) / float(maxi(1, _map_rows)))
-				var inside := false
-				for poly in walk_polys:
-					if Geometry2D.is_point_in_polygon(uv, poly):
-						inside = true
-						break
-				if not inside:
+				if not WalkMask.walkable(_art_id, uv):
 					_set_solid(Vector2i(cx, cy), true, false)
-		for poly in mask.get("block", []):
-			for cy in _map_rows:
-				for cx in _map_cols:
-					var uv2 := Vector2(
-						(float(cx) + 0.5) / float(maxi(1, _map_cols)),
-						(float(cy) + 0.5) / float(maxi(1, _map_rows)))
-					if Geometry2D.is_point_in_polygon(uv2, poly):
-						_set_solid(Vector2i(cx, cy), true, false)
 	## 確保玩家出生點不在實心上
 	_unstuck_player()
 
