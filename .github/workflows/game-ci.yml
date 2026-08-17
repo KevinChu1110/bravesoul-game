@@ -13,6 +13,7 @@ on:
       - "web/**"
       - "tools/run_tests.sh"
       - "tools/check_player_text.py"
+      - "tools/check_content_loc.py"
       - "tools/test_economy_sql.sh"
       - "supabase/**"
       - ".github/workflows/game-ci.yml"
@@ -22,6 +23,7 @@ on:
       - "web/**"
       - "tools/run_tests.sh"
       - "tools/check_player_text.py"
+      - "tools/check_content_loc.py"
       - "tools/test_economy_sql.sh"
       - "supabase/**"
       - ".github/workflows/game-ci.yml"
@@ -96,6 +98,13 @@ jobs:
       ## 玩家不該讀到我們怎麼規劃這款遊戲，只該讀到這款遊戲。
       - name: Spec-language check
         run: python3 tools/check_player_text.py
+
+      ## 譯文覆蓋表以「原文」當 key，所以原文改了表沒跟著改，那句話就會
+      ## 靜靜掉回中文 —— 測試全綠，玩家看到半英半中。這支比對 .gd 裡的
+      ## 原文與五個語言的覆蓋表，順便檢查 %s／%d 佔位符有沒有對齊
+      ## （少一個就是執行時炸掉）。
+      - name: Translation coverage check
+        run: python3 tools/check_content_loc.py
 
   economy_sql:
     name: Economy SQL guards
