@@ -4,9 +4,26 @@ class_name MapCatalog
 ## 0.9：六域多層分區（40+ 張可走地圖）。
 
 const TILE := 32
+const ContentLoc := preload("res://scripts/systems/content_loc.gd")
 
 ## 回傳 {title, bg_color, origin, size, spawn, art, entities:[{id,pos,size,label,color,solid?}]}
+##
+## 地名與物件標籤在非繁中會被 ContentLoc 換掉（domain "map"），以原文當 key。
+## 不用物件 id 當 key 是因為同一個 id 在不同地圖上是不同的字（back_town 有
+## 「回外城廣場」也有「回城」），實測 39 個這種撞名，用 id 會翻錯。
 static func build(id: String) -> Dictionary:
+	var m := _build_raw(id)
+	if ContentLoc.locale() == "zh_TW":
+		return m
+	m = m.duplicate(true)
+	m["title"] = ContentLoc.text("map", str(m.get("title", "")))
+	for e in m.get("entities", []):
+		if typeof(e) == TYPE_DICTIONARY:
+			e["label"] = ContentLoc.text("map", str(e.get("label", "")))
+	return m
+
+
+static func _build_raw(id: String) -> Dictionary:
 	match id:
 		"village":
 			return _village()
