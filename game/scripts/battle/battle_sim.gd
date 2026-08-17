@@ -450,6 +450,12 @@ func _resolve_strike(u: BattleUnit) -> void:
 
 	if fog_mode and u.team == BattleUnit.Team.PLAYER:
 		_apply_player_hit_on_fog(u, target, dmg, is_crit)
+		## 白霧戰走自己的命中處理，會在下面那段累積戰意之前 return ——
+		## 於是整場白霧戰一點戰意都不會累積，玩家放不出任何技能。
+		## 第二章的王正好是玩家第一次真的需要技能的地方，而那一場技能是關的。
+		## 這裡補回來，條件跟一般命中那條一致（有打到才算）。
+		if u.can_skill and not target.is_phantom:
+			u.rage = minf(RAGE_MAX, u.rage + Formulas.rage_from_strike())
 		u.state = BattleUnit.State.STRIKE
 		u.state_timer = 0.08
 		return

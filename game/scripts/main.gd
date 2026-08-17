@@ -1233,7 +1233,17 @@ func _pause_btn(parent: VBoxContainer, text: String, cb: Callable) -> void:
 	parent.add_child(btn)
 
 
-func _play_dialog(lines: Array, after: Callable = Callable()) -> void:
+## 這一段帶選項的對話屬於誰。空字串＝沒有人在等選項。
+##
+## 為什麼需要：`_on_choice` 是全域的，原本只靠「目前在哪個畫面 + 選了第幾項」認人。
+## 演武場練功選單的畫面鍵剛好也是 C1_TOWN、第一項剛好也是 index 0，
+## 於是玩家點「開練」會觸發小芽支線的贊助分支 —— 扣 30 金、支線靜默結案，
+## 而玩家以為自己只是去練功。兩段不相干的對話共用一個處理器，只能靠上下文分開。
+var _choice_ctx: String = ""
+
+
+func _play_dialog(lines: Array, after: Callable = Callable(), choice_ctx: String = "") -> void:
+	_choice_ctx = choice_ctx
 	if _paused:
 		_close_pause()
 	if _explore and is_instance_valid(_explore) and _explore.has_method("set_frozen"):
@@ -1252,14 +1262,19 @@ func _on_dialogue_finished() -> void:
 		cb.call()
 
 
+## 最近一次選項的 index。after 回呼要靠它分辨玩家選了什麼。
+var _last_choice: int = -1
+
+
 func _on_choice(i: int) -> void:
+	_last_choice = i
 	if _current == Screen.C0_VILLAGE:
 		if i == 0 or i == 2:
 			GameState.set_flag("c0_care", true)
 		else:
 			GameState.set_flag("c0_stubborn", true)
-	## 小芽贊助 30 金
-	if _current == Screen.C1_TOWN and GameState.has_flag("c1_sprout_asked") and not GameState.has_flag("c1_sprout_done"):
+	## 小芽贊助 30 金（只認小芽那一段對話）
+	if _choice_ctx == "sprout_sponsor":
 		if i == 0 and GameState.gold >= 30 and not GameState.has_flag("item.wood_sword"):
 			GameState.gold -= 30
 			GameState.stardust += 3
@@ -1434,12 +1449,13 @@ func _panel(title: String, body: String, buttons: Array) -> void:
 	## 置中之後上下都被切掉，「返回」被推出畫面外，Esc 只會疊暫停選單，
 	## 唯一出路是回標題 —— 玩家的進度沒了。684px 的可用高度只放得下 10 顆。
 	##
-	## 高度算法：可用高 = 視窗高 － 卡片其它東西（標題、分隔線、正文、間距、邊距）。
-	## 算出來若比實際需要的還多就不會出現捲軸，版面跟以前完全一樣；
-	## 只有真的放不下時才開始捲。所以這個改動對現有面板是零影響。
-	var btn_h := 30.0
+	## 可用高 = 視窗高 － 卡片其它東西（標題、分隔線、正文、間距、邊距）。
+	## 需要多高**不要用猜的**：這裡原本寫死「一顆按鈕 30px」，
+	## 而 UiStyle.style_button() 之後會把 custom_minimum_size 蓋成 36 ——
+	## 於是每個面板的捲動區都比內容矮，最後一顆（幾乎都是「返回」）被切掉一半。
+	## 按鈕多的面板玩家還會想到去捲，只有兩顆按鈕的面板不會，只覺得「返回不見了」。
+	## 改成按鈕建好之後直接問 VBox 要多高，不再有第二個數字要維護。
 	var btn_gap := 6.0
-	var need_h := float(buttons.size()) * btn_h + maxf(0.0, float(buttons.size() - 1)) * btn_gap
 	## 卡片固定開銷：標題 26 + 分隔線 2 + 三段間距 36 + 上下邊距 18 + 保險 24，
 	## 另外留 40 給上下留白 —— 不留的話卡片會頂到螢幕邊，看起來像被切掉。
 	var chrome_h := 146.0
@@ -1449,7 +1465,6 @@ func _panel(title: String, body: String, buttons: Array) -> void:
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	scroll.custom_minimum_size = Vector2(0, minf(need_h, avail_h))
 	scroll.mouse_filter = Control.MOUSE_FILTER_STOP
 	root.add_child(scroll)
 
@@ -1464,7 +1479,6 @@ func _panel(title: String, body: String, buttons: Array) -> void:
 		var btn := Button.new()
 		btn.text = str(item["text"])
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.custom_minimum_size = Vector2(0, 30)
 		btn.focus_mode = Control.FOCUS_ALL
 		btn.mouse_filter = Control.MOUSE_FILTER_STOP
 		btn.disabled = false
@@ -1480,6 +1494,9 @@ func _panel(title: String, body: String, buttons: Array) -> void:
 			call_deferred("_run_menu_cb", cb)
 		)
 		row.add_child(btn)
+	## 按鈕都建好了，直接問實際需要多高（含 style_button 蓋上去的高度）
+	var need_h := row.get_combined_minimum_size().y
+	scroll.custom_minimum_size = Vector2(0, minf(need_h, avail_h))
 	if row.get_child_count() > 0:
 		(row.get_child(0) as Button).grab_focus()
 	## 下一幀再確保 fade / 過場不擋
@@ -2143,9 +2160,11 @@ func _side_training_spar(id: String) -> void:
 			"replies": ["腳步沉進沙裡。", "改天。"],
 		},
 	], func():
-		## 選項 0 = 開練：用簡易獎勵模擬（避免每次都進全戰可省時間）
-		_side_training_do()
-	)
+		## 原本這裡無條件就練 —— 選「離開」照樣扣掉一次每日額度、照樣給經驗。
+		## 選項要真的有分別，玩家才有得選。
+		if _choice_ctx == "training" and _last_choice == 0:
+			_side_training_do()
+	, "training")
 
 
 func _side_training_do() -> void:
@@ -3444,6 +3463,9 @@ func _c1_sprout() -> void:
 		], func():
 			GameState.set_flag("item.wood_sword", false)
 			GameState.stardust += 3
+			## 台詞承諾 15 金，原本只給星屑。木劍本身花 20 金打，
+			## 玩家是照「20 換 15＋3 星屑」在算帳的。
+			GameState.add_gold(15)
 			GameState.set_flag("c1_sprout_done", true)
 			TitleCatalog.evaluate_all()
 			SaveManager.save_game()
@@ -3460,7 +3482,7 @@ func _c1_sprout() -> void:
 					"好……我再等。不會纏著你的。",
 				],
 			},
-		])
+		], Callable(), "sprout_sponsor")
 		return
 	_play_dialog(DialogLines.lines("c1.sprout_wish"))
 
