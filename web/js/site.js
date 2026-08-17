@@ -232,10 +232,31 @@
     });
   }
 
+  function setupHeroVideo() {
+    var hero = document.querySelector(".hero--video");
+    if (!hero) return;
+    var v = hero.querySelector("video.bg-video");
+    if (!v) return;
+    var markReady = function () {
+      hero.classList.add("hero-video-ready");
+    };
+    v.addEventListener("playing", markReady, { once: true });
+    v.addEventListener("error", function () {
+      /* 影片失敗時維持 poster 靜圖 */
+      v.style.display = "none";
+    });
+    /* 有些瀏覽器 autoplay 延遲，主動 play 一次 */
+    var p = v.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(function () {});
+    }
+  }
+
   function boot() {
     setupReveal();
     setupTilt();
     setupParallax();
+    setupHeroVideo();
   }
 
   window.BS_refreshMotion = function () {
