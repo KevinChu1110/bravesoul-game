@@ -646,34 +646,34 @@ func _layout_battle_equipment_overlays() -> void:
 		bs = player_body.custom_minimum_size
 	if bs.x < 8.0:
 		bs = Vector2(200, 250)
-	## 防具：略縮於身體中央
+	## 防具：甲片只蓋軀幹（探索紙娃娃同邏輯，避免全身拉伸破形）
 	if _battle_armor and is_instance_valid(_battle_armor):
 		var atex := SpriteDB.player_armor_overlay()
 		if atex:
-			var asz := Vector2(bs.x * 0.78, bs.y * 0.78)
+			var asz := Vector2(bs.x * 0.62, bs.y * 0.42)
 			_battle_armor.texture = atex
 			_battle_armor.visible = true
 			_battle_armor.custom_minimum_size = asz
 			_battle_armor.size = asz
-			_battle_armor.position = Vector2((bs.x - asz.x) * 0.5, bs.y * 0.12)
-			_battle_armor.modulate = Color(1, 1, 1, 0.88)
+			_battle_armor.position = Vector2((bs.x - asz.x) * 0.5, bs.y * 0.30)
+			_battle_armor.modulate = Color(1, 1, 1, 0.9)
 			_battle_armor.z_index = 1
 		else:
 			_battle_armor.visible = false
-	## 武器：右前手位置（與探索疊層同源 SpriteDB）
+	## 武器：右前手（武器-only 貼圖）
 	if _battle_weapon and is_instance_valid(_battle_weapon):
 		var wtex := SpriteDB.player_weapon_overlay()
 		if wtex:
-			var wsz := Vector2(bs.x * 0.38, bs.y * 0.38)
-			wsz.x = clampf(wsz.x, 56.0, 96.0)
-			wsz.y = clampf(wsz.y, 56.0, 96.0)
+			var wsz := Vector2(bs.x * 0.32, bs.y * 0.32)
+			wsz.x = clampf(wsz.x, 48.0, 78.0)
+			wsz.y = clampf(wsz.y, 48.0, 78.0)
 			_battle_weapon.texture = wtex
 			_battle_weapon.visible = true
 			_battle_weapon.custom_minimum_size = wsz
 			_battle_weapon.size = wsz
-			_battle_weapon.position = Vector2(bs.x * 0.52, bs.y * 0.34)
-			_battle_weapon.pivot_offset = wsz * 0.5
-			_battle_weapon.rotation_degrees = -22.0
+			_battle_weapon.position = Vector2(bs.x * 0.55, bs.y * 0.38)
+			_battle_weapon.pivot_offset = wsz * Vector2(0.35, 0.7)
+			_battle_weapon.rotation_degrees = -24.0
 			_battle_weapon.z_index = 2
 		else:
 			_battle_weapon.visible = false

@@ -1272,43 +1272,54 @@ func _update_player_visual() -> void:
 			_player.texture = idle
 	_player.modulate = SpriteDB.player_armor_modulate()
 	var foot_y := player_pos.y + PLAYER_SIZE.y
-	## 防具疊層（貼在身體上）
+	## 防具疊層：貼圖是「軀幹甲片」不是全身，不可拉滿 PLAYER_SIZE（會像穿歪／紙娃娃破圖）
 	if _player_armor:
 		var atex := SpriteDB.player_armor_overlay()
 		if atex:
 			_player_armor.visible = true
 			_player_armor.texture = atex
-			_player_armor.position = player_pos
-			_player_armor.pivot_offset = PLAYER_SIZE * 0.5
+			var asz := Vector2(PLAYER_SIZE.x * 0.72, PLAYER_SIZE.y * 0.48)
+			_player_armor.size = asz
+			## 對齊胸腹：頭約上 1/3，甲從 ~28% 高度開始
+			var aoff := Vector2((PLAYER_SIZE.x - asz.x) * 0.5, PLAYER_SIZE.y * 0.30)
+			_player_armor.position = player_pos + aoff
+			_player_armor.pivot_offset = asz * 0.5
 			_player_armor.scale.x = -1.0 if _facing_left else 1.0
+			_player_armor.modulate = Color(1, 1, 1, 0.92)
 			_player_armor.set_meta("sort_y", foot_y + 0.2)
 		else:
 			_player_armor.visible = false
-	## 武器疊層（隨已裝備武器／流派）
+	## 武器疊層：右手握把區（僅武器圖，非整隻角色）
 	if _player_weapon:
 		var wtex := SpriteDB.player_weapon_overlay()
 		if wtex:
 			_player_weapon.visible = true
 			_player_weapon.texture = wtex
-			var hand := Vector2(PLAYER_SIZE.x * 0.52, PLAYER_SIZE.y * 0.38)
+			var wsz := Vector2(PLAYER_SIZE.x * 0.55, PLAYER_SIZE.y * 0.55)
+			wsz.x = clampf(wsz.x, 28.0, 42.0)
+			wsz.y = clampf(wsz.y, 28.0, 42.0)
+			_player_weapon.size = wsz
+			var hand := Vector2(PLAYER_SIZE.x * 0.58, PLAYER_SIZE.y * 0.42)
 			if _facing_left:
-				hand.x = PLAYER_SIZE.x * 0.08
+				hand.x = PLAYER_SIZE.x * 0.02
 			_player_weapon.position = player_pos + hand
-			_player_weapon.pivot_offset = _player_weapon.size * 0.5
+			_player_weapon.pivot_offset = wsz * Vector2(0.35, 0.65)
 			_player_weapon.scale.x = -1.0 if _facing_left else 1.0
-			_player_weapon.rotation_degrees = -25.0 if not _facing_left else 25.0
+			_player_weapon.rotation_degrees = -28.0 if not _facing_left else 28.0
 			_player_weapon.set_meta("sort_y", foot_y + 0.5)
 		else:
 			_player_weapon.visible = false
-	## 飾品（胸前／頭側）
+	## 飾品：小圖掛胸前，避免蓋住臉
 	if _player_accessory:
 		var xtex := SpriteDB.player_accessory_overlay()
 		if xtex:
 			_player_accessory.visible = true
 			_player_accessory.texture = xtex
-			var ap := Vector2(PLAYER_SIZE.x * 0.35, PLAYER_SIZE.y * 0.28)
+			var xsz := Vector2(18, 18)
+			_player_accessory.size = xsz
+			var ap := Vector2(PLAYER_SIZE.x * 0.38, PLAYER_SIZE.y * 0.36)
 			if _facing_left:
-				ap.x = PLAYER_SIZE.x * 0.35
+				ap.x = PLAYER_SIZE.x * 0.30
 			_player_accessory.position = player_pos + ap
 			_player_accessory.scale.x = -1.0 if _facing_left else 1.0
 			_player_accessory.set_meta("sort_y", foot_y + 0.3)
