@@ -706,7 +706,7 @@ func _hunt_xp_line(r: Dictionary) -> String:
 
 
 func _go_hunt_recycle_panel() -> void:
-	var body := "[b]溢物回收[/b]\n獵人商人只收狩獵材料（未來市集原型）。\n\n"
+	var body := "[b]溢物回收[/b]\n獵人商人只收狩獵材料。\n\n"
 	var buttons: Array = []
 	for id in ["hunt_hide", "hunt_bone", "hunt_core"]:
 		var n: int = InventorySystem.count(id)
@@ -982,8 +982,19 @@ func _go_game_log_panel() -> void:
 	])
 
 
+## 分類代號 → 玩家看得懂的字。按鈕上寫的是「只看戰鬥」，
+## 點進去標題卻變成「日誌 · combat」—— 同一件事兩種說法，而且其中一種是給程式看的。
+const LOG_CAT_NAMES := {
+	"combat": "戰鬥",
+	"economy": "經濟",
+	"equip": "裝備",
+	"system": "系統",
+}
+
+
 func _go_game_log_cat(cat: String) -> void:
-	var lines: PackedStringArray = ["[b]日誌 · %s[/b]\n" % cat]
+	var cat_name := str(LOG_CAT_NAMES.get(cat, cat))
+	var lines: PackedStringArray = ["[b]日誌 · %s[/b]\n" % cat_name]
 	for e in GameLog.recent(25, cat):
 		lines.append("· %s" % str(e.get("msg", "")))
 	if lines.size() <= 1:
@@ -1125,9 +1136,23 @@ func _go_guild_panel() -> void:
 		for g in GuildSystem.GUILDS:
 			var gid := str(g.get("id", ""))
 			var gname := str(g.get("name", gid))
+			## 加入之後沒有退出的路（GuildSystem 只有 join()），
+			## 而面板文案一個字都沒提這是一次性選擇。至少先問一次。
 			buttons.append({"text": "加入：%s" % gname, "cb": func():
-				var r: Dictionary = GuildSystem.join(gid)
-				_play_dialog([{"speaker": "盟約", "text": str(r.get("msg", ""))}], _go_guild_panel)
+				_play_dialog([
+					{
+						"speaker": "盟約",
+						"text": "入了「%s」就不能改投別家了。確定嗎？" % gname,
+						"choices": ["確定加入", "再想想"],
+						"replies": ["名字落在盟約上。", "盟約收了回去。"],
+					},
+				], func():
+					if _last_choice != 0:
+						_go_guild_panel()
+						return
+					var r: Dictionary = GuildSystem.join(gid)
+					_play_dialog([{"speaker": "盟約", "text": str(r.get("msg", ""))}], _go_guild_panel)
+				, "guild_join")
 			})
 	else:
 		buttons.append({"text": "下一則佈告", "cb": func():
@@ -1149,8 +1174,16 @@ func _hub_back() -> void:
 	## 標題／章節／探索：回到合理畫面
 	if GameState.chapter == "title" or _current == Screen.TITLE:
 		_go_title()
-	else:
-		_resume_from_chapter()
+		return
+	## 原本一律走 _resume_from_chapter()，那支只認 GameState.chapter，
+	## 不認玩家剛剛站在哪張圖 —— 在星途獵場開個裝備面板再返回，
+	## 人會出現在城外荒野。所有非章節主線的子地圖（獵場、下城市集、下水道、
+	## 各章次場景）都會這樣被傳走。
+	## 記得上一張探索圖就送回那裡；只有真的沒有紀錄時才退回章節預設。
+	if _last_explore_map != "":
+		_open_explore(_last_explore_map, _last_explore_screen)
+		return
+	_resume_from_chapter()
 
 
 func _journey_summary() -> String:
@@ -1877,6 +1910,10 @@ func _go_display_settings() -> void:
 	var body := "[b]%s[/b]\n\n" % Loc.t("display.title")
 	body += DisplaySettings.summary_line() + "\n\n"
 	body += Loc.t("display.blurb") + "\n"
+	## 解析度只有視窗模式吃得到。不講的話，玩家在全螢幕下點了一排解析度、
+	## 每個都打勾、每個都跳提示，卻什麼都沒變。
+	if not DisplaySettings.res_is_effective():
+		body += "[color=#c96]下面的解析度要切到「視窗」才會生效。[/color]\n"
 	body += Loc.t("ctrl.gamepad_hint") + "\n"
 	var buttons: Array = []
 	buttons.append({"text": Loc.t("display.mode", {"mode": DisplaySettings.mode_label()}), "cb": _display_cycle_mode})

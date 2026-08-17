@@ -166,9 +166,19 @@ func set_vsync(on: bool) -> void:
 	apply()
 
 
+## 解析度只有視窗模式吃得到（apply() 只在 windowed 分支動 win.size）。
+## 全螢幕下玩家選 1920×1080，面板照樣打勾、照樣跳提示，但什麼都沒發生 ——
+## 講清楚比讓他一直試好。
+func res_is_effective() -> bool:
+	return mode == "windowed"
+
+
 func summary_line() -> String:
+	var res_part := res_label()
+	if not res_is_effective():
+		res_part = "%s（全螢幕下由螢幕決定）" % res_label()
 	return "顯示：%s · %s · 垂直同步 %s" % [
 		mode_label(),
-		res_label(),
+		res_part,
 		"開" if vsync else "關",
 	]

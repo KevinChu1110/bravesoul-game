@@ -42,8 +42,21 @@ func _build() -> void:
 	add_child(_dim)
 
 	_card = PanelContainer.new()
-	_card.custom_minimum_size = Vector2(420, 360)
-	_card.size = Vector2(420, 360)
+	## 卡片不可以高過畫面。實測它會被內容撐到 823px（畫面只有 720），
+	## 下半段空白整片超出下緣、還把底部快捷欄夾在裡面；
+	## 而 window_drag 把 y 夾在 [0, vp.y-40]，所以怎麼拖都露不完。
+	var vp_h := 720.0
+	if Engine.get_main_loop() is SceneTree:
+		var vp := (Engine.get_main_loop() as SceneTree).root.get_viewport()
+		if vp != null:
+			vp_h = vp.get_visible_rect().size.y
+	## 留 96 給上下邊界與底部快捷欄
+	var card_h: float = clampf(560.0, 240.0, maxf(240.0, vp_h - 96.0))
+	_card.custom_minimum_size = Vector2(420, card_h)
+	_card.size = Vector2(420, card_h)
+	## PanelContainer 會被內容撐大，所以還要明確擋住上限
+	_card.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_card.grow_vertical = Control.GROW_DIRECTION_END
 	_card.mouse_filter = Control.MOUSE_FILTER_STOP
 	_card.add_theme_stylebox_override("panel", UiStyle.panel_style())
 	## 預設位置（可拖）
@@ -80,9 +93,22 @@ func _build() -> void:
 
 	WindowDrag.attach(_card, head, "inv")
 
+	## 內容放進捲動區，卡片才真的封得住高度。
+	##
+	## 只設 custom_minimum_size 沒有用 —— 那是下限不是上限，內容照樣把卡片撐高。
+	## 實測撐到 823px（畫面 720）：下半段空白超出下緣、還把底部快捷欄夾在裡面，
+	## 而 window_drag 把 y 夾在 [0, vp.y-40]，所以怎麼拖都露不完。
+	var scroller := ScrollContainer.new()
+	scroller.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroller.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroller.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroller.mouse_filter = Control.MOUSE_FILTER_STOP
+	outer.add_child(scroller)
+
 	var body := HBoxContainer.new()
 	body.add_theme_constant_override("separation", 10)
-	outer.add_child(body)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroller.add_child(body)
 
 	_grid = GridContainer.new()
 	_grid.columns = COLS

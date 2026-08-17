@@ -489,7 +489,7 @@ func panel_bbcode() -> String:
 	if last_error != "":
 		lines.append("[color=#a55]最近錯誤：%s[/color]" % humanize_error(last_error))
 	if is_signed_in() and ledger_gold >= 0:
-		lines.append("市集可用金幣：%d" % ledger_gold)
+		lines.append("伺服器記錄的金幣：%d" % ledger_gold)
 	lines.append("顯示名：%s" % display_name)
 	lines.append("純單機：%s" % ("是" if offline_only else "否"))
 	lines.append("後端：%s" % ("已設定" if is_configured() else "未設定"))
@@ -499,7 +499,7 @@ func panel_bbcode() -> String:
 			host = host.substr(0, 28) + "…"
 		lines.append("URL：%s" % host)
 	lines.append("")
-	lines.append("不連線也能走完整趟旅途。連上之後多了：雲端存檔、旅人殘影、留言石、市集、裂縫房。")
+	lines.append("不連線也能走完整趟旅途。連上之後多了：雲端存檔、旅人殘影、留言石、通關蠟燭。")
 	return "\n".join(lines)
 
 

@@ -140,7 +140,7 @@ const CATALOG: Dictionary = {
 	},
 	"hunt_hide": {
 		"name": "溢皮",
-		"desc": "狩獵場材料。可賣；未來市集可交易。",
+		"desc": "狩獵場材料。可在溢物回收換金。",
 		"kind": "material",
 		"stack": 99,
 		"sell": 10,
@@ -160,7 +160,7 @@ const CATALOG: Dictionary = {
 	},
 	"hunt_core": {
 		"name": "溢核",
-		"desc": "狩獵場稀有核。日後市集硬貨。",
+		"desc": "狩獵場稀有核。溢物回收價最好。",
 		"kind": "material",
 		"stack": 99,
 		"sell": 60,
