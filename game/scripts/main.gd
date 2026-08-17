@@ -540,9 +540,9 @@ func _go_message_stone(from_id: String = "message_stone") -> void:
 		place = "town_gate"
 	if not OnlineGate.is_online_enabled() or not OnlineGate.is_signed_in():
 		var lore := "石上有舊刻：\n「足跡會交疊。」——星讀\n「別走我的路。」——佚名\n\n（開啟連線並訪客上線後，可讀寫旅人留言。）"
-		_panel("留言石", lore, [
+		_panel(Loc.t("panel.message_stone"), lore, [
 			{"text": "連線設定", "cb": _go_online_panel},
-			{"text": "返回", "cb": _hub_back},
+			{"text": Loc.t("btn.back"), "cb": _hub_back},
 		])
 		return
 	OnlineGate.fetch_messages(place, func(res: Dictionary):
@@ -567,10 +567,10 @@ func _show_messages_panel(place: String, list: Array) -> void:
 		{"text": "留下足跡：還在啊", "cb": _msg_post.bind(place, "還在啊。")},
 		{"text": "留下足跡：氣味比預言近", "cb": _msg_post.bind(place, "氣味比預言近。")},
 		{"text": "留下足跡：微末也走到了", "cb": _msg_post.bind(place, "微末也走到了。")},
-		{"text": "刷新", "cb": func(): _go_message_stone("message_stone")},
-		{"text": "返回", "cb": _hub_back},
+		{"text": Loc.t("btn.refresh"), "cb": func(): _go_message_stone("message_stone")},
+		{"text": Loc.t("btn.back"), "cb": _hub_back},
 	]
-	_panel("留言石", body, buttons)
+	_panel(Loc.t("panel.message_stone"), body, buttons)
 
 
 func _msg_post(place: String, text: String) -> void:
@@ -592,7 +592,7 @@ func _go_candle_altar() -> void:
 	if GameState.has_flag("game_cleared"):
 		buttons.append({"text": "點燃（連線同步）", "cb": _candle_light})
 	buttons.append({"text": "默默離開", "cb": _hub_back})
-	_panel("通關蠟燭", body, buttons)
+	_panel(Loc.t("panel.candle"), body, buttons)
 
 
 func _candle_light() -> void:
@@ -617,8 +617,8 @@ func _go_hunt_panel() -> void:
 	var body: String = HuntSystem.status_bbcode()
 	var buttons: Array = []
 	if not HuntSystem.is_unlocked():
-		buttons.append({"text": "返回", "cb": _hub_back})
-		_panel("星途獵場", body, buttons)
+		buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
+		_panel(Loc.t("panel.hunt"), body, buttons)
 		return
 	if HuntSystem.is_run_active():
 		buttons.append({"text": "繼續當前波次", "cb": _hunt_continue})
@@ -628,8 +628,8 @@ func _go_hunt_panel() -> void:
 			buttons.append({"text": "開始有獎狩獵（剩 %d）" % HuntSystem.daily_left(), "cb": _hunt_start_rewarded})
 		buttons.append({"text": "練習狩獵（獎勵少）", "cb": _hunt_start_practice})
 	buttons.append({"text": "溢物回收", "cb": _go_hunt_recycle_panel})
-	buttons.append({"text": "返回", "cb": _hub_back})
-	_panel("星途獵場", body, buttons)
+	buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
+	_panel(Loc.t("panel.hunt"), body, buttons)
 
 
 func _hunt_start_rewarded() -> void:
@@ -717,8 +717,8 @@ func _go_hunt_recycle_panel() -> void:
 	if buttons.is_empty():
 		body += "\n（袋裡沒有溢皮／焰骨／溢核。）"
 	buttons.append({"text": "返回獵場", "cb": _go_hunt_panel})
-	buttons.append({"text": "關閉", "cb": _hub_back})
-	_panel("溢物回收", body, buttons)
+	buttons.append({"text": Loc.t("btn.close"), "cb": _hub_back})
+	_panel(Loc.t("panel.recycle"), body, buttons)
 
 
 func _hunt_recycle_one(item_id: String) -> void:
@@ -752,8 +752,8 @@ func _go_online_panel() -> void:
 		buttons.append({"text": "登出星途", "cb": _online_sign_out})
 	buttons.append({"text": "體驗回報…", "cb": _go_telemetry_consent})
 	buttons.append({"text": "顯示名：旅人", "cb": _online_set_name})
-	buttons.append({"text": "返回", "cb": _hub_back})
-	_panel("連線／帳號", body, buttons)
+	buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
+	_panel(Loc.t("panel.online"), body, buttons)
 
 
 func _online_health_check() -> void:
@@ -964,8 +964,8 @@ func _go_telemetry_consent() -> void:
 			_show_toast("謝謝")
 			_go_telemetry_consent()
 		})
-	buttons.append({"text": "返回", "cb": _go_online_panel})
-	_panel("體驗回報", body, buttons)
+	buttons.append({"text": Loc.t("btn.back"), "cb": _go_online_panel})
+	_panel(Loc.t("panel.telemetry"), body, buttons)
 
 
 func _go_save_slots_panel() -> void:
@@ -974,11 +974,11 @@ func _go_save_slots_panel() -> void:
 
 func _go_game_log_panel() -> void:
 	var body: String = GameLog.status_bbcode(28)
-	_panel("冒險日誌", body, [
-		{"text": "只看戰鬥", "cb": func(): _go_game_log_cat("combat")},
-		{"text": "只看經濟", "cb": func(): _go_game_log_cat("economy")},
-		{"text": "只看裝備", "cb": func(): _go_game_log_cat("equip")},
-		{"text": "返回", "cb": _hub_back},
+	_panel(Loc.t("panel.log"), body, [
+		{"text": Loc.t("btn.log_combat"), "cb": func(): _go_game_log_cat("combat")},
+		{"text": Loc.t("btn.log_economy"), "cb": func(): _go_game_log_cat("economy")},
+		{"text": Loc.t("btn.log_equip"), "cb": func(): _go_game_log_cat("equip")},
+		{"text": Loc.t("btn.back"), "cb": _hub_back},
 	])
 
 
@@ -999,7 +999,7 @@ func _go_game_log_cat(cat: String) -> void:
 		lines.append("· %s" % str(e.get("msg", "")))
 	if lines.size() <= 1:
 		lines.append("（無）")
-	_panel("冒險日誌", "\n".join(lines), [{"text": "全部", "cb": _go_game_log_panel}, {"text": "返回", "cb": _hub_back}])
+	_panel(Loc.t("panel.log"), "\n".join(lines), [{"text": Loc.t("btn.all"), "cb": _go_game_log_panel}, {"text": Loc.t("btn.back"), "cb": _hub_back}])
 
 
 func _online_push_save() -> void:
@@ -1064,8 +1064,8 @@ func _go_daily_panel() -> void:
 			})
 	buttons.append({"text": "材料行（琥珀）", "cb": _go_material_shop})
 	buttons.append({"text": "長遠任務", "cb": _go_quest_panel})
-	buttons.append({"text": "返回", "cb": _hub_back})
-	_panel("每日 · 簽到與委託", body, buttons)
+	buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
+	_panel(Loc.t("panel.daily"), body, buttons)
 
 
 func _go_quest_panel() -> void:
@@ -1082,8 +1082,8 @@ func _go_quest_panel() -> void:
 	if buttons.is_empty():
 		buttons.append({"text": "（暫無待領任務）", "cb": _go_quest_panel})
 	buttons.append({"text": "每日／委託", "cb": _go_daily_panel})
-	buttons.append({"text": "返回", "cb": _hub_back})
-	_panel("長遠任務", body, buttons)
+	buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
+	_panel(Loc.t("panel.quests"), body, buttons)
 
 
 func _go_material_shop() -> void:
@@ -1106,9 +1106,9 @@ func _go_material_shop() -> void:
 		{"text": "買乾糧×1（8金）", "cb": func(): _shop_buy("bread", 8)},
 		{"text": "一鍵賣出全部材料", "cb": _shop_sell_all},
 		{"text": "回每日／委託", "cb": _go_daily_panel},
-		{"text": "關閉", "cb": _hub_back},
+		{"text": Loc.t("btn.close"), "cb": _hub_back},
 	]
-	_panel("琥珀 · 材料行", body, buttons)
+	_panel(Loc.t("panel.shop"), body, buttons)
 
 
 func _shop_buy(item_id: String, price: int) -> void:
@@ -1166,8 +1166,8 @@ func _go_guild_panel() -> void:
 			})
 		else:
 			buttons.append({"text": "公庫補給（需貢獻 30）", "cb": _go_guild_panel})
-	buttons.append({"text": "返回", "cb": _hub_back})
-	_panel("公會／盟約", body, buttons)
+	buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
+	_panel(Loc.t("panel.guild"), body, buttons)
 
 
 func _hub_back() -> void:
@@ -1913,7 +1913,7 @@ func _go_display_settings() -> void:
 	## 解析度只有視窗模式吃得到。不講的話，玩家在全螢幕下點了一排解析度、
 	## 每個都打勾、每個都跳提示，卻什麼都沒變。
 	if not DisplaySettings.res_is_effective():
-		body += "[color=#c96]下面的解析度要切到「視窗」才會生效。[/color]\n"
+		body += "[color=#c96]%s[/color]\n" % Loc.t("display.res_needs_window")
 	body += Loc.t("ctrl.gamepad_hint") + "\n"
 	var buttons: Array = []
 	buttons.append({"text": Loc.t("display.mode", {"mode": DisplaySettings.mode_label()}), "cb": _display_cycle_mode})
@@ -1991,7 +1991,7 @@ func _go_title_wall() -> void:
 	if GameState.has_flag("game_cleared"):
 		buttons.append({"text": "黑焰裂縫", "cb": _go_postgame_hub})
 		buttons.append({"text": "騎士堡", "cb": _go_c1_town})
-	_panel("稱號牆", body, buttons)
+	_panel(Loc.t("panel.titles"), body, buttons)
 
 
 func _new_game() -> void:
@@ -2919,7 +2919,7 @@ func _go_world_map() -> void:
 		buttons.append({"text": "星途獵場", "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
 	buttons.append({"text": "武器流派", "cb": _go_path_panel})
 	buttons.append({"text": "返回當前", "cb": _hub_back})
-	_panel("世界地圖", body, buttons)
+	_panel(Loc.t("panel.world_map"), body, buttons)
 
 
 func _interact_tower_camp(id: String) -> void:
@@ -3596,7 +3596,7 @@ func _go_skill_panel() -> void:
 			buttons.append({"text": label, "cb": _skill_tutor_cb(sid2)})
 	buttons.append({"text": "戰魂／星屑", "cb": _go_soul_panel})
 	buttons.append({"text": "回到廣場", "cb": _go_c1_town})
-	_panel("灰鬚 · 旅途養招", body, buttons)
+	_panel(Loc.t("panel.tutor"), body, buttons)
 
 
 func _skill_unlock_cb(sid: String) -> Callable:

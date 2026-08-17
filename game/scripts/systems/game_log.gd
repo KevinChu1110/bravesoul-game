@@ -128,7 +128,14 @@ func recent(n: int = 40, category: String = "") -> Array:
 
 func status_bbcode(n: int = 30) -> String:
 	var lines: PackedStringArray = []
-	lines.append("[b]冒險日誌[/b]（最近 %d 條）" % n)
+	## 走 Loc：面板標題已經是英文了，內文再留中文會像翻譯壞掉
+	var loc: Node = null
+	if Engine.get_main_loop() is SceneTree:
+		loc = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("Loc")
+	if loc != null and loc.has_method("t"):
+		lines.append(str(loc.call("t", "log.header", {"n": n})))
+	else:
+		lines.append("[b]冒險日誌[/b]（最近 %d 條）" % n)
 	lines.append("")
 	var list := recent(n)
 	if list.is_empty():

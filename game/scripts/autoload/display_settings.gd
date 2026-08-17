@@ -72,14 +72,25 @@ func res_label(id: String = "") -> String:
 	return str(d.get("label", res_id))
 
 
+## 這幾行原本是硬編碼中文，所以切到英文之後標題變成 Display、內文卻還是
+## 「顯示：視窗 · 1280 × 720 · 垂直同步 開」，看起來像翻譯壞掉。
+func _t(key: String, vars: Dictionary = {}) -> String:
+	var t := Engine.get_main_loop()
+	if t is SceneTree and (t as SceneTree).root != null:
+		var loc: Node = (t as SceneTree).root.get_node_or_null("Loc")
+		if loc != null and loc.has_method("t"):
+			return str(loc.call("t", key, vars))
+	return key
+
+
 func mode_label() -> String:
 	match mode:
 		"windowed":
-			return "視窗"
+			return _t("display.mode_windowed")
 		"exclusive":
-			return "獨占全螢幕"
+			return _t("display.mode_exclusive")
 		_:
-			return "全螢幕"
+			return _t("display.mode_fullscreen")
 
 
 func apply() -> void:
@@ -176,9 +187,9 @@ func res_is_effective() -> bool:
 func summary_line() -> String:
 	var res_part := res_label()
 	if not res_is_effective():
-		res_part = "%s（全螢幕下由螢幕決定）" % res_label()
-	return "顯示：%s · %s · 垂直同步 %s" % [
-		mode_label(),
-		res_part,
-		"開" if vsync else "關",
-	]
+		res_part = _t("display.res_screen_note", {"res": res_label()})
+	return _t("display.summary", {
+		"mode": mode_label(),
+		"res": res_part,
+		"vsync": _t("common.on") if vsync else _t("common.off"),
+	})
