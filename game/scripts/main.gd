@@ -266,9 +266,19 @@ func _refresh_hud() -> void:
 	var show_chrome := _current != Screen.TITLE and not _paused
 	if _inv_panel and _inv_panel.visible:
 		show_chrome = true
+	## 戰鬥中不顯示探索用的左上狀態板。
+	##
+	## 它固定在 (10,10)、228x118，而戰鬥畫面自己的玩家血條／戰意條從 x=28、y=16 開始
+	## —— 兩塊直接疊在一起，畫面上會有兩條血條。而且那張卡片在戰鬥中能提供的
+	## 只有等級／金幣／戰力，打到一半沒有人要看；真正要盯的 HP、戰意、敵人血量、
+	## 格擋倒數，戰鬥畫面本來就都有。
+	## 快捷欄留著 —— 戰鬥中要用道具（見 InventorySystem.hp_authority）。
+	var show_status_card := show_chrome and _current != Screen.BATTLE
+	if _inv_panel and _inv_panel.visible:
+		show_status_card = true
 	if _maple_hud and is_instance_valid(_maple_hud):
-		_maple_hud.visible = show_chrome
-		if show_chrome and _maple_hud.has_method("refresh"):
+		_maple_hud.visible = show_status_card
+		if show_status_card and _maple_hud.has_method("refresh"):
 			_maple_hud.call("refresh")
 	if _hotbar and is_instance_valid(_hotbar):
 		_hotbar.visible = show_chrome and not (_dialogue and _dialogue.visible)
