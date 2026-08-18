@@ -101,6 +101,8 @@
   "pause.reset_ui_toast": "UI 위치를 초기화했습니다",
   "pause.save": "저장",
   "pause.saved": "저장했습니다 · HP {hp}／{max} · {weapon}",
+  "pause.codex": "취령 수첩（{n}/{max}）",
+  "panel.codex": "취령 수첩",
   "pause.journey": "여정 기록",
   "pause.daily": "일일 보상",
   "pause.daily_star": "일일 보상 ★",

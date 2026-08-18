@@ -101,6 +101,8 @@
   "pause.reset_ui_toast": "Posición de la interfaz restablecida",
   "pause.save": "Guardar",
   "pause.saved": "Guardado · PV {hp}/{max} · {weapon}",
+  "pause.codex": "Cuaderno de Cuiling ({n}/{max})",
+  "panel.codex": "Cuaderno de Cuiling",
   "pause.journey": "Progreso",
   "pause.daily": "Recompensa diaria",
   "pause.daily_star": "Recompensa diaria ★",

@@ -101,6 +101,8 @@
   "pause.reset_ui_toast": "UI の位置をリセットしました",
   "pause.save": "セーブ",
   "pause.saved": "セーブしました · HP {hp}／{max} · {weapon}",
+  "pause.codex": "翠嶺の手帖（{n}/{max}）",
+  "panel.codex": "翠嶺の手帖",
   "pause.journey": "旅の記録",
   "pause.daily": "デイリー報酬",
   "pause.daily_star": "デイリー報酬 ★",

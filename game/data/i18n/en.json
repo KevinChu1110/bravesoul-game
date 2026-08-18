@@ -101,6 +101,8 @@
   "pause.reset_ui_toast": "UI layout reset",
   "pause.save": "Save",
   "pause.saved": "Saved · HP {hp}/{max} · {weapon}",
+  "pause.codex": "Cuiling Notebook ({n}/{max})",
+  "panel.codex": "Cuiling Notebook",
   "pause.journey": "Journey",
   "pause.daily": "Daily reward",
   "pause.daily_star": "Daily reward ★",
@@ -199,6 +201,7 @@
   "display.res_needs_window": "Resolution options only apply in Windowed mode.",
   "common.on": "On",
   "common.off": "Off",
+  "panel.world_map": "World Map",
   "panel.guild": "Guild",
   "panel.log": "Adventure Log",
   "panel.saves": "Save Slots",
@@ -220,6 +223,5 @@
   "btn.log_combat": "Combat only",
   "btn.log_economy": "Economy only",
   "btn.log_equip": "Gear only",
-  "log.header": "[b]Adventure Log[/b] (last {n})",
-  "panel.world_map": "World Map"
+  "log.header": "[b]Adventure Log[/b] (last {n})"
 }
