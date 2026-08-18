@@ -49,6 +49,10 @@ var _wall_map: TileMapLayer  ## 牆／實心視覺
 var _has_scenic_bg := false
 ## 目前地圖底圖的 art id —— walkmask 是以 art 為 key（多張地圖共用同一張底圖）
 var _art_id := ""
+## 手繪底圖的前後景切片（從底圖 Atlas 裁出，用來做 Y 排序遮擋）
+var _scenic_layer_nodes: Array = []
+## 站立帶上方的淡陰影：告訴眼睛「上面是遠景／屋頂，不是地板」
+var _horizon_shade: ColorRect = null
 
 const WalkMask := preload("res://scripts/world/walk_mask.gd")
 var _banner: TextureRect
@@ -459,10 +463,19 @@ func _build_chrome() -> void:
 	_vignette.color = Color(0.02, 0.02, 0.04, 0.14)
 	_scroll.add_child(_vignette)
 
+	## 站立帶上方淡影（scenic 地圖才開）
+	_horizon_shade = ColorRect.new()
+	_horizon_shade.name = "HorizonShade"
+	_horizon_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_horizon_shade.color = Color(0.03, 0.02, 0.05, 0.0)
+	_horizon_shade.visible = false
+	_scroll.add_child(_horizon_shade)
+
 	_world = Control.new()
 	_world.name = "World"
 	_world.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_scroll.add_child(_world)
+	_scenic_layer_nodes.clear()
 
 	## 楓式地圖名：小木牌（避開左上狀態板）
 	_title = Label.new()
@@ -610,18 +623,113 @@ static func _shadow_tex() -> Texture2D:
 	return _shadow_tex_cache
 
 
-## 依 y 座標給一點深度縮放：越靠畫面上方（遠）越小。
-## 幅度刻意很小 —— 手繪底圖的透視本來就不是嚴格的，拉太多會更假。
+## 依 y 座標給深度縮放：越靠畫面上方（遠）越小。
+## 普通 tile 地圖幅度小；手繪 scenic 地圖拉大一點，並把縮放區間
+## 壓在「站立帶」（下緣約 65%）—— 上緣天空／屋頂不再浪費遠近對比。
 ## 只影響「顯示」，碰撞仍用 e.size／PLAYER_SIZE，不會改變手感。
 const DEPTH_SCALE_NEAR := 1.05
 const DEPTH_SCALE_FAR := 0.90
+const DEPTH_SCALE_NEAR_SCENIC := 1.14
+const DEPTH_SCALE_FAR_SCENIC := 0.72
+## 站立帶起點（相對 FLOOR 高度）：這條線以上視為遠景／屋頂
+const STAND_BAND_TOP_T := 0.32
 
 
 func _depth_scale(world_y: float) -> float:
 	var top := FLOOR_RECT.position.y
 	var hgt := maxf(1.0, FLOOR_RECT.size.y)
-	var t := clampf((world_y - top) / hgt, 0.0, 1.0)
-	return lerpf(DEPTH_SCALE_FAR, DEPTH_SCALE_NEAR, t)
+	if _has_scenic_bg:
+		var band_top := top + hgt * STAND_BAND_TOP_T
+		var band_h := maxf(1.0, FLOOR_RECT.end.y - band_top)
+		var t := clampf((world_y - band_top) / band_h, 0.0, 1.0)
+		return lerpf(DEPTH_SCALE_FAR_SCENIC, DEPTH_SCALE_NEAR_SCENIC, t)
+	var t2 := clampf((world_y - top) / hgt, 0.0, 1.0)
+	return lerpf(DEPTH_SCALE_FAR, DEPTH_SCALE_NEAR, t2)
+
+
+## 手繪底圖的前後景切片（UV 相對底圖）。
+## FG = 畫面下緣灌木／岩，永遠蓋住中景角色；
+## MG = 建築立面，依腳底 Y 與玩家互遮 —— 走到屋後會被蓋住，不再像貼在平面上。
+const SCENIC_OCCLUDERS := {
+	"village": [
+		{"uv": Rect2(0.0, 0.80, 1.0, 0.20), "kind": "fg"},
+		{"uv": Rect2(0.02, 0.16, 0.24, 0.36), "kind": "mg"},
+		{"uv": Rect2(0.55, 0.10, 0.42, 0.38), "kind": "mg"},
+	],
+	"town": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.28, 0.08, 0.30, 0.38), "kind": "mg"},
+		{"uv": Rect2(0.66, 0.08, 0.28, 0.40), "kind": "mg"},
+		{"uv": Rect2(0.52, 0.48, 0.12, 0.16), "kind": "mg"},
+	],
+}
+
+
+func _update_horizon_shade() -> void:
+	if _horizon_shade == null:
+		return
+	if not _has_scenic_bg:
+		_horizon_shade.visible = false
+		return
+	_horizon_shade.visible = true
+	_horizon_shade.position = FLOOR_RECT.position
+	_horizon_shade.size = Vector2(FLOOR_RECT.size.x, FLOOR_RECT.size.y * STAND_BAND_TOP_T)
+	## 淡淡壓暗遠景／屋頂帶，站立帶以下維持原亮度
+	_horizon_shade.color = Color(0.03, 0.02, 0.06, 0.20)
+
+
+func _clear_scenic_layers() -> void:
+	for n in _scenic_layer_nodes:
+		if is_instance_valid(n):
+			n.queue_free()
+	_scenic_layer_nodes.clear()
+
+
+func _build_scenic_layers() -> void:
+	_clear_scenic_layers()
+	if not _has_scenic_bg or _floor == null or _floor.texture == null or _world == null:
+		return
+	var slices: Array = SCENIC_OCCLUDERS.get(_art_id, [])
+	if slices.is_empty():
+		## 其他 scenic 地圖至少給一條前景帶，空間感立刻好一截
+		slices = [{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"}]
+	var tex: Texture2D = _floor.texture
+	var ts := tex.get_size()
+	if ts.x < 8.0 or ts.y < 8.0:
+		return
+	for s in slices:
+		var uv: Rect2 = s.get("uv", Rect2())
+		if uv.size.x <= 0.0 or uv.size.y <= 0.0:
+			continue
+		var at := AtlasTexture.new()
+		at.atlas = tex
+		at.region = Rect2(
+			uv.position.x * ts.x, uv.position.y * ts.y,
+			uv.size.x * ts.x, uv.size.y * ts.y)
+		var spr := TextureRect.new()
+		spr.texture = at
+		spr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		spr.stretch_mode = TextureRect.STRETCH_SCALE
+		spr.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		spr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var world_pos := Vector2(
+			FLOOR_RECT.position.x + uv.position.x * FLOOR_RECT.size.x,
+			FLOOR_RECT.position.y + uv.position.y * FLOOR_RECT.size.y)
+		var world_size := Vector2(
+			uv.size.x * FLOOR_RECT.size.x,
+			uv.size.y * FLOOR_RECT.size.y)
+		spr.position = world_pos
+		spr.size = world_size
+		var kind := str(s.get("kind", "mg"))
+		## FG：腳底設在地圖最前，幾乎永遠蓋住角色下半
+		## MG：腳底＝切片下緣，走到建築後面會被立面蓋住
+		var foot := world_pos.y + world_size.y
+		if kind == "fg":
+			foot = FLOOR_RECT.end.y + 20.0
+		spr.set_meta("sort_y", foot)
+		spr.set_meta("scenic_kind", kind)
+		_world.add_child(spr)
+		_scenic_layer_nodes.append(spr)
 
 
 func _apply_map_art(id: String) -> void:
@@ -663,6 +771,8 @@ func _apply_map_art(id: String) -> void:
 		_floor_tint.color = Color(0.12, 0.1, 0.1, 0.5)
 
 	_build_tilemap(art_id if art_id != "" else id, has_scenic_bg)
+	_update_horizon_shade()
+	_build_scenic_layers()
 
 	var banner_path := "res://assets/sprites/maps/%s_banner.png" % art_id
 	if not ResourceLoader.exists(banner_path):
@@ -1512,6 +1622,8 @@ func _update_player_visual() -> void:
 			player_pos.x + PLAYER_SIZE.x * 0.5 - sh_w * 0.5,
 			foot_y - sh_h * 0.62)
 		_player_shadow.set_meta("sort_y", foot_y - 1.0)
+		## scenic 地圖把影子再加深一點，腳底「踩在地上」才站得住
+		_player_shadow.modulate = Color(0, 0, 0, 0.55 if _has_scenic_bg else 0.42)
 	var tag := _world.get_node_or_null("PlayerNameTag") as Control
 	if tag:
 		tag.position = player_pos + Vector2(PLAYER_SIZE.x * 0.5 - 28, -16)
