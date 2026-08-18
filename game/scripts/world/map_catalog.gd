@@ -283,16 +283,16 @@ static func _road_inn() -> Dictionary:
 
 
 static func _road_ruins() -> Dictionary:
-	var m := _base("荒路 · 古驛站廢墟", Color(0.1, 0.12, 0.14), 2400, 1350, Vector2(200, 595), "road_ruins")
+	var m := _base("荒路 · 古驛站廢墟", Color(0.1, 0.12, 0.14), 2400, 1350, Vector2(712, 1106), "road_ruins")
 	m["entities"] = [
-		_e("back_road", 100, 571, 56, 56, "回主路", Color(0.4, 0.4, 0.45)),
-		_e("column_a", 500, 366, 40, 72, "斷柱", Color(0.45, 0.42, 0.4), true),
-		_e("column_b", 700, 389, 40, 64, "斷柱", Color(0.42, 0.4, 0.38), true),
-		_e("mosaic", 900, 582, 72, 48, "碎馬賽克", Color(0.5, 0.45, 0.4)),
-		_e("courier_post", 1200, 485, 56, 56, "驛亭基座", Color(0.4, 0.38, 0.35), true),
-		_e("sealed_chest", 1500, 666, 48, 40, "封箱", Color(0.45, 0.35, 0.25)),
-		_e("star_mark", 1800, 361, 48, 48, "星曜刻紋", Color(0.5, 0.55, 0.7)),
-		_e("to_starfall", 2000, 731, 64, 56, "往星落平原", Color(0.45, 0.5, 0.65)),
+		_e("back_road", 684, 1023, 56, 56, "回主路", Color(0.4, 0.4, 0.45)),
+		_e("column_a", 740, 818, 40, 72, "斷柱", Color(0.45, 0.42, 0.4), true),
+		_e("column_b", 1028, 772, 40, 64, "斷柱", Color(0.42, 0.4, 0.38), true),
+		_e("mosaic", 1156, 1004, 72, 48, "碎馬賽克", Color(0.5, 0.45, 0.4)),
+		_e("courier_post", 1500, 861, 56, 56, "驛亭基座", Color(0.4, 0.38, 0.35), true),
+		_e("sealed_chest", 1360, 1228, 48, 40, "封箱", Color(0.45, 0.35, 0.25)),
+		_e("star_mark", 1216, 518, 48, 48, "星曜刻紋", Color(0.5, 0.55, 0.7)),
+		_e("to_starfall", 1640, 996, 64, 56, "往星落平原", Color(0.45, 0.5, 0.65)),
 	]
 	return m
 
@@ -528,15 +528,15 @@ static func _caravan_camp() -> Dictionary:
 
 
 static func _starfall_plain() -> Dictionary:
-	var m := _base("星落平原 · 十四星夜空", Color(0.05, 0.06, 0.12), 2800, 1563, Vector2(200, 692), "starfall_plain")
+	var m := _base("星落平原 · 十四星夜空", Color(0.05, 0.06, 0.12), 2800, 1563, Vector2(264, 1049), "starfall_plain")
 	m["entities"] = [
-		_e("back_cross", 100, 670, 56, 56, "回岔路", Color(0.45, 0.5, 0.4)),
-		_e("meteor_stone", 600, 511, 56, 48, "隕星石", Color(0.5, 0.55, 0.75), true),
-		_e("constellation", 1000, 381, 64, 48, "星圖刻地", Color(0.45, 0.5, 0.7)),
-		_e("star_reader_camp", 1400, 709, 56, 56, "星讀帳篷", Color(0.4, 0.4, 0.55), true),
-		_e("night_bloom", 1800, 835, 40, 40, "夜開花", Color(0.5, 0.4, 0.6)),
-		_e("wish_pool", 2100, 576, 64, 48, "許願淺池" + ("（已許）" if GameState.has_flag("side.star_wish_done") else ""), Color(0.35, 0.4, 0.55), true),
-		_e("to_road_ruins", 2400, 904, 64, 56, "接古驛", Color(0.4, 0.38, 0.35)),
+		_e("back_cross", 236, 962, 56, 56, "回岔路", Color(0.45, 0.5, 0.4)),
+		_e("meteor_stone", 404, 1189, 56, 48, "隕星石", Color(0.5, 0.55, 0.75), true),
+		_e("constellation", 1408, 1001, 64, 48, "星圖刻地", Color(0.45, 0.5, 0.7)),
+		_e("star_reader_camp", 796, 837, 56, 56, "星讀帳篷", Color(0.4, 0.4, 0.55), true),
+		_e("night_bloom", 1196, 1384, 40, 40, "夜開花", Color(0.5, 0.4, 0.6)),
+		_e("wish_pool", 1744, 1251, 64, 48, "許願淺池" + ("（已許）" if GameState.has_flag("side.star_wish_done") else ""), Color(0.35, 0.4, 0.55), true),
+		_e("to_road_ruins", 2304, 1118, 64, 56, "接古驛", Color(0.4, 0.38, 0.35)),
 	]
 	return m
 
@@ -891,52 +891,52 @@ static func _coast_wreck() -> Dictionary:
 # ═══════════════════════════════════════════
 
 static func _tower_camp() -> Dictionary:
-	var m := _base("法師之塔 · 塔下營地", Color(0.08, 0.07, 0.12), 2800, 1575, Vector2(300, 697), "tower")
+	var m := _base("法師之塔 · 塔下營地", Color(0.08, 0.07, 0.12), 2800, 1575, Vector2(488, 1088), "tower")
 	var ents: Array = [
-		_e("duanye", 500, 625, 48, 64, "斷頁", Color(0.55, 0.45, 0.65)),
-		_e("refugee_fire", 700, 804, 56, 48, "逃難營火", Color(0.9, 0.4, 0.15), true),
-		_e("tent_a", 400, 909, 64, 48, "帳棚", Color(0.4, 0.35, 0.4), true),
-		_e("tent_b", 900, 843, 64, 48, "帳棚", Color(0.38, 0.35, 0.42), true),
-		_e("scroll_pile", 1100, 512, 48, 40, "散落卷軸", Color(0.5, 0.45, 0.4)),
-		_e("message_stone", 1200, 675, 52, 56, "留言石", Color(0.5, 0.55, 0.75), true),
-		_e("candle_altar", 1400, 624, 56, 60, "通關蠟燭", Color(0.95, 0.75, 0.35), true),
-		_e("tower_gate", 1800, 596, 80, 96, "塔門", Color(0.35, 0.25, 0.4), true),
-		_e("to_tower_foyer", 1900, 609, 64, 56, "進入塔門廳", Color(0.45, 0.35, 0.5)),
-		_e("climb_tower", 2100, 625, 64, 64, "登上塔", Color(0.5, 0.35, 0.55)),
-		_e("save_tower", 200, 1237, 48, 48, "存檔石", Color(0.4, 0.45, 0.5)),
-		_e("exit_cross_t", 2500, 1111, 72, 64, "六域岔路", Color(0.45, 0.5, 0.4)),
-		_e("path_back_wild", 150, 449, 56, 48, "回荒野", Color(0.35, 0.4, 0.3)),
+		_e("duanye", 800, 898, 48, 64, "斷頁", Color(0.55, 0.45, 0.65)),
+		_e("refugee_fire", 740, 1260, 56, 48, "逃難營火", Color(0.9, 0.4, 0.15), true),
+		_e("tent_a", 456, 1198, 64, 48, "帳棚", Color(0.4, 0.35, 0.4), true),
+		_e("tent_b", 1128, 1386, 64, 48, "帳棚", Color(0.38, 0.35, 0.42), true),
+		_e("scroll_pile", 1248, 796, 48, 40, "散落卷軸", Color(0.5, 0.45, 0.4)),
+		_e("message_stone", 1022, 1064, 52, 56, "留言石", Color(0.5, 0.55, 0.75), true),
+		_e("candle_altar", 1468, 965, 56, 60, "通關蠟燭", Color(0.95, 0.75, 0.35), true),
+		_e("tower_gate", 784, 772, 80, 96, "塔門", Color(0.35, 0.25, 0.4), true),
+		_e("to_tower_foyer", 960, 748, 64, 56, "進入塔門廳", Color(0.45, 0.35, 0.5)),
+		_e("climb_tower", 1688, 804, 64, 64, "登上塔", Color(0.5, 0.35, 0.55)),
+		_e("save_tower", 688, 1386, 48, 48, "存檔石", Color(0.4, 0.45, 0.5)),
+		_e("exit_cross_t", 2356, 1402, 72, 64, "六域岔路", Color(0.45, 0.5, 0.4)),
+		_e("path_back_wild", 460, 1008, 56, 48, "回荒野", Color(0.35, 0.4, 0.3)),
 	]
 	## 勸降成功：塔下再見
 	if GameState.has_flag("side.ronin_spared"):
-		ents.append(_e("ronin", 1000, 678, 48, 64, "浪人（守營）", Color(0.4, 0.35, 0.42)))
+		ents.append(_e("ronin", 1584, 1244, 48, 64, "浪人（守營）", Color(0.4, 0.35, 0.42)))
 	m["entities"] = ents
 	return m
 
 
 static func _tower_foyer() -> Dictionary:
-	var m := _base("法師之塔 · 門廳", Color(0.07, 0.06, 0.11), 2400, 1340, Vector2(200, 592), "tower_foyer")
+	var m := _base("法師之塔 · 門廳", Color(0.07, 0.06, 0.11), 2400, 1340, Vector2(280, 1259), "tower_foyer")
 	m["entities"] = [
-		_e("back_tower_camp", 100, 579, 56, 56, "回營地", Color(0.4, 0.35, 0.5)),
-		_e("pillar_a", 500, 365, 40, 80, "黑石柱", Color(0.3, 0.25, 0.35), true),
-		_e("pillar_b", 800, 365, 40, 80, "黑石柱", Color(0.3, 0.25, 0.35), true),
-		_e("mural", 1100, 421, 80, 56, "封印壁畫", Color(0.4, 0.3, 0.45), true),
-		_e("to_tower_stairs", 1600, 543, 64, 56, "螺旋階", Color(0.45, 0.35, 0.5)),
-		_e("to_tower_memory", 1900, 726, 64, 56, "回憶層入口", Color(0.5, 0.4, 0.55)),
-		_e("climb_tower", 2100, 581, 64, 64, "直接登頂路", Color(0.5, 0.35, 0.55)),
+		_e("back_tower_camp", 252, 1176, 56, 56, "回營地", Color(0.4, 0.35, 0.5)),
+		_e("pillar_a", 548, 831, 40, 80, "黑石柱", Color(0.3, 0.25, 0.35), true),
+		_e("pillar_b", 596, 1045, 40, 80, "黑石柱", Color(0.3, 0.25, 0.35), true),
+		_e("mural", 1152, 801, 80, 56, "封印壁畫", Color(0.4, 0.3, 0.45), true),
+		_e("to_tower_stairs", 1112, 480, 64, 56, "螺旋階", Color(0.45, 0.35, 0.5)),
+		_e("to_tower_memory", 1736, 989, 64, 56, "回憶層入口", Color(0.5, 0.4, 0.55)),
+		_e("climb_tower", 2072, 900, 64, 64, "直接登頂路", Color(0.5, 0.35, 0.55)),
 	]
 	return m
 
 
 static func _tower_stairs() -> Dictionary:
-	var m := _base("法師之塔 · 螺旋階", Color(0.06, 0.05, 0.1), 2200, 1238, Vector2(200, 982), "tower_stairs")
+	var m := _base("法師之塔 · 螺旋階", Color(0.06, 0.05, 0.1), 2200, 1238, Vector2(568, 1095), "tower_stairs")
 	m["entities"] = [
-		_e("back_tower_camp", 100, 975, 56, 56, "下塔", Color(0.4, 0.35, 0.5)),
-		_e("step_mark", 600, 800, 48, 40, "腳印", Color(0.35, 0.3, 0.4)),
-		_e("window_slit", 900, 623, 40, 48, "狹窗", Color(0.3, 0.35, 0.45)),
-		_e("echo_step", 1200, 447, 48, 40, "回音階", Color(0.4, 0.35, 0.45)),
-		_e("to_tower_memory", 1500, 313, 56, 48, "回憶層", Color(0.5, 0.4, 0.55)),
-		_e("climb_tower", 1800, 223, 64, 64, "更高處", Color(0.5, 0.35, 0.55)),
+		_e("back_tower_camp", 540, 1014, 56, 56, "下塔", Color(0.4, 0.35, 0.5)),
+		_e("step_mark", 456, 783, 48, 40, "腳印", Color(0.35, 0.3, 0.4)),
+		_e("window_slit", 592, 552, 40, 48, "狹窗", Color(0.3, 0.35, 0.45)),
+		_e("echo_step", 1072, 486, 48, 40, "回音階", Color(0.4, 0.35, 0.45)),
+		_e("to_tower_memory", 1596, 577, 56, 48, "回憶層", Color(0.5, 0.4, 0.55)),
+		_e("climb_tower", 1724, 833, 64, 64, "更高處", Color(0.5, 0.35, 0.55)),
 	]
 	return m
 
