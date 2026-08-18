@@ -101,6 +101,8 @@
   "pause.reset_ui_toast": "UI 位置已重設",
   "pause.save": "存檔",
   "pause.saved": "已存檔 · HP {hp}／{max} · {weapon}",
+  "pause.codex": "翠嶺手札（{n}/{max}）",
+  "panel.codex": "翠嶺手札",
   "pause.journey": "旅程進度",
   "pause.daily": "每日獎勵",
   "pause.daily_star": "每日獎勵 ★",

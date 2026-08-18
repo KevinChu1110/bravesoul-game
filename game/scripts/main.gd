@@ -463,6 +463,14 @@ func _build_pause_layer() -> void:
 		sub.custom_minimum_size = Vector2(300, 140)
 		AudioManager.play_ui()
 	)
+	var codex_n := 0
+	if StoryCodex:
+		StoryCodex.try_unlock_all()
+		codex_n = StoryCodex.unlocked_count()
+	_pause_btn(box, Loc.t("pause.codex", {"n": codex_n, "max": StoryCodex.total_count() if StoryCodex else 0}), func():
+		_close_pause()
+		_go_story_codex_panel()
+	)
 	_pause_btn(box, daily_tag, func():
 		_close_pause()
 		_go_daily_panel()
@@ -1203,6 +1211,49 @@ func _hub_back() -> void:
 		_open_explore(_last_explore_map, _last_explore_screen)
 		return
 	_resume_from_chapter()
+
+
+func _go_story_codex_panel() -> void:
+	if StoryCodex == null:
+		_show_toast(_t("手札尚未就緒。"))
+		return
+	var newly: Array = StoryCodex.try_unlock_all()
+	if not newly.is_empty():
+		var names: PackedStringArray = []
+		for id in newly:
+			names.append(StoryCodex.display_title(str(id)))
+		_show_toast(_t("手札更新：%s") % "、".join(names))
+	var body := StoryCodex.panel_list_bbcode()
+	var buttons: Array = []
+	for id in StoryCodex.unlocked_ids():
+		var sid := str(id)
+		buttons.append({
+			"text": StoryCodex.display_title(sid),
+			"cb": func(): _go_story_codex_entry(sid),
+		})
+	buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
+	_panel(Loc.t("panel.codex"), body, buttons)
+
+
+func _go_story_codex_entry(id: String) -> void:
+	var body := StoryCodex.entry_bbcode(id) if StoryCodex else ""
+	_panel(
+		StoryCodex.display_title(id) if StoryCodex else id,
+		body,
+		[{"text": Loc.t("btn.back"), "cb": _go_story_codex_panel}]
+	)
+
+
+func _notify_codex_unlocks() -> void:
+	if StoryCodex == null:
+		return
+	var newly: Array = StoryCodex.try_unlock_all()
+	if newly.is_empty():
+		return
+	var names: PackedStringArray = []
+	for id in newly:
+		names.append(StoryCodex.display_title(str(id)))
+	_show_toast(_t("翠嶺手札：%s") % "、".join(names))
 
 
 func _journey_summary() -> String:
@@ -2970,6 +3021,7 @@ func _go_c0() -> void:
 	GameState.set_chapter("c0")
 	if not GameState.has_flag("c0_intro_cut"):
 		GameState.set_flag("c0_intro_cut", true)
+		_notify_codex_unlocks()
 		_play_cutscene(_cutscene_art("c0_open", [
 			{
 				"bg": "village",
@@ -3086,6 +3138,7 @@ func _c0_sword_done() -> void:
 	GameState.set_flag("c0_sword_triple_pull", true)
 	GameState.set_flag("item.rusty_sword", true)
 	SaveManager.save_game()
+	_notify_codex_unlocks()
 
 
 func _c0_try_leave() -> void:
@@ -3094,6 +3147,7 @@ func _c0_try_leave() -> void:
 		return
 	GameState.has_wheat_stalk = true
 	GameState.set_flag("c0_village_left", true)
+	_notify_codex_unlocks()
 	var last := _t("……我會等你。") if GameState.has_flag("c0_care") else _t("快跑！")
 	_play_dialog([
 		{"speaker": _t("麥穗"), "text": _t("（塞進你口袋一枝乾癟的麥穗桿）拿著。不是護身符。——是回家的氣味。")},
@@ -3195,6 +3249,7 @@ func _on_battle_finished(won: bool) -> void:
 			if GameState.skill_slash_lv < 1:
 				GameState.skill_slash_lv = 1
 			GameState.set_flag("c0_first_battle", true)
+			_notify_codex_unlocks()
 			_play_dialog(DialogLines.lines("battle.wolf_win"), _c0_to_c1_cutscene)
 		else:
 			GameState.set_flag("c0_helped_by_stranger", true)
