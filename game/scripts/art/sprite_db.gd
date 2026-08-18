@@ -440,6 +440,11 @@ static func _boss_art_key(mode: String) -> String:
 
 
 static func map_bg(map_id: String) -> Texture2D:
+	## 高解析版是 .webp（2633x1469，底圖不需要 alpha，PNG 純粹浪費空間），
+	## 還沒重出的維持 .png。兩種都找，webp 優先。
+	var webp := "%s/maps/%s_bg.webp" % [ROOT, map_id]
+	if ResourceLoader.exists(webp):
+		return tex(webp)
 	return tex("%s/maps/%s_bg.png" % [ROOT, map_id])
 
 

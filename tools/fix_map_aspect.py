@@ -33,7 +33,9 @@ BASE_RE = (r'(var m := _base\("[^"]+",\s*Color\([^)]*\),\s*)([\d.]+)(,\s*)([\d.]
 
 def img_aspect(art):
     from PIL import Image
-    p = os.path.join(BG, "%s_bg.png" % art)
+    p = os.path.join(BG, "%s_bg.webp" % art)
+    if not os.path.exists(p):
+        p = os.path.join(BG, "%s_bg.png" % art)
     if not os.path.exists(p):
         return None
     w, h = Image.open(p).size

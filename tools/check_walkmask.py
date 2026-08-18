@@ -15,6 +15,7 @@
     python3 tools/check_walkmask.py --check    # 只檢查，不產圖（CI 用）
     python3 tools/check_walkmask.py town       # 只看指定的 art
     python3 tools/check_walkmask.py --example  # 連 _ 開頭的範例一起看（會報實體站不到）
+    python3 tools/check_walkmask.py --grid town village   # 產座標格線圖，用來描多邊形
 """
 
 import io
@@ -101,8 +102,38 @@ def walkable(uv, entry):
     return not any(point_in_poly(uv, p) for p in entry.get("block", []))
 
 
+def make_grid(arts):
+    """產帶 0.0~1.0 座標格線的底圖，描 walk 多邊形時對著它讀座標。"""
+    from PIL import Image, ImageDraw
+    out = os.path.join(ROOT, "screenshots/walkgrid")
+    os.makedirs(out, exist_ok=True)
+    for art in arts:
+        bg = os.path.join(BG_DIR, "%s_bg.webp" % art)
+        if not os.path.exists(bg):
+            bg = os.path.join(BG_DIR, "%s_bg.png" % art)
+        if not os.path.exists(bg):
+            print("  跳過 %s（沒有底圖）" % art)
+            continue
+        im = Image.open(bg).convert("RGB")
+        im = im.resize((960, int(960 * im.height / im.width)), Image.LANCZOS)
+        d = ImageDraw.Draw(im)
+        W, H = im.size
+        for i in range(1, 10):
+            x, y = W * i // 10, H * i // 10
+            d.line([(x, 0), (x, H)], fill=(255, 60, 60))
+            d.line([(0, y), (W, y)], fill=(255, 60, 60))
+            d.text((x + 2, 2), "%.1f" % (i / 10.0), fill=(255, 255, 0))
+            d.text((2, y + 2), "%.1f" % (i / 10.0), fill=(0, 255, 255))
+        im.save(os.path.join(out, "%s.png" % art))
+    print("格線圖 → screenshots/walkgrid/")
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("-")]
+    if "--grid" in sys.argv:
+        allarts = sorted({m[5] for m in load_maps()})
+        make_grid(args or allarts)
+        return
     check_only = "--check" in sys.argv
     mask = load_mask(include_examples="--example" in sys.argv)
     maps = load_maps()
@@ -161,7 +192,10 @@ def main():
             for art, entry in sorted(mask.items()):
                 if args and art not in args:
                     continue
-                bg = os.path.join(BG_DIR, "%s_bg.png" % art)
+                ## 重出的高解析版是 .webp，還沒重出的是 .png
+                bg = os.path.join(BG_DIR, "%s_bg.webp" % art)
+                if not os.path.exists(bg):
+                    bg = os.path.join(BG_DIR, "%s_bg.png" % art)
                 if not os.path.exists(bg):
                     problems.append("%s 沒有對應的 %s_bg.png" % (art, art))
                     continue
