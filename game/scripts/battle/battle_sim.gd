@@ -365,6 +365,7 @@ func _begin_attack(u: BattleUnit) -> void:
 			"skill_id": u.skill_id,
 			"kind": u.skill_kind,
 			"target": target.id,
+			"hits": maxi(1, u.skill_hits),
 		})
 		return
 

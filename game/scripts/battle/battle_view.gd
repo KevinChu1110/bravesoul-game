@@ -1572,6 +1572,9 @@ func _on_event(kind: String, data: Dictionary) -> void:
 			_append_log(_t("[color=#8cf]%s 使出 %s[/color]") % [data.get("id"), data.get("skill")])
 			var sid := str(data.get("id", ""))
 			var skn := str(data.get("skill", _t("技能")))
+			var cast_hits: int = maxi(1, int(data.get("hits", 1)))
+			if cast_hits > 1:
+				skn = "%s ×%d" % [skn, cast_hits]
 			_flash_skill_banner(skn, sid == "player")
 			_lunge(sid)
 			if _is_enemy_actor(sid):
@@ -1579,43 +1582,7 @@ func _on_event(kind: String, data: Dictionary) -> void:
 			elif sid == "player":
 				_set_player_pose("skill", true)
 		"skill_hit":
-			var hits_total: int = maxi(1, int(data.get("hits", 1)))
-			var hit_i: int = int(data.get("hit_index", 0))
-			if str(data.get("kind", "")) == "heal" or int(data.get("heal", 0)) > 0:
-				_append_log(_t("[color=#8f8]%s！回復 %s[/color]") % [data.get("skill"), data.get("heal", 0)])
-				_spawn_float(str(data.get("defender", "player")), "+%s" % data.get("heal", 0), Color(0.5, 1.0, 0.65))
-				_flash(_body_of(str(data.get("defender", "player"))), Color(0.5, 1.0, 0.7))
-			else:
-				var dmg_s := str(data.get("damage", 0))
-				if hits_total > 1:
-					_append_log(_t("[color=#8cf]%s（%d/%d）！%s 傷害[/color]") % [
-						data.get("skill"), hit_i + 1, hits_total, dmg_s
-					])
-				else:
-					_append_log(_t("[color=#8cf]%s！%s 傷害[/color]") % [data.get("skill"), dmg_s])
-				_spawn_float(str(data.get("defender")), dmg_s, Color(0.6, 0.85, 1))
-				_flash(_body_of(str(data.get("defender"))), Color(0.6, 0.8, 1))
-			if str(data.get("attacker", "")) == "player":
-				_set_player_pose("attack", true)
-				## 多段只在首段累積熟練，避免森羅 16 段刷熟練
-				var do_mastery := true
-				if data.has("grant_mastery"):
-					do_mastery = bool(data.get("grant_mastery", true))
-				elif hits_total > 1 and hit_i > 0:
-					do_mastery = false
-				if do_mastery:
-					_grant_skill_mastery(str(data.get("skill_id", "slash")))
-				get_tree().create_timer(0.25).timeout.connect(func():
-					if is_instance_valid(self) and not _ended:
-						_set_player_pose("idle")
-				)
-			if data.get("parry_followup", false):
-				_shake = 0.25
-				_set_boss_pose("recover")
-				get_tree().create_timer(0.4).timeout.connect(func():
-					if is_instance_valid(self) and not _ended:
-						_set_boss_pose("idle")
-				)
+			_handle_skill_hit(data)
 		"perfect_parry":
 			## 不用「微末一格／體型對照」等開發梗；只給可讀的短提示
 			## 先把舊的開發梗正規化，最後才翻 —— 反過來的話比對的是譯文，
@@ -1782,6 +1749,96 @@ func _lunge(id: String) -> void:
 	var tw := create_tween()
 	tw.tween_property(body, "position", home + Vector2(dir * 36, 0), 0.08)
 	tw.tween_property(body, "position", home, 0.12)
+
+
+## 多段技：同幀會連發多個 skill_hit，用 hit_index 錯開演出，讓「真多段」看得見
+func _handle_skill_hit(data: Dictionary) -> void:
+	var hits_total: int = maxi(1, int(data.get("hits", 1)))
+	var hit_i: int = int(data.get("hit_index", 0))
+	## 森羅等超多段：壓成較密但仍可辨的節奏（總演出約 ≤0.7s）
+	var stagger := 0.0
+	if hits_total > 1:
+		var step := 0.07 if hits_total <= 6 else (0.55 / float(hits_total - 1))
+		stagger = float(hit_i) * step
+	if stagger <= 0.001:
+		_present_skill_hit(data, hits_total, hit_i)
+	else:
+		var captured: Dictionary = data.duplicate()
+		get_tree().create_timer(stagger).timeout.connect(func():
+			if is_instance_valid(self) and not _ended:
+				_present_skill_hit(captured, hits_total, hit_i)
+		)
+
+
+func _present_skill_hit(data: Dictionary, hits_total: int, hit_i: int) -> void:
+	if str(data.get("kind", "")) == "heal" or int(data.get("heal", 0)) > 0:
+		_append_log(_t("[color=#8f8]%s！回復 %s[/color]") % [data.get("skill"), data.get("heal", 0)])
+		_spawn_float(str(data.get("defender", "player")), "+%s" % data.get("heal", 0), Color(0.5, 1.0, 0.65))
+		_flash(_body_of(str(data.get("defender", "player"))), Color(0.5, 1.0, 0.7))
+		return
+
+	var dmg_s := str(data.get("damage", 0))
+	var is_multi := hits_total > 1
+	if is_multi:
+		## 只在首段與末段寫完整戰報，中間段少刷屏
+		if hit_i == 0 or hit_i == hits_total - 1 or hits_total <= 4:
+			_append_log(_t("[color=#8cf]%s（%d/%d）！%s 傷害[/color]") % [
+				data.get("skill"), hit_i + 1, hits_total, dmg_s
+			])
+	else:
+		_append_log(_t("[color=#8cf]%s！%s 傷害[/color]") % [data.get("skill"), dmg_s])
+
+	## 多段：飛字偏色輪轉 + 段數角標；單段維持原樣
+	var cols: Array[Color] = [
+		Color(0.55, 0.85, 1.0),
+		Color(0.75, 0.7, 1.0),
+		Color(1.0, 0.75, 0.55),
+		Color(0.6, 1.0, 0.75),
+	]
+	var col: Color = cols[hit_i % cols.size()] if is_multi else Color(0.6, 0.85, 1)
+	var float_txt := dmg_s
+	if is_multi:
+		float_txt = "%s·%d" % [dmg_s, hit_i + 1]
+	_spawn_float(str(data.get("defender")), float_txt, col)
+	_flash(_body_of(str(data.get("defender"))), col * Color(1.2, 1.2, 1.2, 1.0))
+
+	## 輕顫＋極短 hit-stop（超多段只在首／中／尾停，避免卡死）
+	if is_multi:
+		_shake = maxf(_shake, 0.08)
+		if hit_i == 0 or hit_i == hits_total - 1 or hit_i % 4 == 0:
+			trigger_hit_stop(0.025)
+		## 首段顯示連段標
+		if hit_i == 0:
+			_spawn_float(str(data.get("attacker", "player")), "×%d" % hits_total, Color(1.0, 0.9, 0.45))
+		## 微幅衝刺節奏
+		if hit_i % 2 == 0 and str(data.get("attacker", "")) == "player":
+			_lunge("player")
+
+	if str(data.get("attacker", "")) == "player":
+		_set_player_pose("attack", true)
+		var do_mastery := true
+		if data.has("grant_mastery"):
+			do_mastery = bool(data.get("grant_mastery", true))
+		elif is_multi and hit_i > 0:
+			do_mastery = false
+		if do_mastery:
+			_grant_skill_mastery(str(data.get("skill_id", "slash")))
+		## 末段才收招
+		var recover_delay := 0.25
+		if is_multi:
+			recover_delay = 0.12 if hit_i < hits_total - 1 else 0.28
+		if hit_i >= hits_total - 1 or not is_multi:
+			get_tree().create_timer(recover_delay).timeout.connect(func():
+				if is_instance_valid(self) and not _ended:
+					_set_player_pose("idle")
+			)
+	if data.get("parry_followup", false):
+		_shake = 0.25
+		_set_boss_pose("recover")
+		get_tree().create_timer(0.4).timeout.connect(func():
+			if is_instance_valid(self) and not _ended:
+				_set_boss_pose("idle")
+		)
 
 
 func _flash(body: TextureRect, c: Color) -> void:
