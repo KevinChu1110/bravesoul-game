@@ -381,17 +381,17 @@ static func _town_sewers() -> Dictionary:
 
 
 static func _barracks_yard() -> Dictionary:
-	var m := _base("騎士堡 · 演武場", Color(0.1, 0.1, 0.12), 2400, 1340, Vector2(200, 592), "barracks_yard")
+	var m := _base("騎士堡 · 演武場", Color(0.1, 0.1, 0.12), 2400, 1340, Vector2(328, 375), "barracks_yard")
 	var blade_lab := "空武器架" if GameState.has_flag("item.broken_blade") or GameState.has_flag("side.ding_debt_done") else "武器架（斷劍）"
 	m["entities"] = [
-		_e("back_from_barracks", 100, 579, 56, 56, "回廣場", Color(0.4, 0.4, 0.45)),
-		_e("training_ring", 700, 487, 100, 80, "圓形演武台", Color(0.45, 0.4, 0.35), true),
-		_e("weapon_rack", 500, 665, 48, 56, blade_lab, Color(0.5, 0.45, 0.4), true),
-		_e("target_dummy", 1000, 604, 40, 56, "木靶", Color(0.45, 0.35, 0.28)),
-		_e("banner_stand", 1200, 362, 40, 64, "團旗架", Color(0.55, 0.4, 0.3), true),
-		_e("officer_desk", 1500, 541, 56, 48, "隊長桌", Color(0.4, 0.35, 0.3), true),
-		_e("sand_pit", 1800, 724, 80, 48, "沙坑", Color(0.5, 0.45, 0.35)),
-		_e("knight_orphan", 1600, 727, 48, 64, "遺孤少年", Color(0.5, 0.48, 0.55)),
+		_e("back_from_barracks", 300, 292, 56, 56, "回廣場", Color(0.4, 0.4, 0.45)),
+		_e("training_ring", 1190, 750, 100, 80, "圓形演武台", Color(0.45, 0.4, 0.35), true),
+		_e("weapon_rack", 592, 587, 48, 56, blade_lab, Color(0.5, 0.45, 0.4), true),
+		_e("target_dummy", 836, 989, 40, 56, "木靶", Color(0.45, 0.35, 0.28)),
+		_e("banner_stand", 644, 472, 40, 64, "團旗架", Color(0.55, 0.4, 0.3), true),
+		_e("officer_desk", 1500, 595, 56, 48, "隊長桌", Color(0.4, 0.35, 0.3), true),
+		_e("sand_pit", 1584, 997, 80, 48, "沙坑", Color(0.5, 0.45, 0.35)),
+		_e("knight_orphan", 1504, 1061, 48, 64, "遺孤少年", Color(0.5, 0.48, 0.55)),
 	]
 	return m
 
@@ -511,18 +511,18 @@ static func _cross_east() -> Dictionary:
 
 
 static func _caravan_camp() -> Dictionary:
-	var m := _base("行商驛站 · 星途旅人落腳處", Color(0.1, 0.11, 0.12), 2400, 1340, Vector2(200, 592), "caravan_camp")
+	var m := _base("行商驛站 · 星途旅人落腳處", Color(0.1, 0.11, 0.12), 2400, 1340, Vector2(712, 1125), "caravan_camp")
 	var letter_lab := "行商頭領" if not GameState.has_flag("item.true_letter") else "行商（待交信）"
 	m["entities"] = [
-		_e("back_cross", 100, 579, 56, 56, "回岔路", Color(0.45, 0.5, 0.4)),
-		_e("wagon_a", 500, 482, 72, 56, "篷車", Color(0.5, 0.4, 0.3), true),
-		_e("wagon_b", 800, 604, 72, 56, "篷車", Color(0.48, 0.38, 0.28), true),
-		_e("merchant", 1000, 545, 48, 64, letter_lab, Color(0.6, 0.5, 0.4)),
-		_e("amber", 1100, 630, 48, 64, "琥珀·商人", Color(0.75, 0.55, 0.3)),
-		_e("camp_fire", 1200, 663, 48, 48, "營火", Color(0.9, 0.4, 0.15), true),
-		_e("goods_pile", 1500, 480, 56, 48, "貨堆", Color(0.45, 0.4, 0.35)),
-		_e("map_table", 1700, 600, 48, 40, "地圖桌", Color(0.5, 0.45, 0.35)),
-		_e("guard_dog", 600, 782, 40, 36, "守車犬", Color(0.4, 0.35, 0.3)),
+		_e("back_cross", 684, 1096, 56, 56, "回岔路", Color(0.45, 0.5, 0.4)),
+		_e("wagon_a", 1204, 560, 72, 56, "篷車", Color(0.5, 0.4, 0.3), true),
+		_e("wagon_b", 1780, 614, 72, 56, "篷車", Color(0.48, 0.38, 0.28), true),
+		_e("merchant", 1360, 686, 48, 64, letter_lab, Color(0.6, 0.5, 0.4)),
+		_e("amber", 1264, 847, 48, 64, "琥珀·商人", Color(0.75, 0.55, 0.3)),
+		_e("camp_fire", 1528, 809, 48, 48, "營火", Color(0.9, 0.4, 0.15), true),
+		_e("goods_pile", 1740, 943, 56, 48, "貨堆", Color(0.45, 0.4, 0.35)),
+		_e("map_table", 1120, 844, 48, 40, "地圖桌", Color(0.5, 0.45, 0.35)),
+		_e("guard_dog", 1076, 687, 40, 36, "守車犬", Color(0.4, 0.35, 0.3)),
 	]
 	return m
 
@@ -559,16 +559,16 @@ static func _hunting_grounds() -> Dictionary:
 
 
 static func _blackflame_scar() -> Dictionary:
-	var m := _base("黑焰疤地 · 被吞噬的土地", Color(0.08, 0.05, 0.1), 2600, 1451, Vector2(200, 648), "blackflame_scar")
+	var m := _base("黑焰疤地 · 被吞噬的土地", Color(0.08, 0.05, 0.1), 2600, 1451, Vector2(196, 1212), "blackflame_scar")
 	m["entities"] = [
-		_e("back_cross", 100, 624, 56, 56, "退回荒原道", Color(0.4, 0.35, 0.45)),
-		_e("char_soil", 500, 537, 80, 48, "焦裂地", Color(0.25, 0.15, 0.2), true),
-		_e("flame_vent", 900, 479, 48, 56, "焰口", Color(0.5, 0.2, 0.45), true),
-		_e("obsidian", 1200, 657, 48, 40, "黑曜碎", Color(0.2, 0.18, 0.25)),
-		_e("lost_banner", 1500, 418, 40, 56, "半融旗", Color(0.4, 0.25, 0.3)),
-		_e("whisper_stone", 1800, 598, 48, 48, "低語石", Color(0.35, 0.25, 0.4), true),
-		_e("scar_boss", 2000, 510, 80, 88, "黑焰疤主", Color(0.65, 0.25, 0.45)),
-		_e("path_tower_c", 2200, 662, 72, 64, "疤地盡頭·塔", Color(0.45, 0.35, 0.55)),
+		_e("back_cross", 168, 1185, 56, 56, "退回荒原道", Color(0.4, 0.35, 0.45)),
+		_e("char_soil", 520, 1106, 80, 48, "焦裂地", Color(0.25, 0.15, 0.2), true),
+		_e("flame_vent", 900, 1069, 48, 56, "焰口", Color(0.5, 0.2, 0.45), true),
+		_e("obsidian", 1160, 1201, 48, 40, "黑曜碎", Color(0.2, 0.18, 0.25)),
+		_e("lost_banner", 1424, 837, 40, 56, "半融旗", Color(0.4, 0.25, 0.3)),
+		_e("whisper_stone", 1888, 758, 48, 48, "低語石", Color(0.35, 0.25, 0.4), true),
+		_e("scar_boss", 2184, 1095, 80, 88, "黑焰疤主", Color(0.65, 0.25, 0.45)),
+		_e("path_tower_c", 2448, 1177, 72, 64, "疤地盡頭·塔", Color(0.45, 0.35, 0.55)),
 	]
 	return m
 
@@ -728,53 +728,53 @@ static func _dojo_peak() -> Dictionary:
 # ═══════════════════════════════════════════
 
 static func _forest() -> Dictionary:
-	var m := _base("遊俠森林 · 樹海邊緣", Color(0.06, 0.12, 0.08), 3200, 1786, Vector2(180, 807), "forest")
+	var m := _base("遊俠森林 · 樹海邊緣", Color(0.06, 0.12, 0.08), 3200, 1786, Vector2(1512, 223), "forest")
 	var ents: Array = [
-		_e("wind_ear", 320, 659, 48, 64, "風耳", Color(0.45, 0.7, 0.5)),
-		_e("treehouse", 600, 442, 64, 64, "樹屋聚落", Color(0.4, 0.55, 0.35)),
-		_e("kite_stuck", 480, 346, 40, 40, "卡住的風箏", Color(0.7, 0.5, 0.4)),
-		_e("arrow_path", 1100, 731, 56, 48, "箭道", Color(0.35, 0.5, 0.4)),
-		_e("watch_tower", 1400, 353, 48, 64, "觀風塔", Color(0.45, 0.5, 0.4)),
-		_e("herb_slope", 900, 1076, 48, 48, "藥草坡", Color(0.4, 0.6, 0.35)),
-		_e("stream", 1000, 600, 48, 36, "溪流", Color(0.35, 0.5, 0.55)),
-		_e("owl_post", 1300, 527, 40, 48, "貓頭鷹樁", Color(0.4, 0.35, 0.3)),
-		_e("deep_gate", 1800, 823, 64, 56, "深林入口", Color(0.3, 0.45, 0.3)),
-		_e("to_forest_canopy", 1600, 376, 64, 56, "樹冠層", Color(0.35, 0.55, 0.4)),
-		_e("to_forest_lake", 2000, 1142, 64, 56, "靜湖", Color(0.35, 0.5, 0.55)),
-		_e("to_forest_ruins", 2300, 631, 64, 56, "古遊俠遺址", Color(0.4, 0.45, 0.35)),
-		_e("falcon_nest", 2700, 704, 80, 88, "疾影巢", Color(0.4, 0.75, 0.55)),
-		_e("save_c4", 140, 1458, 48, 48, "存檔石", Color(0.4, 0.45, 0.5)),
-		_e("back_dojo", 100, 438, 56, 48, "回道場", Color(0.4, 0.45, 0.35)),
-		_e("exit_cross_f", 2900, 1399, 72, 64, "六域岔路", Color(0.45, 0.5, 0.4)),
+		_e("wind_ear", 1168, 480, 48, 64, "風耳", Color(0.45, 0.7, 0.5)),
+		_e("treehouse", 1768, 302, 64, 64, "樹屋聚落", Color(0.4, 0.55, 0.35)),
+		_e("kite_stuck", 1300, 290, 40, 40, "卡住的風箏", Color(0.7, 0.5, 0.4)),
+		_e("arrow_path", 1100, 889, 56, 48, "箭道", Color(0.35, 0.5, 0.4)),
+		_e("watch_tower", 1936, 516, 48, 64, "觀風塔", Color(0.45, 0.5, 0.4)),
+		_e("herb_slope", 912, 1104, 48, 48, "藥草坡", Color(0.4, 0.6, 0.35)),
+		_e("stream", 2000, 758, 48, 36, "溪流", Color(0.35, 0.5, 0.55)),
+		_e("owl_post", 1236, 675, 40, 48, "貓頭鷹樁", Color(0.4, 0.35, 0.3)),
+		_e("deep_gate", 1608, 1131, 64, 56, "深林入口", Color(0.3, 0.45, 0.3)),
+		_e("to_forest_canopy", 2184, 846, 64, 56, "樹冠層", Color(0.35, 0.55, 0.4)),
+		_e("to_forest_lake", 2440, 1203, 64, 56, "靜湖", Color(0.35, 0.5, 0.55)),
+		_e("to_forest_ruins", 2376, 1024, 64, 56, "古遊俠遺址", Color(0.4, 0.45, 0.35)),
+		_e("falcon_nest", 2112, 1349, 80, 88, "疾影巢", Color(0.4, 0.75, 0.55)),
+		_e("save_c4", 976, 1461, 48, 48, "存檔石", Color(0.4, 0.45, 0.5)),
+		_e("back_dojo", 1484, 121, 56, 48, "回道場", Color(0.4, 0.45, 0.35)),
+		_e("exit_cross_f", 1348, 1659, 72, 64, "六域岔路", Color(0.45, 0.5, 0.4)),
 	]
 	if GameState.has_flag("boss.shadowwind_cleared"):
-		ents.append(_e("path_coast", 2400, 1463, 72, 64, "海岸道", Color(0.4, 0.55, 0.65)))
+		ents.append(_e("path_coast", 1860, 1659, 72, 64, "海岸道", Color(0.4, 0.55, 0.65)))
 	m["entities"] = ents
 	return m
 
 
 static func _forest_deep() -> Dictionary:
-	var m := _base("深林 · 風道迷宮", Color(0.05, 0.1, 0.06), 2600, 1451, Vector2(200, 648), "forest")
+	var m := _base("深林 · 風道迷宮", Color(0.05, 0.1, 0.06), 2600, 1451, Vector2(1236, 225), "forest")
 	m["entities"] = [
-		_e("back_forest", 100, 624, 56, 56, "回樹海邊緣", Color(0.35, 0.5, 0.4)),
-		_e("wind_tunnel", 600, 537, 64, 48, "風道", Color(0.4, 0.6, 0.5)),
-		_e("nest_mark", 1100, 417, 48, 48, "羽痕石", Color(0.45, 0.5, 0.4)),
-		_e("hidden_cache", 1500, 778, 48, 40, "獵人藏匿處", Color(0.4, 0.35, 0.3)),
-		_e("to_forest_canopy", 1800, 356, 56, 48, "爬上樹冠", Color(0.35, 0.55, 0.4)),
-		_e("falcon_nest_deep", 2200, 605, 72, 80, "疾影巢（近）", Color(0.4, 0.75, 0.55)),
+		_e("back_forest", 1208, 140, 56, 56, "回樹海邊緣", Color(0.35, 0.5, 0.4)),
+		_e("wind_tunnel", 1048, 409, 64, 48, "風道", Color(0.4, 0.6, 0.5)),
+		_e("nest_mark", 1576, 612, 48, 48, "羽痕石", Color(0.45, 0.5, 0.4)),
+		_e("hidden_cache", 848, 911, 48, 40, "獵人藏匿處", Color(0.4, 0.35, 0.3)),
+		_e("to_forest_canopy", 1832, 932, 56, 48, "爬上樹冠", Color(0.35, 0.55, 0.4)),
+		_e("falcon_nest_deep", 1356, 1277, 72, 80, "疾影巢（近）", Color(0.4, 0.75, 0.55)),
 	]
 	return m
 
 
 static func _forest_canopy() -> Dictionary:
-	var m := _base("森林 · 樹冠層", Color(0.08, 0.14, 0.1), 2400, 1350, Vector2(200, 595), "forest_canopy")
+	var m := _base("森林 · 樹冠層", Color(0.08, 0.14, 0.1), 2400, 1350, Vector2(232, 1160), "forest_canopy")
 	m["entities"] = [
-		_e("back_from_forest_sub", 100, 584, 56, 56, "下樹", Color(0.35, 0.5, 0.4)),
-		_e("bridge_rope", 700, 482, 100, 40, "藤橋", Color(0.4, 0.45, 0.3), true),
-		_e("nest_platform", 1100, 424, 64, 56, "巢台", Color(0.45, 0.5, 0.35), true),
-		_e("wind_chime", 1400, 359, 40, 40, "風鈴", Color(0.5, 0.55, 0.45)),
-		_e("eagle_view", 1800, 545, 56, 48, "鷹眼眺望", Color(0.4, 0.55, 0.5)),
-		_e("to_forest_ruins", 2000, 729, 56, 48, "藤蔓下·遺址", Color(0.4, 0.45, 0.35)),
+		_e("back_from_forest_sub", 204, 1104, 56, 56, "下樹", Color(0.35, 0.5, 0.4)),
+		_e("bridge_rope", 518, 310, 100, 40, "藤橋", Color(0.4, 0.45, 0.3), true),
+		_e("nest_platform", 1016, 591, 64, 56, "巢台", Color(0.45, 0.5, 0.35), true),
+		_e("wind_chime", 1364, 580, 40, 40, "風鈴", Color(0.5, 0.55, 0.45)),
+		_e("eagle_view", 1884, 302, 56, 48, "鷹眼眺望", Color(0.4, 0.55, 0.5)),
+		_e("to_forest_ruins", 2076, 1112, 56, 48, "藤蔓下·遺址", Color(0.4, 0.45, 0.35)),
 	]
 	return m
 
