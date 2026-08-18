@@ -184,45 +184,45 @@ static func _village_outskirts() -> Dictionary:
 
 
 static func _village_mill() -> Dictionary:
-	var m := _base("翠谷 · 風車田與碾坊", Color(0.09, 0.1, 0.07), 2400, 1350, Vector2(200, 595), "village_mill")
+	var m := _base("翠谷 · 風車田與碾坊", Color(0.09, 0.1, 0.07), 2400, 1350, Vector2(856, 1322), "village_mill")
 	m["entities"] = [
-		_e("back_from_mill", 100, 584, 56, 56, "回田野", Color(0.4, 0.35, 0.3)),
-		_e("big_mill", 600, 377, 96, 120, "巨風車", Color(0.45, 0.42, 0.38), true),
-		_e("grain_silo", 900, 549, 56, 64, "糧倉", Color(0.5, 0.4, 0.3), true),
-		_e("miller_hut", 1100, 670, 64, 56, "碾坊主屋", Color(0.42, 0.36, 0.28), true),
-		_e("wheat_sea", 1400, 484, 80, 48, "麥浪坡", Color(0.55, 0.5, 0.3)),
-		_e("mill_to_road", 2000, 608, 64, 56, "捷徑·荒路", Color(0.35, 0.4, 0.3)),
-		_e("scare_b", 1600, 852, 40, 48, "第二稻草人", Color(0.4, 0.35, 0.25)),
+		_e("back_from_mill", 828, 1239, 56, 56, "回田野", Color(0.4, 0.35, 0.3)),
+		_e("big_mill", 904, 905, 96, 120, "巨風車", Color(0.45, 0.42, 0.38), true),
+		_e("grain_silo", 1260, 934, 56, 64, "糧倉", Color(0.5, 0.4, 0.3), true),
+		_e("miller_hut", 1592, 969, 64, 56, "碾坊主屋", Color(0.42, 0.36, 0.28), true),
+		_e("wheat_sea", 1824, 896, 80, 48, "麥浪坡", Color(0.55, 0.5, 0.3)),
+		_e("mill_to_road", 2072, 996, 64, 56, "捷徑·荒路", Color(0.35, 0.4, 0.3)),
+		_e("scare_b", 740, 1004, 40, 48, "第二稻草人", Color(0.4, 0.35, 0.25)),
 	]
 	return m
 
 
 static func _village_cave() -> Dictionary:
-	var m := _base("翠谷 · 山邊舊礦洞", Color(0.06, 0.06, 0.08), 2200, 1238, Vector2(180, 575), "village_cave")
+	var m := _base("翠谷 · 山邊舊礦洞", Color(0.06, 0.06, 0.08), 2200, 1238, Vector2(304, 872), "village_cave")
 	m["entities"] = [
-		_e("back_from_cave", 100, 551, 56, 56, "回村子", Color(0.4, 0.35, 0.3)),
-		_e("cave_mouth", 500, 431, 80, 72, "洞口", Color(0.25, 0.25, 0.3), true),
-		_e("ore_cart", 800, 609, 56, 40, "礦車", Color(0.4, 0.35, 0.3)),
-		_e("glow_moss", 1100, 486, 40, 40, "螢光苔", Color(0.3, 0.55, 0.4)),
-		_e("deep_dark", 1500, 551, 64, 56, "更深的黑", Color(0.2, 0.2, 0.25)),
-		_e("old_pick", 900, 794, 40, 36, "斷鎬", Color(0.45, 0.4, 0.35)),
-		_e("echo_wall", 1700, 368, 48, 64, "回音壁", Color(0.35, 0.35, 0.4), true),
+		_e("back_from_cave", 276, 792, 56, 56, "回村子", Color(0.4, 0.35, 0.3)),
+		_e("cave_mouth", 1056, 577, 80, 72, "洞口", Color(0.25, 0.25, 0.3), true),
+		_e("ore_cart", 672, 783, 56, 40, "礦車", Color(0.4, 0.35, 0.3)),
+		_e("glow_moss", 1384, 733, 40, 40, "螢光苔", Color(0.3, 0.55, 0.4)),
+		_e("deep_dark", 1108, 866, 64, 56, "更深的黑", Color(0.2, 0.2, 0.25)),
+		_e("old_pick", 592, 1059, 40, 36, "斷鎬", Color(0.45, 0.4, 0.35)),
+		_e("echo_wall", 1688, 759, 48, 64, "回音壁", Color(0.35, 0.35, 0.4), true),
 	]
 	return m
 
 
 static func _village_grave() -> Dictionary:
-	var m := _base("翠谷 · 村後墓園", Color(0.07, 0.07, 0.09), 2200, 1238, Vector2(200, 575), "village_grave")
+	var m := _base("翠谷 · 村後墓園", Color(0.07, 0.07, 0.09), 2200, 1238, Vector2(480, 947), "village_grave")
 	var lamp_lab := "長明燈（亮）" if GameState.has_flag("side.lantern_done") else "長明燈"
 	m["entities"] = [
-		_e("back_from_grave", 100, 551, 56, 56, "回村子", Color(0.4, 0.35, 0.3)),
-		_e("stone_gate", 400, 369, 64, 72, "墓園門", Color(0.4, 0.38, 0.4), true),
-		_e("grave_a", 700, 549, 40, 48, "無名碑", Color(0.45, 0.42, 0.4), true),
-		_e("grave_b", 900, 611, 40, 48, "舊碑", Color(0.42, 0.4, 0.38), true),
-		_e("willow", 1100, 347, 56, 80, "垂柳", Color(0.3, 0.4, 0.32), true),
-		_e("lantern_post", 1300, 489, 36, 56, lamp_lab, Color(0.55, 0.5, 0.35)),
-		_e("fresh_earth", 1500, 671, 48, 40, "新土", Color(0.35, 0.3, 0.25)),
-		_e("hill_edge", 1800, 426, 56, 48, "遠眺丘", Color(0.35, 0.38, 0.32)),
+		_e("back_from_grave", 452, 866, 56, 56, "回村子", Color(0.4, 0.35, 0.3)),
+		_e("stone_gate", 1284, 429, 64, 72, "墓園門", Color(0.4, 0.38, 0.4), true),
+		_e("grave_a", 680, 849, 40, 48, "無名碑", Color(0.45, 0.42, 0.4), true),
+		_e("grave_b", 900, 824, 40, 48, "舊碑", Color(0.42, 0.4, 0.38), true),
+		_e("willow", 540, 867, 56, 80, "垂柳", Color(0.3, 0.4, 0.32), true),
+		_e("lantern_post", 1166, 767, 36, 56, lamp_lab, Color(0.55, 0.5, 0.35)),
+		_e("fresh_earth", 1072, 1105, 48, 40, "新土", Color(0.35, 0.3, 0.25)),
+		_e("hill_edge", 1596, 750, 56, 48, "遠眺丘", Color(0.35, 0.38, 0.32)),
 	]
 	return m
 
@@ -351,31 +351,31 @@ static func _town_keep() -> Dictionary:
 
 
 static func _town_market() -> Dictionary:
-	var m := _base("騎士堡 · 下城市集", Color(0.11, 0.1, 0.12), 2600, 1451, Vector2(200, 648), "town_market")
+	var m := _base("騎士堡 · 下城市集", Color(0.11, 0.1, 0.12), 2600, 1451, Vector2(560, 1270), "town_market")
 	m["entities"] = [
-		_e("back_from_market", 100, 624, 56, 56, "回廣場", Color(0.4, 0.4, 0.45)),
-		_e("stall_a", 400, 477, 56, 48, "布攤", Color(0.55, 0.4, 0.35), true),
-		_e("stall_b", 600, 598, 56, 48, "藥草攤", Color(0.4, 0.55, 0.35), true),
-		_e("stall_c", 800, 501, 56, 48, "空攤", Color(0.45, 0.4, 0.35), true),
-		_e("scale_table", 1000, 717, 48, 40, "天秤台", Color(0.5, 0.48, 0.4)),
-		_e("beggar", 1200, 840, 40, 48, "坐地老人", Color(0.4, 0.38, 0.35)),
-		_e("alley_dark", 1500, 539, 48, 56, "窄巷", Color(0.3, 0.3, 0.32)),
-		_e("spice_smell", 1800, 657, 48, 40, "香料殘跡", Color(0.55, 0.4, 0.3)),
-		_e("to_sewers", 2100, 961, 56, 48, "市集下水口", Color(0.3, 0.32, 0.3)),
+		_e("back_from_market", 532, 1185, 56, 56, "回廣場", Color(0.4, 0.4, 0.45)),
+		_e("stall_a", 740, 612, 56, 48, "布攤", Color(0.55, 0.4, 0.35), true),
+		_e("stall_b", 1156, 554, 56, 48, "藥草攤", Color(0.4, 0.55, 0.35), true),
+		_e("stall_c", 1520, 583, 56, 48, "空攤", Color(0.45, 0.4, 0.35), true),
+		_e("scale_table", 796, 882, 48, 40, "天秤台", Color(0.5, 0.48, 0.4)),
+		_e("beggar", 592, 1077, 40, 48, "坐地老人", Color(0.4, 0.38, 0.35)),
+		_e("alley_dark", 1888, 662, 48, 56, "窄巷", Color(0.3, 0.3, 0.32)),
+		_e("spice_smell", 1732, 940, 48, 40, "香料殘跡", Color(0.55, 0.4, 0.3)),
+		_e("to_sewers", 1468, 1280, 56, 48, "市集下水口", Color(0.3, 0.32, 0.3)),
 	]
 	return m
 
 
 static func _town_sewers() -> Dictionary:
-	var m := _base("騎士堡 · 舊下水道", Color(0.06, 0.08, 0.07), 2400, 1350, Vector2(200, 580), "town_sewers")
+	var m := _base("騎士堡 · 舊下水道", Color(0.06, 0.08, 0.07), 2400, 1350, Vector2(760, 1268), "town_sewers")
 	m["entities"] = [
-		_e("back_from_sewers", 100, 572, 56, 56, "爬回地面", Color(0.4, 0.4, 0.45)),
-		_e("pipe_a", 500, 394, 64, 48, "鐵管", Color(0.35, 0.38, 0.35), true),
-		_e("slime_pool", 800, 661, 72, 40, "黏液池", Color(0.3, 0.4, 0.3), true),
-		_e("rat_nest", 1100, 526, 48, 40, "鼠窩", Color(0.35, 0.3, 0.28)),
-		_e("sealed_door", 1500, 467, 56, 64, "封死鐵門", Color(0.4, 0.4, 0.42), true),
-		_e("echo_drip", 1800, 728, 40, 40, "滴水聲", Color(0.4, 0.45, 0.5)),
-		_e("ladder_out", 2100, 559, 48, 56, "另一出口", Color(0.4, 0.42, 0.4)),
+		_e("back_from_sewers", 732, 1185, 56, 56, "爬回地面", Color(0.4, 0.4, 0.45)),
+		_e("pipe_a", 344, 788, 64, 48, "鐵管", Color(0.35, 0.38, 0.35), true),
+		_e("slime_pool", 820, 1093, 72, 40, "黏液池", Color(0.3, 0.4, 0.3), true),
+		_e("rat_nest", 1120, 877, 48, 40, "鼠窩", Color(0.35, 0.3, 0.28)),
+		_e("sealed_door", 1452, 799, 56, 64, "封死鐵門", Color(0.4, 0.4, 0.42), true),
+		_e("echo_drip", 1268, 1228, 40, 40, "滴水聲", Color(0.4, 0.45, 0.5)),
+		_e("ladder_out", 2032, 969, 48, 56, "另一出口", Color(0.4, 0.42, 0.4)),
 	]
 	return m
 
@@ -397,55 +397,55 @@ static func _barracks_yard() -> Dictionary:
 
 
 static func _wild() -> Dictionary:
-	var m := _base("城外荒野 · 焦土平原", Color(0.08, 0.12, 0.08), 3200, 1800, Vector2(180, 813), "wild")
+	var m := _base("城外荒野 · 焦土平原", Color(0.08, 0.12, 0.08), 3200, 1800, Vector2(360, 944), "wild")
 	var ents: Array = [
-		_e("back_town", 100, 765, 56, 56, "回城", Color(0.35, 0.4, 0.35)),
-		_e("burnt_field", 400, 891, 64, 48, "焦麥田邊", Color(0.45, 0.38, 0.2)),
-		_e("camp", 600, 699, 64, 52, "焦麥田", Color(0.45, 0.4, 0.2), true),
-		_e("scarecrow", 800, 572, 40, 56, "燒焦稻草人", Color(0.4, 0.35, 0.25)),
-		_e("wild_shrine", 500, 442, 44, 52, "路邊小祠", Color(0.45, 0.4, 0.35)),
-		_e("supply_crate", 900, 953, 48, 40, "補給箱", Color(0.5, 0.4, 0.3)),
-		_e("tower", 1300, 448, 56, 72, "廢棄哨塔", Color(0.4, 0.38, 0.35), true),
-		_e("to_wild_ravine", 1600, 1150, 64, 56, "深裂谷", Color(0.3, 0.28, 0.25)),
-		_e("rubble", 1800, 824, 52, 40, "石牆碎塊", Color(0.4, 0.38, 0.36)),
-		_e("trail_mark", 2000, 631, 44, 40, "爪印土", Color(0.35, 0.4, 0.3)),
-		_e("ravine", 1200, 1403, 100, 40, "乾裂溝", Color(0.3, 0.28, 0.25), true),
-		_e("hill_view", 2400, 377, 56, 48, "遠眺丘", Color(0.35, 0.4, 0.3)),
+		_e("back_town", 332, 852, 56, 56, "回城", Color(0.35, 0.4, 0.35)),
+		_e("burnt_field", 264, 1148, 64, 48, "焦麥田邊", Color(0.45, 0.38, 0.2)),
+		_e("camp", 520, 1252, 64, 52, "焦麥田", Color(0.45, 0.4, 0.2), true),
+		_e("scarecrow", 724, 1032, 40, 56, "燒焦稻草人", Color(0.4, 0.35, 0.25)),
+		_e("wild_shrine", 530, 856, 44, 52, "路邊小祠", Color(0.45, 0.4, 0.35)),
+		_e("supply_crate", 464, 1516, 48, 40, "補給箱", Color(0.5, 0.4, 0.3)),
+		_e("tower", 2700, 800, 56, 72, "廢棄哨塔", Color(0.4, 0.38, 0.35), true),
+		_e("to_wild_ravine", 1288, 1428, 64, 56, "深裂谷", Color(0.3, 0.28, 0.25)),
+		_e("rubble", 1678, 1156, 52, 40, "石牆碎塊", Color(0.4, 0.38, 0.36)),
+		_e("trail_mark", 1490, 868, 44, 40, "爪印土", Color(0.35, 0.4, 0.3)),
+		_e("ravine", 1078, 1660, 100, 40, "乾裂溝", Color(0.3, 0.28, 0.25), true),
+		_e("hill_view", 2124, 644, 56, 48, "遠眺丘", Color(0.35, 0.4, 0.3)),
 	]
 	if GameState.has_flag("boss.leo_cleared"):
-		ents.append(_e("path_mist", 2300, 1088, 72, 64, "霧道（東南方）", Color(0.5, 0.55, 0.7)))
-		ents.append(_e("path_crossroads", 2700, 831, 72, 64, "六域岔路", Color(0.45, 0.5, 0.4)))
-		ents.append(_e("to_leo_court", 2800, 572, 64, 56, "內殿前院", Color(0.5, 0.4, 0.3)))
-		ents.append(_e("leo_gate", 2900, 617, 72, 80, "內殿（已通）", Color(0.4, 0.35, 0.25), true))
+		ents.append(_e("path_mist", 1988, 1564, 72, 64, "霧道（東南方）", Color(0.5, 0.55, 0.7)))
+		ents.append(_e("path_crossroads", 2756, 1600, 72, 64, "六域岔路", Color(0.45, 0.5, 0.4)))
+		ents.append(_e("to_leo_court", 2376, 1140, 64, 56, "內殿前院", Color(0.5, 0.4, 0.3)))
+		ents.append(_e("leo_gate", 2564, 1224, 72, 80, "內殿（已通）", Color(0.4, 0.35, 0.25), true))
 	else:
-		ents.append(_e("to_leo_court", 2600, 636, 64, 56, "內殿前院", Color(0.55, 0.4, 0.25)))
-		ents.append(_e("leo_gate", 2750, 671, 80, 88, "內殿·雷歐", Color(0.65, 0.45, 0.2), true))
+		ents.append(_e("to_leo_court", 2376, 1140, 64, 56, "內殿前院", Color(0.55, 0.4, 0.25)))
+		ents.append(_e("leo_gate", 2560, 1216, 80, 88, "內殿·雷歐", Color(0.65, 0.45, 0.2), true))
 	m["entities"] = ents
 	return m
 
 
 static func _wild_ravine() -> Dictionary:
-	var m := _base("荒野 · 深裂谷", Color(0.07, 0.09, 0.07), 2400, 1350, Vector2(200, 595), "wild_ravine")
+	var m := _base("荒野 · 深裂谷", Color(0.07, 0.09, 0.07), 2400, 1350, Vector2(328, 1187), "wild_ravine")
 	m["entities"] = [
-		_e("back_wild", 100, 584, 56, 56, "回平原", Color(0.35, 0.4, 0.3)),
-		_e("cliff_edge", 600, 420, 80, 40, "崖緣", Color(0.35, 0.32, 0.28), true),
-		_e("rope_bridge", 1000, 543, 100, 40, "繩橋", Color(0.45, 0.38, 0.3), true),
-		_e("bone_pile", 1300, 727, 48, 40, "獸骨", Color(0.5, 0.48, 0.45)),
-		_e("echo_canyon", 1600, 484, 56, 48, "回音峽", Color(0.35, 0.4, 0.38)),
-		_e("black_vein", 1900, 666, 56, 40, "黑焰脈紋", Color(0.3, 0.2, 0.35)),
+		_e("back_wild", 300, 1104, 56, 56, "回平原", Color(0.35, 0.4, 0.3)),
+		_e("cliff_edge", 720, 931, 80, 40, "崖緣", Color(0.35, 0.32, 0.28), true),
+		_e("rope_bridge", 1286, 769, 100, 40, "繩橋", Color(0.45, 0.38, 0.3), true),
+		_e("bone_pile", 544, 1228, 48, 40, "獸骨", Color(0.5, 0.48, 0.45)),
+		_e("echo_canyon", 2076, 599, 56, 48, "回音峽", Color(0.35, 0.4, 0.38)),
+		_e("black_vein", 492, 796, 56, 40, "黑焰脈紋", Color(0.3, 0.2, 0.35)),
 	]
 	return m
 
 
 static func _wild_leo_court() -> Dictionary:
-	var m := _base("荒野 · 內殿前院", Color(0.1, 0.09, 0.08), 2400, 1350, Vector2(200, 595), "wild_leo_court")
+	var m := _base("荒野 · 內殿前院", Color(0.1, 0.09, 0.08), 2400, 1350, Vector2(280, 1268), "wild_leo_court")
 	m["entities"] = [
-		_e("back_wild", 100, 584, 56, 56, "回焦土", Color(0.35, 0.4, 0.3)),
-		_e("lion_statue", 600, 368, 64, 80, "石獅像", Color(0.55, 0.45, 0.3), true),
-		_e("courtyard", 1000, 550, 100, 72, "石板院", Color(0.45, 0.4, 0.35), true),
-		_e("banner_torn", 800, 424, 40, 56, "撕破旗", Color(0.5, 0.35, 0.25)),
-		_e("leo_gate", 1800, 517, 80, 88, "內殿·雷歐", Color(0.65, 0.45, 0.2), true),
-		_e("honor_plaque", 1400, 361, 48, 48, "榮譽碑", Color(0.5, 0.48, 0.4), true),
+		_e("back_wild", 252, 1185, 56, 56, "回焦土", Color(0.35, 0.4, 0.3)),
+		_e("lion_statue", 536, 945, 64, 80, "石獅像", Color(0.55, 0.45, 0.3), true),
+		_e("courtyard", 1142, 1142, 100, 72, "石板院", Color(0.45, 0.4, 0.35), true),
+		_e("banner_torn", 836, 1050, 40, 56, "撕破旗", Color(0.5, 0.35, 0.25)),
+		_e("leo_gate", 1296, 910, 80, 88, "內殿·雷歐", Color(0.65, 0.45, 0.2), true),
+		_e("honor_plaque", 1600, 1004, 48, 48, "榮譽碑", Color(0.5, 0.48, 0.4), true),
 	]
 	return m
 
@@ -942,14 +942,14 @@ static func _tower_stairs() -> Dictionary:
 
 
 static func _tower_memory() -> Dictionary:
-	var m := _base("法師之塔 · 回憶層", Color(0.08, 0.06, 0.12), 2400, 1350, Vector2(200, 595), "tower_memory")
+	var m := _base("法師之塔 · 回憶層", Color(0.08, 0.06, 0.12), 2400, 1350, Vector2(280, 1268), "tower_memory")
 	m["entities"] = [
-		_e("back_tower_camp", 100, 584, 56, 56, "離開回憶", Color(0.4, 0.35, 0.5)),
-		_e("memory_orb_a", 500, 484, 48, 48, "記憶球·村", Color(0.55, 0.45, 0.4)),
-		_e("memory_orb_b", 900, 545, 48, 48, "記憶球·堡", Color(0.5, 0.45, 0.55)),
-		_e("memory_orb_c", 1300, 484, 48, 48, "記憶球·聖獸", Color(0.5, 0.55, 0.45)),
-		_e("throne_shadow", 1700, 549, 72, 64, "王座影", Color(0.35, 0.25, 0.4), true),
-		_e("climb_tower", 2000, 585, 64, 64, "面對終焉", Color(0.55, 0.35, 0.5)),
+		_e("back_tower_camp", 252, 1185, 56, 56, "離開回憶", Color(0.4, 0.35, 0.5)),
+		_e("memory_orb_a", 496, 1004, 48, 48, "記憶球·村", Color(0.55, 0.45, 0.4)),
+		_e("memory_orb_b", 784, 1112, 48, 48, "記憶球·堡", Color(0.5, 0.45, 0.55)),
+		_e("memory_orb_c", 1600, 1085, 48, 48, "記憶球·聖獸", Color(0.5, 0.55, 0.45)),
+		_e("throne_shadow", 1156, 772, 72, 64, "王座影", Color(0.35, 0.25, 0.4), true),
+		_e("climb_tower", 2024, 961, 64, 64, "面對終焉", Color(0.55, 0.35, 0.5)),
 	]
 	return m
 
