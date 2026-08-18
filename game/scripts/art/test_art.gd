@@ -23,6 +23,9 @@ func _initialize() -> void:
 		["tile_grass", SpriteDB.tile("grass")],
 		["player_atk", SpriteDB.player_pose("attack")],
 		["player_skill", SpriteDB.player_pose("skill")],
+		["player_hit", SpriteDB.player_pose("hit")],
+		["player_recover", SpriteDB.player_pose("recover")],
+		["player_telegraph", SpriteDB.player_pose("telegraph")],
 	]
 	for c in checks:
 		if c[1] == null:

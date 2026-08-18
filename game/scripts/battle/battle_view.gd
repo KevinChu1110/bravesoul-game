@@ -1520,6 +1520,13 @@ func _on_event(kind: String, data: Dictionary) -> void:
 			var crit_s := _t("暴擊") if is_crit else ""
 			var ks := _t("【王者斬】") if data.get("king_slash", false) else ""
 			_append_log(_t("%s%s 造成 %s 傷害 %s") % [ks, data.get("attacker"), data.get("damage"), crit_s])
+			## 玩家挨打：切受擊姿
+			if str(data.get("defender", "")) == "player":
+				_set_player_pose("hit", true)
+				get_tree().create_timer(0.28).timeout.connect(func():
+					if is_instance_valid(self) and not _ended and _player_pose == "hit":
+						_set_player_pose("idle")
+				)
 			if is_crit:
 				_spawn_float(str(data.get("defender")), str(data.get("damage")), Color(1.0, 0.85, 0.2), true)
 				_shake = 0.35

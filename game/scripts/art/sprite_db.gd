@@ -348,16 +348,26 @@ static func player_battle() -> Texture2D:
 	return tex("%s/player/rabbit_battle.png" % ROOT)
 
 
-## pose: idle | telegraph | attack | recover | skill
-## 戰鬥／探索統一：底圖一律 chibi idle／walk；動作感靠 battle_view 的 scale／lunge。
-## 舊 poses/*.png 保留檔案但不當預設（風格與 idle_x3 不一致）。
+## pose: idle | telegraph | attack | recover | skill | hit
+## 0.16.2：poses/*.png 已用 rabbit_idle_x3 錨重產，戰鬥優先讀專用姿態。
 static func player_pose(pose: String) -> Texture2D:
-	match pose:
+	var key := pose
+	if key == "" or key == "idle":
+		return player_idle()
+	## 專用姿態（chibi 鎖定）
+	var t := tex("%s/player/poses/%s.png" % [ROOT, key])
+	if t:
+		return t
+	## 後備：舊邏輯用 walk 幀湊動作感
+	match key:
 		"attack", "skill":
-			## 略用步行幀做出「出手」感
 			var w := player_walk(1)
 			if w:
 				return w
+		"hit":
+			var wh := player_walk(3)
+			if wh:
+				return wh
 		"telegraph":
 			var w0 := player_walk(0)
 			if w0:
