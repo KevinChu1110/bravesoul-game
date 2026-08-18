@@ -542,18 +542,18 @@ static func _starfall_plain() -> Dictionary:
 
 
 static func _hunting_grounds() -> Dictionary:
-	var m := _base("星途獵場 · 黑焰溢地", Color(0.09, 0.06, 0.08), 3000, 1674, Vector2(400, 762), "hunting_grounds")
+	var m := _base("星途獵場 · 黑焰溢地", Color(0.09, 0.06, 0.08), 3000, 1674, Vector2(340, 950), "hunting_grounds")
 	m["entities"] = [
-		_e("hunt_board", 600, 595, 72, 64, "狩獵告示", Color(0.65, 0.4, 0.35), true),
-		_e("hunt_start", 800, 653, 64, 56, "開始狩獵", Color(0.75, 0.35, 0.4)),
-		_e("hunt_recycler", 1100, 571, 56, 64, "溢物回收", Color(0.55, 0.5, 0.4)),
-		_e("camp_ash", 500, 829, 56, 40, "獵手餘燼", Color(0.4, 0.3, 0.25)),
-		_e("bone_pile", 1400, 710, 48, 40, "獸骨堆", Color(0.5, 0.48, 0.45)),
-		_e("scar_vein", 1700, 530, 56, 40, "溢脈", Color(0.35, 0.2, 0.35)),
-		_e("save_hunt", 350, 1070, 48, 48, "存檔石", Color(0.4, 0.45, 0.5)),
-		_e("back_cross", 200, 713, 56, 56, "回岔路", Color(0.45, 0.5, 0.4)),
-		_e("exit_world", 2500, 593, 56, 56, "世界輿圖", Color(0.4, 0.5, 0.55)),
-		_e("path_knight", 2200, 1071, 64, 56, "往騎士堡", Color(0.5, 0.45, 0.4)),
+		_e("hunt_board", 904, 518, 72, 64, "狩獵告示", Color(0.65, 0.4, 0.35), true),
+		_e("hunt_start", 1388, 761, 64, 56, "開始狩獵", Color(0.75, 0.35, 0.4)),
+		_e("hunt_recycler", 1752, 619, 56, 64, "溢物回收", Color(0.55, 0.5, 0.4)),
+		_e("camp_ash", 612, 1178, 56, 40, "獵手餘燼", Color(0.4, 0.3, 0.25)),
+		_e("bone_pile", 1216, 1044, 48, 40, "獸骨堆", Color(0.5, 0.48, 0.45)),
+		_e("scar_vein", 1992, 1078, 56, 40, "溢脈", Color(0.35, 0.2, 0.35)),
+		_e("save_hunt", 376, 1405, 48, 48, "存檔石", Color(0.4, 0.45, 0.5)),
+		_e("back_cross", 252, 861, 56, 56, "回岔路", Color(0.45, 0.5, 0.4)),
+		_e("exit_world", 2652, 861, 56, 56, "世界輿圖", Color(0.4, 0.5, 0.55)),
+		_e("path_knight", 1808, 1464, 64, 56, "往騎士堡", Color(0.5, 0.45, 0.4)),
 	]
 	return m
 
@@ -617,14 +617,14 @@ static func _mist_deep() -> Dictionary:
 
 
 static func _mist_cliff() -> Dictionary:
-	var m := _base("霧隱 · 霧崖觀台", Color(0.09, 0.1, 0.15), 2200, 1238, Vector2(200, 538), "mist_cliff")
+	var m := _base("霧隱 · 霧崖觀台", Color(0.09, 0.1, 0.15), 2200, 1238, Vector2(1228, 1244), "mist_cliff")
 	m["entities"] = [
-		_e("back_from_mist_sub", 100, 527, 56, 56, "回霧隱村", Color(0.45, 0.5, 0.6)),
-		_e("cliff_rail", 600, 422, 100, 32, "崖欄", Color(0.4, 0.42, 0.5), true),
-		_e("fog_sea", 900, 611, 80, 48, "霧海", Color(0.5, 0.55, 0.65)),
-		_e("bell_tower", 1300, 369, 48, 72, "霧鐘樓", Color(0.45, 0.45, 0.55), true),
-		_e("kite_string", 1600, 486, 40, 40, "斷線風箏", Color(0.55, 0.5, 0.45)),
-		_e("overlook", 1800, 549, 56, 48, "遠眺六域", Color(0.45, 0.5, 0.6)),
+		_e("back_from_mist_sub", 1200, 1163, 56, 56, "回霧隱村", Color(0.45, 0.5, 0.6)),
+		_e("cliff_rail", 1354, 865, 100, 32, "崖欄", Color(0.4, 0.42, 0.5), true),
+		_e("fog_sea", 1232, 1022, 80, 48, "霧海", Color(0.5, 0.55, 0.65)),
+		_e("bell_tower", 1688, 800, 48, 72, "霧鐘樓", Color(0.45, 0.45, 0.55), true),
+		_e("kite_string", 1912, 981, 40, 40, "斷線風箏", Color(0.55, 0.5, 0.45)),
+		_e("overlook", 1552, 1121, 56, 48, "遠眺六域", Color(0.45, 0.5, 0.6)),
 	]
 	return m
 
@@ -643,16 +643,16 @@ static func _mist_shrine() -> Dictionary:
 
 
 static func _mist_mirror() -> Dictionary:
-	var m := _base("霧隱 · 鏡廊迷宮", Color(0.07, 0.08, 0.13), 2400, 1350, Vector2(200, 595), "mist_mirror")
+	var m := _base("霧隱 · 鏡廊迷宮", Color(0.07, 0.08, 0.13), 2400, 1350, Vector2(232, 1295), "mist_mirror")
 	m["entities"] = [
-		_e("back_from_mist_sub", 100, 584, 56, 56, "出廊", Color(0.45, 0.5, 0.6)),
-		_e("mirror_a", 500, 426, 48, 64, "鏡·一", Color(0.55, 0.6, 0.7), true),
-		_e("mirror_b", 800, 610, 48, 64, "鏡·二", Color(0.5, 0.55, 0.65), true),
-		_e("mirror_c", 1100, 426, 48, 64, "鏡·三", Color(0.55, 0.58, 0.7), true),
-		_e("false_exit", 1400, 729, 56, 48, "假出口", Color(0.4, 0.42, 0.5)),
-		_e("true_path", 1800, 484, 56, 48, "真影道", Color(0.5, 0.55, 0.75)),
-		_e("mirror_boss", 1950, 517, 80, 88, "鏡廊殘影", Color(0.7, 0.75, 0.9)),
-		_e("fog_gate_deep", 2100, 552, 72, 80, "幻廊核心", Color(0.65, 0.7, 0.85)),
+		_e("back_from_mist_sub", 204, 1212, 56, 56, "出廊", Color(0.45, 0.5, 0.6)),
+		_e("mirror_a", 352, 988, 48, 64, "鏡·一", Color(0.55, 0.6, 0.7), true),
+		_e("mirror_b", 832, 1150, 48, 64, "鏡·二", Color(0.5, 0.55, 0.65), true),
+		_e("mirror_c", 1504, 1150, 48, 64, "鏡·三", Color(0.55, 0.58, 0.7), true),
+		_e("false_exit", 2124, 1058, 56, 48, "假出口", Color(0.4, 0.42, 0.5)),
+		_e("true_path", 1164, 869, 56, 48, "真影道", Color(0.5, 0.55, 0.75)),
+		_e("mirror_boss", 1008, 748, 80, 88, "鏡廊殘影", Color(0.7, 0.75, 0.9)),
+		_e("fog_gate_deep", 1252, 662, 72, 80, "幻廊核心", Color(0.65, 0.7, 0.85)),
 	]
 	return m
 
@@ -780,27 +780,27 @@ static func _forest_canopy() -> Dictionary:
 
 
 static func _forest_ruins() -> Dictionary:
-	var m := _base("森林 · 古遊俠遺址", Color(0.07, 0.1, 0.08), 2400, 1350, Vector2(200, 595), "forest_ruins")
+	var m := _base("森林 · 古遊俠遺址", Color(0.07, 0.1, 0.08), 2400, 1350, Vector2(256, 674), "forest_ruins")
 	m["entities"] = [
-		_e("back_from_forest_sub", 100, 584, 56, 56, "回樹海", Color(0.35, 0.5, 0.4)),
-		_e("arch_ruin", 600, 426, 72, 64, "石拱廢墟", Color(0.45, 0.42, 0.38), true),
-		_e("bow_relief", 1000, 485, 48, 56, "弓神浮雕", Color(0.4, 0.45, 0.4), true),
-		_e("arrow_well", 1300, 668, 48, 48, "箭井", Color(0.35, 0.4, 0.38), true),
-		_e("moss_script", 1600, 420, 56, 40, "苔文", Color(0.35, 0.5, 0.35)),
-		_e("chest_root", 1900, 605, 48, 40, "根纏箱", Color(0.4, 0.35, 0.28)),
+		_e("back_from_forest_sub", 228, 591, 56, 56, "回樹海", Color(0.35, 0.5, 0.4)),
+		_e("arch_ruin", 724, 759, 72, 64, "石拱廢墟", Color(0.45, 0.42, 0.38), true),
+		_e("bow_relief", 1120, 699, 48, 56, "弓神浮雕", Color(0.4, 0.45, 0.4), true),
+		_e("arrow_well", 880, 1004, 48, 48, "箭井", Color(0.35, 0.4, 0.38), true),
+		_e("moss_script", 1596, 823, 56, 40, "苔文", Color(0.35, 0.5, 0.35)),
+		_e("chest_root", 1792, 1039, 48, 40, "根纏箱", Color(0.4, 0.35, 0.28)),
 	]
 	return m
 
 
 static func _forest_lake() -> Dictionary:
-	var m := _base("森林 · 靜湖", Color(0.06, 0.11, 0.12), 2400, 1340, Vector2(200, 592), "forest_lake")
+	var m := _base("森林 · 靜湖", Color(0.06, 0.11, 0.12), 2400, 1340, Vector2(280, 1259), "forest_lake")
 	m["entities"] = [
-		_e("back_from_forest_sub", 100, 579, 56, 56, "回樹海", Color(0.35, 0.5, 0.4)),
-		_e("lake_shore", 800, 541, 120, 48, "湖岸", Color(0.35, 0.5, 0.55), true),
-		_e("reed", 600, 661, 48, 40, "蘆葦", Color(0.4, 0.5, 0.35)),
-		_e("dock_log", 1100, 599, 64, 36, "原木碼頭", Color(0.45, 0.4, 0.3)),
-		_e("reflection", 1400, 480, 56, 48, "倒影奇", Color(0.4, 0.5, 0.55)),
-		_e("heron", 1700, 419, 40, 48, "蒼鷺", Color(0.5, 0.55, 0.5)),
+		_e("back_from_forest_sub", 252, 1176, 56, 56, "回樹海", Color(0.35, 0.5, 0.4)),
+		_e("lake_shore", 940, 1050, 120, 48, "湖岸", Color(0.35, 0.5, 0.55), true),
+		_e("reed", 592, 871, 48, 40, "蘆葦", Color(0.4, 0.5, 0.35)),
+		_e("dock_log", 1208, 928, 64, 36, "原木碼頭", Color(0.45, 0.4, 0.3)),
+		_e("reflection", 1692, 1077, 56, 48, "倒影奇", Color(0.4, 0.5, 0.55)),
+		_e("heron", 2084, 1104, 40, 48, "蒼鷺", Color(0.5, 0.55, 0.5)),
 	]
 	return m
 
