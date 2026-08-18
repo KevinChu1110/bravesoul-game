@@ -26,6 +26,12 @@ func _initialize() -> void:
 		["player_hit", SpriteDB.player_pose("hit")],
 		["player_recover", SpriteDB.player_pose("recover")],
 		["player_telegraph", SpriteDB.player_pose("telegraph")],
+		["sig_leo", SpriteDB.boss_signature("leo")],
+		["sig_fog", SpriteDB.boss_signature("fog")],
+		["sig_abo", SpriteDB.boss_signature("abo")],
+		["sig_falcon", SpriteDB.boss_signature("falcon")],
+		["sig_boar", SpriteDB.boss_signature("boar")],
+		["sig_demon", SpriteDB.boss_signature("demon")],
 	]
 	for c in checks:
 		if c[1] == null:

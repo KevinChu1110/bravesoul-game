@@ -1961,6 +1961,12 @@ func _on_end(won: bool) -> void:
 		banner.text = _t("勝　利")
 		banner.modulate = Color(1, 1, 1, 1)
 		_append_log(_t("[color=#6f6]勝利！[/color]"))
+		## 勝利瞬間切 Boss 名場面靜幀（有則顯示）
+		var sig: Texture2D = SpriteDB.boss_signature(_mode)
+		if sig and enemy_body:
+			enemy_body.texture = sig
+			_flash(enemy_body, Color(1.35, 1.2, 0.85))
+			_shake = maxf(_shake, 0.2)
 		var p: BattleUnit = sim.get_unit("player")
 		if p:
 			GameState.hp = maxi(1, p.hp)

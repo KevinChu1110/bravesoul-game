@@ -396,6 +396,18 @@ static func boss_icon(mode: String) -> Texture2D:
 	return tex("%s/bosses/%s_icon.png" % [ROOT, mode])
 
 
+## 名場面靜幀（Short／勝利演出／圖鑑）；無則退回 attack → idle
+static func boss_signature(mode: String) -> Texture2D:
+	var key := _boss_art_key(mode)
+	var t := tex("%s/bosses/signature/%s.png" % [ROOT, key])
+	if t:
+		return t
+	t = boss_pose(mode, "attack")
+	if t:
+		return t
+	return boss(mode)
+
+
 ## pose: idle | telegraph | attack | recover
 static func boss_pose(mode: String, pose: String) -> Texture2D:
 	var key := _boss_art_key(mode)
