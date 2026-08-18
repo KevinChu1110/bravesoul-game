@@ -652,46 +652,197 @@ func _depth_scale(world_y: float) -> float:
 ## MG = 建築立面，依腳底 Y 與玩家互遮 —— 走到屋後會被蓋住，不再像貼在平面上。
 const SCENIC_OCCLUDERS := {
 	"village": [
-		{"uv": Rect2(0.0, 0.80, 1.0, 0.20), "kind": "fg"},
+		{"uv": Rect2(0.0, 0.8, 1.0, 0.2), "kind": "fg"},
 		{"uv": Rect2(0.02, 0.16, 0.24, 0.36), "kind": "mg"},
-		{"uv": Rect2(0.55, 0.10, 0.42, 0.38), "kind": "mg"},
+		{"uv": Rect2(0.55, 0.1, 0.42, 0.38), "kind": "mg"}
 	],
 	"town": [
 		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
-		{"uv": Rect2(0.28, 0.08, 0.30, 0.38), "kind": "mg"},
-		{"uv": Rect2(0.66, 0.08, 0.28, 0.40), "kind": "mg"},
-		{"uv": Rect2(0.52, 0.48, 0.12, 0.16), "kind": "mg"},
+		{"uv": Rect2(0.28, 0.08, 0.3, 0.38), "kind": "mg"},
+		{"uv": Rect2(0.66, 0.08, 0.28, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.52, 0.48, 0.12, 0.16), "kind": "mg"}
 	],
 	"mist_village": [
 		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"},
-		{"uv": Rect2(0.10, 0.16, 0.28, 0.40), "kind": "mg"},
+		{"uv": Rect2(0.1, 0.16, 0.28, 0.4), "kind": "mg"},
 		{"uv": Rect2(0.48, 0.14, 0.28, 0.42), "kind": "mg"},
-		{"uv": Rect2(0.72, 0.18, 0.26, 0.40), "kind": "mg"},
+		{"uv": Rect2(0.72, 0.18, 0.26, 0.4), "kind": "mg"}
 	],
 	"town_market": [
 		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
-		{"uv": Rect2(0.0, 0.10, 0.22, 0.42), "kind": "mg"},
+		{"uv": Rect2(0.0, 0.1, 0.22, 0.42), "kind": "mg"},
 		{"uv": Rect2(0.22, 0.12, 0.46, 0.28), "kind": "mg"},
-		{"uv": Rect2(0.72, 0.10, 0.28, 0.40), "kind": "mg"},
+		{"uv": Rect2(0.72, 0.1, 0.28, 0.4), "kind": "mg"}
 	],
 	"road_inn": [
 		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"},
-		{"uv": Rect2(0.02, 0.04, 0.55, 0.58), "kind": "mg"},
+		{"uv": Rect2(0.02, 0.04, 0.55, 0.58), "kind": "mg"}
 	],
 	"dojo": [
 		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"},
-		{"uv": Rect2(0.02, 0.10, 0.28, 0.42), "kind": "mg"},
-		{"uv": Rect2(0.30, 0.06, 0.36, 0.36), "kind": "mg"},
-		{"uv": Rect2(0.68, 0.10, 0.30, 0.48), "kind": "mg"},
+		{"uv": Rect2(0.02, 0.1, 0.28, 0.42), "kind": "mg"},
+		{"uv": Rect2(0.3, 0.06, 0.36, 0.36), "kind": "mg"},
+		{"uv": Rect2(0.68, 0.1, 0.3, 0.48), "kind": "mg"}
 	],
 	"dojo_inner": [
 		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
 		{"uv": Rect2(0.02, 0.14, 0.28, 0.48), "kind": "mg"},
 		{"uv": Rect2(0.38, 0.12, 0.28, 0.36), "kind": "mg"},
-		{"uv": Rect2(0.68, 0.14, 0.30, 0.48), "kind": "mg"},
+		{"uv": Rect2(0.68, 0.14, 0.3, 0.48), "kind": "mg"}
 	],
+	"barracks_yard": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.05, 0.08, 0.3, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.5, 0.06, 0.4, 0.4), "kind": "mg"}
+	],
+	"blackflame_scar": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"}
+	],
+	"caravan_camp": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"},
+		{"uv": Rect2(0.3, 0.1, 0.3, 0.35), "kind": "mg"},
+		{"uv": Rect2(0.55, 0.12, 0.3, 0.35), "kind": "mg"}
+	],
+	"coast": [
+		{"uv": Rect2(0.0, 0.78, 1.0, 0.22), "kind": "fg"},
+		{"uv": Rect2(0.3, 0.02, 0.3, 0.25), "kind": "mg"}
+	],
+	"coast_cave": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.35, 0.12, 0.4, 0.35), "kind": "mg"}
+	],
+	"coast_harbor": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"},
+		{"uv": Rect2(0.02, 0.08, 0.4, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.5, 0.02, 0.45, 0.4), "kind": "mg"}
+	],
+	"coast_wreck": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"},
+		{"uv": Rect2(0.5, 0.02, 0.4, 0.3), "kind": "mg"},
+		{"uv": Rect2(0.12, 0.18, 0.3, 0.3), "kind": "mg"}
+	],
+	"cross_east": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"}
+	],
+	"cross_north": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.28, 0.22, 0.28, 0.35), "kind": "mg"}
+	],
+	"dojo_bamboo": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.15, 0.18, 0.3, 0.35), "kind": "mg"},
+		{"uv": Rect2(0.55, 0.15, 0.35, 0.35), "kind": "mg"}
+	],
+	"dojo_peak": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.22, 0.12, 0.35, 0.35), "kind": "mg"},
+		{"uv": Rect2(0.62, 0.1, 0.32, 0.35), "kind": "mg"}
+	],
+	"forest": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"},
+		{"uv": Rect2(0.05, 0.12, 0.25, 0.5), "kind": "mg"},
+		{"uv": Rect2(0.7, 0.12, 0.25, 0.5), "kind": "mg"}
+	],
+	"forest_canopy": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.18, 0.08, 0.3, 0.3), "kind": "mg"},
+		{"uv": Rect2(0.52, 0.08, 0.3, 0.3), "kind": "mg"}
+	],
+	"forest_lake": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.28, 0.3, 0.35, 0.35), "kind": "mg"}
+	],
+	"forest_ruins": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.22, 0.18, 0.35, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.52, 0.22, 0.35, 0.4), "kind": "mg"}
+	],
+	"hunting_grounds": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"}
+	],
+	"mist_cliff": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.5, 0.25, 0.4, 0.4), "kind": "mg"}
+	],
+	"mist_mirror": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.25, 0.18, 0.3, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.52, 0.2, 0.3, 0.4), "kind": "mg"}
+	],
+	"mist_shrine": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.38, 0.08, 0.4, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.08, 0.18, 0.25, 0.4), "kind": "mg"}
+	],
+	"road": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"},
+		{"uv": Rect2(0.12, 0.08, 0.28, 0.3), "kind": "mg"},
+		{"uv": Rect2(0.52, 0.05, 0.3, 0.28), "kind": "mg"}
+	],
+	"road_bridge": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.15, 0.2, 0.3, 0.45), "kind": "mg"}
+	],
+	"road_ruins": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.25, 0.15, 0.3, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.5, 0.18, 0.3, 0.4), "kind": "mg"}
+	],
+	"starfall_plain": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"}
+	],
+	"tower": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"},
+		{"uv": Rect2(0.25, 0.06, 0.4, 0.45), "kind": "mg"},
+		{"uv": Rect2(0.08, 0.2, 0.25, 0.4), "kind": "mg"}
+	],
+	"tower_foyer": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.12, 0.12, 0.35, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.52, 0.12, 0.4, 0.4), "kind": "mg"}
+	],
+	"tower_memory": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.22, 0.1, 0.35, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.52, 0.15, 0.35, 0.4), "kind": "mg"}
+	],
+	"tower_stairs": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.18, 0.12, 0.35, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.52, 0.15, 0.35, 0.4), "kind": "mg"}
+	],
+	"town_sewers": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.25, 0.3, 0.3, 0.3), "kind": "mg"},
+		{"uv": Rect2(0.52, 0.35, 0.3, 0.3), "kind": "mg"}
+	],
+	"village_cave": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.38, 0.15, 0.3, 0.35), "kind": "mg"}
+	],
+	"village_grave": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.48, 0.12, 0.28, 0.35), "kind": "mg"},
+		{"uv": Rect2(0.2, 0.3, 0.25, 0.35), "kind": "mg"}
+	],
+	"village_mill": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"},
+		{"uv": Rect2(0.28, 0.15, 0.3, 0.42), "kind": "mg"},
+		{"uv": Rect2(0.55, 0.2, 0.3, 0.4), "kind": "mg"}
+	],
+	"wild": [
+		{"uv": Rect2(0.0, 0.82, 1.0, 0.18), "kind": "fg"}
+	],
+	"wild_leo_court": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.12, 0.15, 0.3, 0.4), "kind": "mg"},
+		{"uv": Rect2(0.65, 0.1, 0.32, 0.4), "kind": "mg"}
+	],
+	"wild_ravine": [
+		{"uv": Rect2(0.0, 0.84, 1.0, 0.16), "kind": "fg"},
+		{"uv": Rect2(0.32, 0.22, 0.35, 0.4), "kind": "mg"}
+	]
 }
-
 
 func _update_horizon_shade() -> void:
 	if _horizon_shade == null:
