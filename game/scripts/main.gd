@@ -39,6 +39,9 @@ const SaveSlotsPanelScn = preload("res://scripts/ui/panels/save_slots_panel.gd")
 var _dialogue: DialogueBox
 var _cutscene: Control  ## CutscenePlayer
 var _explore: Control  ## ExploreView
+## 戰鬥結束後探索場景重建時補播的姿態
+var _pending_explore_pose: String = ""
+var _pending_explore_pose_dur: float = 0.45
 var _maple_hud: Control  ## MapleHud
 var _hotbar: Control  ## MapleHotbar
 var _inv_panel: Control  ## MapleInventory
@@ -1679,8 +1682,19 @@ func _open_explore_then(map_id: String, screen: Screen, after: Callable) -> void
 		if after.is_valid():
 			## 場景就緒後再跑教學／後續，避免卡在空 host
 			call_deferred("_run_after_explore", after)
+		call_deferred("_flush_pending_explore_pose")
 		call_deferred("_refresh_hud")
 	)
+
+
+func _flush_pending_explore_pose() -> void:
+	if _pending_explore_pose == "":
+		return
+	var p := _pending_explore_pose
+	var d := _pending_explore_pose_dur
+	_pending_explore_pose = ""
+	if _explore and is_instance_valid(_explore) and _explore.has_method("play_action_pose"):
+		_explore.call("play_action_pose", p, d)
 
 
 func _run_after_explore(after: Callable) -> void:
@@ -2200,6 +2214,12 @@ func _resume_from_chapter() -> void:
 # ─── 探索互動分發 ───
 
 func _on_explore_interact(id: String) -> void:
+	## 戰鬥／拔劍類互動：探索也播攻擊姿
+	if id in ["wolf", "leo", "fog_boss", "abo", "falcon", "boar", "sword", "black_ronin"] \
+			or str(id).begins_with("mb_") or str(id).begins_with("hunt_"):
+		_explore_play_pose("attack", 0.42)
+	elif id in ["maisui", "ding", "greybeard", "silk", "sprout"]:
+		_explore_play_pose("telegraph", 0.28)
 	## 全域路標／子地圖（各章共用）
 	if _handle_world_travel(id):
 		return
@@ -3210,10 +3230,25 @@ func _interact_road(id: String) -> void:
 			_play_dialog(DialogLines.lines("c0.road_east"))
 
 
+func _explore_play_pose(pose: String, duration: float = 0.4) -> void:
+	if pose == "" or pose == "idle":
+		_pending_explore_pose = ""
+		return
+	if _explore and is_instance_valid(_explore) and _explore.has_method("play_action_pose"):
+		_explore.call("play_action_pose", pose, duration)
+		_pending_explore_pose = ""
+	else:
+		## 戰鬥中探索已被清掉：等下次 _open_explore 再播
+		_pending_explore_pose = pose
+		_pending_explore_pose_dur = duration
+
+
 func _start_battle(mode: String) -> void:
 	if _paused:
 		_close_pause()
 	_reset_fade()
+	## 探索→戰鬥：先閃攻擊姿，再進戰（與戰鬥 poses 一致）
+	_explore_play_pose("attack", 0.35)
 	## 首次戰鬥／格擋教學（對話後再進戰）
 	var tut_key := "battle_auto"
 	if mode in ["leo", "demon", "abo", "falcon", "boar", "wrath", "tide", "statue", "chrono", "scar_lord", "mirror_wraith", "wreck_captain"]:
@@ -3243,6 +3278,11 @@ func _start_battle_raw(mode: String) -> void:
 
 func _on_battle_finished(won: bool) -> void:
 	SaveManager.save_game()
+	## 回探索時補一拍勝負姿（場景重建後下一幀也可能已換圖，仍盡力播）
+	if won:
+		_explore_play_pose("skill", 0.55)
+	else:
+		_explore_play_pose("hit", 0.5)
 	if _battle_mode == "wolf":
 		if won:
 			_grant_boss_loot(25, 2, 0)

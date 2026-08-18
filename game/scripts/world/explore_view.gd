@@ -58,6 +58,10 @@ var _world: Control  ## 世界層（實體 + 玩家，Y 排序）
 var _facing_left: bool = false
 var _walk_t: float = 0.0
 var _moving: bool = false
+## 探索動作姿（與戰鬥 poses 同源）：attack / skill / hit / telegraph / recover
+var _action_pose: String = ""
+var _action_pose_left: float = 0.0
+var _action_pose_tween: Tween
 var _banner_base_x: float = 40.0
 const TILE_PX := 32
 ## 動態可行走區（大地圖）
@@ -134,6 +138,46 @@ func entity_label(id: String) -> String:
 		if str(e.get("id", "")) == id:
 			return str(e.get("label", id))
 	return id
+
+
+## 播放與戰鬥一致的 chibi 姿態（短暫覆蓋 walk/idle）
+func play_action_pose(pose: String, duration: float = 0.4) -> void:
+	if pose == "" or pose == "idle":
+		_action_pose = ""
+		_action_pose_left = 0.0
+		return
+	_action_pose = pose
+	_action_pose_left = maxf(0.12, duration)
+	if _player == null:
+		return
+	## 與 battle_view 類似的 punch 感
+	if _action_pose_tween and _action_pose_tween.is_valid():
+		_action_pose_tween.kill()
+	var sx := -1.0 if _facing_left else 1.0
+	match pose:
+		"attack", "skill":
+			_player.scale = Vector2(sx * 1.1, 0.94)
+		"hit":
+			_player.scale = Vector2(sx * 0.92, 1.06)
+		"telegraph":
+			_player.scale = Vector2(sx * 0.97, 1.05)
+		_:
+			_player.scale = Vector2(sx, 1.0)
+	_action_pose_tween = create_tween()
+	_action_pose_tween.tween_property(_player, "scale", Vector2(sx, 1.0), 0.14)
+	_update_player_visual()
+
+
+func play_attack_pose(duration: float = 0.38) -> void:
+	play_action_pose("attack", duration)
+
+
+func play_hit_pose(duration: float = 0.4) -> void:
+	play_action_pose("hit", duration)
+
+
+func play_skill_pose(duration: float = 0.45) -> void:
+	play_action_pose("skill", duration)
 
 
 func show_player_bubble(text: String, secs: float = 2.0) -> void:
@@ -1149,6 +1193,12 @@ func _process(delta: float) -> void:
 		dir.y -= 1
 	if Input.is_action_pressed("ui_down"):
 		dir.y += 1
+	if _action_pose_left > 0.0:
+		_action_pose_left -= delta
+		if _action_pose_left <= 0.0:
+			_action_pose = ""
+			_action_pose_left = 0.0
+	## 動作姿期間仍可移動，但視覺鎖在 pose 上
 	_moving = dir != Vector2.ZERO
 	if _moving:
 		dir = dir.normalized()
@@ -1375,8 +1425,16 @@ func _update_player_visual() -> void:
 	_player.pivot_offset = PLAYER_SIZE * 0.5
 	_player.scale.x = -1.0 if _facing_left else 1.0
 	_player.set_meta("sort_y", player_pos.y + PLAYER_SIZE.y)
-	## 身體：步行幀 + 防具染色
-	if _moving:
+	## 身體：動作姿優先，否則步行／待機（與戰鬥 poses 同源）
+	if _action_pose != "":
+		var pt := SpriteDB.player_pose(_action_pose)
+		if pt:
+			_player.texture = pt
+		else:
+			var idle_fb := SpriteDB.player_idle()
+			if idle_fb:
+				_player.texture = idle_fb
+	elif _moving:
 		var frame := int(_walk_t) % 4
 		var t := SpriteDB.player_walk(frame)
 		if t:
@@ -1385,7 +1443,11 @@ func _update_player_visual() -> void:
 		var idle := SpriteDB.player_idle()
 		if idle:
 			_player.texture = idle
-	_player.modulate = SpriteDB.player_armor_modulate()
+	## 受擊短暫偏紅，其餘維持防具染色
+	if _action_pose == "hit":
+		_player.modulate = SpriteDB.player_armor_modulate() * Color(1.15, 0.75, 0.75, 1)
+	else:
+		_player.modulate = SpriteDB.player_armor_modulate()
 	var foot_y := player_pos.y + PLAYER_SIZE.y
 	## 防具疊層：貼圖是「軀幹甲片」不是全身，不可拉滿 PLAYER_SIZE（會像穿歪／紙娃娃破圖）
 	if _player_armor:
