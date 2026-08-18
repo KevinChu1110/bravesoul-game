@@ -1777,6 +1777,66 @@ func _handle_skill_hit(data: Dictionary) -> void:
 		)
 
 
+func _skill_fx_kind(skill_id: String) -> String:
+	## 依技能武器線選元素 FX；缺圖時呼叫端會退回 parry_flash
+	var line := ""
+	if SkillSystem and SkillSystem.has_method("def_of"):
+		var d: Dictionary = SkillSystem.call("def_of", skill_id)
+		line = str(d.get("line", ""))
+	match line:
+		"sword", "spear", "axe", "hammer":
+			return "slash_arc"
+		"dagger", "dart":
+			return "dart_fan"
+		"bow":
+			return "arrow_rain"
+		"gun":
+			return "gun_flash"
+		"fist", "claw":
+			return "fist_burst"
+		"magic", "crystal":
+			return "magic_spark"
+		_:
+			return "slash_arc"
+
+
+func _spawn_skill_hit_fx(defender_id: String, skill_id: String, hit_i: int) -> void:
+	var body := _body_of(defender_id)
+	if body == null:
+		return
+	var kind := _skill_fx_kind(skill_id)
+	var tex: Texture2D = SpriteDB.fx(kind)
+	if tex == null:
+		tex = SpriteDB.fx("parry_flash")
+	if tex == null:
+		return
+	var fx := TextureRect.new()
+	fx.name = "SkillHitFX"
+	fx.texture = tex
+	fx.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fx.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fx.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var sz := Vector2(96, 96)
+	fx.custom_minimum_size = sz
+	fx.size = sz
+	## 多段錯開落點，避免全疊同一點
+	var jitter := Vector2(float((hit_i * 37) % 48) - 24.0, float((hit_i * 19) % 36) - 18.0)
+	fx.position = body.position + body.size * 0.5 - sz * 0.5 + jitter
+	fx.z_index = 40
+	fx.modulate = Color(1, 1, 1, 0.95)
+	fx.scale = Vector2(0.7, 0.7)
+	fx.pivot_offset = sz * 0.5
+	add_child(fx)
+	var tw := create_tween()
+	tw.tween_property(fx, "scale", Vector2(1.25, 1.25), 0.08)
+	tw.parallel().tween_property(fx, "modulate:a", 0.0, 0.22).set_delay(0.06)
+	tw.tween_callback(func():
+		if is_instance_valid(fx):
+			fx.queue_free()
+	)
+
+
 func _present_skill_hit(data: Dictionary, hits_total: int, hit_i: int) -> void:
 	if str(data.get("kind", "")) == "heal" or int(data.get("heal", 0)) > 0:
 		_append_log(_t("[color=#8f8]%s！回復 %s[/color]") % [data.get("skill"), data.get("heal", 0)])
@@ -1808,6 +1868,8 @@ func _present_skill_hit(data: Dictionary, hits_total: int, hit_i: int) -> void:
 		float_txt = "%s·%d" % [dmg_s, hit_i + 1]
 	_spawn_float(str(data.get("defender")), float_txt, col)
 	_flash(_body_of(str(data.get("defender"))), col * Color(1.2, 1.2, 1.2, 1.0))
+	## 元素命中 FX（多段每下都跳；單段也跳一次）
+	_spawn_skill_hit_fx(str(data.get("defender", "enemy")), str(data.get("skill_id", "")), hit_i)
 
 	## 輕顫＋極短 hit-stop（超多段只在首／中／尾停，避免卡死）
 	if is_multi:
