@@ -452,6 +452,8 @@ func _build_pause_layer() -> void:
 		_close_pause()
 	)
 	var claim_n := QuestSystem.claimable_count()
+	var star_n := QuestSystem.starpath_reward_count()
+	var star_tag := Loc.t("pause.starpath_star", {"n": star_n}) if star_n > 0 else Loc.t("pause.starpath")
 	var daily_tag := Loc.t("pause.daily_star") if QuestSystem.can_claim_daily() else Loc.t("pause.daily")
 	var quest_tag := Loc.t("pause.quests_star", {"n": claim_n}) if claim_n > 0 else Loc.t("pause.quests")
 	_pause_btn(box, Loc.t("pause.save"), func():
@@ -465,6 +467,11 @@ func _build_pause_layer() -> void:
 		sub.text = _journey_summary()
 		sub.custom_minimum_size = Vector2(300, 140)
 		AudioManager.play_ui()
+	)
+	## 今日星途：日課總入口（簽到／委託／競技場／獵場）
+	_pause_btn(box, star_tag, func():
+		_close_pause()
+		_go_starpath_panel()
 	)
 	var codex_n := 0
 	if StoryCodex:
@@ -730,7 +737,7 @@ func _go_arena_panel() -> void:
 	var body: String = ArenaSystem.status_bbcode()
 	var buttons: Array = []
 	if not ArenaSystem.is_unlocked():
-		buttons.append({"text": Loc.t("btn.back"), "cb": _open_pause})
+		buttons.append({"text": Loc.t("btn.back"), "cb": _go_starpath_panel})
 		_panel(Loc.t("panel.arena"), body, buttons)
 		return
 	if ArenaSystem.is_run_active():
@@ -741,7 +748,7 @@ func _go_arena_panel() -> void:
 			buttons.append({"text": _t("開始有獎試煉（剩 %d）") % ArenaSystem.daily_left(), "cb": _arena_start_rewarded})
 		buttons.append({"text": _t("練習試煉"), "cb": _arena_start_practice})
 	buttons.append({"text": _t("查看排行"), "cb": _arena_show_leaderboard})
-	buttons.append({"text": Loc.t("btn.back"), "cb": _open_pause})
+	buttons.append({"text": Loc.t("btn.back"), "cb": _go_starpath_panel})
 	_panel(Loc.t("panel.arena"), body, buttons)
 
 
@@ -1179,6 +1186,42 @@ func _online_on_result(res: Dictionary) -> void:
 	_play_dialog([{"speaker": _t("系統"), "text": msg}], _go_online_panel)
 
 
+func _go_starpath_panel() -> void:
+	## 今日星途儀表板：一天要開遊戲時先看這裡
+	QuestSystem.refresh_daily()
+	var body := QuestSystem.starpath_summary_bbcode()
+	body += _t("\n\n戰力 %d · Lv%d") % [GameState.power_score(), GameState.level]
+	var buttons: Array = []
+	if QuestSystem.can_claim_daily():
+		buttons.append({"text": _t("★ 領取今日簽到"), "cb": func():
+			var r: Dictionary = QuestSystem.claim_daily()
+			_play_dialog([{"speaker": _t("系統"), "text": str(r.get("msg", ""))}], _go_starpath_panel)
+		})
+	for c in QuestSystem.commissions():
+		var cid := str(c.get("id", ""))
+		if QuestSystem.commission_done(c) and not QuestSystem.commission_claimed(cid):
+			var id2 := cid
+			buttons.append({"text": _t("★ 領委託：%s") % c.get("name", cid), "cb": func():
+				var r2: Dictionary = QuestSystem.claim_commission(id2)
+				_play_dialog([{"speaker": _t("系統"), "text": str(r2.get("msg", ""))}], _go_starpath_panel)
+			})
+	buttons.append({"text": _t("今日委託明細"), "cb": _go_daily_panel})
+	if ArenaSystem.is_unlocked():
+		var a_left := ArenaSystem.daily_left()
+		var a_lab := _t("演武競技場（剩 %d）") % a_left if a_left > 0 else _t("演武競技場（練習）")
+		buttons.append({"text": a_lab, "cb": _go_arena_panel})
+	if HuntSystem.is_unlocked():
+		var h_left := HuntSystem.daily_left()
+		var h_lab := _t("星途獵場（剩 %d）") % h_left if h_left > 0 else _t("星途獵場（練習）")
+		buttons.append({"text": h_lab, "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
+	buttons.append({"text": _t("長遠任務"), "cb": _go_quest_panel})
+	if _current == Screen.TITLE:
+		buttons.append({"text": Loc.t("btn.back"), "cb": _go_title})
+	else:
+		buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
+	_panel(Loc.t("panel.starpath"), body, buttons)
+
+
 func _go_daily_panel() -> void:
 	QuestSystem.refresh_daily()
 	var body := _t("每天登入可領補給。連續簽到獎勵更高。\n")
@@ -1207,6 +1250,7 @@ func _go_daily_panel() -> void:
 			})
 	buttons.append({"text": _t("材料行（琥珀）"), "cb": _go_material_shop})
 	buttons.append({"text": _t("長遠任務"), "cb": _go_quest_panel})
+	buttons.append({"text": _t("今日星途"), "cb": _go_starpath_panel})
 	buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
 	_panel(Loc.t("panel.daily"), body, buttons)
 
@@ -2056,6 +2100,8 @@ func _go_title() -> void:
 	]
 	if SaveManager.has_save():
 		buttons.append({"text": Loc.t("title.continue"), "cb": _continue_game})
+		## 今日星途：先讀檔再開儀表板（避免在空白狀態領獎）
+		buttons.append({"text": Loc.t("title.starpath"), "cb": _continue_then_starpath})
 	## 紀錄面板的門檻比「繼續」低一階：格子裡有壞掉的檔時「繼續」給不出來，
 	## 但玩家要進得去才刪得掉那一格。
 	if SaveManager.has_any_slot():
@@ -2063,9 +2109,7 @@ func _go_title() -> void:
 	if GameState.has_flag("game_cleared") or GameState.ng_plus > 0:
 		buttons.append({"text": Loc.t("title.ng"), "cb": _go_ng_plus_menu})
 	buttons.append({"text": Loc.t("title.titles"), "cb": _go_title_wall})
-	## 每日／任務與公會刻意不放在標題：它們讀寫的是「這趟旅途」的進度，
-	## 而標題畫面還沒載入任何一格，玩家在這裡領到的獎勵會進到一份空白狀態，
-	## 點了等於沒點。這兩個入口在暫停選單裡，那時候狀態才是真的。
+	## 簽到／委託本體仍在旅途內（暫停→今日星途）；標題只提供「讀檔後進儀表板」捷徑。
 	var online_lbl := _t("連線設定 · 純單機") if OnlineGate.offline_only else _t("連線設定 · 星途")
 	buttons.append({"text": online_lbl, "cb": _go_online_panel})
 	buttons.append({"text": _t("顯示設定 · %s") % DisplaySettings.mode_label(), "cb": _go_display_settings})
@@ -2092,7 +2136,7 @@ func _go_title() -> void:
 	var title_line := _t("稱號 %d／%d") % [TitleCatalog.unlocked_count(), TitleCatalog.total_count()]
 	var body := "[center][i]%s[/i][/center]\n\n" % Loc.t("title.tagline")
 	body += Loc.t("title.blurb") + "\n\n"
-	body += _t("[color=#7fd]v0.9 · 每日／任務／公會[/color]\n")
+	body += _t("[color=#7fd]v0.17 · 今日星途／競技場／每日輪替[/color]\n")
 	body += "[color=#b8a88a]%s%s[/color]\n\n" % [title_line, ng_line]
 	body += "[color=#8a8070]%s[/color]" % Loc.t("title.controls")
 	_panel(_t("勇者之魂"), body, buttons)
@@ -2262,6 +2306,17 @@ func _continue_game() -> void:
 		return
 	_apply_saved_ui_layout()
 	_resume_from_chapter()
+
+
+## 標題「今日星途」：先載入存檔再開儀表板（狀態才是真的）
+func _continue_then_starpath() -> void:
+	if SaveManager.load_game() != OK:
+		_show_toast(_t("那一格讀不起來，先看看紀錄。"))
+		_go_save_slots_panel()
+		return
+	_apply_saved_ui_layout()
+	_resume_from_chapter()
+	call_deferred("_go_starpath_panel")
 
 
 func _apply_saved_ui_layout() -> void:

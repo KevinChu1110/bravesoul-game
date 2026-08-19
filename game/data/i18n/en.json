@@ -225,5 +225,9 @@
   "btn.log_equip": "Gear only",
   "log.header": "[b]Adventure Log[/b] (last {n})",
   "pause.arena": "Arena",
-  "panel.arena": "Arena"
+  "panel.arena": "Arena",
+  "title.starpath": "Today's Starpath",
+  "pause.starpath": "Today's Starpath",
+  "pause.starpath_star": "Today's Starpath ★{n}",
+  "panel.starpath": "Today's Starpath"
 }

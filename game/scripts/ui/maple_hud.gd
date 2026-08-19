@@ -173,10 +173,13 @@ func refresh() -> void:
 
 	refresh_vitals()
 
+	## 紅點優先顯示「今日可領」（簽到／委託），不含長遠里程碑
 	var claim := 0
 	if Engine.get_main_loop() is SceneTree:
 		var q: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("QuestSystem")
-		if q and q.has_method("claimable_count"):
+		if q and q.has_method("starpath_reward_count"):
+			claim = int(q.call("starpath_reward_count"))
+		elif q and q.has_method("claimable_count"):
 			claim = int(q.call("claimable_count"))
 	var claim_s := Loc.t("hud.claim", {"n": claim}) if claim > 0 else ""
 	var week := Loc.t("pause.week1") if GameState.ng_plus <= 0 else Loc.t("pause.echo", {"n": GameState.ng_plus})

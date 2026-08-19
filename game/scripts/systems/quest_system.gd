@@ -379,3 +379,69 @@ func claimable_count() -> int:
 		if mission_done(m) and not mission_claimed(id):
 			n += 1
 	return n
+
+
+## 「今日星途」儀表板用：可領的紅點（不含長遠里程碑，避免永遠紅）
+func starpath_reward_count() -> int:
+	var n := 0
+	if can_claim_daily():
+		n += 1
+	n += claimable_commissions()
+	return n
+
+
+## 今日還能做的短循環件數（未完成委託 + 有獎場次提示）
+func starpath_todo_count() -> int:
+	refresh_daily()
+	var n := 0
+	for c in todays_commissions_raw():
+		if not commission_done(c):
+			n += 1
+	if Engine.get_main_loop() is SceneTree:
+		var tree := Engine.get_main_loop() as SceneTree
+		var ar: Node = tree.root.get_node_or_null("ArenaSystem")
+		if ar and ar.has_method("is_unlocked") and bool(ar.call("is_unlocked")):
+			if int(ar.call("daily_left")) > 0:
+				n += 1
+		var ht: Node = tree.root.get_node_or_null("HuntSystem")
+		if ht and ht.has_method("is_unlocked") and bool(ht.call("is_unlocked")):
+			if int(ht.call("daily_left")) > 0:
+				n += 1
+	return n
+
+
+## 暫停／標題儀表板正文
+func starpath_summary_bbcode() -> String:
+	refresh_daily()
+	var lines: PackedStringArray = []
+	lines.append("[b]今日星途[/b]")
+	lines.append("連續簽到 %d 天 · %s" % [
+		int(GameState.get_flag(DAILY_STREAK, 0)), streak_milestone_hint()
+	])
+	if can_claim_daily():
+		lines.append("[color=#fc6]● 簽到補給尚未領取[/color]")
+	else:
+		lines.append("· 今日簽到已領")
+	lines.append("")
+	lines.append(list_commissions_bbcode())
+	lines.append("")
+	if Engine.get_main_loop() is SceneTree:
+		var tree := Engine.get_main_loop() as SceneTree
+		var ar: Node = tree.root.get_node_or_null("ArenaSystem")
+		if ar and ar.has_method("is_unlocked") and bool(ar.call("is_unlocked")):
+			var left_a: int = int(ar.call("daily_left"))
+			var best: int = int(ar.call("best_score"))
+			lines.append("[b]演武競技場[/b]  有獎剩 %d · 最佳 %d 分" % [left_a, best])
+		elif ar:
+			lines.append("[b]演武競技場[/b]  （進騎士堡後解鎖）")
+		var ht: Node = tree.root.get_node_or_null("HuntSystem")
+		if ht and ht.has_method("is_unlocked") and bool(ht.call("is_unlocked")):
+			var left_h: int = int(ht.call("daily_left"))
+			lines.append("[b]星途獵場[/b]  有獎剩 %d" % left_h)
+		elif ht:
+			lines.append("[b]星途獵場[/b]  （進騎士堡後解鎖）")
+	var rew := starpath_reward_count()
+	var todo := starpath_todo_count()
+	lines.append("")
+	lines.append("[color=#8a8070]可領 %d · 今日待辦約 %d[/color]" % [rew, todo])
+	return "\n".join(lines)

@@ -34,6 +34,19 @@ func _initialize() -> void:
 		quit(1)
 	print("  ok daily rotation pick=%d" % a.size())
 
+	## 今日星途彙總不應噴錯
+	var _sum: String = qs.starpath_summary_bbcode()
+	if _sum.find("今日星途") < 0 and _sum.find("Starpath") < 0 and _sum.find("[b]") < 0:
+		push_error("starpath summary empty-ish")
+		print("ARENA_DAILY_FAIL")
+		quit(1)
+	var _rew: int = qs.starpath_reward_count()
+	if _rew < 0:
+		push_error("reward count")
+		print("ARENA_DAILY_FAIL")
+		quit(1)
+	print("  ok starpath summary reward=%d" % _rew)
+
 	## 競技場
 	gs.set_flag("c1_entered_city", true)
 	ar.abandon_run()

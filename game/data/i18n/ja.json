@@ -225,5 +225,9 @@
   "btn.log_equip": "装備のみ",
   "log.header": "[b]冒険日誌[/b]（直近 {n} 件）",
   "pause.arena": "演武アリーナ",
-  "panel.arena": "演武アリーナ"
+  "panel.arena": "演武アリーナ",
+  "title.starpath": "今日の星途",
+  "pause.starpath": "今日の星途",
+  "pause.starpath_star": "今日の星途 ★{n}",
+  "panel.starpath": "今日の星途"
 }

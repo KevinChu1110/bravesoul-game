@@ -225,5 +225,9 @@
   "btn.log_equip": "Solo equipo",
   "log.header": "[b]Diario[/b] (últimas {n})",
   "pause.arena": "Arena",
-  "panel.arena": "Arena"
+  "panel.arena": "Arena",
+  "title.starpath": "Senda de hoy",
+  "pause.starpath": "Senda de hoy",
+  "pause.starpath_star": "Senda de hoy ★{n}",
+  "panel.starpath": "Senda de hoy"
 }

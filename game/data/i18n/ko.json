@@ -225,5 +225,9 @@
   "btn.log_equip": "장비만",
   "log.header": "[b]모험 일지[/b]（최근 {n} 건）",
   "pause.arena": "연무 아레나",
-  "panel.arena": "연무 아레나"
+  "panel.arena": "연무 아레나",
+  "title.starpath": "오늘의 별길",
+  "pause.starpath": "오늘의 별길",
+  "pause.starpath_star": "오늘의 별길 ★{n}",
+  "panel.starpath": "오늘의 별길"
 }

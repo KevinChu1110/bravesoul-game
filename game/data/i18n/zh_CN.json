@@ -225,5 +225,9 @@
   "btn.log_equip": "只看装备",
   "log.header": "[b]冒险日志[/b]（最近 {n} 条）",
   "pause.arena": "演武竞技场",
-  "panel.arena": "演武竞技场"
+  "panel.arena": "演武竞技场",
+  "title.starpath": "今日星途",
+  "pause.starpath": "今日星途",
+  "pause.starpath_star": "今日星途 ★{n}",
+  "panel.starpath": "今日星途"
 }
