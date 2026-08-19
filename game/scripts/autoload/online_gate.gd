@@ -29,12 +29,20 @@ var last_health_ms: int = -1
 var ledger_gold: int = -1
 ## 通關蠟燭總數（全服）。-1＝尚未拉過；離線顯示用 GameState 快取。
 var candle_total: int = -1
+var refresh_token: String = ""
 var _http: HTTPRequest
 var _busy: bool = false
 var _pending: Callable = Callable()
 var _queue: Array = []  ## [{method, path, body, auth, prefer, cb}]
 var _health_t0: int = 0
 var _candle_fetching: bool = false
+## OAuth（Google / Discord / Facebook / X）
+const OAuthCallbackServer = preload("res://scripts/autoload/oauth_callback_server.gd")
+const OAUTH_PROVIDERS: PackedStringArray = ["google", "discord", "facebook", "twitter"]
+var _oauth: RefCounted = null  ## OAuthCallbackServer
+var _oauth_cb: Callable = Callable()
+var _oauth_provider: String = ""
+var _oauth_deadline_msec: int = 0
 
 
 
@@ -139,6 +147,7 @@ func _save_session() -> void:
 	f.store_string(JSON.stringify({
 		"user_id": user_id,
 		"access_token": access_token,
+		"refresh_token": refresh_token,
 	}, "\t"))
 
 
@@ -153,12 +162,15 @@ func _load_session() -> void:
 		return
 	user_id = str(data.get("user_id", ""))
 	access_token = str(data.get("access_token", ""))
+	refresh_token = str(data.get("refresh_token", ""))
 	_refresh_status()
 
 
 func sign_out() -> void:
+	_oauth_cancel()
 	user_id = ""
 	access_token = ""
+	refresh_token = ""
 	ledger_gold = -1
 	if FileAccess.file_exists(SESSION_PATH):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(SESSION_PATH))
@@ -236,7 +248,7 @@ func _cb_sign_in(ok: bool, body: Variant, cb: Callable) -> void:
 	if ok:
 		_parse_auth(body, cb)
 	else:
-		_fail(_t("訪客登入失敗：請在 Supabase 開啟 Anonymous Auth。%s") % last_error, cb)
+		_fail(_t("登入失敗：%s") % last_error, cb)
 
 
 func _parse_auth(body: Variant, cb: Callable) -> void:
@@ -244,20 +256,141 @@ func _parse_auth(body: Variant, cb: Callable) -> void:
 		_fail(_t("登入回應無效"), cb)
 		return
 	access_token = str(body.get("access_token", ""))
+	if body.has("refresh_token"):
+		refresh_token = str(body.get("refresh_token", ""))
 	var user: Variant = body.get("user", {})
 	if user is Dictionary:
 		user_id = str(user.get("id", ""))
+		## OAuth 顯示名
+		var meta: Variant = user.get("user_metadata", {})
+		if meta is Dictionary:
+			var dn := str(meta.get("full_name", meta.get("name", meta.get("user_name", ""))))
+			if dn != "":
+				display_name = dn
 	if user_id == "" and body.has("id"):
 		user_id = str(body.get("id", ""))
-	if access_token == "" or user_id == "":
-		_fail(_t("登入缺 token／user"), cb)
+	if access_token == "":
+		_fail(_t("登入缺 token"), cb)
 		return
+	if user_id == "":
+		## OAuth hash 流程常只有 token → 再打 /user
+		_request("GET", "/auth/v1/user", null, true, _cb_oauth_user.bind(cb))
+		return
+	_finish_sign_in(cb)
+
+
+func _cb_oauth_user(ok: bool, body: Variant, cb: Callable) -> void:
+	if not ok or typeof(body) != TYPE_DICTIONARY:
+		_fail(_t("無法取得使用者資料"), cb)
+		return
+	user_id = str(body.get("id", ""))
+	var meta: Variant = body.get("user_metadata", {})
+	if meta is Dictionary:
+		var dn := str(meta.get("full_name", meta.get("name", meta.get("user_name", ""))))
+		if dn != "":
+			display_name = dn
+	if user_id == "":
+		_fail(_t("登入缺 user id"), cb)
+		return
+	_finish_sign_in(cb)
+
+
+func _finish_sign_in(cb: Callable) -> void:
 	_save_session()
 	last_error = ""
 	_refresh_status()
 	status_changed.emit()
 	upsert_profile()
-	_ok({"user_id": user_id}, cb)
+	refresh_candle_soft()
+	_ok({"user_id": user_id, "display_name": display_name}, cb)
+
+
+## ── Social OAuth（Google / Discord / Facebook / X=twitter）──
+
+func oauth_provider_label(provider: String) -> String:
+	match provider:
+		"google":
+			return "Google"
+		"discord":
+			return "Discord"
+		"facebook":
+			return "Facebook"
+		"twitter":
+			return "X"
+		_:
+			return provider
+
+
+func sign_in_oauth(provider: String, cb: Callable = Callable()) -> void:
+	provider = provider.strip_edges().to_lower()
+	if provider == "x":
+		provider = "twitter"
+	if provider not in OAUTH_PROVIDERS:
+		_fail(_t("不支援的登入方式：%s") % provider, cb)
+		return
+	if not is_online_enabled():
+		_fail(_t("純單機或未設定後端"), cb)
+		return
+	_oauth_cancel()
+	_oauth = OAuthCallbackServer.new()
+	var err: Error = _oauth.listen()
+	if err != OK:
+		_oauth = null
+		_fail(_t("無法開啟本機登入埠（8765 被占用？）"), cb)
+		return
+	_oauth_cb = cb
+	_oauth_provider = provider
+	_oauth_deadline_msec = Time.get_ticks_msec() + 180000  ## 3 分鐘
+	var redirect: String = _oauth.redirect_uri()
+	## Supabase authorize（implicit／PKCE 由後端決定；redirect 帶回 hash）
+	var url := "%s/auth/v1/authorize?provider=%s&redirect_to=%s" % [
+		supabase_url.trim_suffix("/"),
+		provider.uri_encode(),
+		redirect.uri_encode(),
+	]
+	var open_err := OS.shell_open(url)
+	if open_err != OK:
+		_oauth_cancel()
+		_fail(_t("無法開啟瀏覽器"), cb)
+		return
+	last_status = _t("瀏覽器登入中（%s）…") % oauth_provider_label(provider)
+	status_changed.emit()
+
+
+func _oauth_cancel() -> void:
+	if _oauth != null and _oauth.has_method("stop"):
+		_oauth.stop()
+	_oauth = null
+	_oauth_cb = Callable()
+	_oauth_provider = ""
+	_oauth_deadline_msec = 0
+
+
+func _process(_delta: float) -> void:
+	if _oauth == null:
+		return
+	if _oauth.has_method("poll"):
+		_oauth.poll()
+	if _oauth_deadline_msec > 0 and Time.get_ticks_msec() > _oauth_deadline_msec:
+		var cb := _oauth_cb
+		_oauth_cancel()
+		_fail(_t("登入逾時，請重試"), cb)
+		return
+	if _oauth.has_method("is_done") and bool(_oauth.is_done()):
+		var payload: Dictionary = _oauth.take_result() if _oauth.has_method("take_result") else {}
+		var cb2 := _oauth_cb
+		var prov := _oauth_provider
+		_oauth_cancel()
+		if not bool(payload.get("ok", false)):
+			_fail(_t("%s 登入取消或失敗") % oauth_provider_label(prov), cb2)
+			return
+		access_token = str(payload.get("access_token", ""))
+		refresh_token = str(payload.get("refresh_token", ""))
+		if access_token == "":
+			_fail(_t("未取得 access_token"), cb2)
+			return
+		## 用 token 換 user
+		_request("GET", "/auth/v1/user", null, true, _cb_oauth_user.bind(cb2))
 
 
 func upsert_profile() -> void:

@@ -37,10 +37,43 @@ cp game/data/online/config.example.json \
 Dashboard → Authentication → Providers → **Email** 開啟。  
 遊戲內：連線／帳號 → Email 註冊／登入（密碼 ≥6）。
 
+## 2.6 Social OAuth（Google／Discord／Facebook／X）
+
+遊戲會開瀏覽器，登入後導回本機 `http://127.0.0.1:8765/callback`。
+
+### 每個 Provider 共通步驟
+
+1. Dashboard → **Authentication → URL Configuration**  
+   - **Redirect URLs** 加入：`http://127.0.0.1:8765/callback`  
+   - （可選）也加 `http://localhost:8765/callback`
+2. Dashboard → **Authentication → Providers** → 開啟對應項目，貼上 Client ID／Secret  
+3. 遊戲內：關純單機 → 連線設定 →「用 Google／Discord／Facebook／X 登入」
+
+| 遊戲按鈕 | Supabase Provider | 申請處 |
+|----------|-------------------|--------|
+| Google | `google` | [Google Cloud Console](https://console.cloud.google.com/) OAuth 用戶端 |
+| Discord | `discord` | [Discord Developer Portal](https://discord.com/developers/applications) |
+| Facebook | `facebook` | [Meta for Developers](https://developers.facebook.com/) |
+| X | `twitter` | [X Developer Portal](https://developer.x.com/) |
+
+Supabase 後台每個 Provider 頁面會顯示 **Callback URL**（形如 `https://<project>.supabase.co/auth/v1/callback`）——那是給 Google／Discord 等**外站**填的，不要跟本機 `127.0.0.1:8765` 搞混。
+
+### 尚未內建
+
+- **Steam**、**LINE**：Supabase 無一鍵 Provider（需自架 OIDC／Edge Function），之後再加。
+
+### 本機注意
+
+- 埠 **8765** 需可用；被占用會提示失敗。  
+- 登入視窗逾時約 3 分鐘。  
+- itch／正式包同樣走本機 callback（桌面）。Web 匯出若要 OAuth 需另做頁面 redirect。
+
 ## 3. 驗證
 
 1. 關純單機 → 訪客上線（應顯示 user id 前八碼）  
 1b. Email 註冊 → 登入 → 推送雲存檔  
+1c. OAuth：用 Google（或 Discord）登入 → 瀏覽器回來後遊戲顯示已上線  
+
 2. 推送雲存檔 → 拉回雲存檔  
 3. 上傳殘影 → 狀態列有 last error 為空  
 4. 留言石：塔下或城門留一句 → 換帳號看得到  

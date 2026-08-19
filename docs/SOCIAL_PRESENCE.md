@@ -33,3 +33,10 @@
 - `OnlineGate.fetch_candle_total` 讀 `candles.total`（可不登入）
 - 快取：`candle_total` + `meta.candle_total_cache`
 - 顯示：標題畫面、今日星途、HUD tip、塔下蠟燭壇
+
+## 帳號登入
+
+- 訪客 Anonymous、Email／密碼
+- **OAuth**：Google／Discord／Facebook／X（本機 `127.0.0.1:8765/callback`）
+- 設定步驟見 [ONLINE_SETUP.md](ONLINE_SETUP.md) §2.6
+- Steam／LINE 尚未內建

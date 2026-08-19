@@ -41,7 +41,7 @@
 
 | 項 | 規格 |
 |----|------|
-| 帳號 | 訪客（anonymous）或 OAuth（後期） |
+| 帳號 | 訪客／Email／**OAuth（Google·Discord·Facebook·X）** |
 | 存檔 | `saves` 表 JSON blob + `updated_at` + `schema_version` |
 | 衝突 | 雲較新／本機較新 → 玩家選「用雲／用本機／另存」 |
 | 失敗 | 安靜回落本機，toast 一句 |

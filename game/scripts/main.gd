@@ -951,7 +951,8 @@ func _hunt_recycle_one(item_id: String) -> void:
 
 func _go_online_panel() -> void:
 	var body: String = OnlineGate.panel_bbcode()
-	body += _t("\n\n[b]帳號[/b]：Email 註冊／登入（需關純單機並設定後端）")
+	body += _t("\n\n[b]帳號[/b]：訪客／Email／Google／Discord／Facebook／X")
+	body += _t("\n（OAuth 會開瀏覽器；需在 Supabase 開啟對應 Provider，並允許 Redirect：http://127.0.0.1:8765/callback）")
 	var buttons: Array = []
 	if OnlineGate.offline_only:
 		buttons.append({"text": _t("關閉純單機（允許連線）"), "cb": _online_enable})
@@ -961,6 +962,10 @@ func _go_online_panel() -> void:
 	buttons.append({"text": _t("編輯後端 URL／金鑰…"), "cb": _go_online_backend_form})
 	if OnlineGate.is_online_enabled() and not OnlineGate.is_signed_in():
 		buttons.append({"text": _t("訪客上線"), "cb": _online_sign_in})
+		buttons.append({"text": _t("用 Google 登入"), "cb": _online_oauth.bind("google")})
+		buttons.append({"text": _t("用 Discord 登入"), "cb": _online_oauth.bind("discord")})
+		buttons.append({"text": _t("用 Facebook 登入"), "cb": _online_oauth.bind("facebook")})
+		buttons.append({"text": _t("用 X 登入"), "cb": _online_oauth.bind("twitter")})
 		buttons.append({"text": _t("Email 註冊…"), "cb": _go_account_register_panel})
 		buttons.append({"text": _t("Email 登入…"), "cb": _go_account_login_panel})
 	if OnlineGate.is_signed_in():
@@ -1158,6 +1163,16 @@ func _online_force_offline() -> void:
 func _online_sign_in() -> void:
 	OnlineGate.sign_in_anonymous(func(res: Dictionary):
 		GameLog.account(_t("訪客上線"))
+		_online_on_result(res)
+	)
+
+
+func _online_oauth(provider: String) -> void:
+	_show_toast(_t("正在開啟瀏覽器（%s）…") % OnlineGate.oauth_provider_label(provider))
+	OnlineGate.sign_in_oauth(provider, func(res: Dictionary):
+		if bool(res.get("ok", false)):
+			GameLog.account(_t("%s 登入") % OnlineGate.oauth_provider_label(provider))
+			_show_toast(_t("登入成功"))
 		_online_on_result(res)
 	)
 
