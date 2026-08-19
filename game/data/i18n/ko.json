@@ -229,5 +229,6 @@
   "title.starpath": "오늘의 별길",
   "pause.starpath": "오늘의 별길",
   "pause.starpath_star": "오늘의 별길 ★{n}",
-  "panel.starpath": "오늘의 별길"
+  "panel.starpath": "오늘의 별길",
+  "hud.candle": "촛불 {n}"
 }

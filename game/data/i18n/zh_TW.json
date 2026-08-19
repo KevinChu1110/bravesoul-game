@@ -229,5 +229,6 @@
   "title.starpath": "今日星途",
   "pause.starpath": "今日星途",
   "pause.starpath_star": "今日星途 ★{n}",
-  "panel.starpath": "今日星途"
+  "panel.starpath": "今日星途",
+  "hud.candle": "燭火 {n}"
 }

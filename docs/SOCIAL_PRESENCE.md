@@ -27,3 +27,9 @@
 
 - 地圖上靠近留言石按 E
 - 今日星途 →「留言石（足跡）」
+
+## 通關蠟燭人數（常駐）
+
+- `OnlineGate.fetch_candle_total` 讀 `candles.total`（可不登入）
+- 快取：`candle_total` + `meta.candle_total_cache`
+- 顯示：標題畫面、今日星途、HUD tip、塔下蠟燭壇

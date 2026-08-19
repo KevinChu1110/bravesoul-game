@@ -27,11 +27,14 @@ var last_health_ok: bool = false
 var last_health_ms: int = -1
 ## 伺服器認定的可交易金幣（影子帳）。市集買東西是扣這一筆，不是扣存檔裡的數字。
 var ledger_gold: int = -1
+## 通關蠟燭總數（全服）。-1＝尚未拉過；離線顯示用 GameState 快取。
+var candle_total: int = -1
 var _http: HTTPRequest
 var _busy: bool = false
 var _pending: Callable = Callable()
 var _queue: Array = []  ## [{method, path, body, auth, prefer, cb}]
 var _health_t0: int = 0
+var _candle_fetching: bool = false
 
 
 
@@ -406,9 +409,92 @@ func candle_increment(cb: Callable = Callable()) -> void:
 
 func _cb_candle(ok: bool, body: Variant, cb: Callable) -> void:
 	if ok:
-		_ok({"total": body}, cb)
+		var total := _parse_candle_total(body)
+		if total >= 0:
+			_cache_candle_total(total)
+		_ok({"total": total if total >= 0 else body}, cb)
 	else:
 		_fail(_t("點燈失敗"), cb)
+
+
+## 讀全服燭火（不需登入，只需後端開啟）。結果快取到 candle_total／存檔。
+func fetch_candle_total(cb: Callable = Callable(), force: bool = false) -> void:
+	if not is_online_enabled():
+		_ok({"total": candle_total_cached(), "cached": true}, cb)
+		return
+	if _candle_fetching and not force:
+		_ok({"total": candle_total if candle_total >= 0 else candle_total_cached(), "pending": true}, cb)
+		return
+	_candle_fetching = true
+	_request("GET", "/rest/v1/candles?id=eq.1&select=total", null, false, _cb_candle_fetch.bind(cb))
+
+
+func _cb_candle_fetch(ok: bool, body: Variant, cb: Callable) -> void:
+	_candle_fetching = false
+	if not ok:
+		_fail(last_error if last_error != "" else _t("讀取燭火失敗"), cb)
+		return
+	var total := _parse_candle_total(body)
+	if total < 0 and body is Array and not (body as Array).is_empty():
+		var row: Variant = (body as Array)[0]
+		if row is Dictionary:
+			total = int(row.get("total", -1))
+	if total >= 0:
+		_cache_candle_total(total)
+	_ok({"total": total, "cached": false}, cb)
+
+
+func _parse_candle_total(body: Variant) -> int:
+	if typeof(body) == TYPE_INT or typeof(body) == TYPE_FLOAT:
+		return int(body)
+	if typeof(body) == TYPE_STRING and str(body).is_valid_int():
+		return int(body)
+	if body is Dictionary:
+		return int(body.get("total", -1))
+	if body is Array and not (body as Array).is_empty():
+		var first: Variant = (body as Array)[0]
+		if first is Dictionary:
+			return int(first.get("total", -1))
+		if typeof(first) == TYPE_INT or typeof(first) == TYPE_FLOAT:
+			return int(first)
+	return -1
+
+
+func _cache_candle_total(total: int) -> void:
+	candle_total = maxi(0, total)
+	if Engine.get_main_loop() is SceneTree:
+		var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameState")
+		if gs and gs.has_method("set_flag"):
+			gs.call("set_flag", "meta.candle_total_cache", candle_total)
+
+
+func candle_total_cached() -> int:
+	if candle_total >= 0:
+		return candle_total
+	if Engine.get_main_loop() is SceneTree:
+		var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameState")
+		if gs and gs.has_method("get_flag"):
+			return int(gs.call("get_flag", "meta.candle_total_cache", -1))
+	return -1
+
+
+## UI 用：「晨光燭火：123 人」／快取／未知
+func candle_line(compact: bool = false) -> String:
+	var n := candle_total_cached()
+	if n < 0:
+		return _t("晨光燭火：—") if not compact else _t("燭火 —")
+	if compact:
+		return _t("燭火 %d") % n
+	if candle_total >= 0:
+		return _t("晨光燭火：%d 人點過") % n
+	return _t("晨光燭火：%d 人（快取）") % n
+
+
+## 標題／儀表板進場時軟拉一次（失敗安靜）
+func refresh_candle_soft() -> void:
+	if not is_online_enabled():
+		return
+	fetch_candle_total(Callable(), false)
 
 
 ## ── RPC 小工具 ──
@@ -508,6 +594,7 @@ func panel_bbcode() -> String:
 			host = host.substr(0, 28) + "…"
 		lines.append("URL：%s" % host)
 	lines.append("")
+	lines.append(candle_line(false))
 	lines.append(_t("不連線也能走完整趟旅途。連上之後多了：雲端存檔、旅人殘影、留言石、通關蠟燭。"))
 	return "\n".join(lines)
 

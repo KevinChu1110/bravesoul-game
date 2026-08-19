@@ -229,5 +229,6 @@
   "title.starpath": "Senda de hoy",
   "pause.starpath": "Senda de hoy",
   "pause.starpath_star": "Senda de hoy ★{n}",
-  "panel.starpath": "Senda de hoy"
+  "panel.starpath": "Senda de hoy",
+  "hud.candle": "Velas {n}"
 }

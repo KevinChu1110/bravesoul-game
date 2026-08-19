@@ -676,8 +676,9 @@ func _msg_post(place: String, text: String, online: bool = true) -> void:
 	], func(): _go_message_stone("message_stone"))
 
 
-func _go_candle_altar() -> void:
-	var body := _t("塔下的蠟燭。據說通關的旅人會讓火苗多一寸。\n")
+func _go_candle_altar(skip_fetch: bool = false) -> void:
+	var body := _t("塔下的蠟燭。據說通關的旅人會讓火苗多一寸。\n\n")
+	body += "[b]%s[/b]\n" % OnlineGate.candle_line(false)
 	if GameState.has_flag("game_cleared"):
 		body += _t("\n你已見過晨光。可以點一支。")
 	else:
@@ -687,8 +688,25 @@ func _go_candle_altar() -> void:
 	var buttons: Array = []
 	if GameState.has_flag("game_cleared"):
 		buttons.append({"text": _t("點燃（連線同步）"), "cb": _candle_light})
+	buttons.append({"text": _t("重新讀取燭火"), "cb": _candle_refresh_panel})
 	buttons.append({"text": _t("默默離開"), "cb": _hub_back})
 	_panel(Loc.t("panel.candle"), body, buttons)
+	## 進場軟拉最新數字，回來後重畫一次（skip 避免迴圈）
+	if not skip_fetch and OnlineGate.is_online_enabled():
+		OnlineGate.fetch_candle_total(func(res: Dictionary):
+			if bool(res.get("ok", false)) and int(res.get("total", -1)) >= 0:
+				_go_candle_altar(true)
+		)
+
+
+func _candle_refresh_panel() -> void:
+	OnlineGate.fetch_candle_total(func(res: Dictionary):
+		if bool(res.get("ok", false)):
+			_show_toast(_t("燭火：%d") % int(res.get("total", 0)))
+		else:
+			_show_toast(str(res.get("msg", _t("讀取失敗"))))
+		_go_candle_altar()
+	, true)
 
 
 func _candle_light() -> void:
@@ -1248,8 +1266,10 @@ func _online_on_result(res: Dictionary) -> void:
 func _go_starpath_panel() -> void:
 	## 今日星途儀表板：一天要開遊戲時先看這裡
 	QuestSystem.refresh_daily()
+	OnlineGate.refresh_candle_soft()
 	var body := QuestSystem.starpath_summary_bbcode()
-	body += _t("\n\n戰力 %d · Lv%d") % [GameState.power_score(), GameState.level]
+	body += "\n\n[color=#fc9]%s[/color]" % OnlineGate.candle_line(false)
+	body += _t("\n戰力 %d · Lv%d") % [GameState.power_score(), GameState.level]
 	var buttons: Array = []
 	if QuestSystem.can_claim_daily():
 		buttons.append({"text": _t("★ 領取今日簽到"), "cb": func():
@@ -1274,12 +1294,14 @@ func _go_starpath_panel() -> void:
 		var h_lab := _t("星途獵場（剩 %d）") % h_left if h_left > 0 else _t("星途獵場（練習）")
 		buttons.append({"text": h_lab, "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
 	buttons.append({"text": _t("留言石（足跡）"), "cb": func(): _go_message_stone("message_stone")})
+	buttons.append({"text": _t("通關蠟燭"), "cb": _go_candle_altar})
 	buttons.append({"text": _t("長遠任務"), "cb": _go_quest_panel})
 	if _current == Screen.TITLE:
 		buttons.append({"text": Loc.t("btn.back"), "cb": _go_title})
 	else:
 		buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
 	_panel(Loc.t("panel.starpath"), body, buttons)
+	## 拉到數字後若面板還在，可再刷一次標題列感覺——此處用 toast 太吵，靜默即可
 
 
 func _go_daily_panel() -> void:
@@ -1889,6 +1911,7 @@ func _open_explore_then(map_id: String, screen: Screen, after: Callable) -> void
 		WorldContent.mark_visit(map_id)
 		if OnlineGate.is_signed_in():
 			OnlineGate.push_presence(map_id)
+		OnlineGate.refresh_candle_soft()
 		## 舊存檔補起始包
 		if GameState.has_flag("tut_done"):
 			InventorySystem.grant_starter()
@@ -2197,10 +2220,13 @@ func _go_title() -> void:
 	var body := "[center][i]%s[/i][/center]\n\n" % Loc.t("title.tagline")
 	body += Loc.t("title.blurb") + "\n\n"
 	body += _t("[color=#7fd]v0.17 · 今日星途／競技場／每日輪替[/color]\n")
+	body += "[color=#fc9]%s[/color]\n" % OnlineGate.candle_line(false)
 	body += "[color=#b8a88a]%s%s[/color]\n\n" % [title_line, ng_line]
 	body += "[color=#8a8070]%s[/color]" % Loc.t("title.controls")
 	_panel(_t("勇者之魂"), body, buttons)
 	_refresh_hud()
+	## 軟拉全服燭火（不擋 UI）
+	OnlineGate.refresh_candle_soft()
 	## 首次啟動引導
 	if not TutorialSystem.seen("boot"):
 		call_deferred("_boot_tutorial")
@@ -5278,6 +5304,8 @@ func _go_ending() -> void:
 				GameState.set_flag("online.candle_lit", true)
 				SaveManager.save_game()
 		)
+	else:
+		OnlineGate.refresh_candle_soft()
 	AudioManager.play_bgm("ending")
 	var maisui_line := _t("「還在啊。」")
 	if GameState.wheat_stalk_broken or GameState.has_flag("c0_wheat_saved"):

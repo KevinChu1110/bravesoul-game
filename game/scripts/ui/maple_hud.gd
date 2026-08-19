@@ -188,4 +188,17 @@ func refresh() -> void:
 	})
 
 	var path_s := GameState.path_display() if GameState.path_style != "" else Loc.t("hud.no_path")
-	_tip_l.text = Loc.t("hud.tip", {"weapon": GameState.weapon_display(), "path": path_s})
+	var tip := Loc.t("hud.tip", {"weapon": GameState.weapon_display(), "path": path_s})
+	## 通關蠟燭人數常駐（有快取／已拉取才顯示）
+	if Engine.get_main_loop() is SceneTree:
+		var og: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("OnlineGate")
+		if og and og.has_method("candle_total_cached"):
+			var cn: int = int(og.call("candle_total_cached"))
+			if cn >= 0:
+				var c_line := ""
+				if og.has_method("candle_line"):
+					c_line = str(og.call("candle_line", true))
+				else:
+					c_line = Loc.t("hud.candle", {"n": cn})
+				tip = "%s · %s" % [tip, c_line]
+	_tip_l.text = tip

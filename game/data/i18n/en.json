@@ -229,5 +229,6 @@
   "title.starpath": "Today's Starpath",
   "pause.starpath": "Today's Starpath",
   "pause.starpath_star": "Today's Starpath ★{n}",
-  "panel.starpath": "Today's Starpath"
+  "panel.starpath": "Today's Starpath",
+  "hud.candle": "Candles {n}"
 }
