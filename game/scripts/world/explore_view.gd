@@ -188,8 +188,16 @@ func show_player_bubble(text: String, secs: float = 2.0) -> void:
 	_spawn_bubble(player_pos + Vector2(PLAYER_SIZE.x * 0.5, -8), text, secs, Color(0.98, 0.95, 0.88))
 
 
+func _hub_presence_map() -> bool:
+	## 人潮感較強的據點圖
+	return map_id in [
+		"village", "town", "town_keep", "town_market", "barracks_yard",
+		"mist_village", "tower", "tower_camp", "crossroads", "caravan_camp",
+	]
+
+
 func _request_presence() -> void:
-	## 星途殘影：有連線才拉；離線顯示本地「假足跡」氛圍
+	## 星途殘影：有連線才拉；離線／空榜顯示本地「假足跡」氛圍
 	_clear_ghosts()
 	if OnlineGate.is_online_enabled():
 		OnlineGate.fetch_presence(map_id, _on_presence_result)
@@ -205,6 +213,7 @@ func _on_presence_result(res: Dictionary) -> void:
 		_spawn_offline_footprints()
 		return
 	var i := 0
+	var cap := 14 if _hub_presence_map() else 8
 	for row in list:
 		if typeof(row) != TYPE_DICTIONARY:
 			continue
@@ -215,28 +224,42 @@ func _on_presence_result(res: Dictionary) -> void:
 		var pos := _ghost_pos_for(uid, i)
 		_spawn_ghost(pos, name_s, false)
 		i += 1
-		if i >= 12:
+		if i >= cap:
 			break
 	if i == 0:
 		_spawn_offline_footprints()
+	else:
+		## 雲端人數少時用本地足跡補滿氣氛
+		var want := 5 if _hub_presence_map() else 3
+		if i < want:
+			_spawn_offline_footprints(want - i, i + 11)
 	_presence_loaded = true
 
 
-func _spawn_offline_footprints() -> void:
-	## 氛圍用：非同步「可能有人來過」
-	var seeds := [_t("灰影"), _t("無名人"), _t("遠方的氣味")]
-	for i in mini(2, seeds.size()):
-		var pos := _ghost_pos_for("offline_%s_%d" % [map_id, i], i + 3)
+func _spawn_offline_footprints(count: int = -1, salt0: int = 3) -> void:
+	## 氛圍用：非同步「可能有人來過」——據點圖多一點
+	var seeds := [
+		_t("灰影"), _t("無名人"), _t("遠方的氣味"), _t("微末者"),
+		_t("昨夜的靴印"), _t("星途旅人"), _t("過客"), _t("霧裡人"),
+	]
+	var n := count
+	if n < 0:
+		n = 5 if _hub_presence_map() else 3
+	n = mini(n, seeds.size())
+	for i in n:
+		var pos := _ghost_pos_for("offline_%s_%d" % [map_id, i + salt0], i + salt0)
 		_spawn_ghost(pos, seeds[i], true)
 	_presence_loaded = true
 
 
 func _ghost_pos_for(key: String, salt: int) -> Vector2:
+	## 壓在站立帶（畫面下半），避免殘影飄上屋頂
 	var h := int(abs(key.hash()) + salt * 9973)
 	var w := maxf(200.0, FLOOR_RECT.size.x - 120.0)
-	var hh := maxf(160.0, FLOOR_RECT.size.y - 120.0)
+	var band_top := FLOOR_RECT.position.y + FLOOR_RECT.size.y * STAND_BAND_TOP_T
+	var band_h := maxf(120.0, FLOOR_RECT.end.y - band_top - 40.0)
 	var x := FLOOR_RECT.position.x + 60.0 + float(h % int(w))
-	var y := FLOOR_RECT.position.y + 40.0 + float((h / 7) % int(hh))
+	var y := band_top + 20.0 + float((h / 11) % int(band_h))
 	return Vector2(x, y)
 
 
@@ -258,33 +281,43 @@ func _spawn_ghost(pos: Vector2, name_s: String, offline_style: bool) -> void:
 		_world.add_child(_ghost_host)
 	var root := Control.new()
 	root.position = pos
+	root.size = Vector2(48, 64)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.z_index = -1
 	_ghost_host.add_child(root)
 
-	var body := ColorRect.new()
-	body.size = Vector2(36, 48)
-	body.position = Vector2(0, 8)
-	if offline_style:
-		body.color = Color(0.55, 0.6, 0.75, 0.28)
+	## 優先用玩家待機圖當半透明剪影；沒圖再退回色塊
+	var tex: Texture2D = SpriteDB.player_idle() if SpriteDB else null
+	if tex:
+		var spr := TextureRect.new()
+		spr.texture = tex
+		spr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		spr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		spr.size = Vector2(44, 58)
+		spr.position = Vector2(2, 6)
+		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		spr.modulate = Color(0.7, 0.82, 1.0, 0.42) if not offline_style else Color(0.55, 0.6, 0.72, 0.32)
+		spr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(spr)
 	else:
-		body.color = Color(0.75, 0.85, 1.0, 0.38)
-	body.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(body)
-
-	var head := ColorRect.new()
-	head.size = Vector2(22, 20)
-	head.position = Vector2(7, 0)
-	head.color = body.color.lightened(0.15)
-	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(head)
+		var body := ColorRect.new()
+		body.size = Vector2(36, 48)
+		body.position = Vector2(6, 12)
+		body.color = Color(0.75, 0.85, 1.0, 0.40) if not offline_style else Color(0.55, 0.6, 0.75, 0.30)
+		body.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(body)
+		var head := ColorRect.new()
+		head.size = Vector2(22, 20)
+		head.position = Vector2(13, 2)
+		head.color = body.color.lightened(0.12)
+		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(head)
 
 	var lab := Label.new()
 	lab.text = name_s if name_s.length() <= 8 else name_s.substr(0, 7) + "…"
-	lab.position = Vector2(-10, -18)
-	lab.add_theme_font_size_override("font_size", 10)
-	lab.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0, 0.75))
-	lab.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
+	lab.position = Vector2(-8, -16)
+	lab.add_theme_font_size_override("font_size", 11)
+	lab.add_theme_color_override("font_color", Color(0.88, 0.93, 1.0, 0.88))
+	lab.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.65))
 	lab.add_theme_constant_override("shadow_offset_x", 1)
 	lab.add_theme_constant_override("shadow_offset_y", 1)
 	lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -303,7 +336,7 @@ func _process_ghosts(delta: float) -> void:
 		g["phase"] = ph
 		var base_y: float = float(g.get("base_y", root.position.y))
 		root.position.y = base_y + sin(ph * 1.7) * 3.0
-		root.modulate.a = 0.75 + 0.2 * sin(ph * 2.3)
+		root.modulate.a = 0.78 + 0.18 * sin(ph * 2.3)
 
 
 func show_entity_bubble(id: String, text: String = "", secs: float = 2.2) -> void:

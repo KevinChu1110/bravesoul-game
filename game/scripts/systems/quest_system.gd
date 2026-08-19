@@ -440,6 +440,8 @@ func starpath_summary_bbcode() -> String:
 			lines.append("[b]星途獵場[/b]  有獎剩 %d" % left_h)
 		elif ht:
 			lines.append("[b]星途獵場[/b]  （進騎士堡後解鎖）")
+	lines.append("")
+	lines.append("[b]星途足跡[/b]  地圖上的半透明旅人＝殘影；留言石可留字")
 	var rew := starpath_reward_count()
 	var todo := starpath_todo_count()
 	lines.append("")

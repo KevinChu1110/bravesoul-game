@@ -566,29 +566,74 @@ func _message_place_for_current() -> String:
 	var mid := _last_explore_map
 	if mid.begins_with("tower"):
 		return "tower_camp"
-	if mid in ["town", "town_keep", "town_market"]:
+	if mid in ["town", "town_keep", "town_market", "barracks_yard"]:
 		return "town_gate"
+	if mid.begins_with("village"):
+		return "village_well"
+	if mid.begins_with("mist"):
+		return "mist_gate"
+	if mid.begins_with("road"):
+		return "road_inn"
 	return "crossroads"
+
+
+func _local_msg_key(place: String) -> String:
+	return "lore.msgs.%s" % place
+
+
+func _local_msgs(place: String) -> Array:
+	var raw: Variant = GameState.get_flag(_local_msg_key(place), [])
+	if raw is Array:
+		return raw
+	if typeof(raw) == TYPE_STRING and str(raw) != "":
+		var parsed = JSON.parse_string(str(raw))
+		if parsed is Array:
+			return parsed
+	return []
+
+
+func _local_msg_add(place: String, text: String) -> void:
+	var arr: Array = _local_msgs(place)
+	arr.push_front({"body": text, "local": true})
+	while arr.size() > 20:
+		arr.pop_back()
+	GameState.set_flag(_local_msg_key(place), arr)
+	SaveManager.save_game()
 
 
 func _go_message_stone(from_id: String = "message_stone") -> void:
 	var place := _message_place_for_current()
 	if from_id == "wall_notice":
 		place = "town_gate"
-	if not OnlineGate.is_online_enabled() or not OnlineGate.is_signed_in():
-		var lore := _t("石上有舊刻：\n「足跡會交疊。」——星讀\n「別走我的路。」——佚名\n\n（開啟連線並訪客上線後，可讀寫旅人留言。）")
-		_panel(Loc.t("panel.message_stone"), lore, [
-			{"text": _t("連線設定"), "cb": _go_online_panel},
-			{"text": Loc.t("btn.back"), "cb": _hub_back},
-		])
+	if from_id == "road_note":
+		place = "road_inn"
+	## 上線：拉雲端；離線：本地足跡＋舊刻（仍可留字，有 FB 牆感覺）
+	if OnlineGate.is_online_enabled() and OnlineGate.is_signed_in():
+		OnlineGate.fetch_messages(place, func(res: Dictionary):
+			var cloud: Array = res.get("list", [])
+			## 雲端為主，本地補在後面（尚未同步的）
+			var merged: Array = cloud.duplicate()
+			for row in _local_msgs(place):
+				merged.append(row)
+			_show_messages_panel(place, merged, true)
+		)
 		return
-	OnlineGate.fetch_messages(place, func(res: Dictionary):
-		_show_messages_panel(place, res.get("list", []))
-	)
+	var lore_rows: Array = [
+		{"body": _t("「足跡會交疊。」——星讀")},
+		{"body": _t("「別走我的路。」——佚名")},
+		{"body": _t("「微末也有火。」——過客")},
+	]
+	for row in _local_msgs(place):
+		lore_rows.append(row)
+	_show_messages_panel(place, lore_rows, false)
 
 
-func _show_messages_panel(place: String, list: Array) -> void:
-	var body := _t("[b]留言石 · %s[/b]\n星途旅人留下的短句（最多 80 字）\n\n") % place
+func _show_messages_panel(place: String, list: Array, online: bool) -> void:
+	var body := _t("[b]留言石[/b]\n星途旅人留下的短句（最多 80 字）\n")
+	if online:
+		body += _t("（已連線 · 雲端足跡）\n\n")
+	else:
+		body += _t("（本地足跡 · 上線後可同步雲端）\n\n")
 	if list.is_empty():
 		body += _t("（尚無留言。做第一個足跡吧。）\n")
 	else:
@@ -596,25 +641,39 @@ func _show_messages_panel(place: String, list: Array) -> void:
 		for row in list:
 			if typeof(row) != TYPE_DICTIONARY:
 				continue
-			body += "· %s\n" % str(row.get("body", ""))
+			var line := str(row.get("body", ""))
+			if bool(row.get("local", false)):
+				line = _t("〔本地〕") + line
+			body += "· %s\n" % line
 			n += 1
-			if n >= 12:
+			if n >= 14:
 				break
 	var buttons: Array = [
-		{"text": _t("留下足跡：還在啊"), "cb": _msg_post.bind(place, _t("還在啊。"))},
-		{"text": _t("留下足跡：氣味比預言近"), "cb": _msg_post.bind(place, _t("氣味比預言近。"))},
-		{"text": _t("留下足跡：微末也走到了"), "cb": _msg_post.bind(place, _t("微末也走到了。"))},
+		{"text": _t("留下足跡：還在啊"), "cb": _msg_post.bind(place, _t("還在啊。"), online)},
+		{"text": _t("留下足跡：氣味比預言近"), "cb": _msg_post.bind(place, _t("氣味比預言近。"), online)},
+		{"text": _t("留下足跡：微末也走到了"), "cb": _msg_post.bind(place, _t("微末也走到了。"), online)},
+		{"text": _t("留下足跡：今日星途"), "cb": _msg_post.bind(place, _t("今日星途，還亮著。"), online)},
 		{"text": Loc.t("btn.refresh"), "cb": func(): _go_message_stone("message_stone")},
-		{"text": Loc.t("btn.back"), "cb": _hub_back},
 	]
+	if not online:
+		buttons.append({"text": _t("連線設定"), "cb": _go_online_panel})
+	buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
 	_panel(Loc.t("panel.message_stone"), body, buttons)
 
 
-func _msg_post(place: String, text: String) -> void:
-	OnlineGate.post_message(place, text, func(res: Dictionary):
-		var msg := str(res.get("msg", OnlineGate.last_error))
-		_play_dialog([{"speaker": _t("系統"), "text": msg}], func(): _go_message_stone("message_stone"))
-	)
+func _msg_post(place: String, text: String, online: bool = true) -> void:
+	if online and OnlineGate.is_signed_in():
+		OnlineGate.post_message(place, text, func(res: Dictionary):
+			var msg := str(res.get("msg", OnlineGate.last_error))
+			## 同時寫本地備份
+			_local_msg_add(place, text)
+			_play_dialog([{"speaker": _t("系統"), "text": msg}], func(): _go_message_stone("message_stone"))
+		)
+		return
+	_local_msg_add(place, text)
+	_play_dialog([
+		{"speaker": _t("系統"), "text": _t("足跡留在石上了。（本地）上線後可同步給其他旅人。")},
+	], func(): _go_message_stone("message_stone"))
 
 
 func _go_candle_altar() -> void:
@@ -1214,6 +1273,7 @@ func _go_starpath_panel() -> void:
 		var h_left := HuntSystem.daily_left()
 		var h_lab := _t("星途獵場（剩 %d）") % h_left if h_left > 0 else _t("星途獵場（練習）")
 		buttons.append({"text": h_lab, "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
+	buttons.append({"text": _t("留言石（足跡）"), "cb": func(): _go_message_stone("message_stone")})
 	buttons.append({"text": _t("長遠任務"), "cb": _go_quest_panel})
 	if _current == Screen.TITLE:
 		buttons.append({"text": Loc.t("btn.back"), "cb": _go_title})
@@ -3039,7 +3099,7 @@ func _handle_world_travel(id: String) -> bool:
 		"save_cross", "save_tower", "menu_save", "save_c2", "save_c3", "save_c4", "save_c5":
 			_touch_save_stone()
 			return true
-		"message_stone", "wall_notice":
+		"message_stone", "wall_notice", "road_note":
 			_go_message_stone(id)
 			return true
 		"candle_altar":

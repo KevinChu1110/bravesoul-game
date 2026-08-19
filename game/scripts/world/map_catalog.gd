@@ -164,6 +164,7 @@ static func _village() -> Dictionary:
 		_e("to_grave", 2402, 1211, 64, 56, "村後墓園", Color(0.35, 0.32, 0.3)),
 		_e("shrine_stub", 1626, 516, 48, 56, "村口小祠", Color(0.45, 0.4, 0.35), true),
 		_e("orchard", 1972, 1352, 56, 48, "枯果園", Color(0.4, 0.35, 0.28)),
+		_e("message_stone", 1580, 1180, 48, 52, "留言石", Color(0.5, 0.55, 0.7), true),
 	]
 	return m
 
@@ -392,6 +393,7 @@ static func _barracks_yard() -> Dictionary:
 		_e("officer_desk", 1500, 595, 56, 48, "隊長桌", Color(0.4, 0.35, 0.3), true),
 		_e("sand_pit", 1584, 997, 80, 48, "沙坑", Color(0.5, 0.45, 0.35)),
 		_e("knight_orphan", 1504, 1061, 48, 64, "遺孤少年", Color(0.5, 0.48, 0.55)),
+		_e("message_stone", 980, 880, 48, 52, "留言石", Color(0.5, 0.55, 0.72), true),
 	]
 	return m
 
@@ -596,6 +598,7 @@ static func _mist() -> Dictionary:
 		_e("save_c2", 256, 1170, 48, 48, "存檔石", Color(0.4, 0.45, 0.5)),
 		_e("back_knight", 192, 769, 56, 48, "回騎士堡", Color(0.4, 0.4, 0.45)),
 		_e("exit_cross_m", 2704, 1556, 72, 64, "六域岔路", Color(0.45, 0.5, 0.4)),
+		_e("message_stone", 980, 1360, 48, 52, "留言石", Color(0.5, 0.55, 0.75), true),
 	]
 	if GameState.has_flag("boss.white_fog_cleared"):
 		ents.append(_e("path_dojo", 2824, 1422, 72, 64, "山道·道場", Color(0.4, 0.55, 0.35)))
