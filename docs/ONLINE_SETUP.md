@@ -39,34 +39,57 @@ Dashboard → Authentication → Providers → **Email** 開啟。
 
 ## 2.6 Social OAuth（Google／Discord／Facebook／X）
 
-遊戲會開瀏覽器，登入後導回本機 `http://127.0.0.1:8765/callback`。
+**不一定要把「登入網站」設成本機。** 推薦流程：
 
-### 每個 Provider 共通步驟
+```
+瀏覽器登入 Google 等
+  → Supabase 導向【官網】auth-callback.html
+  → 官網頁再把 token 轉給【本機】127.0.0.1:8765（遊戲短暫在聽）
+  → 遊戲完成登入
+```
 
-1. Dashboard → **Authentication → URL Configuration**  
-   - **Redirect URLs** 加入：`http://127.0.0.1:8765/callback`  
-   - （可選）也加 `http://localhost:8765/callback`
-2. Dashboard → **Authentication → Providers** → 開啟對應項目，貼上 Client ID／Secret  
-3. 遊戲內：關純單機 → 連線設定 →「用 Google／Discord／Facebook／X 登入」
+官網頁：`https://kevinchu1110.github.io/bravesoul-game/pages/auth-callback.html`  
+（repo：`web/pages/auth-callback.html`，需 push 後 GH Pages 更新）
 
-| 遊戲按鈕 | Supabase Provider | 申請處 |
-|----------|-------------------|--------|
-| Google | `google` | [Google Cloud Console](https://console.cloud.google.com/) OAuth 用戶端 |
-| Discord | `discord` | [Discord Developer Portal](https://discord.com/developers/applications) |
-| Facebook | `facebook` | [Meta for Developers](https://developers.facebook.com/) |
-| X | `twitter` | [X Developer Portal](https://developer.x.com/) |
+### Supabase URL Configuration（已可用 ego-browser 加過）
 
-Supabase 後台每個 Provider 頁面會顯示 **Callback URL**（形如 `https://<project>.supabase.co/auth/v1/callback`）——那是給 Google／Discord 等**外站**填的，不要跟本機 `127.0.0.1:8765` 搞混。
+- Site URL：`https://kevinchu1110.github.io/bravesoul-game`
+- Redirect 白名單需含：
+  - `https://kevinchu1110.github.io/bravesoul-game/**`（或明確 auth-callback.html）
+  - `http://127.0.0.1:8765/**`（官網轉本機時用）
+  - （可選）`http://localhost:**`
+
+### Provider
+
+Dashboard → **Sign In / Providers** → 開啟並填 Client ID／Secret：
+
+| 遊戲按鈕 | Supabase | 申請處 |
+|----------|----------|--------|
+| Google | Google | [Google Cloud](https://console.cloud.google.com/) |
+| Discord | Discord | [Discord Dev](https://discord.com/developers/applications) |
+| Facebook | Facebook | [Meta Dev](https://developers.facebook.com/) |
+| X | X / Twitter (OAuth 2.0) | [X Dev](https://developer.x.com/) |
+
+各家後台的 Callback／Redirect 填 **Supabase 給的**  
+`https://<project>.supabase.co/auth/v1/callback`（不是官網、也不是 8765）。
+
+### 一定要本機嗎？
+
+| 角色 | 要不要本機 |
+|------|------------|
+| Supabase 允許的 redirect | **官網即可**（不必填本機當主 redirect） |
+| 遊戲怎麼拿到 token | 桌面版仍需**短暫聽本機 8765**（官網頁轉過來） |
+
+純網頁版遊戲可以不要 8765；桌面 Godot 目前這套需要。
 
 ### 尚未內建
 
-- **Steam**、**LINE**：Supabase 無一鍵 Provider（需自架 OIDC／Edge Function），之後再加。
+- **Steam**、**LINE**：無一鍵 Provider。
 
-### 本機注意
+### 注意
 
-- 埠 **8765** 需可用；被占用會提示失敗。  
-- 登入視窗逾時約 3 分鐘。  
-- itch／正式包同樣走本機 callback（桌面）。Web 匯出若要 OAuth 需另做頁面 redirect。
+- 登入前請先開遊戲並點社群登入（才會聽 8765）。  
+- 逾時約 3 分鐘；埠被占用會失敗。  
 
 ## 3. 驗證
 

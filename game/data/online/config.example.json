@@ -2,5 +2,6 @@
   "offline_only": true,
   "display_name": "星途旅人",
   "supabase_url": "https://YOUR_PROJECT.supabase.co",
-  "supabase_anon_key": "YOUR_ANON_KEY"
+  "supabase_anon_key": "YOUR_ANON_KEY",
+  "oauth_redirect_url": "https://kevinchu1110.github.io/bravesoul-game/pages/auth-callback.html"
 }

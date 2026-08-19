@@ -39,6 +39,9 @@ var _candle_fetching: bool = false
 ## OAuth（Google / Discord / Facebook / X）
 const OAuthCallbackServer = preload("res://scripts/autoload/oauth_callback_server.gd")
 const OAUTH_PROVIDERS: PackedStringArray = ["google", "discord", "facebook", "twitter"]
+## Supabase redirect_to：官網靜態頁（再轉回本機 8765 給遊戲收 token）
+const OAUTH_WEB_REDIRECT := "https://kevinchu1110.github.io/bravesoul-game/pages/auth-callback.html"
+var oauth_redirect_url: String = OAUTH_WEB_REDIRECT
 var _oauth: RefCounted = null  ## OAuthCallbackServer
 var _oauth_cb: Callable = Callable()
 var _oauth_provider: String = ""
@@ -76,6 +79,8 @@ func load_settings() -> void:
 	display_name = str(data.get("display_name", _t("星途旅人")))
 	supabase_url = str(data.get("supabase_url", "")).strip_edges()
 	supabase_anon_key = str(data.get("supabase_anon_key", "")).strip_edges()
+	var redir := str(data.get("oauth_redirect_url", "")).strip_edges()
+	oauth_redirect_url = redir if redir != "" else OAUTH_WEB_REDIRECT
 
 
 func save_settings() -> void:
@@ -87,6 +92,7 @@ func save_settings() -> void:
 		"display_name": display_name,
 		"supabase_url": supabase_url,
 		"supabase_anon_key": supabase_anon_key,
+		"oauth_redirect_url": oauth_redirect_url,
 	}, "\t"))
 
 
@@ -341,8 +347,8 @@ func sign_in_oauth(provider: String, cb: Callable = Callable()) -> void:
 	_oauth_cb = cb
 	_oauth_provider = provider
 	_oauth_deadline_msec = Time.get_ticks_msec() + 180000  ## 3 分鐘
-	var redirect: String = _oauth.redirect_uri()
-	## Supabase authorize（implicit／PKCE 由後端決定；redirect 帶回 hash）
+	## Supabase 導向官網 callback → 官網再轉本機 8765 給遊戲
+	var redirect: String = oauth_redirect_url if oauth_redirect_url != "" else OAUTH_WEB_REDIRECT
 	var url := "%s/auth/v1/authorize?provider=%s&redirect_to=%s" % [
 		supabase_url.trim_suffix("/"),
 		provider.uri_encode(),

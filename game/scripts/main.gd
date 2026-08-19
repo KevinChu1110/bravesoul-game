@@ -952,7 +952,7 @@ func _hunt_recycle_one(item_id: String) -> void:
 func _go_online_panel() -> void:
 	var body: String = OnlineGate.panel_bbcode()
 	body += _t("\n\n[b]帳號[/b]：訪客／Email／Google／Discord／Facebook／X")
-	body += _t("\n（OAuth 會開瀏覽器；需在 Supabase 開啟對應 Provider，並允許 Redirect：http://127.0.0.1:8765/callback）")
+	body += _t("\n（OAuth 開瀏覽器 → 官網回跳 → 遊戲本機收 token。需在 Supabase 開啟 Provider。）")
 	var buttons: Array = []
 	if OnlineGate.offline_only:
 		buttons.append({"text": _t("關閉純單機（允許連線）"), "cb": _online_enable})

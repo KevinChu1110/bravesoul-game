@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>勇者之魂 · 登入回跳</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #1a1520; color: #eee; padding: 2rem; max-width: 40rem; margin: 0 auto; }
+    a { color: #9cf; }
+    .ok { color: #cfc; }
+    .err { color: #fcc; }
+    code { background: #2a2430; padding: 0.15rem 0.4rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>正在把登入送回遊戲…</h1>
+  <p id="msg">請稍候。請保持「勇者之魂」已開啟並點過社群登入。</p>
+  <p class="err" id="err" hidden></p>
+  <p id="hint" hidden>
+    若遊戲沒反應：確認本機埠 <code>8765</code> 未被占用，並在遊戲內重新點一次登入。
+  </p>
+  <script>
+(function () {
+  var LOCAL = "http://127.0.0.1:8765/ok";
+  var msg = document.getElementById("msg");
+  var errEl = document.getElementById("err");
+  var hint = document.getElementById("hint");
+
+  function fail(t) {
+    msg.textContent = "登入回跳失敗";
+    errEl.hidden = false;
+    errEl.textContent = t;
+    hint.hidden = false;
+  }
+
+  try {
+    var h = new URLSearchParams(location.hash.slice(1));
+    var q = new URLSearchParams(location.search);
+    var err = h.get("error_description") || h.get("error") || q.get("error_description") || q.get("error");
+    if (err) {
+      fail(err);
+      return;
+    }
+    var at = h.get("access_token") || q.get("access_token");
+    var rt = h.get("refresh_token") || q.get("refresh_token") || "";
+    if (!at) {
+      fail("沒有收到 access_token。請確認 Supabase Redirect URL 含本頁網址。");
+      return;
+    }
+    var target = LOCAL + "?access_token=" + encodeURIComponent(at) + "&refresh_token=" + encodeURIComponent(rt);
+    msg.textContent = "已取得憑證，正在送回本機遊戲…";
+    msg.className = "ok";
+    // 轉跳本機：遊戲內 OAuth callback server 會收下
+    location.replace(target);
+    setTimeout(function () {
+      hint.hidden = false;
+      msg.textContent = "若還停在這頁，代表遊戲本機埠沒接到。請回到遊戲重試登入。";
+    }, 1500);
+  } catch (e) {
+    fail(String(e));
+  }
+})();
+  </script>
+</body>
+</html>
