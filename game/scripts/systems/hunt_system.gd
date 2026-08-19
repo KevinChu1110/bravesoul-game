@@ -202,6 +202,8 @@ func _finish_run(full_clear: bool) -> Dictionary:
 		_refresh_daily()
 		GameState.set_flag(_fk("runs_today"), runs_today() + 1)
 		GameState.set_flag(_fk("clears_total"), int(GameState.get_flag(_fk("clears_total"), 0)) + 1)
+		## 每日委託「星途一狩」
+		QuestSystem.track_day("hunt", 1)
 	## 經濟 0.15：狩獵場金幣略降（舊 40+12×波 → 30+10×波），練習局仍 ×PRACTICE_MULT。
 	## 可重複日刷，不可壓過「鍛造／職系武器」主 sink。
 	var gold_n := 30 + int(GameState.get_flag(_fk("waves_cleared"), 0)) * 10

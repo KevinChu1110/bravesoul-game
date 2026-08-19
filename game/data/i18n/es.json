@@ -223,5 +223,7 @@
   "btn.log_combat": "Solo combate",
   "btn.log_economy": "Solo economía",
   "btn.log_equip": "Solo equipo",
-  "log.header": "[b]Diario[/b] (últimas {n})"
+  "log.header": "[b]Diario[/b] (últimas {n})",
+  "pause.arena": "Arena",
+  "panel.arena": "Arena"
 }

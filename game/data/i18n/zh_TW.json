@@ -223,5 +223,7 @@
   "btn.log_combat": "只看戰鬥",
   "btn.log_economy": "只看經濟",
   "btn.log_equip": "只看裝備",
-  "log.header": "[b]冒險日誌[/b]（最近 {n} 條）"
+  "log.header": "[b]冒險日誌[/b]（最近 {n} 條）",
+  "pause.arena": "演武競技場",
+  "panel.arena": "演武競技場"
 }

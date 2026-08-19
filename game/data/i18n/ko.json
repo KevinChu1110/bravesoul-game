@@ -223,5 +223,7 @@
   "btn.log_combat": "전투만",
   "btn.log_economy": "경제만",
   "btn.log_equip": "장비만",
-  "log.header": "[b]모험 일지[/b]（최근 {n} 건）"
+  "log.header": "[b]모험 일지[/b]（최근 {n} 건）",
+  "pause.arena": "연무 아레나",
+  "panel.arena": "연무 아레나"
 }

@@ -6,18 +6,29 @@ const DAILY_CLAIMED := "meta.daily_claimed"
 const DAILY_STREAK := "meta.daily_streak"
 
 ## 每日委託（養成循環）：track 對應 track_day
-## 經濟 0.15：刷怪／練功略降；鍛造委託維持較高獎勵，引導錢進爐。
+## v2：從 COMMISSION_POOL 依日 seed 抽 DAILY_PICK 筆（至少 1 筆戰鬥類）
 const ContentLoc := preload("res://scripts/systems/content_loc.gd")
 ## 任務名與說明在非繁中會被 ContentLoc 換掉
 const QUEST_TEXT_FIELDS: PackedStringArray = ["name", "desc"]
 
-const COMMISSIONS: Array[Dictionary] = [
+const DAILY_PICK := 4
+const COMBAT_TRACKS: PackedStringArray = ["skirmish", "train", "hunt", "arena"]
+const DAY_TRACKS: PackedStringArray = ["train", "skirmish", "sell", "craft", "shop", "hunt", "arena"]
+
+## 委託池（每日輪替子集）；舊 COMMISSIONS 五筆保留為核心
+const COMMISSION_POOL: Array[Dictionary] = [
 	{"id": "d_train", "name": "演武三巡", "desc": "演武場練功 3 次", "track": "train", "need": 3, "gold": 24, "dust": 1, "xp": 25},
 	{"id": "d_skirmish", "name": "清道委託", "desc": "雜魚勝 3 場", "track": "skirmish", "need": 3, "gold": 28, "dust": 1, "xp": 30},
+	{"id": "d_skirmish2", "name": "清道加碼", "desc": "雜魚勝 5 場", "track": "skirmish", "need": 5, "gold": 40, "dust": 2, "xp": 45},
 	{"id": "d_mats", "name": "材料回收", "desc": "賣出材料累計 5 件", "track": "sell", "need": 5, "gold": 20, "dust": 1, "xp": 20},
 	{"id": "d_craft", "name": "爐邊功課", "desc": "鍛造升階或職系武器 1 次", "track": "craft", "need": 1, "gold": 45, "dust": 2, "xp": 35},
 	{"id": "d_shop", "name": "市集一遊", "desc": "在材料行購買 1 次", "track": "shop", "need": 1, "gold": 18, "dust": 1, "xp": 15},
+	{"id": "d_hunt", "name": "星途一狩", "desc": "狩獵場有獎通關 1 次", "track": "hunt", "need": 1, "gold": 35, "dust": 2, "xp": 40},
+	{"id": "d_arena", "name": "演武試劍", "desc": "競技場通關 1 次（有獎或練習皆可）", "track": "arena", "need": 1, "gold": 32, "dust": 2, "xp": 38},
 ]
+
+## 相容舊常數名（測試／外部若仍引用）
+const COMMISSIONS: Array[Dictionary] = COMMISSION_POOL
 
 ## 里程碑任務的經驗＝金幣 × 這個倍率。
 ##
@@ -81,10 +92,10 @@ func refresh_daily() -> void:
 		if last >= 0 and today - last > 1:
 			GameState.set_flag(DAILY_STREAK, 0)
 		## 日計數歸零（委託進度）
-		for t in ["train", "skirmish", "sell", "craft", "shop", "hunt"]:
+		for t in DAY_TRACKS:
 			GameState.set_flag("day.%s" % t, 0)
-		## 委託領獎旗
-		for c in COMMISSIONS:
+		## 委託領獎旗（整池清掉，避免輪替後舊 id 殘留）
+		for c in COMMISSION_POOL:
 			GameState.set_flag("quest.dayclaim.%s" % str(c.get("id", "")), false)
 		## 練功日計（與 main 共用）
 		GameState.set_flag("meta.train_today", 0)
@@ -115,9 +126,42 @@ func commission_claimed(id: String) -> bool:
 	return GameState.has_flag("quest.dayclaim.%s" % id)
 
 
+## 依日 seed 抽當日委託（穩定：同一天重開遊戲結果相同）
+func todays_commissions_raw() -> Array[Dictionary]:
+	refresh_daily()
+	var day := _day_id()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(day) * 9973 + 17
+	var pool: Array = COMMISSION_POOL.duplicate()
+	## Fisher–Yates
+	for i in range(pool.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var tmp = pool[i]
+		pool[i] = pool[j]
+		pool[j] = tmp
+	var picked: Array[Dictionary] = []
+	var has_combat := false
+	for c in pool:
+		if picked.size() >= DAILY_PICK:
+			break
+		picked.append(c)
+		if str(c.get("track", "")) in COMBAT_TRACKS:
+			has_combat = true
+	if not has_combat:
+		## 把第一筆戰鬥類換進最後一格
+		for c in COMMISSION_POOL:
+			if str(c.get("track", "")) in COMBAT_TRACKS:
+				if picked.size() > 0:
+					picked[picked.size() - 1] = c
+				else:
+					picked.append(c)
+				break
+	return picked
+
+
 ## 讀目錄一律走這兩支，直接用常數會拿到未翻的原文
 func commissions() -> Array:
-	return ContentLoc.apply_all("quest", COMMISSIONS, QUEST_TEXT_FIELDS)
+	return ContentLoc.apply_all("quest", todays_commissions_raw(), QUEST_TEXT_FIELDS)
 
 
 func missions() -> Array:
@@ -126,7 +170,7 @@ func missions() -> Array:
 
 func claim_commission(id: String) -> Dictionary:
 	refresh_daily()
-	for c in COMMISSIONS:
+	for c in todays_commissions_raw():
 		if str(c.get("id", "")) != id:
 			continue
 		if commission_claimed(id):
@@ -163,8 +207,8 @@ func claim_commission(id: String) -> Dictionary:
 func list_commissions_bbcode() -> String:
 	refresh_daily()
 	var lines: PackedStringArray = []
-	lines.append("[b]今日委託[/b]（養成循環 · 每日重置）")
-	for c in COMMISSIONS:
+	lines.append("[b]今日委託[/b]（每日輪替 · 養成循環）")
+	for c in commissions():
 		var id := str(c.get("id", ""))
 		var need := int(c.get("need", 1))
 		var prog := mini(need, commission_progress(c))
@@ -176,7 +220,7 @@ func list_commissions_bbcode() -> String:
 func claimable_commissions() -> int:
 	refresh_daily()
 	var n := 0
-	for c in COMMISSIONS:
+	for c in todays_commissions_raw():
 		var id := str(c.get("id", ""))
 		if commission_done(c) and not commission_claimed(id):
 			n += 1
@@ -186,6 +230,14 @@ func claimable_commissions() -> int:
 func can_claim_daily() -> bool:
 	refresh_daily()
 	return not bool(GameState.get_flag(DAILY_CLAIMED, false))
+
+
+func streak_milestone_hint() -> String:
+	var streak := int(GameState.get_flag(DAILY_STREAK, 0))
+	for t in [3, 7, 14]:
+		if streak < t:
+			return "連簽下一檔：%d 天" % t
+	return "連簽里程碑已達 14 天"
 
 
 func claim_daily() -> Dictionary:
@@ -201,6 +253,22 @@ func claim_daily() -> Dictionary:
 	if GameState.ng_plus > 0:
 		gold_n += 10
 		dust_n += 1
+	## 連簽里程碑（一次性）
+	var bonus := ""
+	if streak == 3 and not GameState.has_flag("meta.streak_bonus_3"):
+		GameState.set_flag("meta.streak_bonus_3", true)
+		dust_n += 2
+		bonus = " · 連簽 3 天加碼星屑 +2"
+	elif streak == 7 and not GameState.has_flag("meta.streak_bonus_7"):
+		GameState.set_flag("meta.streak_bonus_7", true)
+		dust_n += 4
+		gold_n += 40
+		bonus = " · 連簽 7 天加碼金 +40／星屑 +4"
+	elif streak == 14 and not GameState.has_flag("meta.streak_bonus_14"):
+		GameState.set_flag("meta.streak_bonus_14", true)
+		dust_n += 8
+		gold_n += 80
+		bonus = " · 連簽 14 天加碼金 +80／星屑 +8"
 	GameState.add_gold(gold_n)
 	GameState.add_stardust(dust_n)
 	## 公會貢獻
@@ -214,7 +282,7 @@ func claim_daily() -> Dictionary:
 		"gold": gold_n,
 		"dust": dust_n,
 		"streak": streak,
-		"msg": "每日補給：金 %d · 星屑 %d · 連續簽到 %d 天" % [gold_n, dust_n, streak],
+		"msg": "每日補給：金 %d · 星屑 %d · 連續簽到 %d 天%s" % [gold_n, dust_n, streak, bonus],
 	}
 
 

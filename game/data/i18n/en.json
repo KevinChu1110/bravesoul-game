@@ -223,5 +223,7 @@
   "btn.log_combat": "Combat only",
   "btn.log_economy": "Economy only",
   "btn.log_equip": "Gear only",
-  "log.header": "[b]Adventure Log[/b] (last {n})"
+  "log.header": "[b]Adventure Log[/b] (last {n})",
+  "pause.arena": "Arena",
+  "panel.arena": "Arena"
 }

@@ -515,6 +515,11 @@ func _build_pause_layer() -> void:
 			_close_pause()
 			_open_explore("hunting_grounds", Screen.C1_WILD)
 		)
+	if ArenaSystem.is_unlocked():
+		_pause_btn(box, Loc.t("pause.arena"), func():
+			_close_pause()
+			_go_arena_panel()
+		)
 	_pause_btn(box, Loc.t("pause.soul"), func():
 		_close_pause()
 		_go_soul_panel()
@@ -719,6 +724,113 @@ func _on_hunt_battle_finished(won: bool) -> void:
 	_play_dialog([{"speaker": _t("系統"), "text": text}], func():
 		_start_battle(str(r.get("next_mode", "ash_rat")))
 	)
+
+
+func _go_arena_panel() -> void:
+	var body: String = ArenaSystem.status_bbcode()
+	var buttons: Array = []
+	if not ArenaSystem.is_unlocked():
+		buttons.append({"text": Loc.t("btn.back"), "cb": _open_pause})
+		_panel(Loc.t("panel.arena"), body, buttons)
+		return
+	if ArenaSystem.is_run_active():
+		buttons.append({"text": _t("繼續試煉"), "cb": _arena_continue})
+		buttons.append({"text": _t("放棄本輪"), "cb": _arena_abandon})
+	else:
+		if ArenaSystem.daily_left() > 0:
+			buttons.append({"text": _t("開始有獎試煉（剩 %d）") % ArenaSystem.daily_left(), "cb": _arena_start_rewarded})
+		buttons.append({"text": _t("練習試煉"), "cb": _arena_start_practice})
+	buttons.append({"text": _t("查看排行"), "cb": _arena_show_leaderboard})
+	buttons.append({"text": Loc.t("btn.back"), "cb": _open_pause})
+	_panel(Loc.t("panel.arena"), body, buttons)
+
+
+func _arena_start_rewarded() -> void:
+	var r: Dictionary = ArenaSystem.start_run(false)
+	if not bool(r.get("ok", false)):
+		_play_dialog([{"speaker": _t("系統"), "text": str(r.get("msg", ""))}], _go_arena_panel)
+		return
+	_play_dialog([
+		{"speaker": _t("系統"), "text": str(r.get("msg", ""))},
+		{"speaker": _t("系統"), "text": str(r.get("label", ""))},
+	], func(): _start_battle(str(r.get("mode", "ash_rat"))))
+
+
+func _arena_start_practice() -> void:
+	var r: Dictionary = ArenaSystem.start_run(true)
+	if not bool(r.get("ok", false)):
+		_play_dialog([{"speaker": _t("系統"), "text": str(r.get("msg", ""))}], _go_arena_panel)
+		return
+	_play_dialog([
+		{"speaker": _t("系統"), "text": str(r.get("msg", ""))},
+		{"speaker": _t("系統"), "text": str(r.get("label", ""))},
+	], func(): _start_battle(str(r.get("mode", "ash_rat"))))
+
+
+func _arena_continue() -> void:
+	if not ArenaSystem.is_run_active():
+		_go_arena_panel()
+		return
+	_play_dialog([
+		{"speaker": _t("系統"), "text": ArenaSystem.wave_label()},
+	], func(): _start_battle(ArenaSystem.wave_mode()))
+
+
+func _arena_abandon() -> void:
+	ArenaSystem.abandon_run()
+	_play_dialog([{"speaker": _t("系統"), "text": _t("已放棄本輪試煉。")}], _go_arena_panel)
+
+
+func _on_arena_battle_finished(won: bool) -> void:
+	if not won:
+		var lost: Dictionary = ArenaSystem.on_wave_lost()
+		_play_dialog([{"speaker": _t("系統"), "text": str(lost.get("msg", _t("敗北。")))}], _go_arena_panel)
+		return
+	var r: Dictionary = ArenaSystem.on_wave_won(GameState.hp)
+	if not bool(r.get("ok", false)):
+		_go_arena_panel()
+		return
+	if bool(r.get("finished", false)):
+		_play_dialog([{"speaker": _t("系統"), "text": str(r.get("msg", _t("完成。"))) + _hunt_xp_line(r)}], _go_arena_panel)
+		return
+	var text := str(r.get("msg", _t("下一試"))) + _hunt_xp_line(r)
+	_play_dialog([{"speaker": _t("系統"), "text": text}], func():
+		_start_battle(str(r.get("next_mode", "ash_rat")))
+	)
+
+
+func _arena_show_leaderboard() -> void:
+	var body := _t("[b]競技場排行[/b]\n個人最佳：%d\n\n") % ArenaSystem.best_score()
+	if OnlineGate.is_signed_in():
+		body += _t("讀取雲端榜中…\n")
+		_panel(Loc.t("panel.arena"), body, [{"text": _t("返回"), "cb": _go_arena_panel}])
+		OnlineGate.leaderboard_fetch(ArenaSystem.LEADERBOARD_BOARD, func(res: Dictionary):
+			var lines: PackedStringArray = []
+			lines.append(_t("[b]競技場排行 · 前 10[/b]"))
+			lines.append(_t("你的最佳：%d\n") % ArenaSystem.best_score())
+			var list: Array = res.get("list", []) if bool(res.get("ok", true)) else []
+			## OnlineGate _ok 包裝可能不同；相容 raw list
+			if list.is_empty() and res.has("data"):
+				list = res.get("data", [])
+			var i := 0
+			for row in list:
+				if typeof(row) != TYPE_DICTIONARY:
+					continue
+				i += 1
+				if i > 10:
+					break
+				lines.append("%d. %s — %d" % [
+					i,
+					str(row.get("display_name", row.get("user_id", "?"))),
+					int(row.get("score", 0)),
+				])
+			if i == 0:
+				lines.append(_t("（尚無紀錄，或連線失敗）"))
+			_panel(Loc.t("panel.arena"), "\n".join(lines), [{"text": _t("返回"), "cb": _go_arena_panel}])
+		)
+	else:
+		body += _t("登入連線帳號後可上傳並查看雲端榜。\n（Esc → 連線設定）")
+		_panel(Loc.t("panel.arena"), body, [{"text": _t("返回"), "cb": _go_arena_panel}])
 
 
 ## 波次經驗要講出來。不講的話玩家看不出獵場跟野外的差別在哪，
@@ -1070,9 +1182,10 @@ func _online_on_result(res: Dictionary) -> void:
 func _go_daily_panel() -> void:
 	QuestSystem.refresh_daily()
 	var body := _t("每天登入可領補給。連續簽到獎勵更高。\n")
-	body += _t("連續：%d 天 · 戰力 %d · Lv%d\n\n") % [
+	body += _t("連續：%d 天 · 戰力 %d · Lv%d\n") % [
 		int(GameState.get_flag(QuestSystem.DAILY_STREAK, 0)), GameState.power_score(), GameState.level
 	]
+	body += _t("%s\n\n") % QuestSystem.streak_milestone_hint()
 	if GameState.ng_plus > 0:
 		body += _t("二周目加成：每日略豐。\n\n")
 	body += QuestSystem.list_commissions_bbcode()
@@ -3016,6 +3129,8 @@ func _go_world_map() -> void:
 		buttons.append({"text": _t("塔下營地"), "cb": _go_c6_camp})
 	if HuntSystem.is_unlocked():
 		buttons.append({"text": _t("星途獵場"), "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
+	if ArenaSystem.is_unlocked():
+		buttons.append({"text": _t("演武競技場"), "cb": _go_arena_panel})
 	buttons.append({"text": _t("武器流派"), "cb": _go_path_panel})
 	buttons.append({"text": _t("返回當前"), "cb": _hub_back})
 	_panel(Loc.t("panel.world_map"), body, buttons)
@@ -3380,6 +3495,10 @@ func _on_world_battle_finished(won: bool) -> void:
 			], func(): _return_to_explore(lmap, lsc))
 		return
 
+	## 競技場波次（優先於獵場）
+	if ArenaSystem.is_run_active() and WorldContent.is_world_battle(mode):
+		_on_arena_battle_finished(won)
+		return
 	## 狩獵場波次
 	if HuntSystem.is_run_active() and WorldContent.is_world_battle(mode):
 		_on_hunt_battle_finished(won)

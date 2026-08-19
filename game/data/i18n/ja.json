@@ -223,5 +223,7 @@
   "btn.log_combat": "戦闘のみ",
   "btn.log_economy": "経済のみ",
   "btn.log_equip": "装備のみ",
-  "log.header": "[b]冒険日誌[/b]（直近 {n} 件）"
+  "log.header": "[b]冒険日誌[/b]（直近 {n} 件）",
+  "pause.arena": "演武アリーナ",
+  "panel.arena": "演武アリーナ"
 }

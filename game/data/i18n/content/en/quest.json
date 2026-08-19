@@ -142,5 +142,21 @@
   "m_wreck": {
     "desc": "Defeat the shadow of the wreck's captain",
     "name": "Wreck's End"
-  }
+  },
+  "演武三巡": "Three drills",
+  "清道委託": "Clear the road",
+  "清道加碼": "Road clear+",
+  "材料回收": "Material scrap",
+  "爐邊功課": "Forge homework",
+  "市集一遊": "Market stroll",
+  "星途一狩": "One hunt",
+  "演武試劍": "Arena trial",
+  "演武場練功 3 次": "Train at the yard 3 times",
+  "雜魚勝 3 場": "Win 3 skirmishes",
+  "雜魚勝 5 場": "Win 5 skirmishes",
+  "賣出材料累計 5 件": "Sell 5 materials",
+  "鍛造升階或職系武器 1 次": "Forge or craft once",
+  "在材料行購買 1 次": "Buy once at the material shop",
+  "狩獵場有獎通關 1 次": "Clear 1 rewarded hunt",
+  "競技場通關 1 次（有獎或練習皆可）": "Clear the arena once (rewarded or practice)"
 }

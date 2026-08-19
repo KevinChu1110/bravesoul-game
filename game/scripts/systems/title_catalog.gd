@@ -62,6 +62,12 @@ const ENTRIES: Array[Dictionary] = [
 		"cond": "rift5",
 	},
 	{
+		"flag": "title.arena_challenger",
+		"name": "演武挑戰者",
+		"desc": "競技場五波試煉通關一次。",
+		"cond": "arena1",
+	},
+	{
 		"flag": "title.echo_walker",
 		"name": "迴響行者",
 		"desc": "黑焰迴響任意層再通關。",
@@ -188,6 +194,9 @@ func _cond_met(cond: String) -> bool:
 		"rift5":
 			return int(GameState.get_flag("postgame.rift_wins", 0)) >= 5 \
 				or GameState.has_flag("title.rift_walker")
+		"arena1":
+			return int(GameState.get_flag("arena.clears_total", 0)) >= 1 \
+				or GameState.has_flag("title.arena_challenger")
 		"echo":
 			return GameState.has_flag("title.echo_walker") \
 				or GameState.ng_plus > 0 and GameState.has_flag("boss.demon_cleared")
