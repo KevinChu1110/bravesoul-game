@@ -2,150 +2,154 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>帳號 — 勇者之魂</title>
-  <meta name="description" content="勇者之魂帳號：可不登入通關。Google／Discord／Facebook／X 可選。" />
+  <meta name="description" content="勇者之魂帳號。不登入可通關；Email 註冊需驗證信。Google／GitHub／Discord 可選。" />
   <meta name="theme-color" content="#c25e73" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/site.css" />
   <link rel="stylesheet" href="../css/sections.css" />
+  <link rel="stylesheet" href="../css/motion.css" />
+  <link rel="stylesheet" href="../css/rwd.css" />
   <script src="../config.js"></script>
-  <style>
-    .account-wrap {
-      display: grid;
-      gap: 1.25rem;
-      max-width: 520px;
-    }
-    .session-card {
-      display: none;
-    }
-    .session-card.show { display: block; }
-    .session-row {
-      display: flex; justify-content: space-between; gap: 1rem;
-      padding: 0.45rem 0; border-bottom: 1px solid var(--line-soft);
-      font-size: 0.92rem;
-    }
-    .session-row:last-child { border-bottom: 0; }
-    .session-row .k { color: var(--ink-soft); font-weight: 700; }
-    .session-row .v { font-weight: 600; word-break: break-all; text-align: right; }
-    .oauth-icons { display: grid; gap: 0.55rem; }
-    .btn-oauth .ico {
-      width: 22px; height: 22px; border-radius: 6px;
-      display: grid; place-items: center; font-size: 13px; font-weight: 800;
-      background: var(--paper); border: 1px solid var(--line-soft);
-    }
-    .auth-tabs {
-      display: flex; gap: 0.35rem; margin-bottom: 0.85rem;
-    }
-    .auth-tabs button {
-      flex: 1; padding: 0.55rem; border-radius: 6px;
-      border: 1px solid var(--line); background: #fff;
-      font: inherit; font-weight: 700; cursor: pointer; color: var(--ink-soft);
-    }
-    .auth-tabs button.active {
-      color: #fff;
-      background: linear-gradient(180deg, var(--key), var(--key-deep));
-      border-color: var(--key-deep);
-    }
-    .hidden { display: none !important; }
-    .setup-box {
-      background: var(--key-faint);
-      border: 1px solid #f2c9d3;
-      border-radius: 8px;
-      padding: 0.85rem 1rem;
-      font-size: 0.88rem;
-      color: var(--ink-soft);
-    }
-    .setup-box code { font-size: 0.8em; }
-  </style>
 </head>
 <body data-page="account">
-  <header class="page-hero" style="--hero-img:url('../media/gemini/keyart_hero.png')">
+  <header class="page-hero" style="--hero-img:url('../media/gemini/keyart_soul.png')">
     <div class="container">
       <div class="breadcrumb"><a href="../index.html">首頁</a> / 帳號</div>
       <h1>帳號</h1>
-      <p>登不登入都行。<strong>不登入一樣走完整趟</strong>。登入後才有好友殘影與雲存檔。</p>
+      <p>登不登入都行。<strong>不登入一樣走完整趟</strong>。Email 註冊要點驗證信；登入後才有好友殘影與雲存檔。</p>
     </div>
   </header>
 
   <main class="page">
-    <div class="container account-wrap">
-      <!-- 已登入 -->
-      <div class="panel session-card" id="session-card">
-        <h2 class="section-h2" style="font-size:1.05rem"><span class="accent"></span><span>目前登入</span></h2>
-        <div class="session-row"><span class="k">Email</span><span class="v" id="sess-email">—</span></div>
-        <div class="session-row" style="display:none"><span class="k">ID</span><span class="v" id="sess-uid">—</span></div>
-        <div class="session-row"><span class="k">登入方式</span><span class="v" id="sess-provider">—</span></div>
-        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.9rem">
-          <button type="button" class="btn btn-primary" id="btn-logout">登出</button>
-        </div>
-        <p class="msg" id="sess-msg" role="status"></p>
-        <p class="muted" style="margin-top:0.75rem">遊戲內：Esc → 連線／帳號，使用同一帳號登入。</p>
-      </div>
+    <section class="band band--soft-key" style="padding-top:0.5rem">
+      <div class="container">
+        <div class="auth-stage">
+          <aside class="auth-visual">
+            <img class="bg" src="../media/promo/scene_soul.jpg" alt="" />
+            <div class="shade"></div>
+            <div class="copy">
+              <h2>傭兵團最弱的新人</h2>
+              <p>帳號是旅人痕跡，不是通關門票。</p>
+              <ul>
+                <li>主線可離線走完</li>
+                <li>Email 註冊會寄驗證信</li>
+                <li>同一帳號可在遊戲裡連線</li>
+              </ul>
+            </div>
+          </aside>
 
-      <!-- 未登入 -->
-      <div id="auth-panels">
-        <div class="panel">
-          <h2 class="section-h2" style="font-size:1.05rem"><span class="accent"></span><span>第三方登入</span></h2>
-          <p class="section-sub">一鍵登入</p>
-          <div class="oauth-icons">
-            <button type="button" class="btn btn-oauth" id="oauth-google">
-              <span class="ico">G</span> 使用 Google 繼續
-            </button>
-            <button type="button" class="btn btn-oauth" id="oauth-github">
-              <span class="ico">GH</span> 使用 GitHub 繼續
-            </button>
-            <button type="button" class="btn btn-oauth" id="oauth-discord">
-              <span class="ico">D</span> 使用 Discord 繼續
-            </button>
+          <div>
+            <div class="auth-card session-card" id="session-card">
+              <p class="sec-kicker">Signed in</p>
+              <h2>目前登入</h2>
+              <p class="lead">遊戲內 Esc → 連線／帳號，用同一組。</p>
+              <div class="session-row"><span class="k">Email</span><span class="v" id="sess-email">—</span></div>
+              <div class="session-row"><span class="k">登入方式</span><span class="v" id="sess-provider">—</span></div>
+              <div class="session-row"><span class="k">信箱驗證</span><span class="v" id="sess-verified">—</span></div>
+              <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1rem">
+                <button type="button" class="btn btn-primary" id="btn-logout">登出</button>
+                <a class="btn btn-ghost" href="download.html">下載遊戲</a>
+              </div>
+              <p class="msg" id="sess-msg" role="status"></p>
+            </div>
+
+            <div id="auth-panels">
+              <div class="auth-card" id="main-auth">
+                <p class="sec-kicker">Sign in</p>
+                <h2>進入翠嶺</h2>
+                <p class="lead">第三方一鍵，或 Email 註冊（要驗證信）。</p>
+
+                <div class="oauth-icons">
+                  <button type="button" class="btn btn-oauth" id="oauth-google">
+                    <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.5c-.3 1.5-1.1 2.7-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.7z"/><path fill="#34A853" d="M12 24c3.2 0 5.9-1 7.9-2.9l-3.9-3c-1.1.7-2.5 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1C3.4 21.3 7.4 24 12 24z"/><path fill="#FBBC05" d="M5.4 14.4c-.2-.7-.4-1.4-.4-2.4s.1-1.7.4-2.4V6.5H1.4C.5 8.3 0 10.1 0 12s.5 3.7 1.4 5.5l4-3.1z"/><path fill="#EA4335" d="M12 4.8c1.7 0 3.3.6 4.5 1.7l3.4-3.4C17.9 1.1 15.2 0 12 0 7.4 0 3.4 2.7 1.4 6.5l4 3.1C6.3 6.9 8.9 4.8 12 4.8z"/></svg></span>
+                    使用 Google 繼續
+                  </button>
+                  <button type="button" class="btn btn-oauth" id="oauth-github">
+                    <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#24292f" d="M12 .3A12 12 0 0 0 8.2 23.7c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.7-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3z"/></svg></span>
+                    使用 GitHub 繼續
+                  </button>
+                  <button type="button" class="btn btn-oauth" id="oauth-discord">
+                    <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#5865F2" d="M20.3 4.4A19.8 19.8 0 0 0 15.6 3l-.4.8c2 .5 3.1 1.2 4.1 2.1-1.7-.8-3.4-1.4-5.2-1.6h-.2c-1.8.2-3.5.8-5.2 1.6 1-1 2.1-1.6 4.1-2.1L12.4 3A19.8 19.8 0 0 0 7.7 4.4C4.3 9.3 3.4 14 3.8 18.7c2 1.5 4 2.4 5.9 3l.8-1.3c-.8-.3-1.6-.7-2.4-1.2l.6-.4c4.6 2.1 9.6 2.1 14.2 0l.6.4c-.8.5-1.6.9-2.4 1.2l.8 1.3c1.9-.6 3.9-1.5 5.9-3 .5-5.4-.8-10.1-4.5-14.3zM9.7 15.5c-1.1 0-2-1-2-2.2s.9-2.2 2-2.2 2 1 2 2.2-.9 2.2-2 2.2zm4.6 0c-1.1 0-2-1-2-2.2s.9-2.2 2-2.2 2 1 2 2.2-.9 2.2-2 2.2z"/></svg></span>
+                    使用 Discord 繼續
+                  </button>
+                </div>
+                <p class="msg" id="oauth-msg" role="status"></p>
+                <div class="divider">或用 Email</div>
+
+                <div class="auth-tabs" role="tablist">
+                  <button type="button" class="active" id="tab-signup">註冊</button>
+                  <button type="button" id="tab-login">登入</button>
+                </div>
+
+                <form class="form-grid" id="reg-form" autocomplete="on" novalidate>
+                  <div class="field">
+                    <label for="reg-email">Email</label>
+                    <input id="reg-email" name="email" type="email" required placeholder="you@example.com" autocomplete="username" />
+                  </div>
+                  <div class="field">
+                    <div class="field-row">
+                      <label for="reg-pass">密碼</label>
+                      <span class="hint-line" id="pass-rule">至少 8 碼，含英文字與數字</span>
+                    </div>
+                    <div class="pass-wrap">
+                      <input id="reg-pass" name="password" type="password" required minlength="8" autocomplete="new-password" />
+                      <button type="button" class="pass-toggle" id="toggle-pass" aria-label="顯示密碼">顯示</button>
+                    </div>
+                    <div class="strength" id="pass-strength" data-n="0" hidden><i></i><i></i><i></i></div>
+                  </div>
+                  <div class="field" id="pass2-wrap">
+                    <label for="reg-pass2">再輸入一次</label>
+                    <div class="pass-wrap">
+                      <input id="reg-pass2" name="password2" type="password" minlength="8" autocomplete="new-password" />
+                    </div>
+                  </div>
+                  <p class="hint-line" id="signup-note">送出後會寄驗證信。沒點連結不能登入。</p>
+                  <button type="submit" class="btn btn-primary" id="reg-btn">建立帳號並寄驗證信</button>
+                  <p class="msg" id="reg-msg" role="status"></p>
+                  <p class="hint-line" id="forgot-wrap" hidden>
+                    <button type="button" class="linkish" id="btn-forgot">忘記密碼？寄重設信</button>
+                  </p>
+                </form>
+              </div>
+
+              <div class="auth-card verify-box hidden" id="verify-panel">
+                <img src="../media/souls/gourd_orange.png" alt="" />
+                <h3>去信箱點驗證</h3>
+                <p>我們寄了一封信到<br /><strong id="verify-email"></strong><br />點信裡的連結才算註冊完成。沒看到就翻垃圾郵件。</p>
+                <div style="display:grid;gap:0.5rem">
+                  <button type="button" class="btn btn-primary" id="btn-resend">重寄驗證信</button>
+                  <button type="button" class="btn btn-ghost" id="btn-back-login">我已驗證，去登入</button>
+                </div>
+                <p class="msg" id="verify-msg" role="status"></p>
+              </div>
+
+              <div class="auth-card hidden" id="forgot-panel">
+                <p class="sec-kicker">Reset</p>
+                <h2>重設密碼</h2>
+                <p class="lead">寄一封重設信到你的 Email。連結會回到這一頁。</p>
+                <form class="form-grid" id="forgot-form">
+                  <div class="field">
+                    <label for="forgot-email">Email</label>
+                    <input id="forgot-email" type="email" required placeholder="you@example.com" autocomplete="username" />
+                  </div>
+                  <button type="submit" class="btn btn-primary" id="forgot-btn">寄重設信</button>
+                  <p class="msg" id="forgot-msg" role="status"></p>
+                  <p class="hint-line"><button type="button" class="linkish" id="btn-forgot-back">回到登入</button></p>
+                </form>
+              </div>
+            </div>
           </div>
-          <p class="msg" id="oauth-msg" role="status"></p>
         </div>
 
-        <div class="panel">
-          <h2 class="section-h2" style="font-size:1.05rem"><span class="accent"></span><span>Email</span></h2>
-          <div class="auth-tabs">
-            <button type="button" class="active" id="tab-signup">註冊</button>
-            <button type="button" id="tab-login">登入</button>
-          </div>
-          <form class="form-grid" id="reg-form" autocomplete="on">
-            <div>
-              <label for="reg-email">Email</label>
-              <input id="reg-email" name="email" type="email" required placeholder="you@example.com" autocomplete="username" />
-            </div>
-            <div>
-              <label for="reg-pass">密碼（至少 6 碼）</label>
-              <input id="reg-pass" name="password" type="password" required minlength="6" autocomplete="new-password" />
-            </div>
-            <div id="pass2-wrap">
-              <label for="reg-pass2">再輸入一次</label>
-              <input id="reg-pass2" name="password2" type="password" minlength="6" autocomplete="new-password" />
-            </div>
-            <button type="submit" class="btn btn-primary" id="reg-btn">建立帳號</button>
-            <p class="msg" id="reg-msg" role="status"></p>
-          </form>
-        </div>
-      </div>
-
-      <!-- 內部設定提示（預設隱藏；開發時可改 display） -->
-      <div class="setup-box" id="setup-box" style="display:none">
-        <strong style="color:var(--key-deep)">Redirect 設定</strong>
-        <ol style="margin:0.5rem 0 0;padding-left:1.15rem">
-          <li>Site URL：<code id="site-url-hint"></code></li>
-          <li>Redirect：<code id="redirect-hint"></code></li>
-        </ol>
-      </div>
-
-      <div class="panel">
-        <h2 class="section-h2" style="font-size:1.05rem"><span class="accent"></span><span>下載遊戲</span></h2>
-        <div style="display:flex;flex-wrap:wrap;gap:0.5rem">
-          <a class="btn btn-primary" href="download.html">開啟下載頁</a>
-          <a class="btn btn-ghost" id="itch-link" href="https://itch.io">itch（準備中）</a>
+        <p style="margin-top:1.5rem">
+          <a class="btn btn-ghost" href="download.html">下載遊戲</a>
           <a class="btn btn-ghost" href="guide.html">遊戲指南</a>
-          <a class="btn btn-ghost" href="gallery.html">實機畫面</a>
-        </div>
+          <a class="btn btn-ghost" href="walkthrough.html">完整攻略</a>
+        </p>
       </div>
-    </div>
+    </section>
   </main>
 
   <script src="../js/site.js"></script>
@@ -153,32 +157,28 @@
     (function () {
       var cfg = window.BRAVESOUL || {};
       var STORAGE_KEY = "bravesoul_auth_session_v1";
-      var mode = "signup"; // signup | login
+      var PENDING_KEY = "bravesoul_pending_email_v1";
+      var mode = "signup";
+      var pendingEmail = "";
 
       function pagesBase() {
         if (location.protocol === "file:") {
           return (cfg.pages || "https://kevinchu1110.github.io/bravesoul-game/").replace(/\/?$/, "/");
         }
-        // e.g. https://kevinchu1110.github.io/bravesoul-game/pages/account.html
         var p = location.pathname;
         var i = p.lastIndexOf("/pages/");
         if (i >= 0) return location.origin + p.slice(0, i + 1);
         return location.origin + "/";
       }
-
       function accountUrl() {
-        if (location.protocol === "file:") {
-          return pagesBase() + "pages/account.html";
-        }
+        if (location.protocol === "file:") return pagesBase() + "pages/account.html";
         return location.origin + location.pathname;
       }
-
       var redirect = accountUrl();
-      var rh = document.getElementById("redirect-hint");
-      var sh = document.getElementById("site-url-hint");
-      if (rh) rh.textContent = redirect;
-      if (sh) sh.textContent = pagesBase().replace(/\/$/, "") || location.origin;
-      if (cfg.itch) document.getElementById("itch-link").href = cfg.itch;
+      if (cfg.itch) {
+        var itch = document.getElementById("itch-link");
+        if (itch) itch.href = cfg.itch;
+      }
 
       function setMsg(id, text, ok) {
         var el = document.getElementById(id);
@@ -186,11 +186,9 @@
         el.textContent = text || "";
         el.className = "msg " + (ok ? "ok" : text ? "err" : "");
       }
-
       function apiBase() {
         return String(cfg.supabaseUrl || "").replace(/\/$/, "");
       }
-
       function headers(extra) {
         var key = cfg.supabaseAnonKey || "";
         var h = {
@@ -201,55 +199,89 @@
         if (extra) Object.keys(extra).forEach(function (k) { h[k] = extra[k]; });
         return h;
       }
-
       function saveSession(sess) {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(sess));
-        } catch (e) {}
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sess)); } catch (e) {}
       }
-
       function loadSession() {
         try {
           var raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return null;
-          return JSON.parse(raw);
-        } catch (e) {
-          return null;
-        }
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
       }
-
       function clearSession() {
         try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      }
+      function savePending(email) {
+        pendingEmail = email || "";
+        try { localStorage.setItem(PENDING_KEY, pendingEmail); } catch (e) {}
+      }
+      function loadPending() {
+        try { pendingEmail = localStorage.getItem(PENDING_KEY) || ""; } catch (e) { pendingEmail = ""; }
+        return pendingEmail;
+      }
+
+      function validEmail(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      }
+      function passScore(p) {
+        var n = 0;
+        if (p.length >= 8) n++;
+        if (/[A-Za-z]/.test(p) && /\d/.test(p)) n++;
+        if (p.length >= 12 || (/[^A-Za-z0-9]/.test(p) && /[A-Z]/.test(p))) n++;
+        return n;
+      }
+      function passOk(p) {
+        return p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p);
+      }
+      function isConfirmed(user) {
+        if (!user) return false;
+        if (user.email_confirmed_at) return true;
+        var p = user.app_metadata && user.app_metadata.provider;
+        return p && p !== "email";
       }
 
       function parseHashTokens() {
         var hash = location.hash || "";
         if (hash.charAt(0) === "#") hash = hash.slice(1);
-        if (!hash) return null;
         var params = new URLSearchParams(hash);
-        var at = params.get("access_token");
-        var rt = params.get("refresh_token");
+        var q = new URLSearchParams(location.search);
+        var err = params.get("error_description") || params.get("error") || q.get("error_description") || q.get("error");
+        if (err) return { error: err };
+        var at = params.get("access_token") || q.get("access_token");
+        var rt = params.get("refresh_token") || q.get("refresh_token") || "";
+        var type = params.get("type") || q.get("type") || "";
         if (!at) return null;
-        return {
-          access_token: at,
-          refresh_token: rt || "",
-          expires_in: params.get("expires_in"),
-          token_type: params.get("token_type") || "bearer",
-          provider: "oauth"
-        };
+        return { access_token: at, refresh_token: rt, type: type };
+      }
+
+      function show(id, on) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.classList.toggle("hidden", !on);
       }
 
       function showLoggedIn(user, provider) {
         document.getElementById("session-card").classList.add("show");
         document.getElementById("auth-panels").classList.add("hidden");
-        document.getElementById("sess-email").textContent = (user && (user.email || user.user_metadata && user.user_metadata.email)) || "（無 email）";
-        document.getElementById("sess-uid").textContent = (user && user.id) ? String(user.id).slice(0, 8) + "…" : "—";
-        document.getElementById("sess-provider").textContent = provider || (user && user.app_metadata && user.app_metadata.provider) || "email";
+        document.getElementById("sess-email").textContent =
+          (user && (user.email || (user.user_metadata && user.user_metadata.email))) || "（無 email）";
+        document.getElementById("sess-provider").textContent =
+          provider || (user && user.app_metadata && user.app_metadata.provider) || "email";
+        document.getElementById("sess-verified").textContent = isConfirmed(user) ? "已驗證" : "尚未驗證";
       }
-
       function showLoggedOut() {
         document.getElementById("session-card").classList.remove("show");
         document.getElementById("auth-panels").classList.remove("hidden");
+        show("main-auth", true);
+        show("verify-panel", false);
+        show("forgot-panel", false);
+      }
+      function showVerify(email) {
+        if (email) savePending(email);
+        document.getElementById("verify-email").textContent = pendingEmail || email || "你的信箱";
+        show("main-auth", false);
+        show("forgot-panel", false);
+        show("verify-panel", true);
       }
 
       async function fetchUser(accessToken) {
@@ -265,23 +297,37 @@
 
       async function restoreOrHash() {
         var fromHash = parseHashTokens();
-        if (fromHash) {
+        if (fromHash && fromHash.error) {
+          setMsg("oauth-msg", fromHash.error, false);
+          history.replaceState(null, "", location.pathname);
+          showLoggedOut();
+          return;
+        }
+        if (fromHash && fromHash.access_token) {
           try {
             var user = await fetchUser(fromHash.access_token);
+            if (!isConfirmed(user) && (fromHash.type === "signup" || !user.app_metadata || user.app_metadata.provider === "email")) {
+              history.replaceState(null, "", location.pathname);
+              showVerify(user.email);
+              setMsg("verify-msg", "信箱還沒驗證。請點信裡的連結。", false);
+              showLoggedOut();
+              showVerify(user.email);
+              return;
+            }
             var sess = {
               access_token: fromHash.access_token,
               refresh_token: fromHash.refresh_token,
               user: user,
-              provider: (user.app_metadata && user.app_metadata.provider) || "oauth"
+              provider: (user.app_metadata && user.app_metadata.provider) || "email"
             };
             saveSession(sess);
-            // 清掉 hash，避免 token 留在網址列
-            history.replaceState(null, "", location.pathname + location.search);
+            try { localStorage.removeItem(PENDING_KEY); } catch (e) {}
+            history.replaceState(null, "", location.pathname + location.search.replace(/[?&](access_token|refresh_token|type|expires_in|token_type)=[^&]*/g, ""));
             showLoggedIn(user, sess.provider);
-            setMsg("sess-msg", "OAuth 登入成功。", true);
+            setMsg("sess-msg", fromHash.type === "recovery" ? "密碼已重設，你已登入。" : (fromHash.type === "signup" ? "信箱驗證完成，已登入。" : "登入成功。"), true);
             return;
           } catch (e) {
-            setMsg("oauth-msg", "OAuth 回調失敗：" + e.message, false);
+            setMsg("oauth-msg", "回調失敗：" + e.message, false);
           }
         }
         var sess = loadSession();
@@ -297,23 +343,21 @@
           }
         }
         showLoggedOut();
+        if (loadPending()) showVerify(pendingEmail);
       }
 
       function oauth(provider) {
         if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
-          setMsg("oauth-msg", "config.js 缺少 Supabase 設定", false);
+          setMsg("oauth-msg", "尚未接上後端。", false);
           return;
         }
         var q =
           "provider=" + encodeURIComponent(provider) +
           "&redirect_to=" + encodeURIComponent(redirect) +
-          "&scopes=" + encodeURIComponent("") +
           "&apikey=" + encodeURIComponent(cfg.supabaseAnonKey);
-        var url = apiBase() + "/auth/v1/authorize?" + q;
         setMsg("oauth-msg", "前往 " + provider + " 授權…", true);
-        location.href = url;
+        location.href = apiBase() + "/auth/v1/authorize?" + q;
       }
-
       document.getElementById("oauth-google").onclick = function () { oauth("google"); };
       document.getElementById("oauth-github").onclick = function () { oauth("github"); };
       document.getElementById("oauth-discord").onclick = function () { oauth("discord"); };
@@ -336,24 +380,49 @@
         document.getElementById("tab-signup").classList.toggle("active", m === "signup");
         document.getElementById("tab-login").classList.toggle("active", m === "login");
         document.getElementById("pass2-wrap").classList.toggle("hidden", m === "login");
-        document.getElementById("reg-btn").textContent = m === "signup" ? "建立帳號" : "登入";
+        document.getElementById("signup-note").classList.toggle("hidden", m === "login");
+        document.getElementById("pass-strength").hidden = m !== "signup";
+        document.getElementById("forgot-wrap").hidden = m !== "login";
+        document.getElementById("pass-rule").textContent = m === "signup" ? "至少 8 碼，含英文字與數字" : "輸入你的密碼";
+        document.getElementById("reg-btn").textContent = m === "signup" ? "建立帳號並寄驗證信" : "登入";
         document.getElementById("reg-pass").autocomplete = m === "signup" ? "new-password" : "current-password";
+        document.getElementById("reg-pass").minLength = m === "signup" ? 8 : 6;
       }
       document.getElementById("tab-signup").onclick = function () { setTab("signup"); };
       document.getElementById("tab-login").onclick = function () { setTab("login"); };
+
+      document.getElementById("toggle-pass").onclick = function () {
+        var i = document.getElementById("reg-pass");
+        var show = i.type === "password";
+        i.type = show ? "text" : "password";
+        this.textContent = show ? "隱藏" : "顯示";
+      };
+      document.getElementById("reg-pass").addEventListener("input", function () {
+        if (mode !== "signup") return;
+        var bar = document.getElementById("pass-strength");
+        bar.hidden = false;
+        bar.setAttribute("data-n", String(passScore(this.value)));
+      });
 
       document.getElementById("reg-form").onsubmit = async function (ev) {
         ev.preventDefault();
         var email = document.getElementById("reg-email").value.trim();
         var pass = document.getElementById("reg-pass").value;
         var pass2 = document.getElementById("reg-pass2").value;
-        if (pass.length < 6) { setMsg("reg-msg", "密碼至少 6 碼", false); return; }
-        if (mode === "signup" && pass !== pass2) { setMsg("reg-msg", "兩次密碼不一致", false); return; }
-        if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) { setMsg("reg-msg", "未設定後端", false); return; }
+        if (!validEmail(email)) { setMsg("reg-msg", "Email 格式不對。", false); return; }
+        if (mode === "signup") {
+          if (!passOk(pass)) { setMsg("reg-msg", "密碼至少 8 碼，且要有英文字與數字。", false); return; }
+          if (pass !== pass2) { setMsg("reg-msg", "兩次密碼不一致。", false); return; }
+        } else if (pass.length < 6) {
+          setMsg("reg-msg", "請輸入密碼。", false); return;
+        }
+        if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) { setMsg("reg-msg", "尚未接上後端。", false); return; }
         setMsg("reg-msg", "連線中…", true);
         document.getElementById("reg-btn").disabled = true;
         try {
-          var path = mode === "signup" ? "/auth/v1/signup" : "/auth/v1/token?grant_type=password";
+          var path = mode === "signup"
+            ? "/auth/v1/signup?redirect_to=" + encodeURIComponent(redirect)
+            : "/auth/v1/token?grant_type=password";
           var body = mode === "signup"
             ? { email: email, password: pass, data: { app: "cuiling_bravesoul", source: "account_page" } }
             : { email: email, password: pass };
@@ -367,32 +436,120 @@
           if (!res.ok) {
             throw new Error(data.error_description || data.msg || data.error || data.message || ("HTTP " + res.status));
           }
-          // signup may return user without session if confirm email on
           var access = data.access_token || (data.session && data.session.access_token);
           var user = data.user || (data.session && data.session.user);
-          if (access && user) {
-            saveSession({
-              access_token: access,
-              refresh_token: data.refresh_token || (data.session && data.session.refresh_token) || "",
-              user: user,
-              provider: "email"
-            });
-            showLoggedIn(user, "email");
-            setMsg("sess-msg", mode === "signup" ? "註冊並登入成功。" : "登入成功。", true);
-          } else if (mode === "signup") {
-            setMsg("reg-msg", "註冊成功。若需驗證信，請查收信箱後再登入。也可在 Dashboard 關閉 Confirm email。", true);
-            setTab("login");
+          if (mode === "signup") {
+            if (access && user && isConfirmed(user)) {
+              saveSession({
+                access_token: access,
+                refresh_token: data.refresh_token || (data.session && data.session.refresh_token) || "",
+                user: user,
+                provider: "email"
+              });
+              showLoggedIn(user, "email");
+              setMsg("sess-msg", "已註冊並登入（信箱已驗證）。", true);
+            } else {
+              showVerify(email);
+              setMsg("verify-msg", "驗證信已寄出。點信裡的連結後再登入。", true);
+            }
+          } else if (access && user) {
+            if (!isConfirmed(user)) {
+              showVerify(email);
+              setMsg("verify-msg", "這個信箱還沒驗證。請先點信裡的連結。", false);
+            } else {
+              saveSession({
+                access_token: access,
+                refresh_token: data.refresh_token || "",
+                user: user,
+                provider: "email"
+              });
+              showLoggedIn(user, "email");
+              setMsg("sess-msg", "登入成功。", true);
+            }
           } else {
             setMsg("reg-msg", "登入回應異常。", false);
           }
         } catch (e) {
           var t = String(e.message || e);
-          if (/already|exists|registered/i.test(t)) t = "此 Email 已註冊，請改按「登入」。";
+          if (/already|exists|registered/i.test(t)) t = "此 Email 已註冊。請改按「登入」，或重寄驗證信。";
           if (/Invalid login|invalid_grant/i.test(t)) t = "帳號或密碼錯誤。";
-          if (/email_not_confirmed/i.test(t)) t = "信箱尚未驗證（Dashboard 可關閉 Confirm email）。";
+          if (/email_not_confirmed/i.test(t)) {
+            showVerify(document.getElementById("reg-email").value.trim());
+            t = "信箱尚未驗證。請先點驗證信。";
+            setMsg("verify-msg", t, false);
+            document.getElementById("reg-btn").disabled = false;
+            return;
+          }
           setMsg("reg-msg", t, false);
         }
         document.getElementById("reg-btn").disabled = false;
+      };
+
+      var resendWait = 0;
+      document.getElementById("btn-resend").onclick = async function () {
+        var email = pendingEmail || document.getElementById("reg-email").value.trim();
+        if (!validEmail(email)) { setMsg("verify-msg", "找不到要重寄的 Email。", false); return; }
+        if (resendWait > Date.now()) {
+          setMsg("verify-msg", "請稍等再寄。", false);
+          return;
+        }
+        this.disabled = true;
+        try {
+          var res = await fetch(apiBase() + "/auth/v1/resend", {
+            method: "POST",
+            headers: headers(),
+            body: JSON.stringify({ type: "signup", email: email })
+          });
+          var data = {};
+          try { data = await res.json(); } catch (e) {}
+          if (!res.ok) throw new Error(data.error_description || data.msg || data.error || ("HTTP " + res.status));
+          resendWait = Date.now() + 60000;
+          setMsg("verify-msg", "已重寄。請查收 " + email, true);
+        } catch (e) {
+          setMsg("verify-msg", String(e.message || e), false);
+        }
+        this.disabled = false;
+      };
+      document.getElementById("btn-back-login").onclick = function () {
+        show("verify-panel", false);
+        show("main-auth", true);
+        setTab("login");
+        if (pendingEmail) document.getElementById("reg-email").value = pendingEmail;
+        setMsg("reg-msg", "驗證完再登入。", true);
+      };
+
+      document.getElementById("btn-forgot").onclick = function () {
+        show("main-auth", false);
+        show("verify-panel", false);
+        show("forgot-panel", true);
+        document.getElementById("forgot-email").value = document.getElementById("reg-email").value.trim();
+      };
+      document.getElementById("btn-forgot-back").onclick = function () {
+        show("forgot-panel", false);
+        show("main-auth", true);
+        setTab("login");
+      };
+      document.getElementById("forgot-form").onsubmit = async function (ev) {
+        ev.preventDefault();
+        var email = document.getElementById("forgot-email").value.trim();
+        if (!validEmail(email)) { setMsg("forgot-msg", "Email 格式不對。", false); return; }
+        document.getElementById("forgot-btn").disabled = true;
+        try {
+          var res = await fetch(apiBase() + "/auth/v1/recover?redirect_to=" + encodeURIComponent(redirect), {
+            method: "POST",
+            headers: headers(),
+            body: JSON.stringify({ email: email })
+          });
+          if (!res.ok) {
+            var data = {};
+            try { data = await res.json(); } catch (e) {}
+            throw new Error(data.error_description || data.msg || data.error || ("HTTP " + res.status));
+          }
+          setMsg("forgot-msg", "若此信箱有帳號，重設信已寄出。", true);
+        } catch (e) {
+          setMsg("forgot-msg", String(e.message || e), false);
+        }
+        document.getElementById("forgot-btn").disabled = false;
       };
 
       restoreOrHash();
