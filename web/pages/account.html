@@ -105,7 +105,15 @@
                       <input id="reg-pass2" name="password2" type="password" minlength="8" autocomplete="new-password" />
                     </div>
                   </div>
-                  <p class="hint-line" id="signup-note">送出後會寄驗證信。沒點連結不能登入。</p>
+                  <div class="hp-field" aria-hidden="true">
+                    <label for="hp-website">網站</label>
+                    <input id="hp-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+                  </div>
+                  <div class="bot-gate" id="bot-gate">
+                    <p>防機器人：點<strong>橙色葫蘆</strong></p>
+                    <div class="gourd-quiz" id="gourd-quiz"></div>
+                  </div>
+                  <p class="hint-line" id="signup-note">送出後會跳到「去信箱點驗證」。沒點連結不能登入。</p>
                   <button type="submit" class="btn btn-primary" id="reg-btn">建立帳號並寄驗證信</button>
                   <p class="msg" id="reg-msg" role="status"></p>
                   <p class="hint-line" id="forgot-wrap" hidden>
@@ -160,6 +168,35 @@
       var PENDING_KEY = "bravesoul_pending_email_v1";
       var mode = "signup";
       var pendingEmail = "";
+      var formOpened = Date.now();
+      var gourdPicked = "";
+
+      function renderGourdQuiz() {
+        var box = document.getElementById("gourd-quiz");
+        if (!box) return;
+        gourdPicked = "";
+        var items = [
+          { id: "green", src: "../media/souls/gourd_green.png", alt: "綠葫蘆" },
+          { id: "blue", src: "../media/souls/gourd_blue.png", alt: "藍葫蘆" },
+          { id: "purple", src: "../media/souls/gourd_purple.png", alt: "紫葫蘆" },
+          { id: "orange", src: "../media/souls/gourd_orange.png", alt: "橙葫蘆" }
+        ];
+        items.sort(function () { return Math.random() - 0.5; });
+        box.innerHTML = "";
+        items.forEach(function (it) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.setAttribute("aria-label", it.alt);
+          b.innerHTML = '<img src="' + it.src + '" alt="' + it.alt + '">';
+          b.onclick = function () {
+            gourdPicked = it.id;
+            Array.prototype.forEach.call(box.children, function (c) { c.classList.remove("is-on"); });
+            b.classList.add("is-on");
+          };
+          box.appendChild(b);
+        });
+      }
+      renderGourdQuiz();
 
       function pagesBase() {
         if (location.protocol === "file:") {
@@ -282,6 +319,13 @@
         show("main-auth", false);
         show("forgot-panel", false);
         show("verify-panel", true);
+        try {
+          history.replaceState(null, "", location.pathname + "?verify=1");
+        } catch (e) {}
+      }
+
+      function goJoined() {
+        location.replace("download.html?joined=1");
       }
 
       async function fetchUser(accessToken) {
@@ -322,9 +366,13 @@
             };
             saveSession(sess);
             try { localStorage.removeItem(PENDING_KEY); } catch (e) {}
-            history.replaceState(null, "", location.pathname + location.search.replace(/[?&](access_token|refresh_token|type|expires_in|token_type)=[^&]*/g, ""));
+            if (fromHash.type === "signup" || fromHash.type === "email") {
+              goJoined();
+              return;
+            }
+            history.replaceState(null, "", location.pathname);
             showLoggedIn(user, sess.provider);
-            setMsg("sess-msg", fromHash.type === "recovery" ? "密碼已重設，你已登入。" : (fromHash.type === "signup" ? "信箱驗證完成，已登入。" : "登入成功。"), true);
+            setMsg("sess-msg", fromHash.type === "recovery" ? "密碼已重設，你已登入。" : "登入成功。", true);
             return;
           } catch (e) {
             setMsg("oauth-msg", "回調失敗：" + e.message, false);
@@ -343,7 +391,9 @@
           }
         }
         showLoggedOut();
-        if (loadPending()) showVerify(pendingEmail);
+        var q = {};
+        try { q = Object.fromEntries(new URLSearchParams(location.search)); } catch (e) {}
+        if (q.verify === "1" || loadPending()) showVerify(pendingEmail || q.email);
       }
 
       function oauth(provider) {
@@ -383,6 +433,9 @@
         document.getElementById("signup-note").classList.toggle("hidden", m === "login");
         document.getElementById("pass-strength").hidden = m !== "signup";
         document.getElementById("forgot-wrap").hidden = m !== "login";
+        document.getElementById("bot-gate").classList.toggle("hidden", m !== "signup");
+        if (m === "signup") renderGourdQuiz();
+        formOpened = Date.now();
         document.getElementById("pass-rule").textContent = m === "signup" ? "至少 8 碼，含英文字與數字" : "輸入你的密碼";
         document.getElementById("reg-btn").textContent = m === "signup" ? "建立帳號並寄驗證信" : "登入";
         document.getElementById("reg-pass").autocomplete = m === "signup" ? "new-password" : "current-password";
@@ -410,7 +463,14 @@
         var pass = document.getElementById("reg-pass").value;
         var pass2 = document.getElementById("reg-pass2").value;
         if (!validEmail(email)) { setMsg("reg-msg", "Email 格式不對。", false); return; }
+        if (document.getElementById("hp-website").value) {
+          showVerify(email);
+          setMsg("verify-msg", "驗證信已寄出。點信裡的連結後會跳到下載頁。", true);
+          return;
+        }
         if (mode === "signup") {
+          if (Date.now() - formOpened < 1800) { setMsg("reg-msg", "填太快了，請再確認一次。", false); return; }
+          if (gourdPicked !== "orange") { setMsg("reg-msg", "請先點橙色葫蘆（防機器人）。", false); return; }
           if (!passOk(pass)) { setMsg("reg-msg", "密碼至少 8 碼，且要有英文字與數字。", false); return; }
           if (pass !== pass2) { setMsg("reg-msg", "兩次密碼不一致。", false); return; }
         } else if (pass.length < 6) {
@@ -450,7 +510,7 @@
               setMsg("sess-msg", "已註冊並登入（信箱已驗證）。", true);
             } else {
               showVerify(email);
-              setMsg("verify-msg", "驗證信已寄出。點信裡的連結後再登入。", true);
+              setMsg("verify-msg", "驗證信已寄出。點信裡的連結後會跳到下載頁。", true);
             }
           } else if (access && user) {
             if (!isConfirmed(user)) {

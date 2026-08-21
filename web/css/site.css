@@ -438,6 +438,7 @@ input:focus {
 .msg.ok { color: var(--success); }
 .msg.err { color: var(--key-deep); }
 .muted { color: var(--ink-soft); font-size: 0.9rem; }
+.hidden { display: none !important; }
 .divider {
   display: flex; align-items: center; gap: 0.75rem;
   color: var(--ink-faint); font-size: 0.82rem; font-weight: 700;

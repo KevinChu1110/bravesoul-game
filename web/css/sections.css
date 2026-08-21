@@ -1032,6 +1032,45 @@ body[data-page="home"] .gnb.is-scrolled {
   color: var(--key-deep); font: inherit; font-weight: 800;
   cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
 }
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px; height: 1px;
+  overflow: hidden;
+}
+.bot-gate {
+  border: 1px dashed #f2c9d3;
+  background: var(--key-faint);
+  border-radius: 14px;
+  padding: 0.75rem 0.8rem 0.85rem;
+}
+.bot-gate p { margin: 0 0 0.55rem; font-size: 0.86rem; font-weight: 700; color: var(--ink-soft); }
+.gourd-quiz {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+.gourd-quiz button {
+  border: 1px solid var(--line-soft);
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.35rem;
+  cursor: pointer;
+}
+.gourd-quiz button img { width: 100%; height: auto; display: block; }
+.gourd-quiz button.is-on {
+  border-color: var(--key-deep);
+  box-shadow: 0 0 0 3px rgba(194, 94, 115, 0.22);
+}
+.welcome-banner {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.25rem;
+  color: #fff;
+}
+.welcome-banner strong { color: #ffc4d2; }
 
 body[data-page="account"] .page-hero {
   min-height: 0;

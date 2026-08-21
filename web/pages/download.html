@@ -21,6 +21,9 @@
 
   <section class="band band--ink">
     <div class="container">
+      <div class="welcome-banner hidden" id="joined-banner">
+        <strong>信箱驗證完成，帳號已開通。</strong> 下載遊戲後，Esc → 連線／帳號用同一組 Email 登入。
+      </div>
       <div class="sec-head" style="margin-bottom:1.5rem">
         <p class="sec-kicker" style="color:#ffc4d2">Release</p>
         <h2 class="sec-title" style="color:#fff">最新建置 <span id="ver-label">v0.15.0</span></h2>
@@ -121,6 +124,12 @@
         var itch = document.getElementById("itch-link");
         if (itch) itch.href = cfg.itch;
       }
+      try {
+        if (new URLSearchParams(location.search).get("joined") === "1") {
+          var b = document.getElementById("joined-banner");
+          if (b) b.classList.remove("hidden");
+        }
+      } catch (e) {}
     })();
   </script>
 </body>
