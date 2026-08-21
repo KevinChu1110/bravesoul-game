@@ -493,6 +493,8 @@ code {
   background: var(--cream); border: 1px solid var(--line-soft);
   border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card);
   display: flex; flex-direction: column;
+  cursor: pointer;
+  text-align: left;
   transition:
     transform var(--dur) var(--ease-out),
     box-shadow var(--dur) var(--ease-out),
@@ -504,7 +506,7 @@ code {
   border-color: #f2c9d3;
 }
 .equip-card .thumb {
-  aspect-ratio: 1; background: var(--wood-dark);
+  aspect-ratio: 1; background: #f4eff2;
   display: grid; place-items: center; padding: 0.75rem;
   overflow: hidden;
 }
@@ -518,6 +520,44 @@ code {
 .equip-card h3 { margin: 0 0 0.4rem; font-size: 1.02rem; font-weight: 800; }
 .equip-card .meta-row { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.4rem; }
 .equip-card .stats { margin: 0; font-size: 0.86rem; color: var(--ink-soft); font-weight: 600; }
+
+.codex-lb {
+  position: fixed; inset: 0; z-index: 80;
+  background: rgba(32, 28, 32, 0.62);
+  display: none; place-items: center;
+  padding: 1.25rem;
+}
+.codex-lb.show { display: grid; }
+.codex-sheet {
+  width: min(520px, 100%);
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 24px 64px rgba(32,28,32,0.35);
+  overflow: hidden;
+  max-height: min(88vh, 720px);
+  display: flex; flex-direction: column;
+}
+.codex-sheet .art {
+  height: 220px;
+  background: #f4eff2;
+  display: grid; place-items: center;
+  padding: 1.2rem;
+  position: relative;
+}
+.codex-sheet .art img {
+  max-width: 72%; max-height: 180px; object-fit: contain;
+}
+.codex-sheet .close {
+  position: absolute; top: 0.7rem; right: 0.7rem;
+  width: 36px; height: 36px; border-radius: 999px;
+  border: 1px solid var(--line); background: #fff;
+  font-weight: 800; cursor: pointer;
+}
+.codex-sheet .pad { padding: 1.1rem 1.25rem 1.4rem; overflow: auto; }
+.codex-sheet h2 { margin: 0 0 0.35rem; font-size: 1.35rem; }
+.codex-sheet .desc { margin: 0.5rem 0 0.85rem; color: var(--ink-soft); }
+.codex-stats { width: 100%; }
+.codex-stats th { width: 38%; }
 
 .gallery-grid {
   display: grid;

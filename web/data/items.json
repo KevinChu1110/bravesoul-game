@@ -1,0 +1,194 @@
+{
+  "schema": "items_v1",
+  "items": {
+    "hp_s": {
+      "id": "hp_s",
+      "name": "小紅水",
+      "desc": "恢復 25 生命。",
+      "kind": "consumable",
+      "sell": null,
+      "buy": null,
+      "heal": 25
+    },
+    "hp_m": {
+      "id": "hp_m",
+      "name": "中紅水",
+      "desc": "恢復 55 生命。",
+      "kind": "consumable",
+      "sell": null,
+      "buy": null,
+      "heal": 55
+    },
+    "bread": {
+      "id": "bread",
+      "name": "乾糧",
+      "desc": "恢復 15 生命。路上充飢。",
+      "kind": "consumable",
+      "sell": null,
+      "buy": null,
+      "heal": 15
+    },
+    "dust_crumb": {
+      "id": "dust_crumb",
+      "name": "星屑碎",
+      "desc": "使用後獲得 1 星屑。",
+      "kind": "consumable",
+      "sell": null,
+      "buy": null,
+      "heal": null
+    },
+    "antidote": {
+      "id": "antidote",
+      "name": "清焰露",
+      "desc": "恢復 10 生命，並略提振精神。",
+      "kind": "consumable",
+      "sell": null,
+      "buy": null,
+      "heal": 10
+    },
+    "key_rusty": {
+      "id": "key_rusty",
+      "name": "鏽劍（紀念）",
+      "desc": "村口撿起的那把。已鍛成正器後仍留念。",
+      "kind": "key",
+      "sell": null,
+      "buy": null,
+      "heal": null
+    },
+    "map_scrap": {
+      "id": "map_scrap",
+      "name": "六域殘圖",
+      "desc": "行商撕給你的一角。可看不可吃。",
+      "kind": "key",
+      "sell": null,
+      "buy": null,
+      "heal": null
+    },
+    "medal": {
+      "id": "medal",
+      "name": "勳章",
+      "desc": "傭兵／演武功績。手藝工坊可用 50 枚點燃熔爐（原作替代金幣）。",
+      "kind": "key",
+      "sell": null,
+      "buy": null,
+      "heal": null
+    },
+    "relic_token": {
+      "id": "relic_token",
+      "name": "秘境印記",
+      "desc": "通關秘境留下的印。收藏用。",
+      "kind": "key",
+      "sell": null,
+      "buy": null,
+      "heal": null
+    },
+    "wolf_fang": {
+      "id": "wolf_fang",
+      "name": "狼牙",
+      "desc": "雜魚掉落。可賣 8 金。",
+      "kind": "material",
+      "sell": 8,
+      "buy": null,
+      "heal": null
+    },
+    "mist_shard": {
+      "id": "mist_shard",
+      "name": "霧晶",
+      "desc": "霧影掉落。可賣 12 金。",
+      "kind": "material",
+      "sell": 12,
+      "buy": null,
+      "heal": null
+    },
+    "sea_shell": {
+      "id": "sea_shell",
+      "name": "潮貝",
+      "desc": "海岸掉落。可賣 10 金。",
+      "kind": "material",
+      "sell": 10,
+      "buy": null,
+      "heal": null
+    },
+    "scar_ember": {
+      "id": "scar_ember",
+      "name": "疤焰燼",
+      "desc": "疤地掉落。可賣 15 金。",
+      "kind": "material",
+      "sell": 15,
+      "buy": null,
+      "heal": null
+    },
+    "hunt_hide": {
+      "id": "hunt_hide",
+      "name": "溢皮",
+      "desc": "狩獵場材料。可在溢物回收換金。",
+      "kind": "material",
+      "sell": 10,
+      "buy": null,
+      "heal": null
+    },
+    "hunt_bone": {
+      "id": "hunt_bone",
+      "name": "焰骨",
+      "desc": "狩獵場中階材料。",
+      "kind": "material",
+      "sell": 22,
+      "buy": null,
+      "heal": null
+    },
+    "hunt_core": {
+      "id": "hunt_core",
+      "name": "溢核",
+      "desc": "狩獵場稀有核。溢物回收價最好。",
+      "kind": "material",
+      "sell": 60,
+      "buy": null,
+      "heal": null
+    },
+    "iron_scrap": {
+      "id": "iron_scrap",
+      "name": "鐵屑",
+      "desc": "鍛造基礎材。鐵匠與商店都收。",
+      "kind": "material",
+      "sell": 6,
+      "buy": 14,
+      "heal": null
+    },
+    "star_ore": {
+      "id": "star_ore",
+      "name": "星砂礦",
+      "desc": "抽魂／獵場武器材料。",
+      "kind": "material",
+      "sell": 10,
+      "buy": 22,
+      "heal": null
+    },
+    "oak_resin": {
+      "id": "oak_resin",
+      "name": "橡脂",
+      "desc": "穩固與飾品材料。",
+      "kind": "material",
+      "sell": 8,
+      "buy": 18,
+      "heal": null
+    },
+    "knight_shard": {
+      "id": "knight_shard",
+      "name": "騎士碎鐵",
+      "desc": "騎士域鍛造碎片。可做軍刀線。",
+      "kind": "material",
+      "sell": 12,
+      "buy": 28,
+      "heal": null
+    },
+    "friendship_key": {
+      "id": "friendship_key",
+      "name": "友誼鑰匙",
+      "desc": "好友挑戰勝利所得。三把開一個友誼寶箱。",
+      "kind": "key",
+      "sell": 0,
+      "buy": null,
+      "heal": null
+    }
+  }
+}

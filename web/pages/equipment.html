@@ -40,6 +40,7 @@
         <button type="button" class="chip" data-filter="soul">戰魂</button>
         <button type="button" class="chip" data-filter="vessel">葫蘆</button>
         <button type="button" class="chip" data-filter="gem">寶石</button>
+        <button type="button" class="chip" data-filter="material">材料</button>
       </div>
 
       <h2 class="section-h2" style="margin-top:1.25rem"><span class="accent"></span><span>圖鑑</span></h2>
@@ -88,6 +89,8 @@
         </table>
       </div>
 
+      <p class="muted" style="margin-top:0.75rem">點卡片可看完整素質與鍛造需求。</p>
+
       <p style="margin-top:1.5rem">
         <a class="btn btn-primary" href="weapons.html">武器流派</a>
         <a class="btn btn-ghost" href="systems.html">器／魂／招</a>
@@ -97,6 +100,20 @@
     </div>
     </section>
   </main>
+  <div class="codex-lb" id="codex-lb" role="dialog" aria-modal="true" hidden>
+    <div class="codex-sheet">
+      <div class="art">
+        <button type="button" class="close" id="codex-close" aria-label="關閉">×</button>
+        <img id="codex-img" alt="" />
+      </div>
+      <div class="pad">
+        <h2 id="codex-name"></h2>
+        <div class="meta-row" id="codex-tags"></div>
+        <p class="desc" id="codex-desc"></p>
+        <table class="codex-stats" id="codex-stats"></table>
+      </div>
+    </div>
+  </div>
   <script src="../js/site.js"></script>
   <script>
     (function () {
@@ -112,12 +129,15 @@
       };
       var FILTER_LABEL = {
         all: "全部", weapon: "武器", armor: "防具", accessory: "飾品",
-        soul: "戰魂", vessel: "葫蘆", gem: "寶石"
+        soul: "戰魂", vessel: "葫蘆", gem: "寶石", material: "材料"
       };
+      var ACC_SLOTS = ["ring","necklace","bracelet","earring","amulet","belt"];
       var allItems = [];
       var craftList = [];
       var filter = "all";
       var nameById = {};
+      var descById = {};
+      var byId = {};
 
       function statsLine(s) {
         if (!s) return "";
@@ -149,9 +169,10 @@
         var list = allItems.filter(function (it) {
           if (filter === "all") return true;
           if (filter === "accessory") {
-            return it.kind === "equip" && (it.slot === "accessory" || SLOT_LABEL[it.slot] && ["ring","necklace","bracelet","earring","amulet","belt"].indexOf(it.slot) >= 0);
+            return it.kind === "equip" && ACC_SLOTS.indexOf(it.slot) >= 0;
           }
           if (filter === "weapon" || filter === "armor") return it.kind === "equip" && it.slot === filter;
+          if (filter === "material") return it.kind === "material" || it.kind === "consumable" || it.kind === "key";
           return it.kind === filter;
         });
         list.sort(function (a, b) {
@@ -182,8 +203,71 @@
             img.dataset.fb = "1";
             img.src = fallbackIcon(it);
           });
+          card.addEventListener("click", function () { openDetail(it); });
           grid.appendChild(card);
         });
+      }
+
+      function relatedCraft(it) {
+        var lines = [];
+        craftList.forEach(function (r) {
+          var pid = r.base_id || r.id;
+          var mats = r.mats || {};
+          if (pid === it.id) {
+            var matStr = Object.keys(mats).map(function (k) {
+              return (nameById[k] || k) + " ×" + mats[k];
+            }).join("、");
+            lines.push("鍛成此件：" + (r.gold || 0) + " 金" + (matStr ? " · " + matStr : "") +
+              " · 器階 ≥ " + (r.need_tier || 1));
+          } else if (mats[it.id]) {
+            lines.push("用於鍛造【" + (nameById[pid] || pid) + "】×" + mats[it.id]);
+          }
+        });
+        return lines;
+      }
+
+      function openDetail(it) {
+        var lb = document.getElementById("codex-lb");
+        var img = document.getElementById("codex-img");
+        img.src = iconFor(it);
+        img.alt = it.name;
+        img.onerror = function () { img.src = fallbackIcon(it); };
+        document.getElementById("codex-name").textContent = it.name;
+        var tags = document.getElementById("codex-tags");
+        tags.innerHTML = "";
+        function addTag(t) {
+          if (!t) return;
+          var s = document.createElement("span");
+          s.className = "tag";
+          s.textContent = t;
+          tags.appendChild(s);
+        }
+        addTag(SLOT_LABEL[it.slot] || FILTER_LABEL[it.kind]);
+        if (it.tier) addTag("器階 T" + it.tier);
+        if (it.line) addTag(LINE_LABEL[it.line] || it.line);
+        document.getElementById("codex-desc").textContent = it.desc || it.note || "點進遊戲裡，數值會再浮動。";
+        var rows = [];
+        var st = it.stats || {};
+        function row(k, v) { if (v !== undefined && v !== null && v !== 0 && v !== "") rows.push("<tr><th>" + k + "</th><td>" + v + "</td></tr>"); }
+        row("攻擊", st.atk);
+        row("防禦", st.def);
+        row("生命", st.hp);
+        row("暴擊", st.crit ? st.crit + "%" : "");
+        row("暴傷", st.crit_dmg ? st.crit_dmg + "%" : "");
+        row("售價", it.sell != null ? it.sell + " 金" : "");
+        row("商店買入", it.buy != null ? it.buy + " 金" : "");
+        row("恢復", it.heal != null ? it.heal + " 生命" : "");
+        relatedCraft(it).forEach(function (line) { rows.push("<tr><th>鍛造</th><td>" + line + "</td></tr>"); });
+        if (!rows.length) rows.push("<tr><th>說明</th><td>" + (it.note || "—") + "</td></tr>");
+        document.getElementById("codex-stats").innerHTML = rows.join("");
+        lb.hidden = false;
+        lb.classList.add("show");
+      }
+
+      function closeDetail() {
+        var lb = document.getElementById("codex-lb");
+        lb.classList.remove("show");
+        lb.hidden = true;
       }
 
       function renderCraft() {
@@ -195,7 +279,7 @@
         tb.innerHTML = craftList.map(function (r) {
           var mats = r.mats || r.materials || {};
           var matStr = Object.keys(mats).map(function (k) {
-            return (nameById[k] || k) + " ×" + mats[k];
+            return (nameById[k] || descById[k] || k) + " ×" + mats[k];
           }).join("、");
           var name = nameById[r.base_id] || nameById[r.id] || r.base_id || r.id;
           return "<tr>" +
@@ -207,6 +291,14 @@
             "</tr>";
         }).join("");
       }
+
+      document.getElementById("codex-close").addEventListener("click", closeDetail);
+      document.getElementById("codex-lb").addEventListener("click", function (ev) {
+        if (ev.target.id === "codex-lb") closeDetail();
+      });
+      document.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape") closeDetail();
+      });
 
       document.getElementById("filters").addEventListener("click", function (ev) {
         var btn = ev.target.closest("[data-filter]");
@@ -222,14 +314,15 @@
         fetch("../data/equipment.json").then(function (r) { return r.json(); }),
         fetch("../data/souls.json").then(function (r) { return r.json(); }),
         fetch("../data/gems.json").then(function (r) { return r.json(); }),
+        fetch("../data/items.json").then(function (r) { return r.json(); }),
       ]).then(function (pack) {
-        var data = pack[0], souls = pack[1], gems = pack[2];
+        var data = pack[0], souls = pack[1], gems = pack[2], bag = pack[3];
         var bases = data.bases || {};
         Object.keys(bases).forEach(function (id) {
           var b = bases[id];
           var slot = b.slot || "weapon";
           nameById[id] = b.name;
-          allItems.push({
+          var rec = {
             id: id,
             name: b.name,
             slot: slot,
@@ -237,7 +330,10 @@
             line: b.line,
             tier: b.tier,
             stats: b.base || b.stats || {},
-          });
+            desc: "鍛造或掉落。數值為基底，實際會依品質浮動。",
+          };
+          allItems.push(rec);
+          byId[id] = rec;
         });
         craftList = data.craft_recipes || data.craft || [];
         (souls.vessels || []).forEach(function (v) {
@@ -262,6 +358,24 @@
           allItems.push({
             id: g.id, name: g.name, kind: "gem", slot: "gem",
             icon: g.icon, note: "武器：" + g.weapon + " · 防具：" + g.armor,
+            desc: "原作手藝工坊寶石。3 合 1 升階，鑲上必定成功，只能替換。",
+          });
+        });
+        var bagItems = (bag && bag.items) || {};
+        Object.keys(bagItems).forEach(function (id) {
+          var it = bagItems[id];
+          nameById[id] = it.name;
+          descById[id] = it.name;
+          allItems.push({
+            id: id,
+            name: it.name,
+            kind: it.kind || "material",
+            slot: it.kind === "consumable" ? "material" : (it.kind || "material"),
+            desc: it.desc,
+            sell: it.sell,
+            buy: it.buy,
+            heal: it.heal,
+            icon: "../media/equipment/" + id + ".png",
           });
         });
         render();
