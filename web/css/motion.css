@@ -1,0 +1,217 @@
+/* 勇者之魂 · 氣氛動效（餘燼／魂塵／葫蘆擺） */
+
+.fx-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.hero .fx-layer { z-index: 2; }
+.hero-copy { z-index: 3; }
+.page-hero .fx-layer { z-index: 0; }
+.page-hero .container { z-index: 2; }
+
+.fx-ember,
+.fx-dust {
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
+  object-fit: cover;
+  mix-blend-mode: screen;
+  opacity: 0.42;
+  animation: fxDrift 28s linear infinite alternate;
+}
+.fx-dust { opacity: 0.35; animation-duration: 36s; }
+.fx-wisp {
+  position: absolute;
+  height: 78%;
+  width: auto;
+  max-width: 38%;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  animation: fxWisp 9s ease-in-out infinite alternate;
+}
+.fx-wisp--l { left: -6%; bottom: -8%; transform-origin: bottom center; }
+.fx-wisp--r {
+  right: -8%;
+  bottom: -12%;
+  transform: scaleX(-1);
+  animation-delay: -3s;
+  opacity: 0.4;
+}
+canvas.fx-embers {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes fxDrift {
+  from { transform: translate3d(0, 0, 0) scale(1.02); }
+  to { transform: translate3d(-2.5%, -3%, 0) scale(1.08); }
+}
+@keyframes fxWisp {
+  from { transform: translate3d(0, 8px, 0) rotate(-2deg); }
+  to { transform: translate3d(10px, -14px, 0) rotate(3deg); }
+}
+.fx-wisp--r {
+  animation-name: fxWispFlip;
+}
+@keyframes fxWispFlip {
+  from { transform: scaleX(-1) translate3d(0, 6px, 0) rotate(2deg); }
+  to { transform: scaleX(-1) translate3d(-12px, -16px, 0) rotate(-3deg); }
+}
+
+/* 內頁 hero 背景緩緩 ken */
+.page-hero::before {
+  transform: scale(1.08);
+  animation: heroKen 22s var(--ease-soft) infinite alternate;
+}
+
+/* 橫列自動漫遊 */
+.rail.is-marquee {
+  display: flex;
+  width: max-content;
+  animation: railSlide 48s linear infinite;
+}
+.rail-wrap:hover .rail.is-marquee { animation-play-state: paused; }
+@keyframes railSlide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* 遊戲葫蘆懸掛擺動 */
+.gourd-hang {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(1.2rem, 4vw, 3.2rem);
+  padding: 0 1rem 0.4rem;
+  background: linear-gradient(180deg, #2b2630 0%, #201c20 100%);
+  overflow: hidden;
+}
+.gourd-hang__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  animation: gourdSwing 3.6s ease-in-out infinite;
+}
+.gourd-hang__item:nth-child(2) { animation-duration: 4.1s; animation-delay: -0.6s; }
+.gourd-hang__item:nth-child(3) { animation-duration: 3.4s; animation-delay: -1.2s; }
+.gourd-hang__item:nth-child(4) { animation-duration: 4.4s; animation-delay: -0.2s; }
+.gourd-hang__rope {
+  width: 2px;
+  height: 28px;
+  background: linear-gradient(#6b5344, #3a2c24);
+  border-radius: 1px;
+}
+.gourd-hang__item img {
+  width: clamp(52px, 9vw, 88px);
+  height: auto;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.45));
+}
+@keyframes gourdSwing {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5.5deg); }
+}
+
+/* 生成圖：聚魂殿橫幅 */
+.gourd-banner {
+  position: relative;
+  overflow: hidden;
+  height: clamp(160px, 28vw, 280px);
+  background: #1a1418;
+}
+.gourd-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+  animation: heroKen 26s var(--ease-soft) infinite alternate;
+}
+.gourd-banner .cap {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(to top, rgba(20, 16, 20, 0.82), transparent);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* 魂塵蓋在墨色帶 */
+.band--ink { position: relative; isolation: isolate; }
+.band--ink .fx-dust-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: screen;
+  opacity: 0.28;
+  pointer-events: none;
+  z-index: 0;
+  animation: fxDrift 40s linear infinite alternate;
+}
+.band--ink > .container,
+.band--ink > .rail-wrap { position: relative; z-index: 1; }
+
+.band--ink .fx-wisp {
+  z-index: 0;
+  height: 70%;
+  opacity: 0.38;
+}
+
+/* 終章背景緩動 */
+.cta-finale__bg {
+  animation: heroKen 20s var(--ease-soft) infinite alternate;
+}
+
+/* 活著標籤呼吸 */
+.tag-live {
+  animation: livePulse 2.4s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(194, 94, 115, 0); }
+  50% { box-shadow: 0 0 0 6px rgba(194, 94, 115, 0.2); }
+}
+
+/* 引用帶微光 */
+.quote-band {
+  position: relative;
+  overflow: hidden;
+}
+.quote-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 120%, rgba(228, 132, 156, 0.22), transparent 58%);
+  animation: quoteGlow 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes quoteGlow {
+  from { opacity: 0.45; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-layer,
+  .gourd-hang,
+  .gourd-banner img,
+  .fx-dust-bg,
+  .fx-ember,
+  .fx-wisp,
+  .cta-finale__bg,
+  .tag-live,
+  .quote-band::after,
+  .rail.is-marquee,
+  .page-hero::before {
+    animation: none !important;
+  }
+  .gourd-hang__item { animation: none !important; }
+}

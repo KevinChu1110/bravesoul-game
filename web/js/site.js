@@ -27,20 +27,20 @@
     return t.content.firstChild;
   }
 
-  /* 確保 sections.css 有載入（舊頁沒手寫 link 時補上） */
-  (function ensureSectionsCss() {
-    var href = depth + "/css/sections.css";
-    var found = false;
-    Array.prototype.forEach.call(document.styleSheets, function () {});
-    Array.prototype.forEach.call(document.querySelectorAll('link[rel="stylesheet"]'), function (l) {
-      if ((l.getAttribute("href") || "").indexOf("sections.css") >= 0) found = true;
+  /* 確保 sections.css / motion.css 有載入 */
+  (function ensureCss() {
+    ["sections.css", "motion.css"].forEach(function (name) {
+      var found = false;
+      Array.prototype.forEach.call(document.querySelectorAll('link[rel="stylesheet"]'), function (l) {
+        if ((l.getAttribute("href") || "").indexOf(name) >= 0) found = true;
+      });
+      if (!found) {
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = depth + "/css/" + name;
+        document.head.appendChild(link);
+      }
     });
-    if (!found) {
-      var link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = href;
-      document.head.appendChild(link);
-    }
   })();
 
   var nav = el(
@@ -253,11 +253,139 @@
     }
   }
 
+  function setupAtmosphere() {
+    if (reduceMotion) return;
+    var emberSrc = depth + "/media/fx/ember_field.jpg";
+    var wispSrc = depth + "/media/fx/flame_wisp.jpg";
+    var dustSrc = depth + "/media/fx/soul_dust.jpg";
+    document.querySelectorAll(".hero, .page-hero").forEach(function (host) {
+      if (host.querySelector(".fx-layer")) return;
+      var layer = document.createElement("div");
+      layer.className = "fx-layer";
+      layer.setAttribute("aria-hidden", "true");
+      layer.innerHTML =
+        '<img class="fx-ember" src="' + emberSrc + '" alt="" />' +
+        '<img class="fx-wisp fx-wisp--l" src="' + wispSrc + '" alt="" />' +
+        '<img class="fx-wisp fx-wisp--r" src="' + wispSrc + '" alt="" />' +
+        '<canvas class="fx-embers"></canvas>';
+      host.appendChild(layer);
+      setupEmberCanvas(layer.querySelector("canvas"));
+    });
+    document.querySelectorAll(".band--ink").forEach(function (band) {
+      if (band.querySelector(".fx-dust-bg")) return;
+      var img = document.createElement("img");
+      img.className = "fx-dust-bg";
+      img.src = dustSrc;
+      img.alt = "";
+      img.setAttribute("aria-hidden", "true");
+      band.insertBefore(img, band.firstChild);
+      var w = document.createElement("img");
+      w.className = "fx-wisp fx-wisp--l";
+      w.src = wispSrc;
+      w.alt = "";
+      band.appendChild(w);
+    });
+  }
+
+  function setupEmberCanvas(canvas) {
+    if (!canvas || reduceMotion) return;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    var dots = [];
+    var running = true;
+    function size() {
+      var r = canvas.getBoundingClientRect();
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.floor(r.width * dpr));
+      canvas.height = Math.max(1, Math.floor(r.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var n = Math.max(18, Math.min(42, Math.floor(r.width / 28)));
+      dots = [];
+      for (var i = 0; i < n; i++) {
+        dots.push({
+          x: Math.random() * r.width,
+          y: Math.random() * r.height,
+          r: 0.6 + Math.random() * 1.8,
+          s: 0.18 + Math.random() * 0.55,
+          a: 0.25 + Math.random() * 0.55,
+          hue: Math.random() < 0.35 ? "255,196,210" : "228,132,156",
+        });
+      }
+    }
+    size();
+    window.addEventListener("resize", size, { passive: true });
+    var vis = new IntersectionObserver(function (entries) {
+      running = entries[0] && entries[0].isIntersecting;
+    });
+    vis.observe(canvas);
+    function tick() {
+      if (running) {
+        var w = canvas.clientWidth;
+        var h = canvas.clientHeight;
+        ctx.clearRect(0, 0, w, h);
+        dots.forEach(function (d) {
+          d.y -= d.s;
+          d.x += Math.sin(d.y * 0.02) * 0.25;
+          if (d.y < -4) {
+            d.y = h + 4;
+            d.x = Math.random() * w;
+          }
+          ctx.beginPath();
+          ctx.fillStyle = "rgba(" + d.hue + "," + d.a.toFixed(2) + ")";
+          ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function setupMarquee() {
+    if (reduceMotion) return;
+    document.querySelectorAll(".rail").forEach(function (rail) {
+      if (rail.dataset.marquee === "1") return;
+      var kids = Array.prototype.slice.call(rail.children);
+      if (kids.length < 3) return;
+      kids.forEach(function (n) {
+        rail.appendChild(n.cloneNode(true));
+      });
+      rail.classList.add("is-marquee");
+      rail.dataset.marquee = "1";
+    });
+  }
+
+  function setupCountUp() {
+    if (reduceMotion || !("IntersectionObserver" in window)) return;
+    document.querySelectorAll(".stat__n").forEach(function (el) {
+      var raw = (el.textContent || "").trim();
+      if (!/^\d+$/.test(raw)) return;
+      var target = parseInt(raw, 10);
+      el.textContent = "0";
+      var io = new IntersectionObserver(function (entries) {
+        if (!entries[0] || !entries[0].isIntersecting) return;
+        io.disconnect();
+        var start = performance.now();
+        function step(now) {
+          var t = Math.min(1, (now - start) / 900);
+          var ease = 1 - Math.pow(1 - t, 3);
+          el.textContent = String(Math.round(target * ease));
+          if (t < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }, { threshold: 0.4 });
+      io.observe(el);
+    });
+  }
+
   function boot() {
     setupReveal();
-    setupTilt();
     setupParallax();
     setupHeroVideo();
+    setupAtmosphere();
+    setupMarquee();
+    setupTilt();
+    setupCountUp();
   }
 
   window.BS_refreshMotion = function () {
