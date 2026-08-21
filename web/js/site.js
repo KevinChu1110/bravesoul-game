@@ -74,7 +74,7 @@
     '<footer><div class="container footer-inner">' +
       "<div>" +
       brand +
-      " · 一隻不慕強權的兔子</div>" +
+      " · 傭兵團最弱的新人</div>" +
       '<div><a href="' +
       depth +
       '/index.html">首頁</a> · <a href="' +
