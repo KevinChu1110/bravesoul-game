@@ -16,6 +16,11 @@
     { href: depth + "/pages/download.html", id: "download", label: "下載" },
     { href: depth + "/pages/account.html", id: "account", label: "帳號" },
   ];
+  var vp = document.querySelector('meta[name="viewport"]');
+  if (vp) {
+    vp.setAttribute("content", "width=device-width, initial-scale=1, viewport-fit=cover");
+  }
+
   var active = document.body.getAttribute("data-page") || "home";
   var reduceMotion =
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -29,7 +34,7 @@
 
   /* 確保 sections.css / motion.css 有載入 */
   (function ensureCss() {
-    ["sections.css", "motion.css"].forEach(function (name) {
+    ["sections.css", "motion.css", "rwd.css"].forEach(function (name) {
       var found = false;
       Array.prototype.forEach.call(document.querySelectorAll('link[rel="stylesheet"]'), function (l) {
         if ((l.getAttribute("href") || "").indexOf(name) >= 0) found = true;
@@ -52,6 +57,8 @@
       "</span></a>" +
       '<div class="gnb-menu" id="gnb-menu"></div>' +
       '<div class="gnb-actions">' +
+      '<button type="button" class="gnb-toggle" id="gnb-toggle" aria-label="打開選單" aria-expanded="false" aria-controls="gnb-menu">' +
+      "<span></span><span></span><span></span></button>" +
       '<a class="btn btn-primary" href="' +
       depth +
       '/pages/download.html">下載</a></div>' +
@@ -67,6 +74,40 @@
     if (L.id === active) a.className = "active";
     menu.appendChild(a);
   });
+
+  (function setupMobileNav() {
+    var toggle = document.getElementById("gnb-toggle");
+    if (!toggle) return;
+    function close() {
+      nav.classList.remove("is-open");
+      document.body.classList.remove("is-nav-lock");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "打開選單");
+    }
+    function open() {
+      nav.classList.add("is-open");
+      document.body.classList.add("is-nav-lock");
+      toggle.setAttribute("aria-expanded", "true");
+      toggle.setAttribute("aria-label", "關閉選單");
+    }
+    toggle.addEventListener("click", function () {
+      if (nav.classList.contains("is-open")) close();
+      else open();
+    });
+    menu.querySelectorAll("a").forEach(function (a) {
+      a.addEventListener("click", close);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") close();
+    });
+    window.addEventListener(
+      "resize",
+      function () {
+        if (window.innerWidth > 1080) close();
+      },
+      { passive: true }
+    );
+  })();
 
   var social = cfg.facebook
     ? ' · <a href="' + cfg.facebook + '" target="_blank" rel="noopener">Facebook</a>'
@@ -343,6 +384,7 @@
 
   function setupMarquee() {
     if (reduceMotion) return;
+    if (window.matchMedia && window.matchMedia("(max-width: 1080px)").matches) return;
     document.querySelectorAll(".rail").forEach(function (rail) {
       if (rail.dataset.marquee === "1") return;
       var kids = Array.prototype.slice.call(rail.children);

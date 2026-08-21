@@ -396,7 +396,6 @@ a.card:hover .meta { color: var(--ink); }
 }
 @media (max-width: 900px) {
   .sys-grid { grid-template-columns: 1fr; }
-  .gnb-menu { display: none; }
 }
 .sys-card {
   background: var(--cream);
