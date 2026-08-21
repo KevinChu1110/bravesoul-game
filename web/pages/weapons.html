@@ -15,7 +15,7 @@
     <div class="container">
       <div class="breadcrumb"><a href="../index.html">首頁</a> / 武器系統</div>
       <h1>六職 · 雙武器系統</h1>
-      <p>戰鬥 HUD 三欄武器。次數耗盡自動切下一把；技能只吃手上那把。不是主副——<strong>每一職兩套對等系統</strong>。</p>
+      <p>原作：<strong>武器決定攻速與次數</strong>，技能綁定武器類型。本作做成十二條武器線、戰鬥三欄，耗盡自動切。</p>
     </div>
   </header>
 
@@ -97,7 +97,7 @@
           var prof = PROF_LABEL[c.profession] || c.profession || "";
           card.innerHTML =
             '<div class="icon-row">' +
-              '<div class="icon" style="background:' + (c.color || "#eee") + '22;display:grid;place-items:center;font-size:1.4rem;font-weight:800;color:' + (c.color || "#333") + '">' + (c.name || "?") + "</div>" +
+              '<div class="icon" style="background:' + (c.color || "#eee") + '22;overflow:hidden"><img src="../media/equipment/weapons/' + c.id + '.png" alt="' + (c.name || "") + '" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display=\'none\'"></div>' +
               "<div><h3>" + c.name + " · " + c.title + "</h3>" +
               '<p class="tagline">' + (prof ? ("【" + prof + "】") : "") + (c.tagline || "") + "</p></div></div>" +
             '<p class="muted" style="margin:0">玩法：' + (c.play || "") + "</p>" +

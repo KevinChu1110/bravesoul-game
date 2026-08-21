@@ -7,7 +7,7 @@
   var links = [
     { href: depth + "/index.html", id: "home", label: "首頁" },
     { href: depth + "/pages/weapons.html", id: "weapons", label: "流派" },
-    { href: depth + "/pages/equipment.html", id: "equipment", label: "裝備" },
+    { href: depth + "/pages/equipment.html", id: "equipment", label: "圖鑑" },
     { href: depth + "/pages/systems.html", id: "systems", label: "養成" },
     { href: depth + "/pages/walkthrough.html", id: "walkthrough", label: "攻略" },
     { href: depth + "/pages/guide.html", id: "guide", label: "指南" },

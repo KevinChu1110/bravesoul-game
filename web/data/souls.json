@@ -1,0 +1,27 @@
+{
+  "schema": "souls_v1",
+  "note": "原作聚魂：紫微十四主星＋葫蘆魂器。神品質＝神魂，不是另一套系統。",
+  "vessels": [
+    {"id": "green", "name": "綠葫蘆", "cost": 80, "icon": "../media/souls/gourd_green.png"},
+    {"id": "blue", "name": "藍葫蘆", "cost": 200, "icon": "../media/souls/gourd_blue.png"},
+    {"id": "purple", "name": "紫葫蘆", "cost": 500, "icon": "../media/souls/gourd_purple.png"},
+    {"id": "orange", "name": "橙葫蘆", "cost": 1000, "icon": "../media/souls/gourd_orange.png"}
+  ],
+  "stars": [
+    {"id": "ziwei", "name": "紫微", "stat": "衡", "icon": "../media/souls/star_ziwei.png"},
+    {"id": "tianji", "name": "天機", "stat": "機／攻", "icon": "../media/souls/star_tianji.png"},
+    {"id": "taiyang", "name": "太陽", "stat": "陽／攻", "icon": "../media/souls/star_taiyang.png"},
+    {"id": "wuqu", "name": "武曲", "stat": "武／攻", "icon": "../media/souls/star_wuqu.png"},
+    {"id": "tiantong", "name": "天同", "stat": "同／血", "icon": "../media/souls/star_tiantong.png"},
+    {"id": "lianzhen", "name": "廉貞", "stat": "廉／攻", "icon": "../media/souls/star_lianzhen.png"},
+    {"id": "tianfu", "name": "天府", "stat": "府／防", "icon": "../media/souls/star_tianfu.png"},
+    {"id": "taiyin", "name": "太陰", "stat": "陰／血", "icon": "../media/souls/star_taiyin.png"},
+    {"id": "tanlang", "name": "貪狼", "stat": "血", "icon": "../media/souls/star_tanlang.png"},
+    {"id": "jumen", "name": "巨門", "stat": "巨／攻", "icon": "../media/souls/star_jumen.png"},
+    {"id": "tianxiang", "name": "天相", "stat": "相／防", "icon": "../media/souls/star_tianxiang.png"},
+    {"id": "tianliang", "name": "天梁", "stat": "梁／防", "icon": "../media/souls/star_tianliang.png"},
+    {"id": "qisha", "name": "七殺", "stat": "銳／攻", "icon": "../media/souls/star_qisha.png"},
+    {"id": "pojun", "name": "破軍", "stat": "攻", "icon": "../media/souls/star_pojun.png"}
+  ],
+  "shen": {"name": "神魂", "note": "神品質戰魂的前綴。3合1最高10級。", "icon": "../media/souls/shen.png"}
+}

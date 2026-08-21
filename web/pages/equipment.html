@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>裝備圖鑑 — 勇者之魂</title>
-  <meta name="description" content="勇者之魂裝備圖鑑：武器、防具、飾品與鍛造材料。" />
+  <title>圖鑑 — 勇者之魂</title>
+  <meta name="description" content="勇者之魂圖鑑：武器、防具、飾品六槽、紫微十四星、葫蘆魂器、紅黃藍寶石。" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/site.css" />
   <link rel="stylesheet" href="../css/sections.css" />
@@ -13,23 +13,23 @@
 <body data-page="equipment">
   <header class="page-hero" style="--hero-img:url('../media/gemini/keyart_forge.png')">
     <div class="container">
-      <div class="breadcrumb"><a href="../index.html">首頁</a> / 裝備圖鑑</div>
-      <h1>裝備圖鑑</h1>
-      <p>三欄武器、防具、飾品六槽（Lv15）。品質影響數值；造型疊在探索與戰鬥。</p>
+      <div class="breadcrumb"><a href="../index.html">首頁</a> / 圖鑑</div>
+      <h1>圖鑑</h1>
+      <p>原作村莊四店對得上的東西：器、魂、寶石、招。武器決定攻速與次數；戰魂是紫微十四星。</p>
     </div>
   </header>
   <main class="page">
     <section class="band band--soft-key" style="padding-top:2rem;padding-bottom:1rem">
     <div class="container">
       <div class="sec-head">
-        <p class="sec-kicker">Gear</p>
-        <h2 class="sec-title">裝備是旅途的另一種日記</h2>
-        <p class="sec-lead">篩選槽位、看數值與外觀疊層。鍛造在遊戲內找釘釘。</p>
+        <p class="sec-kicker">Codex</p>
+        <h2 class="sec-title">鐵匠鋪 · 聚魂殿 · 手藝工坊</h2>
+        <p class="sec-lead">對齊原作：器在釘釘、魂在星讀、寶石在工坊。飾品六槽 Lv15（戒指／項鍊／手環／耳環／護符／腰帶）。</p>
       </div>
       <div class="panel" style="margin-bottom:1.25rem">
-        <p style="margin:0 0 0.5rem"><strong>部位</strong>：武器／防具／飾品可同時穿戴，數值相加。</p>
-        <p style="margin:0 0 0.5rem"><strong>品質</strong>：凡品 → 良品 → 上品 → 秘寶（掉落或鍛造時隨機，影響數值浮動）。</p>
-        <p style="margin:0"><strong>造型</strong>：裝備後角色會換武器疊層、六職防具紙娃娃與飾品；與雙武器系統可並用。</p>
+        <p style="margin:0 0 0.5rem"><strong>器</strong>：三欄武器、失敗不掉階。次數耗盡自動切下一把。</p>
+        <p style="margin:0 0 0.5rem"><strong>魂</strong>：抽魂＝聚魂。葫蘆綠→橙；十四星；神品質最高 10 級。</p>
+        <p style="margin:0"><strong>寶石</strong>：紅黃藍。3 合 1，鑲上必定成功，只能換不能拆。</p>
       </div>
 
       <div class="equip-filters" id="filters">
@@ -37,6 +37,9 @@
         <button type="button" class="chip" data-filter="weapon">武器</button>
         <button type="button" class="chip" data-filter="armor">防具</button>
         <button type="button" class="chip" data-filter="accessory">飾品</button>
+        <button type="button" class="chip" data-filter="soul">戰魂</button>
+        <button type="button" class="chip" data-filter="vessel">葫蘆</button>
+        <button type="button" class="chip" data-filter="gem">寶石</button>
       </div>
 
       <h2 class="section-h2" style="margin-top:1.25rem"><span class="accent"></span><span>圖鑑</span></h2>
@@ -47,27 +50,27 @@
       <p class="section-sub">探索時疊在角色身上的圖層</p>
       <div class="equip-grid compact" id="look-grid">
         <article class="equip-card">
-          <div class="thumb look"><img src="../media/equipment/paperdoll/armor/knight_plate.png" alt="騎士" onerror="this.src='../media/equipment/armor/plate.png'" /></div>
+          <div class="thumb look"><img src="../media/equipment/knight_plate.png" alt="騎士" onerror="this.src='../media/equipment/armor/plate.png'" /></div>
           <div class="body"><h3>騎士殘甲</h3><p class="muted">騎士 · 劍／槍</p></div>
         </article>
         <article class="equip-card">
-          <div class="thumb look"><img src="../media/equipment/paperdoll/armor/viking_hide.png" alt="維京" onerror="this.src='../media/equipment/armor/hide.png'" /></div>
+          <div class="thumb look"><img src="../media/equipment/viking_hide.png" alt="維京" onerror="this.src='../media/equipment/armor/hide.png'" /></div>
           <div class="body"><h3>北境獸甲</h3><p class="muted">維京 · 斧／鎚</p></div>
         </article>
         <article class="equip-card">
-          <div class="thumb look"><img src="../media/equipment/paperdoll/armor/ninja_wrap.png" alt="忍者" onerror="this.src='../media/equipment/armor/wrap.png'" /></div>
+          <div class="thumb look"><img src="../media/equipment/ninja_wrap.png" alt="忍者" onerror="this.src='../media/equipment/armor/wrap.png'" /></div>
           <div class="body"><h3>霧隱夜衣</h3><p class="muted">忍者 · 匕／鏢</p></div>
         </article>
         <article class="equip-card">
-          <div class="thumb look"><img src="../media/equipment/paperdoll/armor/monk_gi.png" alt="武鬥" onerror="this.src='../media/equipment/armor/gi.png'" /></div>
+          <div class="thumb look"><img src="../media/equipment/monk_gi.png" alt="武鬥" onerror="this.src='../media/equipment/armor/gi.png'" /></div>
           <div class="body"><h3>道場練衣</h3><p class="muted">武鬥 · 拳／爪</p></div>
         </article>
         <article class="equip-card">
-          <div class="thumb look"><img src="../media/equipment/paperdoll/armor/star_veil.png" alt="法師" onerror="this.src='../media/equipment/armor/veil.png'" /></div>
+          <div class="thumb look"><img src="../media/equipment/star_veil.png" alt="法師" onerror="this.src='../media/equipment/armor/veil.png'" /></div>
           <div class="body"><h3>星紗披風</h3><p class="muted">法師 · 杖／晶</p></div>
         </article>
         <article class="equip-card">
-          <div class="thumb look"><img src="../media/equipment/paperdoll/armor/ranger_leather.png" alt="遊俠" onerror="this.src='../media/equipment/armor/leather.png'" /></div>
+          <div class="thumb look"><img src="../media/equipment/ranger_leather.png" alt="遊俠" onerror="this.src='../media/equipment/armor/leather.png'" /></div>
           <div class="body"><h3>遊俠皮甲</h3><p class="muted">遊俠 · 弓／銃</p></div>
         </article>
       </div>
@@ -97,11 +100,19 @@
   <script src="../js/site.js"></script>
   <script>
     (function () {
-      var SLOT_LABEL = { weapon: "武器", armor: "防具", accessory: "飾品" };
+      var SLOT_LABEL = {
+        weapon: "武器", armor: "防具", accessory: "飾品",
+        ring: "戒指", necklace: "項鍊", bracelet: "手環",
+        earring: "耳環", amulet: "護符", belt: "腰帶",
+        soul: "戰魂", vessel: "葫蘆", gem: "寶石"
+      };
       var LINE_LABEL = {
-        sword: "劍", soul: "星途", iron: "鐵骨",
-        bow: "弓", magic: "法", fist: "拳", axe: "斧", hammer: "鎚",
-        spear: "槍", gun: "銃", dart: "鏢", crystal: "晶"
+        sword: "劍", bow: "弓", magic: "法", fist: "拳", axe: "斧", hammer: "鎚",
+        spear: "槍", gun: "銃", dart: "鏢", crystal: "晶", dagger: "匕", claw: "爪"
+      };
+      var FILTER_LABEL = {
+        all: "全部", weapon: "武器", armor: "防具", accessory: "飾品",
+        soul: "戰魂", vessel: "葫蘆", gem: "寶石"
       };
       var allItems = [];
       var craftList = [];
@@ -119,32 +130,58 @@
         return parts.join(" · ") || "—";
       }
 
+      function iconFor(it) {
+        if (it.icon) return it.icon;
+        return "../media/equipment/" + it.id + ".png";
+      }
+
+      function fallbackIcon(it) {
+        if (it.kind === "soul" || it.kind === "vessel") return "../media/souls/star_ziwei.png";
+        if (it.kind === "gem") return "../media/equipment/gem_red.png";
+        if (it.slot === "weapon" && it.line) return "../media/equipment/weapons/" + it.line + ".png";
+        if (it.slot === "armor") return "../media/equipment/armor/plate.png";
+        return "../media/equipment/star_pendant.png";
+      }
+
       function render() {
         var grid = document.getElementById("equip-grid");
         grid.innerHTML = "";
         var list = allItems.filter(function (it) {
-          return filter === "all" || it.slot === filter;
+          if (filter === "all") return true;
+          if (filter === "accessory") {
+            return it.kind === "equip" && (it.slot === "accessory" || SLOT_LABEL[it.slot] && ["ring","necklace","bracelet","earring","amulet","belt"].indexOf(it.slot) >= 0);
+          }
+          if (filter === "weapon" || filter === "armor") return it.kind === "equip" && it.slot === filter;
+          return it.kind === filter;
         });
         list.sort(function (a, b) {
-          if (a.slot !== b.slot) return a.slot.localeCompare(b.slot);
+          if (a.kind !== b.kind) return (a.kind || "").localeCompare(b.kind || "");
+          if (a.slot !== b.slot) return String(a.slot).localeCompare(String(b.slot));
           return (a.tier || 0) - (b.tier || 0);
         });
         document.getElementById("count-line").textContent =
-          "共 " + list.length + " 件" + (filter === "all" ? "" : "（" + (SLOT_LABEL[filter] || filter) + "）");
+          "共 " + list.length + " 件" + (filter === "all" ? "" : "（" + (FILTER_LABEL[filter] || filter) + "）");
         list.forEach(function (it) {
           var card = document.createElement("article");
           card.className = "equip-card";
+          var tag = SLOT_LABEL[it.slot] || FILTER_LABEL[it.kind] || it.slot;
+          var extra = it.line ? '<span class="tag tag-update">' + (LINE_LABEL[it.line] || it.line) + "</span>" : "";
+          var tier = it.tier ? '<span class="tag tag-guide">T' + it.tier + "</span>" : "";
           card.innerHTML =
-            '<div class="thumb"><img src="' + it.icon + '" alt="' + it.name + '" loading="lazy" /></div>' +
+            '<div class="thumb"><img src="' + iconFor(it) + '" alt="' + it.name + '" loading="lazy" /></div>' +
             '<div class="body">' +
               "<h3>" + it.name + "</h3>" +
               '<div class="meta-row">' +
-                '<span class="tag">' + (SLOT_LABEL[it.slot] || it.slot) + "</span>" +
-                '<span class="tag tag-guide">T' + it.tier + "</span>" +
-                (it.line ? '<span class="tag tag-update">' + (LINE_LABEL[it.line] || it.line) + "</span>" : "") +
+                '<span class="tag">' + tag + "</span>" + tier + extra +
               "</div>" +
-              '<p class="stats">' + statsLine(it.stats) + "</p>" +
+              '<p class="stats">' + (it.note || statsLine(it.stats)) + "</p>" +
             "</div>";
+          var img = card.querySelector("img");
+          img.addEventListener("error", function () {
+            if (img.dataset.fb) return;
+            img.dataset.fb = "1";
+            img.src = fallbackIcon(it);
+          });
           grid.appendChild(card);
         });
       }
@@ -156,16 +193,16 @@
           return;
         }
         tb.innerHTML = craftList.map(function (r) {
-          var mats = r.mats || {};
+          var mats = r.mats || r.materials || {};
           var matStr = Object.keys(mats).map(function (k) {
-            return k + " ×" + mats[k];
+            return (nameById[k] || k) + " ×" + mats[k];
           }).join("、");
-          var name = nameById[r.base_id] || r.base_id;
+          var name = nameById[r.base_id] || nameById[r.id] || r.base_id || r.id;
           return "<tr>" +
             "<td><strong>" + name + "</strong></td>" +
             "<td>" + (r.gold || 0) + "</td>" +
             "<td>" + matStr + "</td>" +
-            "<td>武器階 ≥ " + (r.need_tier || 1) + "</td>" +
+            "<td>武器階 ≥ " + (r.need_tier || r.need || 1) + "</td>" +
             "<td class=\"muted\">" + (r.hint || "") + "</td>" +
             "</tr>";
         }).join("");
@@ -181,19 +218,58 @@
         render();
       });
 
-      fetch("../data/equipment.json")
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          allItems = data.items || [];
-          craftList = data.craft || [];
-          allItems.forEach(function (it) { nameById[it.id] = it.name; });
-          render();
-          renderCraft();
-        })
-        .catch(function () {
-          document.getElementById("equip-grid").innerHTML =
-            '<p class="msg err">無法載入裝備資料。</p>';
+      Promise.all([
+        fetch("../data/equipment.json").then(function (r) { return r.json(); }),
+        fetch("../data/souls.json").then(function (r) { return r.json(); }),
+        fetch("../data/gems.json").then(function (r) { return r.json(); }),
+      ]).then(function (pack) {
+        var data = pack[0], souls = pack[1], gems = pack[2];
+        var bases = data.bases || {};
+        Object.keys(bases).forEach(function (id) {
+          var b = bases[id];
+          var slot = b.slot || "weapon";
+          nameById[id] = b.name;
+          allItems.push({
+            id: id,
+            name: b.name,
+            slot: slot,
+            kind: "equip",
+            line: b.line,
+            tier: b.tier,
+            stats: b.base || b.stats || {},
+          });
         });
+        craftList = data.craft_recipes || data.craft || [];
+        (souls.vessels || []).forEach(function (v) {
+          allItems.push({
+            id: v.id, name: v.name, kind: "vessel", slot: "vessel",
+            icon: v.icon, note: "抽魂魂器 · " + v.cost + " 金（每日免費 1 次）",
+          });
+        });
+        (souls.stars || []).forEach(function (s) {
+          allItems.push({
+            id: s.id, name: s.name, kind: "soul", slot: "soul",
+            icon: s.icon, note: "紫微十四星 · " + s.stat,
+          });
+        });
+        if (souls.shen) {
+          allItems.push({
+            id: "shen", name: souls.shen.name, kind: "soul", slot: "soul",
+            icon: souls.shen.icon, note: souls.shen.note,
+          });
+        }
+        (gems.colors || []).forEach(function (g) {
+          allItems.push({
+            id: g.id, name: g.name, kind: "gem", slot: "gem",
+            icon: g.icon, note: "武器：" + g.weapon + " · 防具：" + g.armor,
+          });
+        });
+        render();
+        renderCraft();
+      }).catch(function () {
+        document.getElementById("equip-grid").innerHTML =
+          '<p class="msg err">無法載入圖鑑資料。</p>';
+      });
     })();
   </script>
 </body>

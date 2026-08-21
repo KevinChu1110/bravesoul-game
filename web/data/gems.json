@@ -1,0 +1,10 @@
+{
+  "schema": "gems_v1",
+  "note": "原作手藝工坊：紅黃藍。3合1升階，最高5級。鑲嵌必定成功，只能換不能拆。",
+  "unlock": "Lv10 工坊；Lv20 熔爐第二產線",
+  "colors": [
+    {"id": "red", "name": "紅寶石", "weapon": "暴擊", "armor": "血％", "icon": "../media/equipment/gem_red.png"},
+    {"id": "yellow", "name": "黃寶石", "weapon": "攻％", "armor": "防％", "icon": "../media/equipment/gem_yellow.png"},
+    {"id": "blue", "name": "藍寶石", "weapon": "命中", "armor": "迴避", "icon": "../media/equipment/gem_blue.png"}
+  ]
+}
