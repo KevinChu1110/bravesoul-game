@@ -1,0 +1,192 @@
+{
+  "schema": "maps_v1",
+  "places": [
+    {
+      "id": "village",
+      "title": "翠谷村 · 夜",
+      "kicker": "餘燼村",
+      "image": "../media/shots/proof_12_village.png",
+      "gallery": ["../media/gemini/keyart_village.png"],
+      "blurb": "旅途起點。村口那把鏽劍、開場乾糧都從這裡帶走。不是預言聖村，只是傭兵團新人過夜的地方。",
+      "enemies": [],
+      "drops": ["bread", "key_rusty", "hp_s"],
+      "note": "開場贈送乾糧與小紅水。"
+    },
+    {
+      "id": "road",
+      "title": "荒路 · 橫貫翠嶺東道",
+      "kicker": "出村第一帶",
+      "image": "../media/shots/proof_05_crossroads.png",
+      "gallery": ["../media/shots/proof_24_caravan.png"],
+      "blurb": "離開翠谷之後的東道：斷崖大橋、半塌客棧、古驛廢墟。荒路殘兵與灰燼鼠常在這裡。鍛造入門材料多半先從這帶撿。",
+      "enemies": ["荒路殘兵", "灰燼鼠"],
+      "drops": ["wolf_fang", "knight_shard", "iron_scrap", "star_ore", "oak_resin", "hp_s", "bread"],
+      "note": "各域雜魚也會掉鐵屑／星砂／橡脂；荒路機率較穩。"
+    },
+    {
+      "id": "town",
+      "title": "騎士堡壘 · 外城廣場",
+      "kicker": "主城",
+      "image": "../media/shots/proof_02_explore_town.png",
+      "gallery": ["../media/gemini/keyart_leo.png"],
+      "blurb": "石城、旗幟、榮譽。釘釘、星讀、工坊、演武、下城市集都從廣場走進。黑焰浪人在雷歐之後出沒，騎士碎鐵掉很多。",
+      "enemies": ["黑焰浪人"],
+      "drops": ["knight_shard", "iron_scrap"],
+      "note": "聖獸：雷歐（獅）。"
+    },
+    {
+      "id": "forge",
+      "title": "騎士堡 · 鐵匠鋪",
+      "kicker": "釘釘",
+      "image": "../media/shots/proof_08_forge.png",
+      "gallery": ["../media/gemini/keyart_forge.png", "../media/promo/scene_forge.jpg"],
+      "blurb": "找釘釘鍛造。材料湊齊、器階夠了就能釘。失敗不掉階。圖鑑裡的鍛造表，成品都是在這裡打出來的。",
+      "enemies": [],
+      "drops": [],
+      "note": "原作四店之一：走進去的室內。"
+    },
+    {
+      "id": "market",
+      "title": "騎士堡 · 下城市集",
+      "kicker": "琥珀材料行",
+      "image": "../media/shots/proof_15_market.png",
+      "gallery": ["../media/npc_amber.jpg"],
+      "blurb": "琥珀的材料行掛在每日／委託。鐵屑 14、星砂 22、橡脂 18、騎士碎鐵 28；小紅水 12、乾糧 8。野外掉不夠再買，買了再打，這是循環。",
+      "enemies": [],
+      "drops": ["iron_scrap", "star_ore", "oak_resin", "knight_shard", "hp_s", "bread"],
+      "note": "狼牙、霧晶、潮貝、疤焰燼材料行不賣。"
+    },
+    {
+      "id": "sewers",
+      "title": "騎士堡 · 舊下水道",
+      "kicker": "市集下水口",
+      "image": "../media/shots/proof_15_market.png",
+      "gallery": [],
+      "blurb": "下城市集的下水口通到舊下水道。下水道黏怪會掉潮貝，鐵屑也掉得比較多。",
+      "enemies": ["下水道黏怪"],
+      "drops": ["sea_shell", "iron_scrap"],
+      "note": "海岸盜與下水道共用潮貝掉落。"
+    },
+    {
+      "id": "arena",
+      "title": "騎士堡 · 演武場",
+      "kicker": "日結勳章",
+      "image": "../media/shots/proof_02_explore_town.png",
+      "gallery": [],
+      "blurb": "舊兵營改的演武場。角鬥日結給勳章；手藝工坊可用 50 枚點燃熔爐（原作替代金幣）。",
+      "enemies": [],
+      "drops": ["medal"],
+      "note": "不是野外獵場。獵場在岔路另一頭。"
+    },
+    {
+      "id": "mist",
+      "title": "霧隱村 · 外圍",
+      "kicker": "忍者域",
+      "image": "../media/shots/proof_04_mist.png",
+      "gallery": ["../media/shots/proof_20_mist_shrine.png", "../media/gemini/keyart_mist.png"],
+      "blurb": "霧、影、真假。霧祠、鏡廊、霧崖。霧影掉霧晶；這一帶星砂礦也比較多。看破節奏的課堂。",
+      "enemies": ["霧影"],
+      "drops": ["mist_shard", "star_ore"],
+      "note": "聖獸：白霧（狐）。鏡廊是秘境。"
+    },
+    {
+      "id": "dojo",
+      "title": "武鬥道場 · 竹林徑",
+      "kicker": "阿波",
+      "image": "../media/shots/proof_13_dojo.png",
+      "gallery": ["../media/shots/proof_22_dojo_peak.png"],
+      "blurb": "山門、拳理、茶。竹林裡的竹精與霧影一樣掉霧晶。山巔是貼身連段的試金石。",
+      "enemies": ["竹精"],
+      "drops": ["mist_shard", "star_ore"],
+      "note": "聖獸：阿波（熊貓）。"
+    },
+    {
+      "id": "forest",
+      "title": "遊俠森林 · 樹海邊緣",
+      "kicker": "疾影",
+      "image": "../media/shots/proof_06_forest.png",
+      "gallery": ["../media/shots/proof_18_forest_lake.png"],
+      "blurb": "密林、風、箭道。樹冠、靜湖、遺址。森林精掉星屑碎，橡脂在這一帶也比較常見。",
+      "enemies": ["森林精"],
+      "drops": ["oak_resin", "dust_crumb"],
+      "note": "聖獸：疾影（隼）。"
+    },
+    {
+      "id": "coast",
+      "title": "維京海岸 · 碼頭與岸道",
+      "kicker": "石拳",
+      "image": "../media/shots/proof_07_coast.png",
+      "gallery": ["../media/shots/proof_19_harbor.png", "../media/shots/proof_23_coast_wreck.png"],
+      "blurb": "浪、火、蠻勇。碼頭、潮汐洞、沉船灣。海岸盜掉潮貝。沉船灣另有秘境。",
+      "enemies": ["海岸盜"],
+      "drops": ["sea_shell", "iron_scrap"],
+      "note": "聖獸：石拳（豕）。"
+    },
+    {
+      "id": "scar",
+      "title": "黑焰疤地 · 被吞噬的土地",
+      "kicker": "秘境與長遠",
+      "image": "../media/shots/proof_16_blackflame.png",
+      "gallery": ["../media/shots/proof_17_starfall.png"],
+      "blurb": "黑焰吞噬過的土地。疤地焰靈掉疤焰燼；橡脂在疤地也會出現。疤主是秘境三王之一。",
+      "enemies": ["疤地焰靈"],
+      "drops": ["scar_ember", "oak_resin"],
+      "note": "星落平原就在附近，十四星夜空。"
+    },
+    {
+      "id": "hunt",
+      "title": "野外獵場 · 黑焰溢地",
+      "kicker": "狩獵",
+      "image": "../media/shots/proof_21_hunt.png",
+      "gallery": [],
+      "blurb": "岔路連過去的溢地獵場。溢皮、焰骨、溢核只在這裡出，可拿去溢物回收換金。不是演武場。",
+      "enemies": ["溢地殘兵", "灰燼鼠潮"],
+      "drops": ["hunt_hide", "hunt_bone", "hunt_core"],
+      "note": "中階焰骨、稀有溢核。"
+    },
+    {
+      "id": "caravan",
+      "title": "行商驛站 · 星途旅人落腳處",
+      "kicker": "行商",
+      "image": "../media/shots/proof_24_caravan.png",
+      "gallery": ["../media/shots/proof_05_crossroads.png"],
+      "blurb": "六域岔路旁的落腳處。行商支線會撕給你一角六域殘圖。補貨、聽傳聞、再選下一域。",
+      "enemies": [],
+      "drops": ["map_scrap"],
+      "note": "殘圖可看不可吃。"
+    },
+    {
+      "id": "parts",
+      "title": "戰鬥 · 破部位",
+      "kicker": "不是地圖",
+      "image": "../media/shots/proof_11_battle.png",
+      "gallery": ["../media/promo/scene_battle.jpg"],
+      "blurb": "打掉部位會掉對應鍛材：盔→騎士碎鐵、冠→星砂礦、靴→橡脂、甲→鐵屑。雜魚與 Boss 都可能掛部位。",
+      "enemies": [],
+      "drops": ["knight_shard", "star_ore", "oak_resin", "iron_scrap"],
+      "note": "對齊原作部位破壞，不是另外一套材料。"
+    },
+    {
+      "id": "visit",
+      "title": "好友挑戰 · 殘影",
+      "kicker": "非即時對打",
+      "image": "../media/shots/proof_11_battle.png",
+      "gallery": ["../media/gemini/keyart_mirror.png"],
+      "blurb": "打的是別人留下的殘影快照，不是同房即時 PVP。勝利給友誼鑰匙；三把開一個友誼寶箱。",
+      "enemies": ["旅人殘影"],
+      "drops": ["friendship_key", "iron_scrap"],
+      "note": "離線也能走完整趟；連線多的是交會，不是強制對打。"
+    },
+    {
+      "id": "rift",
+      "title": "秘境 · 三王與印記",
+      "kicker": "通關獎勵",
+      "image": "../media/shots/proof_14_tower.png",
+      "gallery": ["../media/gemini/keyart_tower.png", "../media/gemini/keyart_mirror.png"],
+      "blurb": "鏡廊、沉船、疤地各藏秘境。通關留秘境印記，並給一瓶中紅水。小 Boss 也走同一套獎勵。",
+      "enemies": ["疤主", "鏡影", "船長"],
+      "drops": ["relic_token", "hp_m"],
+      "note": "中紅水材料行不賣。"
+    }
+  ]
+}

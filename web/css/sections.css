@@ -197,6 +197,43 @@
 .bento__item--lg { grid-column: span 7; min-height: 340px; }
 .bento__item--md { grid-column: span 5; min-height: 340px; }
 .bento__item--sm { grid-column: span 4; min-height: 220px; }
+
+/* 地圖誌 */
+.place {
+  scroll-margin-top: 88px;
+  padding: 1.25rem 0;
+  border-radius: 18px;
+}
+.place + .place { margin-top: 1.75rem; }
+.place:target {
+  background: linear-gradient(180deg, var(--key-faint), transparent 70%);
+  box-shadow: 0 0 0 2px var(--key);
+  padding: 1.25rem 1rem;
+}
+.place-thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+}
+.place-thumbs img {
+  width: 100%;
+  aspect-ratio: 16/10;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--line-soft);
+}
+.src-link {
+  color: var(--key-deep) !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 700;
+  text-decoration-color: rgba(168, 62, 85, 0.35);
+}
+.src-link:hover {
+  color: var(--key-strong) !important;
+  text-decoration-color: var(--key);
+}
 .bento__item--wide { grid-column: span 8; min-height: 220px; }
 .bento__item--tall { grid-column: span 4; min-height: 460px; grid-row: span 2; }
 @media (max-width: 900px) {

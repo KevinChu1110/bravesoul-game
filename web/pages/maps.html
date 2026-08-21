@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>地圖誌 — 勇者之魂</title>
+  <meta name="description" content="勇者之魂地圖誌：荒路、騎士堡、霧隱、海岸、疤地、獵場。材料從哪張地圖來，點過去看圖。" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+  <link rel="stylesheet" href="../css/sections.css" />
+  <script src="../config.js"></script>
+</head>
+<body data-page="maps">
+  <header class="page-hero" style="--hero-img:url('../media/shots/proof_05_crossroads.png')">
+    <div class="container">
+      <div class="breadcrumb"><a href="../index.html">首頁</a> / <a href="equipment.html">圖鑑</a> / 地圖誌</div>
+      <h1>地圖誌</h1>
+      <p>材料從哪裡來，就連到哪張地圖。圖是實機；掉落對齊遊戲，不是另外發明。</p>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="band band--soft-key" style="padding-top:2rem;padding-bottom:1rem">
+      <div class="container">
+        <div class="sec-head">
+          <p class="sec-kicker">Atlas</p>
+          <h2 class="sec-title">點取得來源會落到這裡</h2>
+          <p class="sec-lead">鍛造表、材料卡上的連結都帶錨點。對應遊戲地圖名：荒路、下城市集、霧隱、獵場…</p>
+        </div>
+        <div class="equip-filters" id="map-toc"></div>
+        <div id="map-list">
+          <p class="muted">載入中…</p>
+        </div>
+        <p style="margin-top:1.5rem">
+          <a class="btn btn-primary" href="equipment.html">回圖鑑鍛造表</a>
+          <a class="btn btn-ghost" href="walkthrough.html#ch7">六域攻略</a>
+          <a class="btn btn-ghost" href="gallery.html">畫面圖庫</a>
+        </p>
+      </div>
+    </section>
+  </main>
+  <script src="../js/site.js"></script>
+  <script>
+    (function () {
+      var list = document.getElementById("map-list");
+      var toc = document.getElementById("map-toc");
+      var nameById = {};
+
+      function goHash() {
+        var h = location.hash.replace(/^#/, "");
+        if (!h) return;
+        var el = document.getElementById(h);
+        if (!el) return;
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      Promise.all([
+        fetch("../data/maps.json").then(function (r) { return r.json(); }),
+        fetch("../data/items.json").then(function (r) { return r.json(); }),
+      ]).then(function (pack) {
+        var maps = pack[0];
+        var bag = ((pack[1] || {}).items) || {};
+        Object.keys(bag).forEach(function (id) { nameById[id] = bag[id].name || id; });
+        var places = maps.places || [];
+        toc.innerHTML = "";
+        places.forEach(function (p) {
+          var a = document.createElement("a");
+          a.className = "chip";
+          a.href = "#" + p.id;
+          a.textContent = p.kicker || p.title;
+          toc.appendChild(a);
+        });
+        list.innerHTML = places.map(function (p, i) {
+          var extra = (p.gallery || []).map(function (src) {
+            return '<img src="' + src + '" alt="" loading="lazy" />';
+          }).join("");
+          var enemies = (p.enemies || []).length
+            ? "<li>雜魚：" + p.enemies.join("、") + "</li>"
+            : "";
+          var drops = (p.drops || []).map(function (id) {
+            return '<a class="src-link" href="equipment.html?item=' + id + '">' +
+              (nameById[id] || id) + "</a>";
+          }).join("、");
+          var dropLine = drops ? "<li>掉落／可買：" + drops + "</li>" : "";
+          var note = p.note ? "<li>" + p.note + "</li>" : "";
+          var flip = i % 2 === 1 ? " feature--flip" : "";
+          return (
+            '<article class="place feature' + flip + '" id="' + p.id + '">' +
+              '<div class="feature__media">' +
+                '<img src="' + p.image + '" alt="' + p.title + '" />' +
+                '<span class="feature__badge">' + (p.kicker || "") + "</span>" +
+              "</div>" +
+              '<div class="feature__copy">' +
+                "<h3>" + p.title + "</h3>" +
+                "<p>" + p.blurb + "</p>" +
+                (extra ? '<div class="place-thumbs">' + extra + "</div>" : "") +
+                '<ul class="feature__list">' + enemies + dropLine + note + "</ul>" +
+                '<a class="btn btn-ghost" href="equipment.html">看鍛造要用什麼</a>' +
+              "</div>" +
+            "</article>"
+          );
+        }).join("");
+        requestAnimationFrame(goHash);
+      }).catch(function () {
+        list.innerHTML = '<p class="msg err">無法載入地圖誌。</p>';
+      });
+
+      window.addEventListener("hashchange", goHash);
+    })();
+  </script>
+</body>
+</html>

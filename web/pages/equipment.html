@@ -77,14 +77,27 @@
       </div>
 
       <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>鍛造配方</span></h2>
-      <p class="section-sub">材料行／野外掉落收集後，找鐵匠釘釘</p>
+      <p class="section-sub">找騎士堡鐵匠釘釘。取得可點進<a class="src-link" href="maps.html">地圖誌</a>看圖。</p>
       <div class="panel" style="overflow-x:auto">
         <table>
           <thead>
-            <tr><th>成品</th><th>金幣</th><th>材料</th><th>需求</th><th>提示</th></tr>
+            <tr><th>成品</th><th>金幣</th><th>材料</th><th>取得</th><th>需求</th><th>提示</th></tr>
           </thead>
           <tbody id="craft-body">
-            <tr><td colspan="5" class="muted">載入中…</td></tr>
+            <tr><td colspan="6" class="muted">載入中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="section-h2" style="margin-top:2rem"><span class="accent"></span><span>材料從哪來</span></h2>
+      <p class="section-sub">對齊遊戲掉落與琥珀材料行。點來源會跳到那張地圖。</p>
+      <div class="panel" style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr><th>材料</th><th>取得</th><th>商店</th></tr>
+          </thead>
+          <tbody id="source-body">
+            <tr><td colspan="3" class="muted">載入中…</td></tr>
           </tbody>
         </table>
       </div>
@@ -92,10 +105,10 @@
       <p class="muted" style="margin-top:0.75rem">點卡片可看完整素質與鍛造需求。</p>
 
       <p style="margin-top:1.5rem">
-        <a class="btn btn-primary" href="weapons.html">武器流派</a>
+        <a class="btn btn-primary" href="maps.html">地圖誌</a>
+        <a class="btn btn-ghost" href="weapons.html">武器流派</a>
         <a class="btn btn-ghost" href="systems.html">器／魂／招</a>
         <a class="btn btn-ghost" href="walkthrough.html">完整攻略</a>
-        <a class="btn btn-ghost" href="guide.html">精簡指南</a>
       </p>
     </div>
     </section>
@@ -138,6 +151,7 @@
       var filter = "all";
       var nameById = {};
       var descById = {};
+      var sourceById = {};
       var byId = {};
 
       function statsLine(s) {
@@ -259,6 +273,8 @@
         row("商店買入", it.buy != null ? it.buy + " 金" : "");
         row("恢復", it.heal != null ? it.heal + " 生命" : "");
         relatedCraft(it).forEach(function (line) { rows.push("<tr><th>鍛造</th><td>" + line + "</td></tr>"); });
+        var srcHtml = sourceHtml(it);
+        if (srcHtml) rows.push("<tr><th>取得</th><td>" + srcHtml + "</td></tr>");
         if (!rows.length) rows.push("<tr><th>說明</th><td>" + (it.note || "—") + "</td></tr>");
         document.getElementById("codex-stats").innerHTML = rows.join("");
         lb.hidden = false;
@@ -271,15 +287,47 @@
         lb.hidden = true;
       }
 
+      function sourceHtml(it) {
+        var rec = it || {};
+        var arr = rec.sources;
+        if (arr && arr.length) {
+          return arr.map(function (s) {
+            if (!s.map) return s.label;
+            return '<a class="src-link" href="maps.html#' + s.map + '">' + s.label + "</a>";
+          }).join("、");
+        }
+        return rec.source || sourceById[rec.id] || "";
+      }
+
+      function craftMapLinks(keys) {
+        var seen = {};
+        var bits = [];
+        keys.forEach(function (k) {
+          var rec = byId[k] || {};
+          var arr = rec.sources || [];
+          if (!arr.length && sourceById[k]) {
+            bits.push(sourceById[k]);
+            return;
+          }
+          arr.forEach(function (s) {
+            if (!s.map || seen[s.map]) return;
+            seen[s.map] = 1;
+            bits.push('<a class="src-link" href="maps.html#' + s.map + '">' + s.label + "</a>");
+          });
+        });
+        return bits.join(" · ") || "野外掉落或琥珀材料行";
+      }
+
       function renderCraft() {
         var tb = document.getElementById("craft-body");
         if (!craftList.length) {
-          tb.innerHTML = '<tr><td colspan="5" class="muted">尚無公開配方</td></tr>';
+          tb.innerHTML = '<tr><td colspan="6" class="muted">尚無公開配方</td></tr>';
           return;
         }
         tb.innerHTML = craftList.map(function (r) {
           var mats = r.mats || r.materials || {};
-          var matStr = Object.keys(mats).map(function (k) {
+          var keys = Object.keys(mats);
+          var matStr = keys.map(function (k) {
             return (nameById[k] || descById[k] || k) + " ×" + mats[k];
           }).join("、");
           var name = nameById[r.base_id] || nameById[r.id] || r.base_id || r.id;
@@ -287,9 +335,30 @@
             "<td><strong>" + name + "</strong></td>" +
             "<td>" + (r.gold || 0) + "</td>" +
             "<td>" + matStr + "</td>" +
+            "<td>" + craftMapLinks(keys) + "</td>" +
             "<td>武器階 ≥ " + (r.need_tier || r.need || 1) + "</td>" +
             "<td class=\"muted\">" + (r.hint || "") + "</td>" +
             "</tr>";
+        }).join("");
+      }
+
+      function renderSources() {
+        var tb = document.getElementById("source-body");
+        if (!tb) return;
+        var ids = Object.keys(sourceById).filter(function (id) {
+          var it = byId[id] || {};
+          return sourceById[id] && (it.kind === "material" || it.kind === "consumable");
+        });
+        ids.sort(function (a, b) {
+          return String(nameById[a] || a).localeCompare(String(nameById[b] || b), "zh-Hant");
+        });
+        tb.innerHTML = ids.map(function (id) {
+          var it = byId[id] || {};
+          var shop = it.buy != null
+            ? '<a class="src-link" href="maps.html#market">琥珀材料行 ' + it.buy + " 金</a>"
+            : "—";
+          return "<tr><td><strong>" + (nameById[id] || id) + "</strong></td><td>" +
+            sourceHtml(it) + "</td><td>" + shop + "</td></tr>";
         }).join("");
       }
 
@@ -367,20 +436,29 @@
           var it = bagItems[id];
           nameById[id] = it.name;
           descById[id] = it.name;
-          allItems.push({
+          if (it.source) sourceById[id] = it.source;
+          var rec = {
             id: id,
             name: it.name,
             kind: it.kind || "material",
             slot: it.kind === "consumable" ? "material" : (it.kind || "material"),
             desc: it.desc,
+            source: it.source || "",
+            sources: it.sources || [],
             sell: it.sell,
             buy: it.buy,
             heal: it.heal,
             icon: "../media/equipment/" + id + ".png",
-          });
+          };
+          allItems.push(rec);
+          byId[id] = rec;
         });
         render();
         renderCraft();
+        renderSources();
+        var want = "";
+        try { want = new URLSearchParams(location.search).get("item") || ""; } catch (e) {}
+        if (want && byId[want]) openDetail(byId[want]);
       }).catch(function () {
         document.getElementById("equip-grid").innerHTML =
           '<p class="msg err">無法載入圖鑑資料。</p>';

@@ -7,8 +7,13 @@
       "desc": "恢復 25 生命。",
       "kind": "consumable",
       "sell": null,
-      "buy": null,
-      "heal": 25
+      "buy": 12,
+      "heal": 25,
+      "source": "雜魚掉落；琥珀材料行 12 金",
+      "sources": [
+        {"label": "雜魚掉落", "map": "road"},
+        {"label": "琥珀材料行 12 金", "map": "market"}
+      ]
     },
     "hp_m": {
       "id": "hp_m",
@@ -17,7 +22,11 @@
       "kind": "consumable",
       "sell": null,
       "buy": null,
-      "heal": 55
+      "heal": 55,
+      "source": "擊敗小 Boss／秘境獎勵（材料行不賣）",
+      "sources": [
+        {"label": "小 Boss／秘境獎勵", "map": "rift"}
+      ]
     },
     "bread": {
       "id": "bread",
@@ -25,8 +34,14 @@
       "desc": "恢復 15 生命。路上充飢。",
       "kind": "consumable",
       "sell": null,
-      "buy": null,
-      "heal": 15
+      "buy": 8,
+      "heal": 15,
+      "source": "雜魚掉落；開場贈送；琥珀材料行 8 金",
+      "sources": [
+        {"label": "雜魚掉落", "map": "road"},
+        {"label": "開場贈送", "map": "village"},
+        {"label": "琥珀材料行 8 金", "map": "market"}
+      ]
     },
     "dust_crumb": {
       "id": "dust_crumb",
@@ -35,7 +50,12 @@
       "kind": "consumable",
       "sell": null,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "雜魚／森林精掉落",
+      "sources": [
+        {"label": "雜魚掉落", "map": "road"},
+        {"label": "森林精", "map": "forest"}
+      ]
     },
     "antidote": {
       "id": "antidote",
@@ -44,7 +64,9 @@
       "kind": "consumable",
       "sell": null,
       "buy": null,
-      "heal": 10
+      "heal": 10,
+      "source": "目錄有此項，目前沒掛掉落與商店",
+      "sources": []
     },
     "key_rusty": {
       "id": "key_rusty",
@@ -53,7 +75,11 @@
       "kind": "key",
       "sell": null,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "序章拾劍留下的紀念",
+      "sources": [
+        {"label": "翠谷村口拾劍", "map": "village"}
+      ]
     },
     "map_scrap": {
       "id": "map_scrap",
@@ -62,7 +88,11 @@
       "kind": "key",
       "sell": null,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "行商支線",
+      "sources": [
+        {"label": "行商支線", "map": "caravan"}
+      ]
     },
     "medal": {
       "id": "medal",
@@ -71,7 +101,11 @@
       "kind": "key",
       "sell": null,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "演武場／角鬥日結",
+      "sources": [
+        {"label": "演武場日結", "map": "arena"}
+      ]
     },
     "relic_token": {
       "id": "relic_token",
@@ -80,7 +114,11 @@
       "kind": "key",
       "sell": null,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "通關秘境",
+      "sources": [
+        {"label": "通關秘境", "map": "rift"}
+      ]
     },
     "wolf_fang": {
       "id": "wolf_fang",
@@ -89,7 +127,12 @@
       "kind": "material",
       "sell": 8,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "荒路殘兵、灰燼鼠",
+      "sources": [
+        {"label": "荒路殘兵", "map": "road"},
+        {"label": "灰燼鼠", "map": "road"}
+      ]
     },
     "mist_shard": {
       "id": "mist_shard",
@@ -98,7 +141,12 @@
       "kind": "material",
       "sell": 12,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "霧影、竹精",
+      "sources": [
+        {"label": "霧影", "map": "mist"},
+        {"label": "竹精", "map": "dojo"}
+      ]
     },
     "sea_shell": {
       "id": "sea_shell",
@@ -107,7 +155,12 @@
       "kind": "material",
       "sell": 10,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "海岸盜、下水道",
+      "sources": [
+        {"label": "海岸盜", "map": "coast"},
+        {"label": "舊下水道", "map": "sewers"}
+      ]
     },
     "scar_ember": {
       "id": "scar_ember",
@@ -116,7 +169,11 @@
       "kind": "material",
       "sell": 15,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "疤地焰靈",
+      "sources": [
+        {"label": "疤地焰靈", "map": "scar"}
+      ]
     },
     "hunt_hide": {
       "id": "hunt_hide",
@@ -125,7 +182,11 @@
       "kind": "material",
       "sell": 10,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "野外獵場",
+      "sources": [
+        {"label": "野外獵場", "map": "hunt"}
+      ]
     },
     "hunt_bone": {
       "id": "hunt_bone",
@@ -134,7 +195,11 @@
       "kind": "material",
       "sell": 22,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "野外獵場（中階）",
+      "sources": [
+        {"label": "野外獵場（中階）", "map": "hunt"}
+      ]
     },
     "hunt_core": {
       "id": "hunt_core",
@@ -143,7 +208,11 @@
       "kind": "material",
       "sell": 60,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "野外獵場（稀有）",
+      "sources": [
+        {"label": "野外獵場（稀有）", "map": "hunt"}
+      ]
     },
     "iron_scrap": {
       "id": "iron_scrap",
@@ -152,7 +221,13 @@
       "kind": "material",
       "sell": 6,
       "buy": 14,
-      "heal": null
+      "heal": null,
+      "source": "各域雜魚；琥珀材料行可買；破部位（甲）",
+      "sources": [
+        {"label": "各域雜魚", "map": "road"},
+        {"label": "琥珀材料行 14 金", "map": "market"},
+        {"label": "破部位（甲）", "map": "parts"}
+      ]
     },
     "star_ore": {
       "id": "star_ore",
@@ -161,7 +236,14 @@
       "kind": "material",
       "sell": 10,
       "buy": 22,
-      "heal": null
+      "heal": null,
+      "source": "各域雜魚、霧域較多；琥珀可買；破部位（冠）",
+      "sources": [
+        {"label": "各域雜魚", "map": "road"},
+        {"label": "霧隱較多", "map": "mist"},
+        {"label": "琥珀材料行 22 金", "map": "market"},
+        {"label": "破部位（冠）", "map": "parts"}
+      ]
     },
     "oak_resin": {
       "id": "oak_resin",
@@ -170,7 +252,15 @@
       "kind": "material",
       "sell": 8,
       "buy": 18,
-      "heal": null
+      "heal": null,
+      "source": "各域雜魚、森林／疤地；琥珀可買；破部位（靴）",
+      "sources": [
+        {"label": "各域雜魚", "map": "road"},
+        {"label": "遊俠森林", "map": "forest"},
+        {"label": "黑焰疤地", "map": "scar"},
+        {"label": "琥珀材料行 18 金", "map": "market"},
+        {"label": "破部位（靴）", "map": "parts"}
+      ]
     },
     "knight_shard": {
       "id": "knight_shard",
@@ -179,7 +269,14 @@
       "kind": "material",
       "sell": 12,
       "buy": 28,
-      "heal": null
+      "heal": null,
+      "source": "荒路／騎士域、黑焰浪人；琥珀可買；破部位（盔）",
+      "sources": [
+        {"label": "荒路", "map": "road"},
+        {"label": "騎士堡／黑焰浪人", "map": "town"},
+        {"label": "琥珀材料行 28 金", "map": "market"},
+        {"label": "破部位（盔）", "map": "parts"}
+      ]
     },
     "friendship_key": {
       "id": "friendship_key",
@@ -188,7 +285,11 @@
       "kind": "key",
       "sell": 0,
       "buy": null,
-      "heal": null
+      "heal": null,
+      "source": "好友挑戰勝利。3 把開友誼寶箱",
+      "sources": [
+        {"label": "好友挑戰殘影", "map": "visit"}
+      ]
     }
   }
 }
