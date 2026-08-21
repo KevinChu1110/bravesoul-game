@@ -23,4 +23,12 @@ Procedural one-shots for combat / UI.
 | tower | 塔 | 88 | choir | soft | 低沉 |
 | ending | 終章 | 96 | brass | soft | 收束大調 |
 
-重產：`python3 tools/gen_bgm.py`
+重產合成 WAV：`python3 tools/gen_bgm.py`  
+烤成可替換壓縮曲＋循環：`python3 tools/bake_placeholder_bgm.py`  
+Suno／外部成品：`python3 tools/import_bgm.py <file> --id <曲目>`  
+
+優先順序：`.ogg`／`.mp3`（真配樂槽）→ `.wav`（程式合成後備）。
+
+### 2026-08-21 · Suno 真曲已入庫
+帳號 `guanrung1110` 產的 `bravesoul_*` 已下載並 `import_bgm` 覆蓋 13 首。  
+來源 uuid 見 `SUNO_SOURCES.json`。多數曲循環相似度偏低（Suno 歌曲結構），若聽得出接縫可再產 loopable 版或手動 `--loop-offset`。

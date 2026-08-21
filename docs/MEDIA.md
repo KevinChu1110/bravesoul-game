@@ -59,6 +59,26 @@ python3 tools/import_bgm.py boss_v3.mp3 --id boss --loop-offset 12.5
 - 請 Flow 重生一版，在提示裡明講要 **loopable / seamless loop**
 - 用 `--loop-offset` 自己指定一個小節線上的時間點
 
+### 占位「真曲格式」一鍵烤（推薦先做）
+
+還沒有 Suno／Flow 成品時，把現有合成 `.wav` 烤成壓縮檔＋循環點，遊戲就走真配樂管線：
+
+```bash
+python3 tools/bake_placeholder_bgm.py
+# 或先重產 wav 再烤
+python3 tools/bake_placeholder_bgm.py --regen-wav
+```
+
+之後丟 Suno 檔覆蓋即可（同名 id）：
+
+```bash
+python3 tools/import_bgm.py ~/Downloads/suno_title.mp3 --id title
+godot --path game --headless --import
+godot --path game --headless -s res://scripts/art/test_bgm.gd
+```
+
+Suno 提示建議加：`seamless loopable game soundtrack, no vocals, [地區情緒], [BPM]`。
+
 ### 換回程式合成的版本
 
 `AudioManager` 看到同名的 `.ogg` 或 `.mp3` 就優先用它，找不到才用 `.wav`。

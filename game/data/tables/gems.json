@@ -1,0 +1,29 @@
+{
+  "schema": "gems_v1",
+  "version": 1,
+  "description": "原作手藝工坊寶石：紅／黃／藍，3合1升階，最高5級，鑲嵌必定成功不可取下只能替換。",
+  "unlock_level": 10,
+  "furnace_level": 20,
+  "furnace_gold": 2500,
+  "furnace_medals": 50,
+  "furnace_note": "原作：Lv20＋2500金，或50勳章解鎖第二熔煉產線。本作＝每日熔煉線 1→2。",
+  "shard_need": 3,
+  "max_level": 5,
+  "fuse_count": 3,
+  "socket_gold_base": 40,
+  "socket_gold_per_level": 25,
+  "colors": {
+    "red": {"name": "紅寶石", "weapon": "crit", "armor": "hp_pct"},
+    "yellow": {"name": "黃寶石", "weapon": "atk_pct", "armor": "def_pct"},
+    "blue": {"name": "藍寶石", "weapon": "hit", "armor": "eva"}
+  },
+  "bonus_per_level": {
+    "crit": 2.0,
+    "hp_pct": 0.03,
+    "atk_pct": 0.04,
+    "def_pct": 0.04,
+    "hit": 3.0,
+    "eva": 3.0
+  },
+  "note": "％與命中／迴避點數為原創補完（原作有方向無精確％）。"
+}

@@ -14,12 +14,12 @@ extends SceneTree
 const GOLDEN: Array = [
 	{"npc": "greybeard", "ng": 1, "flags": ["boss.leo_cleared"], "n": 2, "first": "又一次。腳印疊在舊路上。你還記得第一次拔劍拔了三次嗎？"},
 	{"npc": "greybeard", "ng": 0, "flags": ["boss.leo_cleared", "boss.white_fog_cleared"], "n": 2, "first": "霧也看破了？眼睛比劍先長。"},
-	{"npc": "greybeard", "ng": 0, "flags": [], "n": 2, "first": "聖獅在內殿。你若不是送死，就先把劍養好。"},
+	{"npc": "greybeard", "ng": 0, "flags": [], "n": 2, "first": "傭兵團最弱的？聖獅在內殿。你若不是送死，就先把劍養好。"},
 	{"npc": "star", "ng": 0, "flags": [], "n": 0, "first": ""},
 	{"npc": "ding", "ng": 0, "flags": ["side.ding_debt_done"], "n": 2, "first": "舊債還了。爐火……比以前穩一點。"},
 	{"npc": "ronin", "ng": 0, "flags": ["side.ronin_spared"], "n": 1, "first": "……刃收了。路還長。別學我把焰當柴。"},
-	{"npc": "tide_roar_idle", "ng": 0, "flags": ["c5_entered"], "n": 2, "first": "衝過來的時候別逃——迎上去。對撞。"},
-	{"npc": "silk", "ng": 0, "flags": ["c2_wheat_letter"], "n": 2, "first": "兔子？來找書的少，來找藉口的多。"},
+	{"npc": "tide_roar_idle", "ng": 0, "flags": ["c5_entered"], "n": 2, "first": "衝過來別逃——迎上去。對撞。傭兵第一課在岸上也通。"},
+	{"npc": "silk", "ng": 0, "flags": ["c2_wheat_letter"], "n": 2, "first": "新面孔。逃難？傭兵外包？還是來對號入座當『至弱者』的？"},
 	{"npc": "knight_orphan", "ng": 0, "flags": ["side.ding_debt_asked"], "n": 2, "first": "斷劍？在武器架那邊。我不敢碰，怕鐵匠生氣。"},
 	{"npc": "knight_orphan", "ng": 0, "flags": [], "n": 2, "first": "演武場以前很吵。現在只剩風。"},
 ]

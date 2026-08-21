@@ -48,6 +48,9 @@
 | [POSTGAME_AND_EVENTS.md](POSTGAME_AND_EVENTS.md) | **通關後＋週裂縫** | ✅ |
 | [ART_2D.md](ART_2D.md) | **2D 表現與遷移** | ✅ |
 | [SCRIPT_C2.md](SCRIPT_C2.md) | 忍者村＋N8 信＋白霧 | ✅ |
+| [SCRIPT_C3.md](SCRIPT_C3.md) | 道場＋為何而戰 | ✅ |
+| [SCRIPT_C4.md](SCRIPT_C4.md) | 疾影森林傭兵語氣 | ✅ |
+| [SCRIPT_C5.md](SCRIPT_C5.md) | 石拳海岸傭兵語氣 | ✅ |
 
 ## 核心循環（定稿）
 

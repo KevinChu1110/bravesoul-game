@@ -34,6 +34,9 @@ UiLayout="*res://scripts/ui/ui_layout.gd"
 OnlineGate="*res://scripts/autoload/online_gate.gd"
 HuntSystem="*res://scripts/systems/hunt_system.gd"
 ArenaSystem="*res://scripts/systems/arena_system.gd"
+GemSystem="*res://scripts/systems/gem_system.gd"
+EnergySystem="*res://scripts/systems/energy_system.gd"
+VisitSystem="*res://scripts/systems/visit_system.gd"
 Telemetry="*res://scripts/autoload/telemetry.gd"
 
 [display]

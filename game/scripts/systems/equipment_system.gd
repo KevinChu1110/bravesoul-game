@@ -6,7 +6,21 @@ signal equipment_changed
 
 const ContentLoc := preload("res://scripts/systems/content_loc.gd")
 
-const SLOTS: Array[String] = ["weapon", "armor", "accessory"]
+## 武器／防具＋原作飾品六槽（戒指／項鍊／手環／耳環／護符／腰帶）
+const SLOTS: Array[String] = [
+	"weapon", "armor",
+	"ring", "necklace", "bracelet", "earring", "amulet", "belt",
+]
+const ACCESSORY_SLOTS: Array[String] = [
+	"ring", "necklace", "bracelet", "earring", "amulet", "belt",
+]
+const ACCESSORY_LEVEL_REQ := 15
+## 舊單一 accessory 槽 → 戒指
+const LEGACY_ACCESSORY_TO := "ring"
+
+## 真正多武器欄（原作升級解鎖；第 1 欄開局、第 2 欄 Lv10、第 3 欄 Lv16）
+const WEAPON_LOADOUT_SIZE := 3
+const WEAPON_LOADOUT_LEVEL_REQ := [1, 10, 16]
 
 
 
@@ -24,10 +38,182 @@ func _ensure_state() -> void:
 	if GameState.equip_bag == null:
 		GameState.equip_bag = []
 	if GameState.equip_slots == null:
-		GameState.equip_slots = {"weapon": "", "armor": "", "accessory": ""}
+		GameState.equip_slots = {}
+	## 舊檔只有 accessory：搬到戒指
+	if GameState.equip_slots.has("accessory"):
+		var legacy := str(GameState.equip_slots.get("accessory", ""))
+		if legacy != "" and str(GameState.equip_slots.get(LEGACY_ACCESSORY_TO, "")) == "":
+			GameState.equip_slots[LEGACY_ACCESSORY_TO] = legacy
+		GameState.equip_slots.erase("accessory")
 	for s in SLOTS:
 		if not GameState.equip_slots.has(s):
 			GameState.equip_slots[s] = ""
+	_ensure_weapon_loadout()
+
+
+func _ensure_weapon_loadout() -> void:
+	if GameState.weapon_loadout == null or typeof(GameState.weapon_loadout) != TYPE_ARRAY:
+		GameState.weapon_loadout = ["", "", ""]
+	while GameState.weapon_loadout.size() < WEAPON_LOADOUT_SIZE:
+		GameState.weapon_loadout.append("")
+	if GameState.weapon_loadout.size() > WEAPON_LOADOUT_SIZE:
+		GameState.weapon_loadout.resize(WEAPON_LOADOUT_SIZE)
+	GameState.weapon_loadout_active = clampi(int(GameState.weapon_loadout_active), 0, WEAPON_LOADOUT_SIZE - 1)
+	## 若欄全空但 equip_slots.weapon 有值，灌進第 0 欄
+	var any := false
+	for i in WEAPON_LOADOUT_SIZE:
+		if str(GameState.weapon_loadout[i]) != "":
+			any = true
+			break
+	var wuid := str(GameState.equip_slots.get("weapon", ""))
+	if not any and wuid != "":
+		GameState.weapon_loadout[0] = wuid
+		GameState.weapon_loadout_active = 0
+
+
+func loadout_slot_unlocked(index: int) -> bool:
+	if index < 0 or index >= WEAPON_LOADOUT_SIZE:
+		return false
+	var need := int(WEAPON_LOADOUT_LEVEL_REQ[index])
+	return GameState.level >= need
+
+
+func loadout_unlock_level(index: int) -> int:
+	if index < 0 or index >= WEAPON_LOADOUT_SIZE:
+		return 999
+	return int(WEAPON_LOADOUT_LEVEL_REQ[index])
+
+
+func active_loadout_index() -> int:
+	_ensure_state()
+	return clampi(int(GameState.weapon_loadout_active), 0, WEAPON_LOADOUT_SIZE - 1)
+
+
+func loadout_uid(index: int) -> String:
+	_ensure_state()
+	if index < 0 or index >= GameState.weapon_loadout.size():
+		return ""
+	return str(GameState.weapon_loadout[index])
+
+
+func weapon_inst(uid: String) -> Dictionary:
+	if uid == "" or not GameState.equip_worn.has(uid):
+		return {}
+	return GameState.equip_worn[uid] as Dictionary
+
+
+func active_weapon_inst() -> Dictionary:
+	return weapon_inst(loadout_uid(active_loadout_index()))
+
+
+func active_weapon_line() -> String:
+	var inst := active_weapon_inst()
+	var line := str(inst.get("line", ""))
+	if line != "":
+		return line
+	return str(GameState.path_style)
+
+
+## 把武器裝進指定欄（須已解鎖）。會從背包取出；原欄武器回背包。
+func equip_weapon_to_loadout(uid: String, index: int = -1) -> Dictionary:
+	_ensure_state()
+	var inst := find_bag(uid)
+	## 也可能已在另一欄／worn
+	if inst.is_empty() and GameState.equip_worn.has(uid):
+		inst = GameState.equip_worn[uid]
+	if inst.is_empty():
+		return {"ok": false, "msg": _t("背包沒有此裝。")}
+	if normalize_slot(str(inst.get("slot", "weapon"))) != "weapon":
+		return {"ok": false, "msg": _t("只能把武器放進武器欄。")}
+	var idx := index
+	if idx < 0:
+		idx = active_loadout_index()
+	if not loadout_slot_unlocked(idx):
+		return {"ok": false, "msg": _t("武器欄 %d 需達到 Lv%d。") % [idx + 1, loadout_unlock_level(idx)]}
+	## 若已在其他欄，先清掉那個 index
+	for i in WEAPON_LOADOUT_SIZE:
+		if str(GameState.weapon_loadout[i]) == uid:
+			GameState.weapon_loadout[i] = ""
+	## 原欄有武 → 回背包（若仍 worn）
+	var old_uid := str(GameState.weapon_loadout[idx])
+	if old_uid != "" and old_uid != uid:
+		_unequip_weapon_uid(old_uid)
+	## 從 bag 移到 worn
+	if find_bag(uid).is_empty() == false:
+		_remove_from_bag(uid)
+	GameState.equip_worn[uid] = inst
+	GameState.weapon_loadout[idx] = uid
+	GameState.weapon_loadout_active = idx
+	_sync_active_weapon_mirror()
+	equipment_changed.emit()
+	SaveManager.save_game()
+	return {"ok": true, "msg": _t("武器欄 %d：【%s】") % [idx + 1, inst.get("name", "")]}
+
+
+## 戰鬥外切換作用中武器欄（同步 path_style／面板攻擊）
+func switch_weapon_loadout(index: int) -> Dictionary:
+	_ensure_state()
+	if not loadout_slot_unlocked(index):
+		return {"ok": false, "msg": _t("武器欄 %d 需達到 Lv%d。") % [index + 1, loadout_unlock_level(index)]}
+	var uid := loadout_uid(index)
+	if uid == "":
+		return {"ok": false, "msg": _t("武器欄 %d 是空的。") % [index + 1]}
+	GameState.weapon_loadout_active = index
+	_sync_active_weapon_mirror()
+	equipment_changed.emit()
+	SaveManager.save_game()
+	var inst := weapon_inst(uid)
+	return {"ok": true, "msg": _t("切換武器欄 %d：【%s】") % [index + 1, inst.get("name", "")], "line": str(inst.get("line", "")), "uid": uid}
+
+
+func _unequip_weapon_uid(uid: String) -> void:
+	if uid == "" or not GameState.equip_worn.has(uid):
+		return
+	## 若仍被其他欄引用則不卸
+	for i in WEAPON_LOADOUT_SIZE:
+		if str(GameState.weapon_loadout[i]) == uid:
+			return
+	var inst: Dictionary = GameState.equip_worn[uid]
+	GameState.equip_worn.erase(uid)
+	if not inst.is_empty():
+		GameState.equip_bag.append(inst)
+
+
+func _sync_active_weapon_mirror() -> void:
+	_ensure_weapon_loadout()
+	var idx := active_loadout_index()
+	var uid := loadout_uid(idx)
+	GameState.equip_slots["weapon"] = uid
+	_sync_legacy_weapon()
+	## 作用中武器決定流派（技能綁定）
+	var inst := weapon_inst(uid)
+	var line := str(inst.get("line", ""))
+	if line != "":
+		GameState.path_style = line
+
+
+func loadout_snapshot_for_battle() -> Array:
+	## [{index, uid, name, line, weapon_atk, unlocked, empty}]
+	_ensure_state()
+	var out: Array = []
+	for i in WEAPON_LOADOUT_SIZE:
+		var unlocked := loadout_slot_unlocked(i)
+		var uid := loadout_uid(i) if unlocked else ""
+		var inst := weapon_inst(uid)
+		var atk := 0
+		if not inst.is_empty():
+			atk = int((inst.get("rolled", {}) as Dictionary).get("atk", 0))
+		out.append({
+			"index": i,
+			"uid": uid,
+			"name": str(inst.get("name", "")),
+			"line": str(inst.get("line", "")),
+			"weapon_atk": atk,
+			"unlocked": unlocked,
+			"empty": uid == "",
+			"active": i == active_loadout_index(),
+		})
+	return out
 
 
 func _uid() -> String:
@@ -71,7 +257,7 @@ func roll_instance(base_id: String, quality: String = "", rng: RandomNumberGener
 		"uid": _uid(),
 		"base_id": base_id,
 		"name": str(def.get("name", base_id)),
-		"slot": str(def.get("slot", "weapon")),
+		"slot": normalize_slot(str(def.get("slot", "weapon"))),
 		"tier": int(def.get("tier", 1)),
 		"line": str(def.get("line", "")),
 		"quality": quality,
@@ -137,14 +323,44 @@ func _equipped_lookup(uid: String) -> Dictionary:
 	return {}
 
 
+func normalize_slot(slot: String) -> String:
+	if slot == "accessory":
+		return LEGACY_ACCESSORY_TO
+	return slot
+
+
+func is_accessory_slot(slot: String) -> bool:
+	return normalize_slot(slot) in ACCESSORY_SLOTS
+
+
+func accessories_unlocked() -> bool:
+	return GameState.level >= ACCESSORY_LEVEL_REQ
+
+
 func equip(uid: String) -> Dictionary:
 	_ensure_state()
 	var inst := find_bag(uid)
 	if inst.is_empty():
 		return {"ok": false, "msg": _t("背包沒有此裝。")}
-	var slot := str(inst.get("slot", "weapon"))
+	var slot := normalize_slot(str(inst.get("slot", "weapon")))
+	inst["slot"] = slot
 	if slot not in SLOTS:
 		return {"ok": false, "msg": _t("未知部位。")}
+	if slot == "weapon":
+		## 武器走多欄：裝進作用中欄（空則第一個已解鎖空欄）
+		var idx := active_loadout_index()
+		if loadout_uid(idx) != "":
+			## 找第一個已解鎖空欄，否則覆寫作用中欄
+			var found := -1
+			for i in WEAPON_LOADOUT_SIZE:
+				if loadout_slot_unlocked(i) and loadout_uid(i) == "":
+					found = i
+					break
+			if found >= 0:
+				idx = found
+		return equip_weapon_to_loadout(uid, idx)
+	if is_accessory_slot(slot) and not accessories_unlocked():
+		return {"ok": false, "msg": _t("飾品六槽需達到 Lv%d（現 Lv%d）。") % [ACCESSORY_LEVEL_REQ, GameState.level]}
 	## 卸下舊的
 	var old_uid := str(GameState.equip_slots.get(slot, ""))
 	if old_uid != "":
@@ -161,18 +377,62 @@ func equip(uid: String) -> Dictionary:
 
 func unequip(slot: String) -> Dictionary:
 	_ensure_state()
-	var uid := str(GameState.equip_slots.get(slot, ""))
-	if uid == "":
+	slot = normalize_slot(slot)
+	if slot == "weapon":
+		return unequip_loadout_slot(active_loadout_index())
+	var uid2 := str(GameState.equip_slots.get(slot, ""))
+	if uid2 == "":
 		return {"ok": false, "msg": _t("該部位無裝備。")}
-	var inst: Dictionary = GameState.equip_worn.get(uid, {})
+	var inst2: Dictionary = GameState.equip_worn.get(uid2, {})
 	GameState.equip_slots[slot] = ""
-	GameState.equip_worn.erase(uid)
-	if not inst.is_empty():
-		GameState.equip_bag.append(inst)
+	GameState.equip_worn.erase(uid2)
+	if not inst2.is_empty():
+		GameState.equip_bag.append(inst2)
 	_sync_legacy_weapon()
 	equipment_changed.emit()
 	SaveManager.save_game()
 	return {"ok": true, "msg": _t("已卸下")}
+
+
+## 卸下指定武器欄（不必是作用中欄）
+func unequip_loadout_slot(index: int) -> Dictionary:
+	_ensure_state()
+	if index < 0 or index >= WEAPON_LOADOUT_SIZE:
+		return {"ok": false, "msg": _t("無效的武器欄。")}
+	if not loadout_slot_unlocked(index):
+		return {"ok": false, "msg": _t("武器欄 %d 需達到 Lv%d。") % [index + 1, loadout_unlock_level(index)]}
+	var uid := loadout_uid(index)
+	if uid == "":
+		return {"ok": false, "msg": _t("該武器欄是空的。")}
+	GameState.weapon_loadout[index] = ""
+	var still := false
+	for i in WEAPON_LOADOUT_SIZE:
+		if str(GameState.weapon_loadout[i]) == uid:
+			still = true
+			break
+	var inst: Dictionary = GameState.equip_worn.get(uid, {})
+	if not still:
+		GameState.equip_worn.erase(uid)
+		if not inst.is_empty():
+			GameState.equip_bag.append(inst)
+	## 若卸的是作用中欄，改指到第一個仍有武的欄
+	if active_loadout_index() == index:
+		var nxt := -1
+		for i in WEAPON_LOADOUT_SIZE:
+			if loadout_uid(i) != "":
+				nxt = i
+				break
+		if nxt >= 0:
+			GameState.weapon_loadout_active = nxt
+		## else 維持 index，mirror 會清成空手
+	_sync_active_weapon_mirror()
+	## 全空時清 legacy 顯示
+	if str(GameState.equip_slots.get("weapon", "")) == "":
+		GameState.weapon_name = "空手"
+		GameState.weapon_atk = 0
+	equipment_changed.emit()
+	SaveManager.save_game()
+	return {"ok": true, "msg": _t("已卸下武器欄 %d") % [index + 1]}
 
 
 func _remove_from_bag(uid: String) -> void:
@@ -232,16 +492,26 @@ func status_bbcode() -> String:
 	lines.append(_t("總加成：攻+%d 防+%d 血+%d 暴擊+%.1f 暴傷+%.1f") % [
 		int(b.atk), int(b.def), int(b.hp), float(b.crit), float(b.crit_dmg)
 	])
+	lines.append(_t("[b]武器欄[/b]（耗盡自動切 · 2欄Lv10 · 3欄Lv16）"))
+	for i in WEAPON_LOADOUT_SIZE:
+		if not loadout_slot_unlocked(i):
+			lines.append(_t("· 欄 %d：未解鎖（Lv%d）") % [i + 1, loadout_unlock_level(i)])
+			continue
+		var wuid := loadout_uid(i)
+		var mark := _t("〔使用中〕") if i == active_loadout_index() and wuid != "" else ""
+		if wuid != "" and GameState.equip_worn.has(wuid):
+			lines.append("· %s%d%s：%s" % [_t("欄 "), i + 1, mark, label(GameState.equip_worn[wuid])])
+		else:
+			lines.append(_t("· 欄 %d%s：—") % [i + 1, mark])
+	if not accessories_unlocked():
+		lines.append(_t("飾品六槽：Lv%d 開放（戒指／項鍊／手環／耳環／護符／腰帶）") % ACCESSORY_LEVEL_REQ)
 	for s in SLOTS:
+		if s == "weapon":
+			continue  ## 已用武器欄列出
+		if is_accessory_slot(s) and not accessories_unlocked():
+			continue
 		var uid := str(GameState.equip_slots.get(s, ""))
-		var name_s := s
-		match s:
-			"weapon":
-				name_s = _t("武器")
-			"armor":
-				name_s = _t("防具")
-			"accessory":
-				name_s = _t("飾品")
+		var name_s := slot_label(s)
 		if uid != "" and GameState.equip_worn.has(uid):
 			lines.append("· %s：%s" % [name_s, label(GameState.equip_worn[uid])])
 		else:
@@ -249,6 +519,28 @@ func status_bbcode() -> String:
 	lines.append("")
 	lines.append(_t("背包裝備 %d 件") % GameState.equip_bag.size())
 	return "\n".join(lines)
+
+
+func slot_label(slot: String) -> String:
+	match normalize_slot(slot):
+		"weapon":
+			return _t("武器")
+		"armor":
+			return _t("防具")
+		"ring":
+			return _t("戒指")
+		"necklace":
+			return _t("項鍊")
+		"bracelet":
+			return _t("手環")
+		"earring":
+			return _t("耳環")
+		"amulet":
+			return _t("護符")
+		"belt":
+			return _t("腰帶")
+		_:
+			return slot
 
 
 func migrate_line(line: String) -> String:

@@ -38,3 +38,17 @@ CI：`.github/workflows/game-ci.yml` 每次 push／PR 自動跑 1–3；export �
 - 探索地圖定義在 `game/scripts/world/map_catalog.gd`；鏡頭／小地圖在 `explore_view.gd`。
 - 付費生成資產前確認；輸出進 `game/assets/`，生成用參考圖不要塞進 runtime 路徑。
 - 改 XML／DB schema 類比：改探索實體後務必測互動 id 是否在 `main.gd` 有 handler。
+- **產品北辰**：[docs/PRODUCT_BRIDGE.md](docs/PRODUCT_BRIDGE.md)（原作對齊）；AI 契約：[CLAUDE.md](CLAUDE.md)。
+- **降 AI 感**：禁空泛勵志套話；用語對齊選單別名（今日村莊／演武場／抽魂／聚魂殿）。
+- **經濟／能量**：開戰走 `EnergySystem`；勿另造體力第二套。
+- **BGM**：只用 `AudioManager.play_bgm_for_map` / `play_bgm_for_battle`；地區對照表在 `map_to_bgm`。真曲用 `tools/import_bgm.py`／占位烤 `tools/bake_placeholder_bgm.py`。
+- **地圖場景**：可選 `scenes/maps/<id>.tscn`（`MapSceneRegistry`）；scaffold：`tools/scaffold_map_scene.py`。
+
+## 改完自檢（影片心法精簡）
+
+| 問 | 若否 → |
+|----|--------|
+| 玩家看得見的字有沒有「AI 腔」？ | 改短、改口吻 |
+| 有沒有偏離原作名詞／機制？ | 對 PRODUCT_BRIDGE |
+| 存檔版號要不要升？ | `GameState.VERSION` + `save_migration` |
+| 無頭測試哨兵有沒有綠？ | `./tools/run_tests.sh` 或單支 `test_*.gd` |

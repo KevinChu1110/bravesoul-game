@@ -28,6 +28,7 @@ var _dialogue_scene: PackedScene = preload("res://scenes/ui/dialogue_box.tscn")
 const ExploreViewScn = preload("res://scripts/world/explore_view.gd")
 const WorldTravel = preload("res://scripts/world/world_travel.gd")
 const WorldContent = preload("res://scripts/world/world_content.gd")
+const RegionCatalog = preload("res://scripts/world/region_catalog.gd")
 const UiStyle = preload("res://scripts/ui/ui_style.gd")
 const MapleHudScn = preload("res://scripts/ui/maple_hud.gd")
 const MapleHotbarScn = preload("res://scripts/ui/maple_hotbar.gd")
@@ -468,7 +469,7 @@ func _build_pause_layer() -> void:
 		sub.custom_minimum_size = Vector2(300, 140)
 		AudioManager.play_ui()
 	)
-	## 今日星途：日課總入口（簽到／委託／競技場／獵場）
+	## 今日村莊：日課總入口（簽到／委託／競技場／獵場）
 	_pause_btn(box, star_tag, func():
 		_close_pause()
 		_go_starpath_panel()
@@ -531,6 +532,18 @@ func _build_pause_layer() -> void:
 		_close_pause()
 		_go_soul_panel()
 	)
+	_pause_btn(box, Loc.t("pause.gems"), func():
+		_close_pause()
+		_go_gem_panel()
+	)
+	_pause_btn(box, Loc.t("pause.regions"), func():
+		_close_pause()
+		_go_region_panel()
+	)
+	_pause_btn(box, Loc.t("pause.visit"), func():
+		_close_pause()
+		_go_visit_panel()
+	)
 	_pause_btn(box, Loc.t("pause.titles"), func():
 		_show_pause_titles(box, sub)
 	)
@@ -566,7 +579,7 @@ func _message_place_for_current() -> String:
 	var mid := _last_explore_map
 	if mid.begins_with("tower"):
 		return "tower_camp"
-	if mid in ["town", "town_keep", "town_market", "barracks_yard"]:
+	if mid.begins_with("town") or mid == "barracks_yard":
 		return "town_gate"
 	if mid.begins_with("village"):
 		return "village_well"
@@ -652,7 +665,7 @@ func _show_messages_panel(place: String, list: Array, online: bool) -> void:
 		{"text": _t("留下足跡：還在啊"), "cb": _msg_post.bind(place, _t("還在啊。"), online)},
 		{"text": _t("留下足跡：氣味比預言近"), "cb": _msg_post.bind(place, _t("氣味比預言近。"), online)},
 		{"text": _t("留下足跡：微末也走到了"), "cb": _msg_post.bind(place, _t("微末也走到了。"), online)},
-		{"text": _t("留下足跡：今日星途"), "cb": _msg_post.bind(place, _t("今日星途，還亮著。"), online)},
+		{"text": _t("留下足跡：今日村莊"), "cb": _msg_post.bind(place, _t("今日村莊，還亮著。"), online)},
 		{"text": Loc.t("btn.refresh"), "cb": func(): _go_message_stone("message_stone")},
 	]
 	if not online:
@@ -747,8 +760,13 @@ func _go_hunt_panel() -> void:
 
 
 func _hunt_start_rewarded() -> void:
+	var er: Dictionary = EnergySystem.try_spend_run("hunt")
+	if not bool(er.get("ok", false)):
+		_play_dialog([{"speaker": _t("系統"), "text": str(er.get("msg", ""))}], _go_hunt_panel)
+		return
 	var r: Dictionary = HuntSystem.start_run(false)
 	if not bool(r.get("ok", false)):
+		EnergySystem.grant(int(er.get("cost", 1)))
 		_play_dialog([{"speaker": _t("系統"), "text": str(r.get("msg", ""))}], _go_hunt_panel)
 		return
 	var lines: Array = [
@@ -759,8 +777,13 @@ func _hunt_start_rewarded() -> void:
 
 
 func _hunt_start_practice() -> void:
+	var er: Dictionary = EnergySystem.try_spend_run("hunt")
+	if not bool(er.get("ok", false)):
+		_play_dialog([{"speaker": _t("系統"), "text": str(er.get("msg", ""))}], _go_hunt_panel)
+		return
 	var r: Dictionary = HuntSystem.start_run(true)
 	if not bool(r.get("ok", false)):
+		EnergySystem.grant(int(er.get("cost", 1)))
 		_play_dialog([{"speaker": _t("系統"), "text": str(r.get("msg", ""))}], _go_hunt_panel)
 		return
 	var lines: Array = [
@@ -830,8 +853,13 @@ func _go_arena_panel() -> void:
 
 
 func _arena_start_rewarded() -> void:
+	var er: Dictionary = EnergySystem.try_spend_run("arena")
+	if not bool(er.get("ok", false)):
+		_play_dialog([{"speaker": _t("系統"), "text": str(er.get("msg", ""))}], _go_arena_panel)
+		return
 	var r: Dictionary = ArenaSystem.start_run(false)
 	if not bool(r.get("ok", false)):
+		EnergySystem.grant(int(er.get("cost", 1)))  ## 開場失敗退能量
 		_play_dialog([{"speaker": _t("系統"), "text": str(r.get("msg", ""))}], _go_arena_panel)
 		return
 	_play_dialog([
@@ -841,8 +869,13 @@ func _arena_start_rewarded() -> void:
 
 
 func _arena_start_practice() -> void:
+	var er: Dictionary = EnergySystem.try_spend_run("arena")
+	if not bool(er.get("ok", false)):
+		_play_dialog([{"speaker": _t("系統"), "text": str(er.get("msg", ""))}], _go_arena_panel)
+		return
 	var r: Dictionary = ArenaSystem.start_run(true)
 	if not bool(r.get("ok", false)):
+		EnergySystem.grant(int(er.get("cost", 1)))
 		_play_dialog([{"speaker": _t("系統"), "text": str(r.get("msg", ""))}], _go_arena_panel)
 		return
 	_play_dialog([
@@ -884,13 +917,13 @@ func _on_arena_battle_finished(won: bool) -> void:
 
 
 func _arena_show_leaderboard() -> void:
-	var body := _t("[b]競技場排行[/b]\n個人最佳：%d\n\n") % ArenaSystem.best_score()
+	var body := _t("[b]角鬥排行[/b]\n個人最佳：%d\n\n") % ArenaSystem.best_score()
 	if OnlineGate.is_signed_in():
 		body += _t("讀取雲端榜中…\n")
 		_panel(Loc.t("panel.arena"), body, [{"text": _t("返回"), "cb": _go_arena_panel}])
 		OnlineGate.leaderboard_fetch(ArenaSystem.LEADERBOARD_BOARD, func(res: Dictionary):
 			var lines: PackedStringArray = []
-			lines.append(_t("[b]競技場排行 · 前 10[/b]"))
+			lines.append(_t("[b]角鬥排行 · 前 10[/b]"))
 			lines.append(_t("你的最佳：%d\n") % ArenaSystem.best_score())
 			var list: Array = res.get("list", []) if bool(res.get("ok", true)) else []
 			## OnlineGate _ok 包裝可能不同；相容 raw list
@@ -1279,7 +1312,7 @@ func _online_on_result(res: Dictionary) -> void:
 
 
 func _go_starpath_panel() -> void:
-	## 今日星途儀表板：一天要開遊戲時先看這裡
+	## 今日村莊儀表板：一天要開遊戲時先看這裡
 	QuestSystem.refresh_daily()
 	OnlineGate.refresh_candle_soft()
 	var body := QuestSystem.starpath_summary_bbcode()
@@ -1302,14 +1335,14 @@ func _go_starpath_panel() -> void:
 	buttons.append({"text": _t("今日委託明細"), "cb": _go_daily_panel})
 	if ArenaSystem.is_unlocked():
 		var a_left := ArenaSystem.daily_left()
-		var a_lab := _t("演武競技場（剩 %d）") % a_left if a_left > 0 else _t("演武競技場（練習）")
+		var a_lab := _t("演武場（剩 %d）") % a_left if a_left > 0 else _t("演武場（練習）")
 		buttons.append({"text": a_lab, "cb": _go_arena_panel})
 	if HuntSystem.is_unlocked():
 		var h_left := HuntSystem.daily_left()
-		var h_lab := _t("星途獵場（剩 %d）") % h_left if h_left > 0 else _t("星途獵場（練習）")
+		var h_lab := _t("野外獵場（剩 %d）") % h_left if h_left > 0 else _t("野外獵場（練習）")
 		buttons.append({"text": h_lab, "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
-	buttons.append({"text": _t("留言石（足跡）"), "cb": func(): _go_message_stone("message_stone")})
-	buttons.append({"text": _t("通關蠟燭"), "cb": _go_candle_altar})
+	buttons.append({"text": _t("旅人留言石"), "cb": func(): _go_message_stone("message_stone")})
+	buttons.append({"text": _t("通關燭火"), "cb": _go_candle_altar})
 	buttons.append({"text": _t("長遠任務"), "cb": _go_quest_panel})
 	if _current == Screen.TITLE:
 		buttons.append({"text": Loc.t("btn.back"), "cb": _go_title})
@@ -1347,7 +1380,7 @@ func _go_daily_panel() -> void:
 			})
 	buttons.append({"text": _t("材料行（琥珀）"), "cb": _go_material_shop})
 	buttons.append({"text": _t("長遠任務"), "cb": _go_quest_panel})
-	buttons.append({"text": _t("今日星途"), "cb": _go_starpath_panel})
+	buttons.append({"text": _t("今日村莊"), "cb": _go_starpath_panel})
 	buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
 	_panel(Loc.t("panel.daily"), body, buttons)
 
@@ -1460,7 +1493,7 @@ func _hub_back() -> void:
 		_go_title()
 		return
 	## 原本一律走 _resume_from_chapter()，那支只認 GameState.chapter，
-	## 不認玩家剛剛站在哪張圖 —— 在星途獵場開個裝備面板再返回，
+	## 不認玩家剛剛站在哪張圖 —— 在野外獵場開個裝備面板再返回，
 	## 人會出現在城外荒野。所有非章節主線的子地圖（獵場、下城市集、下水道、
 	## 各章次場景）都會這樣被傳走。
 	## 記得上一張探索圖就送回那裡；只有真的沒有紀錄時才退回章節預設。
@@ -1556,8 +1589,31 @@ func _grant_boss_loot(gold_n: int, dust_n: int, hp_n: int = 0) -> void:
 	if hp_n > 0:
 		GameState.max_hp += hp_n
 		GameState.hp = GameState.effective_max_hp()
+	_grant_part_break_loot()
 	GuildSystem.add_contrib(20)
 	SaveManager.save_game()
+
+
+## 破部位掉落：僅打贏進袋（原作報酬；變兇部位可能掉雙份）
+func _grant_part_break_loot() -> void:
+	var BattleSimT := preload("res://scripts/battle/battle_sim.gd")
+	var loot: Array = BattleSimT.last_victory_part_loot.duplicate()
+	BattleSimT.last_victory_part_loot = []
+	if loot.is_empty():
+		return
+	var counts: Dictionary = {}
+	for mid in loot:
+		var id := str(mid)
+		if id == "":
+			continue
+		counts[id] = int(counts.get(id, 0)) + 1
+	var bits: PackedStringArray = []
+	for id in counts.keys():
+		var n: int = int(counts[id])
+		InventorySystem.add_item(id, n)
+		bits.append("%s×%d" % [InventorySystem.item_name(id), n])
+	if not bits.is_empty():
+		ui_toast(_t("部位殘片：%s") % " · ".join(bits))
 
 
 ## 支線發獎樣板 → SideMilestones.apply（旗／金／星屑／稱號／存檔）。
@@ -1629,6 +1685,17 @@ func _play_dialog(lines: Array, after: Callable = Callable(), choice_ctx: String
 func _on_dialogue_finished() -> void:
 	if _explore and is_instance_valid(_explore) and _explore.has_method("set_frozen"):
 		_explore.call("set_frozen", false)
+	## 拜訪獎勵選完後回拜訪面板
+	if _choice_ctx == "visit_reward":
+		var msg := str(GameState.get_flag("visit.last_result_msg", ""))
+		_choice_ctx = ""
+		var cb0 := _after_dialogue
+		_after_dialogue = Callable()
+		if msg != "":
+			_play_dialog([{"speaker": _t("系統"), "text": msg}], _go_visit_panel)
+		else:
+			_go_visit_panel()
+		return
 	var cb := _after_dialogue
 	_after_dialogue = Callable()
 	if cb.is_valid():
@@ -1654,6 +1721,12 @@ func _on_choice(i: int) -> void:
 			GameState.set_flag("c1_sprout_done", true)
 			TitleCatalog.evaluate_all()
 			SaveManager.save_game()
+	## 好友挑戰：0=金幣 1=經驗
+	if _choice_ctx == "visit_reward":
+		var prefer_gold := i == 0
+		var vr: Dictionary = VisitSystem.on_challenge_won(prefer_gold)
+		## 對話結束後再跳面板（finished 會清 ctx；這裡先把結果存起來）
+		GameState.set_flag("visit.last_result_msg", str(vr.get("msg", "")))
 
 
 func _clear_host() -> void:
@@ -1729,7 +1802,7 @@ func _battle_is_live() -> bool:
 	return false
 
 
-func _panel(title: String, body: String, buttons: Array) -> void:
+func _panel(title: String, body: String, buttons: Array, extras: Dictionary = {}) -> void:
 	## 戰鬥進行中不准開面板。
 	##
 	## _panel() 第一件事就是 _clear_host()，而戰鬥節點就掛在 host 底下 ——
@@ -1816,6 +1889,11 @@ func _panel(title: String, body: String, buttons: Array) -> void:
 	t.add_theme_font_size_override("font_size", 18)
 	t.add_theme_color_override("font_color", UiStyle.WOOD_DARK)
 	root.add_child(t)
+
+	if bool(extras.get("soul_hang", false)):
+		var hang := _make_soul_hang()
+		if hang:
+			root.add_child(hang)
 
 	var rule := ColorRect.new()
 	rule.custom_minimum_size = Vector2(0, 2)
@@ -2198,7 +2276,7 @@ func _go_title() -> void:
 	]
 	if SaveManager.has_save():
 		buttons.append({"text": Loc.t("title.continue"), "cb": _continue_game})
-		## 今日星途：先讀檔再開儀表板（避免在空白狀態領獎）
+		## 今日村莊：先讀檔再開儀表板（避免在空白狀態領獎）
 		buttons.append({"text": Loc.t("title.starpath"), "cb": _continue_then_starpath})
 	## 紀錄面板的門檻比「繼續」低一階：格子裡有壞掉的檔時「繼續」給不出來，
 	## 但玩家要進得去才刪得掉那一格。
@@ -2207,7 +2285,7 @@ func _go_title() -> void:
 	if GameState.has_flag("game_cleared") or GameState.ng_plus > 0:
 		buttons.append({"text": Loc.t("title.ng"), "cb": _go_ng_plus_menu})
 	buttons.append({"text": Loc.t("title.titles"), "cb": _go_title_wall})
-	## 簽到／委託本體仍在旅途內（暫停→今日星途）；標題只提供「讀檔後進儀表板」捷徑。
+	## 簽到／委託本體仍在旅途內（暫停→今日村莊）；標題只提供「讀檔後進儀表板」捷徑。
 	var online_lbl := _t("連線設定 · 純單機") if OnlineGate.offline_only else _t("連線設定 · 星途")
 	buttons.append({"text": online_lbl, "cb": _go_online_panel})
 	buttons.append({"text": _t("顯示設定 · %s") % DisplaySettings.mode_label(), "cb": _go_display_settings})
@@ -2234,7 +2312,7 @@ func _go_title() -> void:
 	var title_line := _t("稱號 %d／%d") % [TitleCatalog.unlocked_count(), TitleCatalog.total_count()]
 	var body := "[center][i]%s[/i][/center]\n\n" % Loc.t("title.tagline")
 	body += Loc.t("title.blurb") + "\n\n"
-	body += _t("[color=#7fd]v0.17 · 今日星途／競技場／每日輪替[/color]\n")
+	body += _t("[color=#7fd]v0.17 · 今日村莊／演武場／每日輪替[/color]\n")
 	body += "[color=#fc9]%s[/color]\n" % OnlineGate.candle_line(false)
 	body += "[color=#b8a88a]%s%s[/color]\n\n" % [title_line, ng_line]
 	body += "[color=#8a8070]%s[/color]" % Loc.t("title.controls")
@@ -2409,7 +2487,7 @@ func _continue_game() -> void:
 	_resume_from_chapter()
 
 
-## 標題「今日星途」：先載入存檔再開儀表板（狀態才是真的）
+## 標題「今日村莊」：先載入存檔再開儀表板（狀態才是真的）
 func _continue_then_starpath() -> void:
 	if SaveManager.load_game() != OK:
 		_show_toast(_t("那一格讀不起來，先看看紀錄。"))
@@ -2487,7 +2565,7 @@ func _on_explore_interact(id: String) -> void:
 	if id in ["wolf", "leo", "fog_boss", "abo", "falcon", "boar", "sword", "black_ronin"] \
 			or str(id).begins_with("mb_") or str(id).begins_with("hunt_"):
 		_explore_play_pose("attack", 0.42)
-	elif id in ["maisui", "ding", "greybeard", "silk", "sprout"]:
+	elif id in ["maisui", "ding", "greybeard", "silk", "sprout", "star", "gem_clerk"]:
 		_explore_play_pose("telegraph", 0.28)
 	## 全域路標／子地圖（各章共用）
 	if _handle_world_travel(id):
@@ -2711,7 +2789,7 @@ func _side_ronin() -> void:
 		{"speaker": _t("黑焰浪人"), "text": _t("黑焰教我：心一軟，就被吃乾淨。我不會再軟。")},
 		{
 			"speaker": _t("黑焰浪人"),
-			"text": _t("怎麼，兔子？要刀還是要滾？"),
+			"text": _t("怎麼，團裡最弱的？要刀還是要滾？"),
 			"choices": choices,
 			"replies": replies,
 		},
@@ -2785,7 +2863,7 @@ func _side_deliver_true_letter() -> void:
 	_play_dialog([
 		{"speaker": _t("行商"), "portrait": "caravan_chief", "text": _t("這印……霧隱？假信我看過一百封。")},
 		{"speaker": _t("行商"), "text": _t("……紙邊有火燎。是真的。我們會送到村外那戶。")},
-		{"speaker": _t("行商"), "text": _t("謝了，兔子。路上少一層假，就少一場刀。")},
+		{"speaker": _t("行商"), "text": _t("謝了。路上少一層假，就少一場刀。")},
 		{"speaker": _t("系統"), "text": _t("交付【真信】。金幣＋45 · 星屑＋3。")},
 	], func(): _grant_side_reward(SideMilestones.reward("fog_letter_deliver")))
 
@@ -3227,6 +3305,9 @@ func _handle_world_travel(id: String) -> bool:
 	var screen_key := str(link.get("screen", ""))
 	if map_id == "":
 		return false
+	if map_id in ["town_forge", "town_soul", "town_gem", "town_tutor"]:
+		if not GameState.has_flag("c1_four_shops_seen"):
+			GameState.set_flag("c1_four_shops_seen", true)
 	## 進入主城／章節入口時走正式流程（旗標與過場）
 	if map_id == "town" and screen_key == "C1_TOWN" and id in ["exit_town_hint", "dawn_glow", "path_knight"]:
 		_go_c1_town()
@@ -3240,7 +3321,7 @@ func _go_world_map() -> void:
 	body += _t("　　　　遊俠森林（樹冠／靜湖／遺址）\n")
 	body += "　　　　　　｜\n"
 	body += _t("維京海岸 ── 法師之塔 ── 騎士堡壘\n")
-	body += _t("（港／洞／沉船）　（門廳／階／回憶）　（市集／下水道／演武）\n")
+	body += _t("（港／洞／沉船）　（門廳／階／回憶）　（四店／市集／演武）\n")
 	body += "　　　　　　｜\n"
 	body += _t("　　　忍者村／霧隱（崖／祠／鏡廊）\n")
 	body += "　　　　　　｜\n"
@@ -3284,9 +3365,9 @@ func _go_world_map() -> void:
 			or GameState.has_flag("boss.stonefist_cleared") or GameState.power_score() >= 42:
 		buttons.append({"text": _t("塔下營地"), "cb": _go_c6_camp})
 	if HuntSystem.is_unlocked():
-		buttons.append({"text": _t("星途獵場"), "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
+		buttons.append({"text": _t("野外獵場"), "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)})
 	if ArenaSystem.is_unlocked():
-		buttons.append({"text": _t("演武競技場"), "cb": _go_arena_panel})
+		buttons.append({"text": _t("演武場"), "cb": _go_arena_panel})
 	buttons.append({"text": _t("武器流派"), "cb": _go_path_panel})
 	buttons.append({"text": _t("返回當前"), "cb": _hub_back})
 	_panel(Loc.t("panel.world_map"), body, buttons)
@@ -3534,6 +3615,20 @@ func _start_battle(mode: String) -> void:
 
 
 func _start_battle_raw(mode: String) -> void:
+	## 拜訪挑戰不耗能量；其餘走能量制
+	var visit_pending := VisitSystem.pending_id() != ""
+	if not visit_pending:
+		var er: Dictionary = EnergySystem.try_spend_for_battle(mode)
+		if not bool(er.get("ok", false)):
+			_play_dialog([{"speaker": _t("系統"), "text": str(er.get("msg", ""))}], func():
+				if _last_explore_map != "":
+					_open_explore(_last_explore_map, _last_explore_screen)
+				else:
+					_go_starpath_panel()
+			)
+			return
+		elif int(er.get("cost", 0)) > 0:
+			ui_toast(EnergySystem.status_line())
 	_current = Screen.BATTLE
 	_battle_mode = mode
 	_clear_host()
@@ -3554,6 +3649,10 @@ func _on_battle_finished(won: bool) -> void:
 		_explore_play_pose("skill", 0.55)
 	else:
 		_explore_play_pose("hit", 0.5)
+	## 好友挑戰優先收尾
+	if VisitSystem.pending_id() != "":
+		_on_visit_battle_finished(won)
+		return
 	if _battle_mode == "wolf":
 		if won:
 			_grant_boss_loot(25, 2, 0)
@@ -3674,7 +3773,7 @@ func _on_world_battle_finished(won: bool) -> void:
 			gold_n = maxi(6, int(gold_n * 0.8))
 		var dust_n := 1 if int(def.get("max_hp", 50)) >= 90 else 0
 		_grant_boss_loot(gold_n, dust_n, 0)
-		var xp_n := 12 + int(def.get("max_hp", 50) / 10)
+		var xp_n := Formulas.field_xp(int(def.get("max_hp", 50)), sk_wins)
 		if bool(def.get("is_boss", false)):
 			xp_n = 80 + int(def.get("max_hp", 100) / 5)
 		var xr: Dictionary = GameState.add_xp(xp_n)
@@ -3696,6 +3795,8 @@ func _on_world_battle_finished(won: bool) -> void:
 		extra += _t(" · 經驗 %d") % int(xr.get("gained", xp_n))
 		if int(xr.get("levels", 0)) > 0:
 			extra += _t(" · 升級！")
+		if sk_wins == 24:
+			extra += _t(" · 野外經驗開始變薄。回村演武比較厚。")
 		if loot_s != "":
 			extra += " · " + loot_s
 		extra += eq_s
@@ -3730,7 +3831,7 @@ func _c0_to_c1_cutscene() -> void:
 		{
 			"bg": "town",
 			"speaker": _t("灰鬚"),
-			"text": _t("……兔子。帶著煙味的兔子。"),
+			"text": _t("……傭兵團的？煙味。最弱那掛。"),
 		},
 	]), _go_c1_town)
 
@@ -3746,19 +3847,19 @@ func _go_c1_town() -> void:
 		_clear_host()
 		_current = Screen.C1_TOWN
 		_play_dialog([
-			{"speaker": _t("灰鬚"), "text": _t("停。兔子？")},
-			{"speaker": _t("灰鬚"), "text": _t("這裡不是菜園。回去。")},
+			{"speaker": _t("灰鬚"), "text": _t("停。傭兵團的？……看腳步就知道。最弱那掛的。")},
+			{"speaker": _t("灰鬚"), "text": _t("這裡不是菜園，也不是團裡發餉的地方。回去。")},
 			{
 				"speaker": _t("灰鬚"),
 				"text": _t("……說吧。幹嘛還杵在門前。"),
-				"choices": [_t("村子被燒了。"), _t("我來找能打黑焰的人。"), _t("……讓我進去就好。")],
+				"choices": [_t("村子被燒了。——上面只叫我來看一眼。"), _t("我來找能打黑焰的人。團裡沒人肯來。"), _t("……讓我進去就好。活著回報就行。")],
 				"replies": [
 					_t("翠谷？……煙味我聞得出。進來。別哭，沒用。"),
 					_t("能打黑焰的人？牆裡沒有這種神仙。只有還肯站崗的傻瓜。"),
 					_t("哼。至少話短。進門，別擋道。"),
 				],
 			},
-			{"speaker": _t("灰鬚"), "text": _t("聽著，小東西。牆內也不是天堂。聖獅狂了，騎士團散了。")},
+			{"speaker": _t("灰鬚"), "text": _t("聽著，新人。牆內也不是天堂。聖獅狂了，騎士團散了。")},
 			{"speaker": _t("灰鬚"), "text": _t("進了就別給我添亂。——劍橫著掃，別跟啄木鳥一樣戳。")},
 			{"speaker": _t("系統"), "text": _t("灰鬚指點了你。【橫斬】更穩了。Esc 可開「技能／招式」。")},
 		], func():
@@ -3783,13 +3884,15 @@ func _go_c1_town() -> void:
 
 
 func _interact_town(id: String) -> void:
+	if _interact_shop_interior(id):
+		return
 	match id:
 		"greybeard":
-			_c1_greybeard()
+			_enter_plaza_shop("tutor")
 		"ding":
-			_go_c1_forge()
+			_enter_plaza_shop("forge")
 		"star":
-			_c1_star()
+			_enter_plaza_shop("soul")
 		"silk":
 			_side_silk("silk")
 		"flag":
@@ -3806,8 +3909,6 @@ func _interact_town(id: String) -> void:
 				{"speaker": _t("旁白"), "text": Loc.t("flavor.market")},
 				{"speaker": _t("系統"), "text": _t("殘架旁有琥珀的告示：材料行在行商驛站；城內也可問攤位。")},
 			], _go_material_shop)
-		"forge_sign":
-			_play_dialog([{"speaker": _t("旁白"), "text": Loc.t("flavor.forge_sign")}])
 		"fountain":
 			_play_dialog([{"speaker": _t("旁白"), "text": Loc.t("flavor.fountain")}])
 		"bench":
@@ -3848,7 +3949,7 @@ func _c1_star() -> void:
 	if GameState.has_flag("c1_soul_intro"):
 		var lines: Array = NpcLines.for_npc("star")
 		if lines.is_empty():
-			lines = [{"speaker": _t("星讀"), "text": _t("足跡會再交疊。星屑夠了就來觀星。")}]
+			lines = [{"speaker": _t("星讀"), "text": _t("足跡會再交疊。星屑夠了就來抽魂。")}]
 		var tut: Array = TutorialSystem.take("soul")
 		for t in tut:
 			lines.append(t)
@@ -3856,7 +3957,7 @@ func _c1_star() -> void:
 		return
 	_play_dialog([
 		{"speaker": _t("星讀"), "text": _t("你身上有煙味，和一點……尚未點名的星光。")},
-		{"speaker": _t("星讀"), "text": _t("路上會撿到星屑。拿來觀星，走過的路會凝成刃的性格。")},
+		{"speaker": _t("星讀"), "text": _t("路上會撿到星屑。拿來抽魂，走過的路會凝成刃的性格。")},
 		{"speaker": _t("星讀"), "text": _t("先送你一握星屑。星盤為你亮了一角。")},
 		{"speaker": _t("系統"), "text": _t("獲得星屑 ×5。凝出戰魂「凡·破軍」，已入魂槽。")},
 	], func():
@@ -3869,30 +3970,153 @@ func _c1_star() -> void:
 	)
 
 
+
+func _screen_from_region_key(key: String) -> Screen:
+	match key:
+		"C0_ROAD":
+			return Screen.C0_ROAD
+		"C1_TOWN":
+			return Screen.C1_TOWN
+		"C1_WILD":
+			return Screen.C1_WILD
+		"C2_MIST":
+			return Screen.C2_MIST
+		"C3_DOJO":
+			return Screen.C3_DOJO
+		"C4_FOREST":
+			return Screen.C4_FOREST
+		"C5_COAST":
+			return Screen.C5_COAST
+		"C6_TOWER":
+			return Screen.C6_TOWER
+		_:
+			return Screen.C1_TOWN
+
+
+func _go_region_panel() -> void:
+	var body := RegionCatalog.status_bbcode()
+	body += "\n" + EnergySystem.status_line()
+	var buttons: Array = []
+	for s in RegionCatalog.flat_open_stages():
+		var st := str(s.get("state", "open"))
+		var mark := "✅" if st == "cleared" else "▶"
+		var label := "%s %s" % [mark, str(s.get("name", ""))]
+		var goto: Dictionary = s.get("goto", {})
+		var map_id := str(goto.get("map", "town"))
+		var sc := _screen_from_region_key(str(goto.get("screen", "C1_TOWN")))
+		buttons.append({"text": label, "cb": _region_goto_cb(map_id, sc)})
+	buttons.append({"text": Loc.t("btn.back"), "cb": _go_starpath_panel})
+	_panel(_t("四地區關卡"), body, buttons)
+
+
+func _region_goto_cb(map_id: String, screen: Screen) -> Callable:
+	return func():
+		_open_explore(map_id, screen)
+
+
+func _go_visit_panel() -> void:
+	if OnlineGate.is_signed_in():
+		OnlineGate.push_pvp_snapshot()
+		OnlineGate.fetch_pvp_snapshots(func(res: Dictionary):
+			var list: Array = res.get("list", []) if typeof(res.get("list", [])) == TYPE_ARRAY else []
+			VisitSystem.ingest_remote(list)
+			_render_visit_panel()
+		)
+	_render_visit_panel()
+
+
+func _render_visit_panel() -> void:
+	var body := VisitSystem.status_bbcode()
+	body += "\n" + EnergySystem.status_line()
+	var buttons: Array = []
+	for trow in VisitSystem.list_targets():
+		var tid := str(trow.get("id", ""))
+		var done := bool(trow.get("done", false))
+		var nm := str(trow.get("name", tid))
+		var lab := (_t("今日已戰・%s") % nm) if done else (_t("挑戰好友・%s") % nm)
+		var pwr: int = int(trow.get("power", 0))
+		if pwr > 0:
+			lab += _t("  戰力 %d") % pwr
+		if done:
+			buttons.append({"text": lab, "cb": _go_visit_panel})
+		else:
+			buttons.append({"text": lab, "cb": _visit_challenge_cb(tid)})
+	if VisitSystem.can_open_chest():
+		buttons.append({"text": _t("打開友誼寶箱（3 鑰匙）"), "cb": _visit_open_chest})
+	else:
+		buttons.append({"text": _t("友誼寶箱（需 3 鑰匙）"), "cb": _go_visit_panel})
+	buttons.append({"text": Loc.t("btn.back"), "cb": _go_starpath_panel})
+	_panel(_t("好友挑戰"), body, buttons)
+
+
+func _visit_challenge_cb(tid: String) -> Callable:
+	return func():
+		var r: Dictionary = VisitSystem.begin_challenge(tid)
+		if not bool(r.get("ok", false)):
+			_play_dialog([{"speaker": _t("系統"), "text": str(r.get("msg", ""))}], _go_visit_panel)
+			return
+		_play_dialog([
+			{"speaker": _t("系統"), "text": str(r.get("msg", ""))},
+			{"speaker": _t("系統"), "text": _t("殘影戰力 %d。打的是人影留下的打法，不是即時對戰。勝利後可選金幣或經驗。不耗能量。") % int(r.get("power", 0))},
+		], func(): _start_battle(str(r.get("mode", "pvp_snap"))))
+
+
+func _visit_open_chest() -> void:
+	var r: Dictionary = VisitSystem.open_chest()
+	_play_dialog([{"speaker": _t("系統"), "text": str(r.get("msg", ""))}], _go_visit_panel)
+
+
+func _on_visit_battle_finished(won: bool) -> void:
+	if not won:
+		var lost: Dictionary = VisitSystem.on_challenge_lost()
+		_play_dialog([{"speaker": _t("系統"), "text": str(lost.get("msg", ""))}], _go_visit_panel)
+		return
+	_play_dialog([
+		{
+			"speaker": _t("系統"),
+			"text": _t("好友挑戰勝利！選擇獎勵："),
+			"choices": [_t("要金幣"), _t("要經驗")],
+			"replies": [_t("選擇金幣。"), _t("選擇經驗。")],
+		},
+	], Callable(), "visit_reward")
+
+
 func _go_soul_panel() -> void:
 	SoulSystem.ensure_slots()
+	SoulSystem.ensure_daily_free()
+	## 聚魂殿用較靜的村曲，避免還停在戰鬥 BGM
+	if AudioManager and AudioManager.has_method("play_bgm"):
+		AudioManager.play_bgm("village")
 	var body: String = SoulSystem.panel_status_bbcode()
 	body += "\n\n" + Loc.t("soul.hint")
+	body += "\n" + EnergySystem.status_line()
 	var buttons: Array = []
 	if SoulSystem.can_ritual():
-		buttons.append({"text": Loc.t("soul.ritual", {"n": SoulSystem.RITUAL_COST}), "cb": _soul_do_ritual})
+		var cost_g: int = SoulSystem.ritual_cost_gold()
+		var label: String
+		if cost_g <= 0:
+			label = Loc.t("soul.ritual_free")
+		else:
+			label = Loc.t("soul.ritual_gold", {"n": cost_g})
+		buttons.append({"text": label, "cb": _soul_do_ritual})
+		if SoulSystem.can_ritual_batch(10):
+			var est: int = SoulSystem.ritual_batch_gold_estimate(10)
+			buttons.append({
+				"text": Loc.t("soul.ritual_x10", {"n": est}),
+				"cb": _soul_do_ritual_x10,
+			})
 	else:
-		buttons.append({"text": Loc.t("soul.dust_short", {"n": SoulSystem.RITUAL_COST}), "cb": _go_soul_panel})
-	## 背包入魂：每顆可選槽位
+		buttons.append({
+			"text": Loc.t("soul.gold_short", {"n": SoulSystem.vessel_cost()}),
+			"cb": _go_soul_panel,
+		})
+	## 背包入魂：先進對比槽位，不默默塞第一空槽
 	var bag: Array = SoulSystem.bag_souls()
-	var slots: int = SoulSystem.slot_count()
 	for i in mini(5, bag.size()):
 		var s: Dictionary = bag[i]
 		var sid: String = str(s.get("id", ""))
 		var label: String = Loc.t("soul.equip", {"name": SoulSystem.soul_display(s)})
-		if slots >= 1:
-			## 預設進第一空槽，否則槽1
-			var target_slot := 0
-			for si in GameState.soul_slots.size():
-				if str(GameState.soul_slots[si]) == "":
-					target_slot = si
-					break
-			buttons.append({"text": label, "cb": _soul_equip_cb(sid, target_slot)})
+		buttons.append({"text": label, "cb": _soul_embed_pick_cb(sid)})
 	for i in GameState.soul_slots.size():
 		if str(GameState.soul_slots[i]) != "":
 			var si: int = i
@@ -3902,9 +4126,87 @@ func _go_soul_panel() -> void:
 				_go_soul_panel()
 			})
 	buttons.append({"text": Loc.t("soul.fuse"), "cb": _soul_try_fuse})
+	buttons.append({"text": Loc.t("pause.gems"), "cb": _go_gem_panel})
 	buttons.append({"text": Loc.t("common.skills"), "cb": _go_skill_panel})
 	buttons.append({"text": Loc.t("forge.back_square"), "cb": _go_c1_town})
-	_panel(Loc.t("soul.panel_title"), body, buttons)
+	_panel(Loc.t("soul.panel_title"), body, buttons, {"soul_hang": true})
+
+
+func _go_gem_panel() -> void:
+	var body: String = GemSystem.status_bbcode()
+	body += "\n\n" + GemSystem.panel_actions_hint()
+	var buttons: Array = []
+	if GemSystem.unlocked():
+		## 熔爐解鎖
+		if GemSystem.furnace_can_unlock_gold():
+			buttons.append({
+				"text": _t("點燃熔爐（%d 金 · 第二產線）") % GemSystem.FURNACE_GOLD,
+				"cb": func():
+					var ur: Dictionary = GemSystem.unlock_furnace("gold")
+					_show_toast(str(ur.get("msg", "")))
+					_go_gem_panel()
+			})
+		if GemSystem.furnace_can_unlock_medal():
+			buttons.append({
+				"text": _t("點燃熔爐（%d 勳章）") % GemSystem.FURNACE_MEDALS,
+				"cb": func():
+					var um: Dictionary = GemSystem.unlock_furnace("medal")
+					_show_toast(str(um.get("msg", "")))
+					_go_gem_panel()
+			})
+		## 熔煉：3 碎片 → 1 級
+		for c in GemSystem.COLORS:
+			if GemSystem.can_smelt(c):
+				var cc: String = c
+				buttons.append({
+					"text": _t("熔煉 %s（3 碎片→1級）") % GemSystem.color_label(cc),
+					"cb": func():
+						var sr: Dictionary = GemSystem.smelt(cc)
+						_show_toast(str(sr.get("msg", "")))
+						_go_gem_panel()
+				})
+		## 合成：每色每級若可合成給一顆按鈕（最多列幾組）
+		var fuse_n := 0
+		for c in GemSystem.COLORS:
+			for lv in range(1, GemSystem.MAX_LEVEL):
+				if GemSystem.can_fuse(c, lv) and fuse_n < 6:
+					var cc2: String = c
+					var ll: int = lv
+					buttons.append({
+						"text": _t("合成 %s %d→%d") % [GemSystem.color_label(cc2), ll, ll + 1],
+						"cb": func():
+							var r: Dictionary = GemSystem.fuse(cc2, ll)
+							_show_toast(str(r.get("msg", "")))
+							_go_gem_panel()
+					})
+					fuse_n += 1
+		## 鑲嵌：背包前幾顆寶石 × 已穿武器／防具
+		var worn_targets: Array = []
+		for slot in ["weapon", "armor"]:
+			var uid := str(GameState.equip_slots.get(slot, ""))
+			if uid != "" and GameState.equip_worn.has(uid):
+				worn_targets.append({"uid": uid, "name": str(GameState.equip_worn[uid].get("name", slot))})
+		var bag_n := 0
+		for g in GameState.gem_bag:
+			if bag_n >= 4:
+				break
+			var gid := str(g.get("id", ""))
+			var glabel := GemSystem.gem_label(g)
+			for t in worn_targets:
+				var uid2: String = str(t.get("uid", ""))
+				var tname: String = str(t.get("name", ""))
+				buttons.append({
+					"text": _t("鑲嵌 %s → %s") % [glabel, tname],
+					"cb": func():
+						var r2: Dictionary = GemSystem.socket(uid2, gid)
+						_show_toast(str(r2.get("msg", "")))
+						_go_gem_panel()
+				})
+			bag_n += 1
+	buttons.append({"text": Loc.t("pause.soul"), "cb": _go_soul_panel})
+	buttons.append({"text": Loc.t("pause.equip"), "cb": _go_equip_panel})
+	buttons.append({"text": Loc.t("btn.back"), "cb": _hub_back})
+	_panel(Loc.t("panel.gems"), body, buttons)
 
 
 func _c1_sprout() -> void:
@@ -3958,6 +4260,97 @@ func _c1_sprout() -> void:
 	_play_dialog(DialogLines.lines("c1.sprout_wish"))
 
 
+## 原作村內四大店：走進室內圖，店裡才開面板（Esc 選單仍可用）
+func _plaza_shop_map(kind: String) -> String:
+	match kind:
+		"forge":
+			return "town_forge"
+		"soul":
+			return "town_soul"
+		"gem":
+			return "town_gem"
+		"tutor":
+			return "town_tutor"
+		_:
+			return ""
+
+
+func _enter_plaza_shop(kind: String) -> void:
+	var dest := _plaza_shop_map(kind)
+	if dest == "":
+		return
+	var first := not GameState.has_flag("c1_four_shops_seen")
+	if first:
+		GameState.set_flag("c1_four_shops_seen", true)
+		_play_dialog([
+			{"speaker": _t("旁白"), "text": _t("廣場四店：鐵匠鋪、聚魂殿、手藝工坊、武術館。走進才算來過。")},
+		], func(): _open_explore(dest, Screen.C1_TOWN))
+		return
+	_open_explore(dest, Screen.C1_TOWN)
+
+
+func _interact_shop_interior(id: String) -> bool:
+	match _last_explore_map:
+		"town_forge":
+			match id:
+				"ding":
+					_go_c1_forge()
+					return true
+				"anvil":
+					_play_dialog([{"speaker": _t("旁白"), "text": _t("鐵砧還燙。釘釘不看頭銜，看鐵。")}])
+					return true
+				"forge_hearth":
+					_play_dialog([{"speaker": _t("旁白"), "text": _t("爐心拍在臉上。失敗不掉階——他手藝沒那麼丟人。")}])
+					return true
+				"bellows":
+					_play_dialog([{"speaker": _t("旁白"), "text": _t("風箱餘息。重鍛時他曾在這裡停錘兩秒。")}])
+					return true
+				"scrap_bin":
+					_play_dialog([{"speaker": _t("旁白"), "text": _t("廢鐵桶裡有捲刃。他養的是器，不是骨灰盒。")}])
+					return true
+		"town_soul":
+			match id:
+				"star":
+					_c1_star()
+					return true
+				"astrolabe":
+					_play_dialog([{"speaker": _t("旁白"), "text": _t("星盤偏了一角，像在等傭兵團最弱的那個。")}])
+					return true
+				"gourd_shelf":
+					_play_dialog([{"speaker": _t("旁白"), "text": _t("葫蘆綠到橙。抽魂＝聚魂。星屑只是路上的光。")}])
+					return true
+				"star_mat":
+					_play_dialog([{"speaker": _t("旁白"), "text": _t("墊上還有上一個人的膝印。足跡會交疊。")}])
+					return true
+		"town_gem":
+			match id:
+				"gem_clerk":
+					_play_dialog([
+						{"speaker": _t("工坊師傅"), "text": _t("紅黃藍。三合一流派；碎片熔煉。鑲上就成——只換，不失敗。")},
+					], _go_gem_panel)
+					return true
+				"gem_case", "cold_furnace", "shard_box":
+					_go_gem_panel()
+					return true
+		"town_tutor":
+			match id:
+				"greybeard":
+					_c1_greybeard()
+					return true
+				"training_dummy":
+					_play_dialog([{"speaker": _t("旁白"), "text": _t("木人樁身上全是橫痕。啄木鳥式的戳，一刀都沒留下。")}])
+					return true
+				"weapon_wall":
+					_play_dialog([{"speaker": _t("旁白"), "text": _t("牆上的劍都橫放。招跟手上那把走，換錯欄出不了招。")}])
+					return true
+				"floor_mat":
+					_play_dialog([{"speaker": _t("旁白"), "text": _t("練武墊磨薄了。傭兵第一課：活著比漂亮重要。")}])
+					return true
+		_:
+			pass
+	return false
+
+
 func _c1_greybeard() -> void:
 	if GameState.has_flag("c1_forged") and not SkillSystem.is_learned("emergency_heal") and not GameState.has_flag("boss.leo_cleared"):
 		_play_dialog([
@@ -3992,7 +4385,7 @@ func _go_skill_panel() -> void:
 		if SkillSystem.can_tutor(sid2):
 			var label: String = _t("指點 %s（%d金）") % [SkillSystem.display_name(sid2), SkillSystem.TUTOR_COST]
 			buttons.append({"text": label, "cb": _skill_tutor_cb(sid2)})
-	buttons.append({"text": _t("戰魂／星屑"), "cb": _go_soul_panel})
+	buttons.append({"text": Loc.t("pause.soul"), "cb": _go_soul_panel})
 	buttons.append({"text": _t("回到廣場"), "cb": _go_c1_town})
 	_panel(Loc.t("panel.tutor"), body, buttons)
 
@@ -4022,6 +4415,41 @@ func _skill_tutor_cb(sid: String) -> Callable:
 		], _go_skill_panel)
 
 
+func _soul_embed_pick_cb(sid: String) -> Callable:
+	return func():
+		_go_soul_embed_panel(sid)
+
+
+func _go_soul_embed_panel(sid: String) -> void:
+	SoulSystem.ensure_slots()
+	var incoming: Dictionary = SoulSystem.find_soul(sid)
+	if incoming.is_empty():
+		_play_dialog([{"speaker": _t("星讀"), "text": _t("找不到這顆戰魂。")}], _go_soul_panel)
+		return
+	if SoulSystem.slot_count() <= 0:
+		_play_dialog([
+			{"speaker": _t("星讀"), "text": _t("器階不足，尚無魂槽。先找釘釘養器。")},
+		], _go_soul_panel)
+		return
+	var body: String = _t("[b]入魂：%s[/b]\n%s\n選空槽或替換。數字是相對該槽的增減。") % [
+		SoulSystem.soul_display(incoming), SoulSystem.soul_bonus_line(incoming)
+	]
+	var buttons: Array = []
+	for i in GameState.soul_slots.size():
+		var cmp: Dictionary = SoulSystem.compare_embed(sid, i)
+		buttons.append({"text": str(cmp.get("line", "")), "cb": _soul_equip_cb(sid, i)})
+	buttons.append({"text": Loc.t("btn.back"), "cb": _go_soul_panel})
+	_panel(_t("入魂 · 選槽"), body, buttons, {"soul_hang": true})
+
+
+func _soul_after_draw(sid: String) -> void:
+	var buttons: Array = [
+		{"text": _t("前往嵌魂"), "cb": func(): _go_soul_embed_panel(sid)},
+		{"text": _t("稍後再說"), "cb": _go_soul_panel},
+	]
+	_panel(_t("點亮完成"), _t("戰魂已入袋。要現在嵌進器槽嗎？"), buttons, {"soul_hang": true})
+
+
 func _soul_equip_cb(sid: String, slot: int) -> Callable:
 	return func():
 		var err: String = SoulSystem.equip_soul(sid, slot)
@@ -4032,34 +4460,263 @@ func _soul_equip_cb(sid: String, slot: int) -> Callable:
 			_play_dialog(DialogLines.lines("soul.equipped"), _go_soul_panel)
 
 
+func _make_soul_hang() -> Control:
+	## 聚魂面板掛圖：當下葫蘆＋十四星（已抽過的亮、神品質偏金）
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var top := HBoxContainer.new()
+	top.alignment = BoxContainer.ALIGNMENT_CENTER
+	top.add_theme_constant_override("separation", 8)
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var vt: Texture2D = SpriteDB.soul_vessel(str(GameState.soul_vessel))
+	if vt:
+		var gourd := TextureRect.new()
+		gourd.texture = vt
+		gourd.custom_minimum_size = Vector2(56, 72)
+		gourd.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		gourd.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		gourd.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		top.add_child(gourd)
+	var shen_tex: Texture2D = SpriteDB.soul_shen()
+	var owned: Dictionary = {}
+	var has_shen := false
+	for s in GameState.souls:
+		if typeof(s) != TYPE_DICTIONARY:
+			continue
+		var star_id := str(s.get("star", ""))
+		owned[star_id] = true
+		if str(s.get("quality", "")) == "神":
+			has_shen = true
+	if has_shen and shen_tex:
+		var wreath := TextureRect.new()
+		wreath.texture = shen_tex
+		wreath.custom_minimum_size = Vector2(48, 48)
+		wreath.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		wreath.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		wreath.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		top.add_child(wreath)
+	box.add_child(top)
+	var grid := GridContainer.new()
+	grid.columns = 7
+	grid.add_theme_constant_override("h_separation", 4)
+	grid.add_theme_constant_override("v_separation", 4)
+	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var any_star := false
+	for st in SoulSystem.STARS:
+		var sid := str(st.get("id", ""))
+		var star_tex: Texture2D = SpriteDB.soul_star(sid)
+		if star_tex == null:
+			continue
+		any_star = true
+		var cell := TextureRect.new()
+		cell.texture = star_tex
+		cell.custom_minimum_size = Vector2(32, 32)
+		cell.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		cell.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if owned.has(sid):
+			cell.modulate = Color(1.1, 1.05, 0.9)
+		else:
+			cell.modulate = Color(0.38, 0.38, 0.42, 0.55)
+		grid.add_child(cell)
+	if any_star:
+		box.add_child(grid)
+	if top.get_child_count() == 0 and not any_star:
+		return null
+	return box
+
+
+func _soul_preview_tex(tex: Texture2D) -> TextureRect:
+	var old := host.get_node_or_null("SoulHangPreview")
+	if old:
+		old.queue_free()
+	if tex == null:
+		return null
+	var wrap := CenterContainer.new()
+	wrap.name = "SoulHangPreview"
+	wrap.set_anchors_preset(Control.PRESET_FULL_RECT)
+	wrap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tr := TextureRect.new()
+	tr.name = "Glow"
+	tr.texture = tex
+	tr.custom_minimum_size = Vector2(180, 200)
+	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	wrap.add_child(tr)
+	host.add_child(wrap)
+	wrap.z_index = 8
+	return tr
+
+
+func _vessel_glow_color(vessel: String) -> Color:
+	match vessel:
+		"綠葫蘆":
+			return Color(0.45, 1.0, 0.55)
+		"藍葫蘆":
+			return Color(0.4, 0.65, 1.15)
+		"紫葫蘆":
+			return Color(0.85, 0.5, 1.15)
+		"橙葫蘆":
+			return Color(1.15, 0.65, 0.25)
+		_:
+			return Color(1, 1, 1)
+
+
+func _soul_play_lightup(vessel: String, result: Texture2D, then: Callable) -> void:
+	var gourd := SpriteDB.soul_vessel(vessel)
+	var tr := _soul_preview_tex(gourd if gourd else result)
+	if tr == null:
+		if then.is_valid():
+			then.call()
+		return
+	var col := _vessel_glow_color(vessel)
+	tr.modulate = Color(0.35, 0.35, 0.4)
+	var tw := create_tween()
+	tw.set_trans(Tween.TRANS_SINE)
+	tw.tween_property(tr, "modulate", col, 0.28)
+	tw.tween_property(tr, "modulate", Color(1.25, 1.2, 0.95), 0.18)
+	tw.tween_callback(func():
+		if result:
+			tr.texture = result
+		tr.modulate = col
+	)
+	tw.tween_property(tr, "modulate", Color.WHITE, 0.35)
+	tw.tween_callback(func():
+		if then.is_valid():
+			then.call()
+	)
+
+
+func _vessel_glow_line(vessel: String) -> String:
+	match vessel:
+		"綠葫蘆":
+			return _t("💚 綠光從蒂部滲出……樸素的葫蘆醒了。")
+		"藍葫蘆":
+			return _t("💙 藍紋沿著葫蘆腰線爬升……更深一階。")
+		"紫葫蘆":
+			return _t("💜 紫霧在葫蘆內打轉……稀世近了。")
+		"橙葫蘆":
+			return _t("🧡 橙焰燃滿葫蘆——頂階！再抽同色便會摔回綠。")
+		_:
+			return _t("魂器顫動……")
+
+
 func _soul_do_ritual() -> void:
 	if not SoulSystem.can_ritual():
-		_play_dialog(DialogLines.lines("soul.ritual_not_enough"), _go_soul_panel)
+		_play_dialog([
+			{"speaker": _t("星讀"), "text": _t("金幣不夠點亮魂器。去做委託、演武，或等明日免費一次。")},
+		], _go_soul_panel)
 		return
-	## 儀式感三步（務實版）：靠近 → 足跡點亮 → 凝魂入盤
+	## 原作「點亮」：依目前葫蘆色階演出 → 抽魂 → 跳階結果
 	AudioManager.play("ui", 1.08, -6.0)
-	ui_toast(_t("星屑靠近星盤……"))
+	var vessel_now := str(GameState.soul_vessel)
+	_soul_preview_tex(SpriteDB.soul_vessel(vessel_now))
+	ui_toast(_t("點亮：%s") % vessel_now)
 	var footprint: String = SoulSystem.ritual_footprint_line()
+	var ladder := SoulSystem.vessel_ladder_bbcode()
 	_play_dialog([
-		{"speaker": _t("星讀"), "text": _t("把星屑撒上星盤。")},
-		{"speaker": _t("系統"), "text": _t("靠近——星屑顫了一下。")},
+		{"speaker": _t("星讀"), "text": _t("把手放上葫蘆。聚魂——也就是你們說的抽魂。")},
+		{"speaker": _t("系統"), "text": _t("魂器階梯：%s") % ladder},
+		{"speaker": _t("系統"), "text": _vessel_glow_line(vessel_now)},
 		{"speaker": _t("系統"), "text": footprint},
-		{"speaker": _t("系統"), "text": _t("星區點亮……凝魂。")},
+		{"speaker": _t("系統"), "text": _t("點亮——抽魂！")},
 	], func():
+		var before_v := str(GameState.soul_vessel)
 		var soul: Dictionary = SoulSystem.ritual()
 		SaveManager.save_game()
 		if soul.is_empty():
 			_play_dialog([{"speaker": _t("星讀"), "text": _t("……今夜無星。")}], _go_soul_panel)
 			return
+		var after_v := str(GameState.soul_vessel)
+		var q := str(soul.get("quality", ""))
+		var result_tex: Texture2D = SpriteDB.soul_star(str(soul.get("star", "")))
+		if q == "神":
+			var sh := SpriteDB.soul_shen()
+			if sh:
+				result_tex = sh
+		if result_tex == null:
+			result_tex = SpriteDB.soul_vessel(after_v)
 		var line: String = _t("凝出 %s（%s）") % [
 			SoulSystem.soul_display(soul), SoulSystem.soul_bonus_line(soul)
 		]
+		var vessel_line := _t("魂器仍為 %s。") % after_v
+		if after_v != before_v:
+			if after_v == "綠葫蘆" and before_v != "綠葫蘆":
+				vessel_line = _t("同色頂階！魂器由 %s 摔回綠葫蘆，重新攀升。") % before_v
+			else:
+				vessel_line = _t("魂器升階：%s → %s｜%s") % [before_v, after_v, _vessel_glow_line(after_v)]
 		ui_toast(_t("入魂候補：%s") % SoulSystem.soul_display(soul))
 		AudioManager.play("interact", 1.0, -4.0)
+		var sid_done := str(soul.get("id", ""))
+		_soul_play_lightup(before_v, result_tex, func():
+			_play_dialog([
+				{"speaker": _t("星讀"), "text": _t("好。看葫蘆現在停在哪一階。")},
+				{"speaker": _t("系統"), "text": line},
+				{"speaker": _t("系統"), "text": vessel_line},
+				{"speaker": _t("系統"), "text": _t("現階：%s") % SoulSystem.vessel_ladder_bbcode()},
+			], func(): _soul_after_draw(sid_done))
+		)
+	)
+
+
+func _soul_do_ritual_x10() -> void:
+	if not SoulSystem.can_ritual_batch(10):
 		_play_dialog([
-			{"speaker": _t("星讀"), "text": _t("成了。這不是運氣，是你走過的路。")},
-			{"speaker": _t("系統"), "text": line},
+			{"speaker": _t("星讀"), "text": _t("金幣不夠連抽十次。先抽一顆，或去做委託、演武。")},
 		], _go_soul_panel)
+		return
+	AudioManager.play("ui", 1.08, -6.0)
+	var vessel_now := str(GameState.soul_vessel)
+	_soul_preview_tex(SpriteDB.soul_vessel(vessel_now))
+	ui_toast(_t("點亮×10：%s") % vessel_now)
+	_play_dialog([
+		{"speaker": _t("星讀"), "text": _t("十次。把手放穩。聚魂會連著跳。")},
+		{"speaker": _t("系統"), "text": _vessel_glow_line(vessel_now)},
+		{"speaker": _t("系統"), "text": _t("點亮——抽魂×10！")},
+	], func():
+		var before_v := str(GameState.soul_vessel)
+		var souls: Array = SoulSystem.ritual_batch(10)
+		SaveManager.save_game()
+		if souls.is_empty():
+			_play_dialog([{"speaker": _t("星讀"), "text": _t("……今夜無星。")}], _go_soul_panel)
+			return
+		var after_v := str(GameState.soul_vessel)
+		var best: Dictionary = souls[0]
+		for s in souls:
+			if str(s.get("quality", "")) == "神":
+				best = s
+				break
+		var best_tex: Texture2D = SpriteDB.soul_star(str(best.get("star", "")))
+		if str(best.get("quality", "")) == "神":
+			var sh2 := SpriteDB.soul_shen()
+			if sh2:
+				best_tex = sh2
+		if best_tex == null:
+			best_tex = SpriteDB.soul_vessel(after_v)
+		var names: Array[String] = []
+		for s2 in souls:
+			names.append(SoulSystem.soul_display(s2))
+		var shown := "、".join(PackedStringArray(names.slice(0, mini(4, names.size()))))
+		if names.size() > 4:
+			shown += _t("…共 %d 顆") % names.size()
+		var vessel_line := _t("魂器仍為 %s。") % after_v
+		if after_v != before_v:
+			if after_v == "綠葫蘆" and before_v != "綠葫蘆":
+				vessel_line = _t("同色頂階！魂器由 %s 摔回綠葫蘆，重新攀升。") % before_v
+			else:
+				vessel_line = _t("魂器：%s → %s") % [before_v, after_v]
+		ui_toast(_t("抽魂×%d") % souls.size())
+		var sid_best := str(best.get("id", ""))
+		_soul_play_lightup(before_v, best_tex, func():
+			_play_dialog([
+				{"speaker": _t("星讀"), "text": _t("十次聚魂完了。看最好的那顆。")},
+				{"speaker": _t("系統"), "text": _t("凝出：%s") % shown},
+				{"speaker": _t("系統"), "text": vessel_line},
+				{"speaker": _t("系統"), "text": _t("現階：%s") % SoulSystem.vessel_ladder_bbcode()},
+			], func(): _soul_after_draw(sid_best))
+		)
 	)
 
 
@@ -4098,8 +4755,8 @@ func _go_c1_forge() -> void:
 		return
 	if not GameState.has_flag("c1_forged"):
 		_play_dialog([
-			{"speaker": _t("釘釘"), "text": _t("門開著不是讓兔子觀光的。")},
-			{"speaker": _t("釘釘"), "text": _t("……這什麼垃圾。挖土的？")},
+			{"speaker": _t("釘釘"), "text": _t("門開著不是讓菜鳥觀光的。——傭兵團又把最弱的送來了？")},
+			{"speaker": _t("釘釘"), "text": _t("……這什麼垃圾。挖土的？團裡發的？")},
 			{"speaker": _t("釘釘"), "text": _t("鏽進骨子了。你要走遠路，就別拿骨灰盒當武器。")},
 			{"speaker": _t("系統"), "text": _t("錘擊一。火花。")},
 			{"speaker": _t("系統"), "text": _t("錘擊二。刃上淺淺古紋。")},
@@ -4441,7 +5098,7 @@ func _interact_wild(id: String) -> void:
 				_play_dialog([
 					{"speaker": _t("灰鬚"), "text": _t("（若有回音）獅子不聽人話。聽刀。")},
 					{"speaker": _t("灰鬚"), "text": _t("你不是去證明你強。你是去讓它想起——它該守什麼。")},
-					{"speaker": _t("雷歐"), "text": _t("渺小的兔子……也想挑戰騎士之王？")},
+					{"speaker": _t("雷歐"), "text": _t("傭兵團把最弱的送來了？也想挑戰騎士之王？")},
 					{"speaker": _t("系統"), "text": _t("王者斬一定要擋。地上冒出火圈時會先亮一下，那時按 J 跳開。")},
 				], func(): _start_battle("leo"))
 
@@ -4490,7 +5147,7 @@ func _go_aftermath() -> void:
 	AudioManager.play_bgm("town")
 	_panel(
 		_t("雷歐之後"),
-		_t("堡壘的門已開。\n廣場旗上有歪扭兔爪印——小芽說「差不多是你」。\n\n絲絨說：東南方霧起——忍者村。\n\n體悟【怒雷】【反戈】· 外觀契機：金鬃。"),
+		_t("堡壘的門已開。\n廣場旗上有歪扭爪印——小芽說「差不多是你」。\n\n絲絨說：東南方霧起——忍者村。團裡的「看一眼」還沒寫完。\n\n體悟【怒雷】【反戈】· 外觀契機：金鬃。"),
 		[
 			{"text": _t("前往霧隱村（C2）"), "cb": _go_c2_enter},
 			{"text": _t("回到廣場"), "cb": _go_c1_town},
@@ -4534,7 +5191,7 @@ func _go_c2_enter_body() -> void:
 			{
 				"bg": "mist_village",
 				"speaker": _t("霧隱"),
-				"text": _t("……兔子。你的眼睛，借我用用。"),
+				"text": _t("……傭兵團最弱的？眼睛，借我用用。"),
 			},
 		]), func():
 			## N8 延遲的信：進村後主線強制先讀，不可漏
@@ -4738,7 +5395,7 @@ func _go_c3_enter_body() -> void:
 			{
 				"bg": "dojo",
 				"speaker": _t("阿茶"),
-				"text": _t("客從霧裡來？宗師在試煉堂。他不先出手，他先問。"),
+				"text": _t("客從霧裡來？傭兵團的……最弱那個？宗師在試煉堂。他不先出手，他先問。"),
 			},
 		]), func():
 			_play_dialog(DialogLines.lines("c3.arrive"), _go_c3_dojo)
@@ -4800,8 +5457,8 @@ func _c3_try_abo() -> void:
 		_play_dialog(DialogLines.lines("c3.abo_cleared"))
 		return
 	_play_dialog([
-		{"speaker": _t("阿波"), "text": _t("小兔子。來打我的架勢。")},
-		{"speaker": _t("阿波"), "text": _t("打不穿的時候，別急——一下一下，把殼撞鬆。")},
+		{"speaker": _t("阿波"), "text": _t("傭兵團最弱的。來打我的架勢。")},
+		{"speaker": _t("阿波"), "text": _t("打不穿的時候，別急——一下一下，把殼撞鬆。頭銜撞不開。")},
 		{"speaker": _t("系統"), "text": _t("先把他的架勢打散，散開的那陣子傷害吃得滿。但他也會出重拳，記得擋。")},
 	], func(): _start_battle("abo"))
 
@@ -4815,7 +5472,7 @@ func _go_abo_win() -> void:
 		extra = _t("你的拳裡，開始有道了。")
 	_play_dialog([
 		{"speaker": _t("阿波"), "text": extra},
-		{"speaker": _t("阿波"), "text": _t("（指尖在你眉心一點）最後的試煉在塔頂——去吧，別回頭。")},
+		{"speaker": _t("阿波"), "text": _t("（指尖在你眉心一點）最後的試煉在塔頂——去吧，別回頭。團裡若問，就說：你答過為何而戰。")},
 		{"speaker": _t("阿茶"), "text": _t("（茶香）路上要是聞到這個味道，就是走對了。")},
 		{"speaker": _t("系統"), "text": _t("金 90、星屑 5，體力上限多 10。毛裡泛出玉光。往塔的路開了。")},
 	], _c3_abo_clear_cut)
@@ -4851,7 +5508,7 @@ func _go_c3_cleared_panel() -> void:
 	AudioManager.play_bgm("dojo")
 	_panel(
 		_t("C3 完成 · 拳中有道"),
-		_t("阿波認可了你。\n鐘聲落盡。\n\n西林有風在等——疾影；東岸有石在吼——石拳。\n亦可直上法師之塔（最短通關）。"),
+		_t("阿波認可了你——不問頭銜，問為何而戰。\n鐘聲落盡。\n\n西林有風在等——疾影；東岸有石在吼——石拳。\n亦可直上法師之塔（最短通關）。"),
 		[
 			{"text": _t("遊俠森林（C4·疾影）"), "cb": _go_c4_enter},
 			{"text": _t("維京海岸（C5·石拳）"), "cb": _go_c5_enter},
@@ -4874,7 +5531,7 @@ func _go_c4_enter() -> void:
 			{
 				"bg": "dojo",
 				"speaker": _t("旁白"),
-				"text": _t("西林的風比鐘聲更急。葉縫裡有人笑，像在等你追。"),
+				"text": _t("西林的風比鐘聲更急。團裡最弱的那個，被風先看見。"),
 			},
 			{
 				"bg": "forest",
@@ -4885,7 +5542,7 @@ func _go_c4_enter() -> void:
 			{
 				"bg": "forest",
 				"speaker": _t("風耳"),
-				"text": _t("站住。追風的人，最後都會迷路。"),
+				"text": _t("站住。追風的人，最後都會迷路。傭兵團的？腳步比風慢。——正好。"),
 			},
 		]), func():
 			_play_dialog(DialogLines.lines("c4.arrive"), _go_c4_forest)
@@ -4963,8 +5620,8 @@ func _c4_try_falcon() -> void:
 		_play_dialog(DialogLines.lines("c4.falcon_cleared"))
 		return
 	_play_dialog([
-		{"speaker": _t("疾影"), "text": _t("……你的眼睛，跟得上我嗎？")},
-		{"speaker": _t("疾影"), "text": _t("追，會迷路。等，才見我。")},
+		{"speaker": _t("疾影"), "text": _t("……傭兵團把最慢的送來了？眼睛，跟得上我嗎？")},
+		{"speaker": _t("疾影"), "text": _t("追，會迷路。等，才見我。頭銜追不上風。")},
 		{"speaker": _t("系統"), "text": _t("牠停下來的那一拍才吃滿傷害。風聲響起就按 J。")},
 	], func(): _start_battle("falcon"))
 
@@ -4980,13 +5637,13 @@ func _c4_falcon_clear_cut() -> void:
 			"bg": "forest",
 			"speaker": _t("旁白"),
 			"portrait": _t("疾影"),
-			"text": _t("銀羽在光裡轉。風第一次，為誰停了半拍。"),
+			"text": _t("銀羽在光裡轉。風第一次，為傭兵團最弱的那個停了半拍。"),
 		},
 		{
 			"bg": "coast",
 			"speaker": _t("旁白"),
 			"portrait": _t("石拳"),
-			"text": _t("東岸有浪在吼——力氣，還要找方向。"),
+			"text": _t("東岸有浪在吼——力氣，還要找方向。團裡沒規定你非去不可。"),
 		},
 	]), _go_c4_cleared_panel)
 
@@ -4998,7 +5655,7 @@ func _go_c4_cleared_panel() -> void:
 	AudioManager.play_bgm("forest")
 	_panel(
 		_t("C4 完成 · 風之試煉"),
-		_t("你等來了疾影的停拍。\n林旗揚起，銀羽在光裡轉。\n\n東岸石拳仍在吼——或直上塔。"),
+		_t("你等來了疾影的停拍——不是追上風，是風肯為新人停半拍。\n林旗揚起，銀羽在光裡轉。\n\n東岸石拳仍在吼——或直上塔。團裡若問，就說：你等過風。"),
 		[
 			{"text": _t("維京海岸（C5）"), "cb": _go_c5_enter},
 			{"text": _t("塔下營地（C6）"), "cb": _go_c6_camp},
@@ -5022,7 +5679,7 @@ func _go_c5_enter() -> void:
 			{
 				"bg": "forest",
 				"speaker": _t("旁白"),
-				"text": _t("林盡是鹽。風裡有鐵與浪。"),
+				"text": _t("林盡是鹽。團裡最弱的那個，被浪先打濕。"),
 			},
 			{
 				"bg": "coast",
@@ -5034,7 +5691,7 @@ func _go_c5_enter() -> void:
 				"bg": "coast",
 				"speaker": _t("潮吼"),
 				"portrait": _t("潮吼"),
-				"text": _t("哦？兔子？來比腕力——不，來聽浪。"),
+				"text": _t("傭兵團的？岸上不比腕力——比你敢不敢迎上去。"),
 			},
 		]), func():
 			_play_dialog(DialogLines.lines("c5.arrive"), _go_c5_coast)
@@ -5095,8 +5752,8 @@ func _c5_try_boar() -> void:
 		_play_dialog(DialogLines.lines("c5.boar_cleared"))
 		return
 	_play_dialog([
-		{"speaker": _t("石拳"), "text": _t("哦？還站著？那就接下這一拳——")},
-		{"speaker": _t("石拳"), "text": _t("力氣……該砸向誰？我早忘了。")},
+		{"speaker": _t("石拳"), "text": _t("傭兵團把最弱的送來了？還站著？那就接下這一拳——")},
+		{"speaker": _t("石拳"), "text": _t("力氣該砸向誰？頭銜砸不開岸。")},
 		{"speaker": _t("系統"), "text": _t("他衝過來時按 J 硬碰，岩甲會一層層裂開。落石時一樣按 J 找掩護。")},
 	], func(): _start_battle("boar"))
 
@@ -5118,7 +5775,7 @@ func _c5_boar_clear_cut() -> void:
 			"bg": "tower",
 			"speaker": _t("旁白"),
 			"portrait": _t("小白"),
-			"text": _t("五柱中四柱已醒。塔門——千年來第一次，為你開了一縫。"),
+			"text": _t("五柱中四柱已醒。塔門開了一縫——不是為預言，是為還肯站著的人。"),
 		},
 	]), _go_c5_cleared_panel)
 
@@ -5130,7 +5787,7 @@ func _go_c5_cleared_panel() -> void:
 	AudioManager.play_bgm("coast")
 	_panel(
 		_t("C5 完成 · 岸上最後一擊"),
-		_t("石拳記起了力氣的方向。\n岸旗燃起，浪聲如鼓。\n\n五柱中四柱已醒——塔門在等。"),
+		_t("石拳記起了力氣的方向——不是砸人，是護岸。團裡最弱的那個，迎上去了。\n岸旗燃起，浪聲如鼓。\n\n五柱中四柱已醒——塔門在等。團裡若問，就說：你把力氣對準了。"),
 		[
 			{"text": _t("前往塔下營地（C6）"), "cb": _go_c6_camp},
 			{"text": _t("回海岸走走"), "cb": _go_c5_coast},
@@ -5184,7 +5841,7 @@ func _go_c6_camp() -> void:
 			{
 				"bg": "tower",
 				"speaker": _t("斷頁"),
-				"text": _t("兔子。你比預言輕……也比預言先到。"),
+				"text": _t("傭兵團把最弱的送到塔下了。卷軸寫至弱——我信的是你走到這裡的腳印。"),
 			},
 		]), _show_c6_camp_panel)
 	else:
@@ -5294,7 +5951,7 @@ func _c6_ending_cut() -> void:
 			"bg": "village",
 			"speaker": _t("旁白"),
 			"portrait": _t("麥穗"),
-			"text": _t("遠方，有人還在等。氣味比預言近。"),
+			"text": _t("遠方，有人還在等。氣味比卷軸近。"),
 		},
 	]), _go_ending)
 
@@ -5312,7 +5969,7 @@ func _go_ending() -> void:
 	GameState.set_chapter("cleared")
 	var new_titles: Array[String] = TitleCatalog.evaluate_all()
 	SaveManager.save_game()
-	## 通關蠟燭（有連線才同步；失敗不擋結局）
+	## 通關燭火（有連線才同步；失敗不擋結局）
 	if OnlineGate.is_signed_in() and not GameState.has_flag("online.candle_lit"):
 		OnlineGate.candle_increment(func(res: Dictionary):
 			if bool(res.get("ok", false)) or res.has("total"):
@@ -5341,7 +5998,7 @@ func _go_ending() -> void:
 		title_pop = _t("\n\n新稱號：%s") % "、".join(new_titles)
 	_panel(
 		_t("終章 · 晨光"),
-		_t("黑焰潰散的那一刻，法師之塔自塔頂裂開。\n五方聖獸卸下重擔，化作星辰。\n\n而那隻曾經連劍都拔了三次才拔起的兔子，站在晨光裡——\n不是因為變得多強，是因為從未把心餵給焰。\n\n麥穗：%s%s%s%s%s\n\n[b]通關。[/b] 塔外，黑焰裂縫仍在顫。") % [maisui_line, ding_line, star_line, ng_line, title_pop],
+		_t("黑焰潰散的那一刻，法師之塔自塔頂裂開。\n五方聖獸卸下重擔，化作星辰。\n\n而那個曾經連劍都拔了三次才拔起的傭兵，站在晨光裡——\n不是因為變得多強，是因為從未把心餵給焰。\n\n麥穗：%s%s%s%s%s\n\n[b]通關。[/b] 塔外，黑焰裂縫仍在顫。") % [maisui_line, ding_line, star_line, ng_line, title_pop],
 		[
 			{"text": _t("黑焰裂縫（通關後）"), "cb": _go_postgame_hub},
 			{"text": _t("稱號牆"), "cb": _go_title_wall},
@@ -5379,7 +6036,7 @@ func _go_postgame_hub() -> void:
 			"cb": func(): _go_rift_intro(mode_s),
 		})
 	buttons.append_array([
-		{"text": _t("星途獵場"), "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)},
+		{"text": _t("野外獵場"), "cb": func(): _open_explore("hunting_grounds", Screen.C1_WILD)},
 		{"text": _t("塔下營地"), "cb": _go_c6_camp},
 		{"text": _t("騎士堡"), "cb": _go_c1_town},
 		{"text": _t("存檔回標題"), "cb": func(): SaveManager.save_game(); _go_title()},

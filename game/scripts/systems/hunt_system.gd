@@ -72,14 +72,14 @@ func is_practice() -> bool:
 func status_bbcode() -> String:
 	_refresh_daily()
 	var lines: PackedStringArray = []
-	lines.append(_t("[b]星途獵場[/b]"))
-	lines.append(_t("黑焰溢地的邊陲。主線不經此處——只為鍛鍊與材料。"))
+	lines.append(_t("[b]野外獵場[/b]"))
+	lines.append(_t("黑焰溢地的邊陲。主線不經此處——材料為主，經驗比演武場薄。"))
 	lines.append("")
 	if not is_unlocked():
 		lines.append(_t("（進入騎士堡後解鎖）"))
 		return "\n".join(lines)
 	lines.append(_t("今日有獎場次：%d／%d（剩餘 %d）") % [runs_today(), DAILY_CAP, daily_left()])
-	lines.append(_t("每場：3 波雜魚。每波給經驗，通關再發材料與金。"))
+	lines.append(_t("每場：3 波雜魚。每波薄經驗，通關再發材料與金。要練等回村演武。"))
 	lines.append(_t("有獎場次用完後仍可練習，但經驗與金都只剩三成五。"))
 	if is_run_active():
 		lines.append(_t("[color=#c96]進行中：第 %d／%d 波[/color]") % [current_wave() + 1, WAVES.size()])
@@ -133,18 +133,13 @@ func wave_mode(index: int = -1) -> String:
 
 
 ## 勝利一波：回傳 {ok, finished, next_mode?, next_label?, loot_msg, msg}
-## 打贏一波要給的經驗。
-##
-## 這裡本來是 0 —— 獵場整場打完三隻雜魚一點經驗都沒有，
-## 比在野外隨便打三隻還差，而面板上還寫著「只為鍛鍊與材料」。
-## 走 main.gd 雜魚收尾的同一條公式，讓同一隻怪在獵場跟在野外值一樣多；
-## 獵場多出來的是通關的金與材料，那才是它跟野外的差別。
+## 打贏一波要給的經驗＝野外同一隻（薄）。材料才是獵場多出來的。
 func wave_xp(mode: String, practice: bool) -> int:
 	var def: Dictionary = WorldContent.enemy_def(mode)
-	var xp_n := 12 + int(int(def.get("max_hp", 50)) / 10)
+	var xp_n := Formulas.field_xp(int(def.get("max_hp", 50)), 0)
 	if practice:
-		xp_n = int(float(xp_n) * PRACTICE_MULT)
-	return maxi(0, xp_n)
+		xp_n = maxi(1, int(round(float(xp_n) * PRACTICE_MULT)))
+	return maxi(1, xp_n)
 
 
 func on_wave_won() -> Dictionary:
@@ -219,6 +214,20 @@ func _finish_run(full_clear: bool) -> Dictionary:
 		if randf() < 0.4:
 			InventorySystem.add_item("hp_s", 1)
 			extra += _t(" 小紅水×1")
+		## 寶石碎片（手藝工坊熔煉原料）
+		if Engine.get_main_loop() is SceneTree:
+			var gem: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GemSystem")
+			if gem != null and gem.has_method("add_shards") and randf() < 0.65:
+				var cols: Array = ["red", "yellow", "blue"]
+				var col: String = str(cols[randi() % 3])
+				var qty := 2 if randf() < 0.45 else 1
+				gem.call("add_shards", col, qty)
+				extra += _t(" 寶石碎片×%d（%s）") % [qty, str(gem.call("color_label", col))]
+		if Engine.get_main_loop() is SceneTree:
+			var inv2: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("InventorySystem")
+			if inv2 != null and inv2.has_method("add_item") and randf() < 0.55:
+				inv2.call("add_item", "medal", 1)
+				extra += _t(" 勳章×1")
 		loot_msg = (loot_msg + " " + extra).strip_edges()
 	elif practice and full_clear:
 		loot_msg = _grant_items({"hunt_hide": 1})

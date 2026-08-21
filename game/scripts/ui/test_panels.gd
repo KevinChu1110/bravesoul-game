@@ -16,12 +16,12 @@ extends SceneTree
 ## 只驗「標題 + 按鈕數」的話，就算把同步那次拿掉，後來的重畫也會把測試補成綠燈
 ## —— 實測過，那種破壞抓不到。驗到具體按鈕才擋得住。
 const PANELS: Array = [
-	## 裝備面板是自己畫的：三部位槽 + 背包網格
+	## 裝備面板：武器欄三格 + 防具／飾品 + 背包
 	{
 		"entry": "_go_equip_panel",
 		"title": "裝備",
-		"min_buttons": 1,
-		"expect_buttons": ["返回"],
+		"min_buttons": 2,
+		"expect_buttons": ["返回", "裝填"],
 	},
 	{
 		"entry": "_go_save_slots_panel",

@@ -2,7 +2,7 @@
   "c6.refugee": [
     {
       "speaker": "Refugee",
-      "text": "The tower gate opened… we don't dare go up. Are you… that rabbit?"
+      "text": "The tower gate opened… we don't dare go up. Are you… the weakest of the mercenary band?"
     }
   ],
   "c6.scroll_pile": [
@@ -142,7 +142,7 @@
     },
     {
       "speaker": "Leo",
-      "text": "Go, rabbit — the fortress gate opens for you."
+      "text": "Go — the fortress gate opens for you."
     },
     {
       "speaker": "Leo",
@@ -156,11 +156,11 @@
   "c2.arrive": [
     {
       "speaker": "Veilfog",
-      "text": "In the mist, true and false are the same colour. Lend me your eyes."
+      "text": "In the mist, true and false are the same colour. Weakest of the company? …Lend me your eyes."
     },
     {
       "speaker": "Veilfog",
-      "text": "Stay the night first. Those who walk at night break inside before anything else."
+      "text": "Stay the night first. Night walkers—especially those sent to 'take a look'—break inside before anything else."
     },
     {
       "speaker": "System",
@@ -246,11 +246,11 @@
   "c2.fog_win": [
     {
       "speaker": "White Fog",
-      "text": "You saw through it… how dull."
+      "text": "You saw through it… even a mercenary? How dull."
     },
     {
       "speaker": "White Fog",
-      "text": "The mist is gone, the road's right in front of you — go on."
+      "text": "The mist is gone, the road's right in front of you — go report back, or keep walking. Your call."
     },
     {
       "speaker": "System",
@@ -264,13 +264,13 @@
     },
     {
       "speaker": "System",
-      "text": "If it's not enough, forge and read stars in the city, or train at the yard or the Starpath hunting grounds."
+      "text": "If it's not enough, forge, draw souls, light the furnace in town — or drill at the yard and the hunting grounds. Mercenary homework."
     }
   ],
   "c3.arrive": [
     {
       "speaker": "Acha",
-      "text": "A guest out of the mist? The master's in the trial hall. He doesn't strike first. He asks first."
+      "text": "A guest out of the mist? Weakest of the company? The master's in the trial hall. He doesn't strike first. He asks first — not about your orders."
     },
     {
       "speaker": "System",
@@ -280,7 +280,7 @@
   "c3.gate_bell": [
     {
       "speaker": "Narration",
-      "text": "The bell rings once. The valley hands the echo back: what do you fight for?"
+      "text": "The bell rings once. The valley hands the echo back: what do you fight for? — Not the hero. Someone is still waiting."
     }
   ],
   "c3.dummy_done": [
@@ -308,13 +308,13 @@
   "c3.abo_cleared": [
     {
       "speaker": "System",
-      "text": "The trial hall is empty. Abo sits on the threshold drinking tea."
+      "text": "The trial hall is empty. Abo sits on the threshold drinking tea. If the company asks: you already answered why you fight."
     }
   ],
   "c4.arrive": [
     {
       "speaker": "Windear",
-      "text": "If you want to meet Swiftshadow — learn to wait first. The beat where the wind stops, that's the real one."
+      "text": "The company? Your feet are slower than the wind. Good. If you want Swiftshadow, learn to wait. The beat where the wind stops — that's the real one."
     },
     {
       "speaker": "System",
@@ -350,7 +350,7 @@
     },
     {
       "speaker": "Thought",
-      "text": "It's watching the wind, not me."
+      "text": "It's watching the wind, not titles."
     }
   ],
   "c4.arrow_path_done": [
@@ -370,7 +370,7 @@
     },
     {
       "speaker": "Thought",
-      "text": "Waiting… isn't weakness. It's seeing clearly."
+      "text": "Waiting… isn't weakness. It's seeing clearly — then shooting."
     }
   ],
   "c4.herb_looted": [
@@ -388,15 +388,15 @@
   "c4.falcon_win": [
     {
       "speaker": "Swiftshadow",
-      "text": "You caught the wind… what an interesting creature."
+      "text": "You caught the wind… weakest of the company, yet you waited."
     },
     {
       "speaker": "Swiftshadow",
-      "text": "Take the silver feather. Not a reward — a reminder: someone is willing to stop for you."
+      "text": "Take the silver feather. Not a reward — a reminder: someone is willing to stop for you. When you report, don't write 'hero'."
     },
     {
       "speaker": "Windear",
-      "text": "(In the distance) …Go. The coast is still roaring."
+      "text": "(In the distance) Go. The coast is still roaring. If the company asks: you waited for the wind."
     },
     {
       "speaker": "System",
@@ -518,7 +518,7 @@
   "c6.demon_win": [
     {
       "speaker": "Demon King",
-      "text": "Impossible… by a… rabbit…"
+      "text": "Impossible… the weakest of the band…"
     },
     {
       "speaker": "Predecessor",
@@ -534,7 +534,7 @@
     },
     {
       "speaker": "System",
-      "text": "150 gold, 8 stardust. Five threads of starlight rise and settle on your fur."
+      "text": "150 gold, 8 stardust. Five threads of starlight rise and settle on your shoulder."
     }
   ],
   "post.rift_not_open": [

@@ -49,7 +49,18 @@
   "rage": {
     "per_strike": 14.0,
     "max": 100.0,
-    "from_damage_cap": 40.0
+    "from_damage_cap": 40.0,
+    "note": "滿怒＝暴怒。自動進暴怒狀態（攻速／傷害加成）；同時可放技能。F／4 可手動耗怒換更長暴怒。"
+  },
+
+  "berserk": {
+    "note": "原作：怒氣滿觸發暴怒、屬性大幅提升。具體％失傳→原創補完。auto＝怒氣剛滿自動進；manual＝F／4 耗怒換更長。",
+    "auto_duration": 6.0,
+    "auto_atk_mult": 1.25,
+    "auto_atb_mult": 1.25,
+    "manual_duration": 8.0,
+    "manual_atk_mult": 1.40,
+    "manual_atb_mult": 1.40
   },
 
   "stance": {
@@ -66,17 +77,43 @@
   },
 
   "weapon_tempo": {
-    "note": "玩家風姿（秒）。未列流派用 default。敵／Boss 仍各自寫死 windup，不走這張表。",
+    "note": "玩家風姿（秒）。未列流派用 default。敵／Boss 仍各自寫死 windup，不走這張表。斧慢鏢快對比拉大（對齊 GNN「斧一次／手裡劍兩次」精神）。",
     "default": { "windup": 0.25, "recover": 0.40 },
     "sword": { "windup": 0.25, "recover": 0.40 },
     "bow": { "windup": 0.30, "recover": 0.38 },
     "gun": { "windup": 0.42, "recover": 0.55 },
     "magic": { "windup": 0.32, "recover": 0.42 },
-    "dart": { "windup": 0.18, "recover": 0.28 },
-    "fist": { "windup": 0.20, "recover": 0.32 },
-    "axe": { "windup": 0.35, "recover": 0.50 },
-    "hammer": { "windup": 0.36, "recover": 0.52 },
+    "dart": { "windup": 0.14, "recover": 0.22 },
+    "dagger": { "windup": 0.15, "recover": 0.24 },
+    "fist": { "windup": 0.18, "recover": 0.28 },
+    "claw": { "windup": 0.16, "recover": 0.26 },
+    "axe": { "windup": 0.42, "recover": 0.58 },
+    "hammer": { "windup": 0.40, "recover": 0.56 },
     "spear": { "windup": 0.28, "recover": 0.42 },
     "crystal": { "windup": 0.28, "recover": 0.45 }
+  },
+
+  "weapon_uses": {
+    "note": "原作：戰鬥內武器有使用次數，歸零只能赤手（巴哈／GNN）。具體次數失傳→原創補完。慢武少次、快武多次；拳系也會耗盡。切換器魂姿態＝換一把，重置該姿態次數。",
+    "default": 16,
+    "sword": 16,
+    "spear": 15,
+    "bow": 14,
+    "gun": 12,
+    "magic": 14,
+    "crystal": 14,
+    "axe": 12,
+    "hammer": 12,
+    "dart": 22,
+    "dagger": 20,
+    "fist": 18,
+    "claw": 18
+  },
+
+  "bare_fist": {
+    "note": "武器次數歸零→赤手。降攻＋拳節奏；武器技關閉（無裝可發）。",
+    "atk_mult": 0.55,
+    "windup": 0.20,
+    "recover": 0.32
   }
 }

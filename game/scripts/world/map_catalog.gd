@@ -45,6 +45,14 @@ static func _build_raw(id: String) -> Dictionary:
 			return _road_ruins()
 		"town":
 			return _town()
+		"town_forge":
+			return _town_forge()
+		"town_soul":
+			return _town_soul()
+		"town_gem":
+			return _town_gem()
+		"town_tutor":
+			return _town_tutor()
 		"town_keep":
 			return _town_keep()
 		"town_market":
@@ -306,16 +314,19 @@ static func _town() -> Dictionary:
 	var m := _base("騎士堡壘 · 外城廣場", Color(0.1, 0.11, 0.14), 3200, 1785, Vector2(792, 1293), "town")
 	var flag_label := "旗幟（兔爪）" if GameState.has_flag("c1_flag_paw") else "灰旗"
 	m["entities"] = [
-		_e("greybeard", 1024, 891, 48, 64, "灰鬚", Color(0.55, 0.55, 0.6)),
+		_e("greybeard", 1024, 891, 48, 64, "武術館·灰鬚", Color(0.55, 0.55, 0.6)),
+		_e("tutor_hall", 1088, 860, 44, 44, "走進武術館", Color(0.5, 0.48, 0.52)),
 		_e("wall_notice", 1442, 840, 44, 52, "告示牆", Color(0.45, 0.4, 0.35), true),
 		_e("message_stone", 736, 1009, 48, 52, "留言石", Color(0.5, 0.55, 0.7), true),
 		_e("to_market", 888, 1488, 64, 56, "下城市集", Color(0.5, 0.4, 0.3)),
 		_e("market", 1096, 1027, 64, 52, "攤位殘架", Color(0.5, 0.4, 0.3), true),
-		_e("ding", 848, 1176, 48, 64, "釘釘·鐵匠", Color(0.7, 0.4, 0.25)),
-		_e("forge_sign", 978, 1133, 44, 44, "鐵匠招牌", Color(0.55, 0.4, 0.25)),
+		_e("ding", 848, 1176, 48, 64, "鐵匠鋪·釘釘", Color(0.7, 0.4, 0.25)),
+		_e("forge_sign", 978, 1133, 44, 44, "走進鐵匠鋪", Color(0.55, 0.4, 0.25)),
+		_e("gem_shop", 1008, 1228, 52, 56, "走進手藝工坊", Color(0.75, 0.35, 0.4)),
 		_e("fountain", 1832, 1170, 64, 52, "乾涸水池", Color(0.4, 0.45, 0.5), true),
 		_e("flag", 1760, 828, 48, 56, flag_label, Color(0.85, 0.75, 0.35), true),
-		_e("star", 2304, 1015, 48, 64, "星讀", Color(0.45, 0.5, 0.75)),
+		_e("star", 2304, 1015, 48, 64, "聚魂殿·星讀", Color(0.45, 0.5, 0.75)),
+		_e("soul_hall", 2372, 968, 44, 44, "走進聚魂殿", Color(0.4, 0.45, 0.7)),
 		_e("bench", 2176, 1150, 48, 36, "石凳", Color(0.45, 0.45, 0.48)),
 		_e("sprout", 1616, 1577, 48, 64, "小芽", Color(0.55, 0.75, 0.45)),
 		_e("silk", 2224, 855, 48, 64, "絲絨·書吏", Color(0.55, 0.5, 0.65)),
@@ -329,6 +340,56 @@ static func _town() -> Dictionary:
 		_e("exit_world", 668, 1202, 56, 56, "六域地圖", Color(0.4, 0.5, 0.55)),
 		_e("menu_save", 1040, 1585, 48, 48, "存檔石", Color(0.4, 0.45, 0.5)),
 		_e("stable", 2296, 1335, 64, 56, "空馬廄", Color(0.42, 0.36, 0.3), true),
+	]
+	return m
+
+
+static func _town_forge() -> Dictionary:
+	## 原作村內鐵匠鋪：走進才見到爐與釘釘
+	var m := _base("騎士堡 · 鐵匠鋪", Color(0.16, 0.08, 0.06), 1400, 820, Vector2(680, 660), "town_forge")
+	m["entities"] = [
+		_e("back_from_shop", 652, 690, 56, 48, "回廣場", Color(0.4, 0.4, 0.45)),
+		_e("ding", 620, 360, 48, 64, "釘釘·鐵匠", Color(0.7, 0.4, 0.25)),
+		_e("anvil", 780, 400, 56, 40, "鐵砧", Color(0.5, 0.42, 0.35), true),
+		_e("forge_hearth", 500, 300, 64, 56, "爐心", Color(0.75, 0.35, 0.18), true),
+		_e("bellows", 420, 420, 48, 40, "風箱", Color(0.45, 0.32, 0.25), true),
+		_e("scrap_bin", 920, 480, 48, 40, "廢鐵桶", Color(0.4, 0.38, 0.32)),
+	]
+	return m
+
+
+static func _town_soul() -> Dictionary:
+	var m := _base("騎士堡 · 聚魂殿", Color(0.07, 0.08, 0.16), 1400, 820, Vector2(680, 660), "town_soul")
+	m["entities"] = [
+		_e("back_from_shop", 652, 690, 56, 48, "回廣場", Color(0.4, 0.4, 0.45)),
+		_e("star", 640, 340, 48, 64, "星讀", Color(0.45, 0.5, 0.75)),
+		_e("astrolabe", 800, 300, 56, 48, "星盤台", Color(0.4, 0.45, 0.7), true),
+		_e("gourd_shelf", 460, 380, 48, 56, "葫蘆架", Color(0.35, 0.5, 0.4), true),
+		_e("star_mat", 720, 500, 64, 36, "觀星墊", Color(0.3, 0.32, 0.5)),
+	]
+	return m
+
+
+static func _town_gem() -> Dictionary:
+	var m := _base("騎士堡 · 手藝工坊", Color(0.14, 0.07, 0.09), 1400, 820, Vector2(680, 660), "town_gem")
+	m["entities"] = [
+		_e("back_from_shop", 652, 690, 56, 48, "回廣場", Color(0.4, 0.4, 0.45)),
+		_e("gem_clerk", 620, 360, 48, 64, "工坊師傅", Color(0.75, 0.35, 0.4)),
+		_e("gem_case", 800, 340, 56, 48, "寶石櫃", Color(0.7, 0.3, 0.35), true),
+		_e("cold_furnace", 460, 400, 56, 52, "冷熔爐", Color(0.45, 0.28, 0.3), true),
+		_e("shard_box", 920, 500, 48, 36, "碎片匣", Color(0.55, 0.4, 0.35)),
+	]
+	return m
+
+
+static func _town_tutor() -> Dictionary:
+	var m := _base("騎士堡 · 武術館", Color(0.11, 0.1, 0.12), 1400, 820, Vector2(680, 660), "town_tutor")
+	m["entities"] = [
+		_e("back_from_shop", 652, 690, 56, 48, "回廣場", Color(0.4, 0.4, 0.45)),
+		_e("greybeard", 640, 340, 48, 64, "灰鬚", Color(0.55, 0.55, 0.6)),
+		_e("training_dummy", 840, 420, 40, 56, "木人樁", Color(0.5, 0.42, 0.32), true),
+		_e("weapon_wall", 460, 300, 56, 64, "兵器牆", Color(0.45, 0.42, 0.4), true),
+		_e("floor_mat", 700, 520, 72, 36, "練武墊", Color(0.4, 0.35, 0.3)),
 	]
 	return m
 
@@ -472,7 +533,7 @@ static func _crossroads() -> Dictionary:
 		_e("to_cross_east", 2108, 526, 64, 56, "東塔荒原道", Color(0.4, 0.35, 0.45)),
 		_e("to_caravan", 968, 1095, 64, 56, "行商驛站", Color(0.55, 0.45, 0.35)),
 		_e("to_starfall", 728, 727, 64, 56, "星落平原", Color(0.45, 0.5, 0.7)),
-		_e("to_hunt", 1808, 1062, 64, 56, "星途獵場", Color(0.65, 0.35, 0.4)),
+		_e("to_hunt", 1808, 1062, 64, 56, "野外獵場", Color(0.65, 0.35, 0.4)),
 		_e("ruin_pillar", 1100, 820, 40, 64, "古柱", Color(0.4, 0.38, 0.36), true),
 		_e("save_cross", 916, 1304, 48, 48, "存檔石", Color(0.4, 0.45, 0.5)),
 		_e("world_map_stone", 1632, 1237, 56, 48, "世界輿圖石", Color(0.4, 0.5, 0.55)),
@@ -544,7 +605,7 @@ static func _starfall_plain() -> Dictionary:
 
 
 static func _hunting_grounds() -> Dictionary:
-	var m := _base("星途獵場 · 黑焰溢地", Color(0.09, 0.06, 0.08), 3000, 1674, Vector2(340, 950), "hunting_grounds")
+	var m := _base("野外獵場 · 黑焰溢地", Color(0.09, 0.06, 0.08), 3000, 1674, Vector2(340, 950), "hunting_grounds")
 	m["entities"] = [
 		_e("hunt_board", 904, 518, 72, 64, "狩獵告示", Color(0.65, 0.4, 0.35), true),
 		_e("hunt_start", 1388, 761, 64, 56, "開始狩獵", Color(0.75, 0.35, 0.4)),
@@ -902,7 +963,7 @@ static func _tower_camp() -> Dictionary:
 		_e("tent_b", 1128, 1386, 64, 48, "帳棚", Color(0.38, 0.35, 0.42), true),
 		_e("scroll_pile", 1248, 796, 48, 40, "散落卷軸", Color(0.5, 0.45, 0.4)),
 		_e("message_stone", 1022, 1064, 52, 56, "留言石", Color(0.5, 0.55, 0.75), true),
-		_e("candle_altar", 1468, 965, 56, 60, "通關蠟燭", Color(0.95, 0.75, 0.35), true),
+		_e("candle_altar", 1468, 965, 56, 60, "通關燭火", Color(0.95, 0.75, 0.35), true),
 		_e("tower_gate", 784, 772, 80, 96, "塔門", Color(0.35, 0.25, 0.4), true),
 		_e("to_tower_foyer", 960, 748, 64, 56, "進入塔門廳", Color(0.45, 0.35, 0.5)),
 		_e("climb_tower", 1688, 804, 64, 64, "登上塔", Color(0.5, 0.35, 0.55)),

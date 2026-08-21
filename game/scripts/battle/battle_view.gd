@@ -49,10 +49,18 @@ var _battle_weapon: TextureRect = null
 var _battle_armor: TextureRect = null
 var _skill_banner: Label
 var _rage_ready: Label
+var _weapon_dock: HBoxContainer
+var _weapon_dock_cells: Array = []  ## Label per bar
+var _overlay_key: String = ""
 var _coach: Label
 var _coach_timer: float = 0.0
 var _hud_styled: bool = false
 var _log_panel: PanelContainer
+## 雷歐旗艦部位血條
+var _part_bars: Dictionary = {}  ## id -> ProgressBar
+var _part_labels: Dictionary = {}  ## id -> Label
+var _part_box: VBoxContainer
+var _focus_hint: Label
 
 
 
@@ -106,12 +114,24 @@ func setup(mode: String) -> void:
 		"crit": GameState.effective_crit(),
 		"crit_dmg": GameState.effective_crit_dmg(),
 		"dmg_variance": GameState.effective_variance(),
+		"hit": GameState.effective_hit(),
+		"eva": GameState.effective_eva(),
+		"weapon_atk": GameState.weapon_atk,
+		"weapon_name": GameState.weapon_name,
+		"weapon_loadout_active": GameState.weapon_loadout_active,
 	}
-	## 招式系統：倍率／優先技名
+	## 真正多武器欄快照
+	if Engine.get_main_loop() is SceneTree:
+		var eq: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("EquipmentSystem")
+		if eq and eq.has_method("loadout_snapshot_for_battle"):
+			stats["weapon_loadout"] = eq.call("loadout_snapshot_for_battle")
+			if eq.has_method("active_weapon_line"):
+				stats["weapon_class"] = str(eq.call("active_weapon_line"))
+	## 招式系統：倍率／優先技名（綁定當前武器 line）
 	if Engine.get_main_loop() is SceneTree:
 		var sk: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("SkillSystem")
 		if sk and sk.has_method("battle_player_stats_patch"):
-			var patch: Dictionary = sk.call("battle_player_stats_patch")
+			var patch: Dictionary = sk.call("battle_player_stats_patch", str(stats.get("weapon_class", "")))
 			for k in patch.keys():
 				stats[k] = patch[k]
 			if mode == "wolf":
@@ -195,6 +215,18 @@ func setup(mode: String) -> void:
 	_ensure_coach()
 	AudioManager.battle_start(_mode)
 	_append_log("[color=#b8a88a]%s[/color]" % Loc.t("battle.start"))
+	if mode == "pvp_snap":
+		var WC3 = load("res://scripts/world/world_content.gd")
+		var d3: Dictionary = WC3.enemy_def("pvp_snap") if WC3 else {}
+		var pwr: int = int(d3.get("power", 0))
+		if pwr <= 0:
+			var raw: Variant = GameState.get_flag("pvp.pending_def", {})
+			if raw is Dictionary:
+				pwr = int((raw as Dictionary).get("power", 0))
+		_append_log(_t("[color=#9cf]面對【%s】的殘影 · 戰力 %d · 不是即時對戰[/color]") % [
+			str(d3.get("name", _t("好友殘影"))), pwr
+		])
+		_flash_coach(_t("這是對方留下的打法。對手是人影，不是野怪。"), 2.8)
 	_flash_coach(_mode_coach_intro(mode), 3.2)
 	if GameState.ng_plus > 0:
 		_append_log(_t("[color=#c8f]黑焰迴響 ×%d · 敵人強了 ×%.2f · 出手空檔更窄[/color]") % [
@@ -204,9 +236,10 @@ func setup(mode: String) -> void:
 	if GameState.stain_flame:
 		_append_log(_t("[color=#a88]沾焰：刃上有一層不肯散的灰。攻擊略升。[/color]"))
 	if mode == "leo":
-		_append_log(_t("雷歐：渺小的兔子……也想挑戰騎士之王？"))
+		_append_log(_t("雷歐：傭兵團把最弱的送來了？也想挑戰騎士之王？"))
 		_append_log(_t("[color=#fa6]王者斬要擋，擋住就能反擊 · 火圈亮起後按 J 跳開[/color]"))
-		parry_hint.text = _t("【J】倒數變綠＝格擋　·　火圈預告後＝躍出")
+		parry_hint.text = _t("【J】格擋　·　【Tab】鎖部位　·　火圈後躍出")
+		_flash_coach(_t("先鎖盾磨爆→防禦下降；再打本體。盔可破但會激怒牠。"), 3.6)
 	elif mode == "fog":
 		_append_log(_t("白霧：嘻嘻～真的假的，你分得清嗎？"))
 		_append_log(_t("[color=#8cf]分身很多 · 只有本體發白時打得中 · 砍幻影會被反咬又變慢[/color]"))
@@ -214,27 +247,27 @@ func setup(mode: String) -> void:
 	elif mode == "demon":
 		_append_log(_t("魔王：那就來——用你的微末，撞我的千年。"))
 		_append_log(_t("[color=#c8f]黑焰必殺一定要擋 · 時鐘轉到時按 J · 血量掉到一半他會拒絕[/color]"))
-		parry_hint.text = _t("【J】必殺格擋　·　時鐘窗　·　階段點「我拒絕」")
+		parry_hint.text = _t("【J】必殺格擋　·　【Tab】鎖部位　·　時鐘窗")
 	elif mode == "abo":
 		_append_log(_t("阿波：來。打我的架勢——用拳，不是用嘴。"))
 		_append_log(_t("[color=#9c9]打散他的架勢 · 散開後傷害吃滿 · 但他會出重拳，記得擋[/color]"))
-		parry_hint.text = _t("打散架勢　·　趁散開輸出　·　重拳舉起時【J】")
+		parry_hint.text = _t("打散架勢　·　【Tab】鎖部位　·　重拳【J】")
 	elif mode == "falcon":
-		_append_log(_t("疾影：你的眼睛……跟得上我嗎？"))
+		_append_log(_t("疾影：傭兵團把最慢的送來了？眼睛，跟得上我嗎？"))
 		_append_log(_t("[color=#8f8]牠停下那一拍才吃滿傷害 · 風聲響起按 J[/color]"))
-		parry_hint.text = _t("等【停拍】輸出　·　風切預告後【J】")
+		parry_hint.text = _t("等【停拍】　·　【Tab】鎖翼／冠　·　風切【J】")
 	elif mode == "boar":
-		_append_log(_t("石拳：哦？還站著？那就接下這一拳——"))
+		_append_log(_t("石拳：傭兵團把最弱的送來了？還站著？那就接下這一拳——"))
 		_append_log(_t("[color=#c96]他衝來時按 J 硬碰，岩甲會裂 · 落石時按 J 躲開[/color]"))
-		parry_hint.text = _t("衝鋒【J】對撞剝甲　·　落岩【J】進安全區")
+		parry_hint.text = _t("衝鋒對撞【J】　·　【Tab】鎖角／甲　·　落岩【J】")
 	elif mode == "wrath":
 		_append_log(_t("無臉：…………（焰在顫）"))
 		_append_log(_t("[color=#f84]裂縫·怒火：密火圈 · 漏閃疊灼燒，滿 3 層大爆[/color]"))
-		parry_hint.text = _t("密火圈按 J · 勿讓灼燒疊滿")
+		parry_hint.text = _t("密火圈【J】　·　【Tab】鎖部位")
 	elif mode == "tide":
 		_append_log(_t("潮聲：刺胞在裂縫裡孵化……"))
 		_append_log(_t("[color=#6cf]裂縫·潮噬：時間內解決刺胞 · 本體會輪流擋普攻或技能，看情況換手[/color]"))
-		parry_hint.text = _t("先解決刺胞 · 看牠擋什麼就換另一種")
+		parry_hint.text = _t("先清刺胞　·　【Tab】鎖潮甲／囊")
 	elif mode == "statue":
 		_append_log(_t("石響：三尊輪流亮起。"))
 		_append_log(_t("[color=#ca8]裂縫·石像：只打發光石像 · 落岩 · 全滅後打本體[/color]"))
@@ -242,9 +275,14 @@ func setup(mode: String) -> void:
 	elif mode == "chrono":
 		_append_log(_t("時牢：倒數的焰在腳下盤成環。"))
 		_append_log(_t("[color=#a8f]裂縫·時牢：炸彈窗按 J 拆除 · 落岩進安全[/color]"))
-		parry_hint.text = _t("炸彈拆除 · 落岩安全（J）")
+		parry_hint.text = _t("炸彈／落岩【J】　·　【Tab】鎖外殼")
 	else:
 		parry_hint.text = "%s · %s" % [Loc.t("tut.battle"), Loc.t("battle.rage_full")]
+	## 有多部位的 Boss：通用 HUD／教學（白霧／石像除外——Tab 另有用途）
+	if _boss_has_parts():
+		_ensure_part_hud()
+		if _part_lock_enabled():
+			_append_log(_t("[color=#fc0]部位破壞：Tab 鎖定部位／本體 · 破甲降防 · 破冠／角會激怒[/color]"))
 
 
 func _apply_hud_chrome() -> void:
@@ -414,7 +452,105 @@ func _apply_hud_chrome() -> void:
 		_rage_ready.add_theme_constant_override("shadow_offset_y", 1)
 		_rage_ready.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(_rage_ready)
+	_ensure_weapon_dock()
 	_ensure_coach()
+
+
+func _ensure_weapon_dock() -> void:
+	if _weapon_dock != null and is_instance_valid(_weapon_dock):
+		return
+	var side := get_node_or_null("SideBars/PlayerSide") as VBoxContainer
+	if side == null:
+		return
+	_weapon_dock = HBoxContainer.new()
+	_weapon_dock.name = "WeaponDock"
+	_weapon_dock.alignment = BoxContainer.ALIGNMENT_BEGIN
+	_weapon_dock.add_theme_constant_override("separation", 6)
+	side.add_child(_weapon_dock)
+	var rage_i := player_rage.get_index() if player_rage else 2
+	side.move_child(_weapon_dock, mini(rage_i + 1, side.get_child_count() - 1))
+	_weapon_dock_cells.clear()
+	for i in 3:
+		var cell := Label.new()
+		cell.custom_minimum_size = Vector2(72, 36)
+		cell.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cell.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		cell.add_theme_font_size_override("font_size", 11)
+		cell.add_theme_color_override("font_color", Color(0.9, 0.88, 0.82))
+		cell.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+		cell.add_theme_constant_override("shadow_offset_x", 1)
+		cell.add_theme_constant_override("shadow_offset_y", 1)
+		cell.text = _t("欄%d") % [i + 1]
+		_weapon_dock.add_child(cell)
+		_weapon_dock_cells.append(cell)
+
+
+func _weapon_line_short(line: String) -> String:
+	match line:
+		"sword":
+			return _t("劍")
+		"spear":
+			return _t("槍")
+		"axe":
+			return _t("斧")
+		"hammer":
+			return _t("鎚")
+		"dagger":
+			return _t("匕")
+		"dart":
+			return _t("鏢")
+		"fist":
+			return _t("拳")
+		"claw":
+			return _t("爪")
+		"bow":
+			return _t("弓")
+		"gun":
+			return _t("銃")
+		"magic":
+			return _t("法")
+		"crystal":
+			return _t("晶")
+		_:
+			return line if line != "" else "—"
+
+
+func _refresh_weapon_dock() -> void:
+	if _weapon_dock == null or sim == null:
+		return
+	if _weapon_dock_cells.size() < 3:
+		return
+	var p: BattleUnit = sim.get_unit("player")
+	for i in 3:
+		var lab: Label = _weapon_dock_cells[i]
+		var txt := _t("欄%d") % [i + 1]
+		var active := false
+		var empty := true
+		var locked := false
+		if i < sim.weapon_bars.size():
+			var b: Dictionary = sim.weapon_bars[i]
+			locked = not bool(b.get("unlocked", true))
+			empty = bool(b.get("empty", true)) or str(b.get("line", "")) == ""
+			var line := str(b.get("line", ""))
+			var left := int(b.get("uses_left", 0))
+			var mx := int(b.get("uses_max", 0))
+			if locked:
+				txt = _t("欄%d\n鎖") % [i + 1]
+			elif empty:
+				txt = _t("欄%d\n空") % [i + 1]
+			else:
+				txt = "%s\n%d/%d" % [_weapon_line_short(line), left, mx]
+			active = (i == sim.weapon_bar_active) and p != null and not p.bare_fisted
+		if p != null and p.bare_fisted and i == sim.weapon_bar_active:
+			txt = _t("赤手")
+			lab.modulate = Color(1.0, 0.8, 0.45)
+		elif active:
+			lab.modulate = Color(1.0, 0.92, 0.55)
+		elif locked or empty:
+			lab.modulate = Color(0.55, 0.55, 0.58)
+		else:
+			lab.modulate = Color(0.85, 0.85, 0.82)
+		lab.text = txt
 
 
 func _ensure_coach() -> void:
@@ -549,6 +685,9 @@ func _apply_battle_art(mode: String) -> void:
 		var fb := str(WC2.art_fallback(mode)) if WC2 else "wolf"
 		etex = SpriteDB.boss(fb)
 		_boss_art_key = fb
+	if etex == null and mode == "pvp_snap":
+		etex = SpriteDB.player_idle()
+		_boss_art_key = "pvp_snap"
 	if etex:
 		enemy_body.texture = etex
 	enemy_body.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -593,6 +732,10 @@ func _apply_battle_art(mode: String) -> void:
 		"wreck_captain":
 			enemy_body.custom_minimum_size = Vector2(280, 300)
 			_enemy_base_mod = Color(0.7, 0.85, 1.0)
+		"pvp_snap":
+			## 殘影＝人影，體型跟玩家同一檔，不要長成荒路殘兵
+			enemy_body.custom_minimum_size = Vector2(200, 250)
+			_enemy_base_mod = Color(0.72, 0.78, 1.18)
 		_:
 			if _is_world_miniboss(mode):
 				enemy_body.custom_minimum_size = Vector2(260, 290)
@@ -669,9 +812,16 @@ func _layout_battle_equipment_overlays() -> void:
 			_battle_armor.z_index = 1
 		else:
 			_battle_armor.visible = false
-	## 武器：右前手（武器-only 貼圖）
+	## 武器：右前手；戰鬥中跟當前武器欄／赤手走（頁遊剪影）
 	if _battle_weapon and is_instance_valid(_battle_weapon):
-		var wtex := SpriteDB.player_weapon_overlay()
+		var wtex: Texture2D = null
+		var p_live: BattleUnit = sim.get_unit("player") if sim else null
+		if p_live and p_live.bare_fisted:
+			wtex = SpriteDB.weapon_tex_for_class("fist")
+		elif p_live and p_live.weapon_class != "":
+			wtex = SpriteDB.weapon_tex_for_class(p_live.weapon_class)
+		else:
+			wtex = SpriteDB.player_weapon_overlay()
 		if wtex:
 			var wsz := Vector2(bs.x * 0.32, bs.y * 0.32)
 			wsz.x = clampf(wsz.x, 48.0, 78.0)
@@ -814,13 +964,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if sim.sim_paused:
 		return
-	if _mode == "fog" and event.is_action_pressed("ui_focus_next"):
-		## Tab
-		var tid := sim.cycle_player_target(1)
-		if tid != "":
-			_append_log(_t("鎖定：%s") % sim.get_unit(tid).display_name)
-		get_viewport().set_input_as_handled()
-		return
+	if event.is_action_pressed("ui_focus_next"):
+		## Tab：白霧切目標；其餘有部位的 Boss 切部位鎖定
+		if _mode == "fog":
+			var tid := sim.cycle_player_target(1)
+			if tid != "":
+				_append_log(_t("鎖定：%s") % sim.get_unit(tid).display_name)
+			get_viewport().set_input_as_handled()
+			return
+		if _part_lock_enabled():
+			sim.cycle_part_focus(1)
+			_append_log(_t("鎖定部位：%s") % sim.part_focus_label())
+			_refresh_part_focus_hint()
+			get_viewport().set_input_as_handled()
+			return
 	## 白霧戰原本把 1/2/3 拿去切鎖定目標並 set_input_as_handled()（BattleView 在樹上
 	## 比 main 深，會先吃到事件）—— 於是全遊戲最需要中途補血的一場，
 	## 快捷欄前三格（玩家最可能放藥的位置）是死的，畫面上也沒有任何一句話說明。
@@ -833,12 +990,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventKey and event.pressed and not event.echo:
+		## 1／2／3＝真正武器欄（非器魂快捷）；空／未解鎖會被 sim 擋下
 		if event.keycode == KEY_1:
-			sim.switch_soul_style("sword")
+			sim.switch_weapon_slot(0)
 		elif event.keycode == KEY_2:
-			sim.switch_soul_style("axe")
+			sim.switch_weapon_slot(1)
 		elif event.keycode == KEY_3:
-			sim.switch_soul_style("dagger")
+			sim.switch_weapon_slot(2)
 		elif event.keycode == KEY_4 or event.keycode == KEY_F:
 			sim.trigger_fury_awakening()
 
@@ -941,21 +1099,44 @@ func _refresh_hud() -> void:
 			status = _t(" [強化]")
 		elif p.atk_buff_left > 0.0 and p.atk_buff_mult < 1.0:
 			status = _t(" [虛弱]")
-		player_hp_label.text = "HP %d／%d%s" % [p.hp, p.max_hp, status]
+		var uses_txt := ""
+		if p.bare_fisted:
+			uses_txt = _t(" · 赤手")
+			if status == "":
+				status = _t(" [赤手]")
+		elif p.weapon_uses_left >= 0 and p.weapon_uses_max > 0:
+			uses_txt = _t(" · 武 %d/%d") % [p.weapon_uses_left, p.weapon_uses_max]
+		if p.fury_active and status == "":
+			status = _t(" [暴怒]")
+		player_hp_label.text = "HP %d／%d%s%s" % [p.hp, p.max_hp, status, uses_txt]
 		player_rage.max_value = 100
 		player_rage.value = p.rage
-		## 怒氣將近滿／已滿提示
+		## 怒氣將近滿／已滿／暴怒中提示
 		if _rage_ready:
-			if p.can_skill and p.rage >= 100.0:
+			if p.fury_active:
+				_rage_ready.visible = true
+				_rage_ready.text = Loc.t("battle.berserk_active")
+				_rage_ready.modulate = Color(1.0, 0.45, 0.2)
+			elif p.can_skill and not p.bare_fisted and p.rage >= 100.0:
 				_rage_ready.visible = true
 				_rage_ready.text = Loc.t("battle.rage_full")
 				_rage_ready.modulate = Color(1.0, 0.85, 0.4)
-			elif p.can_skill and p.rage >= 70.0:
+			elif (p.can_skill or p.bare_fisted) and p.rage >= 70.0:
 				_rage_ready.visible = true
 				_rage_ready.text = Loc.t("battle.rage_pct", {"n": int(p.rage)})
 				_rage_ready.modulate = Color(0.9, 0.75, 0.5, 0.85)
 			else:
 				_rage_ready.visible = false
+		if player_rage:
+			if p.fury_active:
+				player_rage.modulate = Color(1.35, 0.7, 0.35)
+			else:
+				player_rage.modulate = Color.WHITE
+		_refresh_weapon_dock()
+		var okey := "bare" if p.bare_fisted else p.weapon_class
+		if okey != _overlay_key:
+			_overlay_key = okey
+			_layout_battle_equipment_overlays()
 	## 場地機制 HUD（火圈／時鐘）優先於一般提示
 	if sim.hazard_kind != "" and sim.hazard_phase != "idle":
 		_update_hazard_hud()
@@ -967,6 +1148,8 @@ func _refresh_hud() -> void:
 				enemy_hp.max_value = real_u.max_hp
 				enemy_hp.value = real_u.hp
 				enemy_hp_label.text = _t("本體 HP %d / %d") % [real_u.hp, real_u.max_hp]
+				if not real_u.parts.is_empty():
+					_refresh_part_bars(real_u)
 				if real_u.vulnerable:
 					enemy_body.modulate = Color(1.35, 1.35, 1.4)
 					telegraph.visible = true
@@ -993,18 +1176,27 @@ func _refresh_hud() -> void:
 					parry_hint.modulate = Color(0.85, 0.85, 0.95)
 		else:
 			enemy_name.text = e.display_name
+			if _mode == "pvp_snap":
+				var raw2: Variant = GameState.get_flag("pvp.pending_def", {})
+				var pwr2 := 0
+				if raw2 is Dictionary:
+					pwr2 = int((raw2 as Dictionary).get("power", 0))
+				if pwr2 > 0:
+					enemy_name.text = "%s  %s" % [e.display_name, _t("戰力 %d") % pwr2]
 			enemy_hp.max_value = e.max_hp
 			enemy_hp.value = e.hp
 			enemy_hp_label.text = "HP %d / %d" % [e.hp, e.max_hp]
+			if _boss_has_parts() and e.parts.size() > 0:
+				_refresh_part_bars(e)
 			if e.telegraph_active and not sim.sim_paused:
 				_update_parry_countdown(e)
 			elif not sim.sim_paused:
 				countdown.visible = false
 				countdown_sub.visible = false
 				telegraph.visible = false
-				if _mode == "leo":
+				if _part_lock_enabled() and not e.telegraph_active:
 					parry_hint.modulate = Color(1, 1, 1)
-					parry_hint.text = _t("王者斬會出現倒數。倒數變綠時按 J 或滑鼠格擋。")
+					_refresh_part_focus_hint()
 				elif _mode == "demon":
 					parry_hint.modulate = Color(1, 1, 1)
 					parry_hint.text = _t("黑焰必殺可格擋 · 階段誘惑選「我拒絕」")
@@ -1022,6 +1214,134 @@ func _refresh_hud() -> void:
 					_update_statue_hud()
 				elif _mode == "chrono":
 					_update_chrono_hud()
+
+
+func _boss_has_parts() -> bool:
+	if sim == null:
+		return false
+	var boss := sim._primary_boss_unit()
+	return boss != null and not boss.parts.is_empty()
+
+
+func _part_lock_enabled() -> bool:
+	## 白霧 Tab＝切目標；石像＝亮石輪轉。其餘有部位的 Boss 可用 Tab 鎖部位。
+	if _mode == "fog" or _mode == "statue":
+		return false
+	return _boss_has_parts()
+
+
+func _ensure_part_hud() -> void:
+	if _part_box != null and is_instance_valid(_part_box):
+		## 已建過：若 Boss 換了（理論上同場不會），仍重刷數值
+		return
+	var enemy_side := get_node_or_null("SideBars/EnemySide") as VBoxContainer
+	if enemy_side == null:
+		return
+	var boss: BattleUnit = null
+	if sim:
+		boss = sim._primary_boss_unit()
+	if boss == null or boss.parts.is_empty():
+		return
+	_part_box = VBoxContainer.new()
+	_part_box.name = "PartBars"
+	_part_box.add_theme_constant_override("separation", 4)
+	enemy_side.add_child(_part_box)
+	var hp_i := enemy_hp.get_index() if enemy_hp else 1
+	enemy_side.move_child(_part_box, mini(hp_i + 2, enemy_side.get_child_count() - 1))
+	_focus_hint = Label.new()
+	_focus_hint.name = "PartFocusHint"
+	_focus_hint.add_theme_font_size_override("font_size", 13)
+	_focus_hint.add_theme_color_override("font_color", Color(1.0, 0.85, 0.45))
+	_part_box.add_child(_focus_hint)
+	for p in boss.parts:
+		var pid := str(p.get("id", ""))
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		var lab := Label.new()
+		var ptype := str(p.get("ptype", p.get("effect", "")))
+		var tag := ""
+		match ptype:
+			"helmet", "helm":
+				tag = _t("盔")
+			"armor", "plate":
+				tag = _t("甲")
+			"boots":
+				tag = _t("靴")
+			"crown", "crest":
+				tag = _t("冠")
+			"enrage":
+				tag = _t("盔")
+			"def_down":
+				tag = _t("甲")
+		var pname := str(p.get("name", pid))
+		lab.text = ("%s·%s" % [tag, pname]) if tag != "" else pname
+		lab.custom_minimum_size.x = 84
+		lab.add_theme_font_size_override("font_size", 12)
+		lab.add_theme_color_override("font_color", Color(0.9, 0.75, 0.55))
+		var bar := ProgressBar.new()
+		bar.custom_minimum_size = Vector2(120, 10)
+		bar.max_value = float(p.get("max_hp", 1))
+		bar.value = float(p.get("hp", 0))
+		bar.show_percentage = false
+		_style_bar(bar, Color(0.95, 0.7, 0.25), Color(0.25, 0.15, 0.08, 0.95))
+		row.add_child(lab)
+		row.add_child(bar)
+		_part_box.add_child(row)
+		_part_bars[pid] = bar
+		_part_labels[pid] = lab
+	_refresh_part_focus_hint()
+
+
+func _refresh_part_bars(boss: BattleUnit) -> void:
+	if boss == null or boss.parts.is_empty():
+		return
+	if _part_box == null:
+		_ensure_part_hud()
+	for p in boss.parts:
+		var pid := str(p.get("id", ""))
+		var bar: ProgressBar = _part_bars.get(pid) as ProgressBar
+		var lab: Label = _part_labels.get(pid) as Label
+		if bar == null:
+			continue
+		bar.max_value = float(p.get("max_hp", 1))
+		bar.value = float(p.get("hp", 0))
+		var broken := bool(p.get("broken", false))
+		var focused := sim != null and sim.focus_part_id == pid
+		if lab:
+			var mark := "▶ " if focused and not broken else ""
+			var ptype2 := str(p.get("ptype", p.get("effect", "")))
+			var tag2 := ""
+			match ptype2:
+				"helmet", "helm", "enrage":
+					tag2 = _t("盔")
+				"armor", "plate", "def_down":
+					tag2 = _t("甲")
+				"boots":
+					tag2 = _t("靴")
+				"crown", "crest":
+					tag2 = _t("冠")
+			var nm := str(p.get("name", pid))
+			if tag2 != "":
+				nm = "%s·%s" % [tag2, nm]
+			lab.text = ("%s%s" % [mark, nm])
+			lab.modulate = Color(0.55, 0.55, 0.55) if broken else (Color(1.0, 0.92, 0.55) if focused else Color.WHITE)
+		bar.modulate = Color(0.45, 0.45, 0.45) if broken else Color.WHITE
+
+
+func _refresh_part_focus_hint() -> void:
+	if sim == null or not _part_lock_enabled():
+		return
+	var label := sim.part_focus_label()
+	var tip := _t("鎖定：%s　·　Tab 切換　·　破甲降防／破冠激怒") % label
+	var boss := sim._primary_boss_unit()
+	if parry_hint and boss and not boss.telegraph_active:
+		## 保留各 Boss 專屬提示時，把鎖定資訊併入尾端
+		if _mode == "leo":
+			parry_hint.text = tip
+		elif not parry_hint.text.contains("Tab"):
+			parry_hint.text = "%s　·　%s" % [parry_hint.text, tip]
+	if _focus_hint:
+		_focus_hint.text = _t("部位鎖定 → %s") % label
 
 
 func _update_tide_hud() -> void:
@@ -1550,28 +1870,99 @@ func _on_event(kind: String, data: Dictionary) -> void:
 		"part_broken":
 			var boss_id := str(data.get("boss_id", "enemy"))
 			var pname := str(data.get("part_name", _t("部位")))
-			_append_log(_t("[color=#fc0]💥 部位破壞！【%s】打破擊暈！[/color]") % pname)
+			var staggered := bool(data.get("staggered", false))
+			if staggered:
+				_append_log(_t("[color=#fc0]💥 部位破壞！【%s】打破擊暈！[/color]") % pname)
+			else:
+				_append_log(_t("[color=#fc0]💥 部位破壞！【%s】碎裂！[/color]") % pname)
 			_spawn_float(boss_id, _t("💥 部位破壞！"), Color(1.0, 0.85, 0.15), false, true)
 			_shake = 0.5
 			trigger_hit_stop(0.12)
 			_flash(_body_of(boss_id), Color(3.0, 2.5, 1.0))
 			_set_boss_pose("recover")
+			_refresh_part_focus_hint()
 			get_tree().create_timer(0.8).timeout.connect(func():
 				if is_instance_valid(self) and not _ended:
 					_set_boss_pose("idle")
 			)
-		"soul_style_switched":
-			var st := str(data.get("style", "sword")).to_upper()
-			var skn := str(data.get("skill_name", _t("橫斬")))
-			_append_log(_t("[color=#8ff]⚔️ 切換器魂姿態：%s（技能：%s）[/color]") % [st, skn])
-			_spawn_float("player", _t("切換：%s") % st, Color(0.4, 0.9, 1.0))
+		"part_effect":
+			var emsg := str(data.get("msg", ""))
+			if emsg != "":
+				_append_log("[color=#fa8]%s[/color]" % emsg)
+				_flash_coach(emsg, 2.4)
+		"part_unlock":
+			var umsg := str(data.get("msg", ""))
+			if umsg != "":
+				_append_log("[color=#fc8]%s[/color]" % umsg)
+				_flash_coach(umsg, 2.6)
+		"part_blocked":
+			var bmsg := str(data.get("msg", ""))
+			if bmsg != "":
+				_append_log("[color=#aaa]%s[/color]" % bmsg)
+		"part_flee":
+			var fmsg := str(data.get("msg", ""))
+			if fmsg != "":
+				_append_log("[color=#fc8]%s[/color]" % fmsg)
+				_flash_coach(fmsg, 2.8)
+			_shake = 0.35
+			banner.text = _t("逃　走")
+			banner.modulate = Color(1, 0.9, 0.5, 1)
+			banner.visible = true
+		"part_focus":
+			_refresh_part_focus_hint()
+		"weapon_slot_switched":
+			var wname := str(data.get("name", ""))
+			var wline := str(data.get("line", "")).to_upper()
+			var wuses := int(data.get("uses_left", 0))
+			var wmax := int(data.get("uses_max", 0))
+			var skn2 := str(data.get("skill_name", ""))
+			var label := wname if wname != "" else wline
+			var auto_sw := bool(data.get("auto", false))
+			if auto_sw:
+				_append_log(_t("[color=#8ff]⚔️ 武器次數耗盡 · 自動切換欄 %d：%s（武 %d/%d）[/color]") % [
+					int(data.get("index", 0)) + 1, label, wuses, wmax,
+				])
+				_spawn_float("player", _t("換武！"), Color(0.5, 1.0, 0.55), true)
+			else:
+				_append_log(_t("[color=#8ff]⚔️ 武器欄 %d：%s（武 %d/%d%s）[/color]") % [
+					int(data.get("index", 0)) + 1, label, wuses, wmax,
+					(" · " + skn2) if skn2 != "" else "",
+				])
+				_spawn_float("player", _t("武欄%d") % [int(data.get("index", 0)) + 1], Color(0.4, 0.9, 1.0))
 			_flash(player_body, Color(0.5, 0.8, 1.0))
+			_layout_battle_equipment_overlays()
+			_refresh_weapon_dock()
+		"weapon_slot_blocked":
+			var why := str(data.get("reason", ""))
+			if why == "locked":
+				_append_log(_t("[color=#aaa]武器欄尚未解鎖（第2欄 Lv10／第3欄 Lv16）[/color]"))
+			elif why == "empty":
+				_append_log(_t("[color=#aaa]該武器欄是空的[/color]"))
+		"soul_style_switched":
+			## 相容舊事件（單測／無 slot 事件時）
+			pass
 		"fury_awakening":
-			_append_log(_t("[color=#f52]🔥 器魂覺醒！進入暴怒狀態（8秒攻速與傷害加成）[/color]"))
-			_spawn_float("player", _t("🔥 暴怒覺醒！"), Color(1.0, 0.4, 0.1), true)
+			var auto_b := bool(data.get("auto", false))
+			var bdur := float(data.get("duration", 8.0))
+			if auto_b:
+				_append_log(_t("[color=#f52]🔥 怒氣滿 · 暴怒！（%.0f 秒攻速與傷害提升）[/color]") % bdur)
+				_spawn_float("player", _t("🔥 暴怒！"), Color(1.0, 0.4, 0.1), true)
+			else:
+				_append_log(_t("[color=#f52]🔥 器魂覺醒！進入暴怒狀態（%.0f 秒攻速與傷害加成）[/color]") % bdur)
+				_spawn_float("player", _t("🔥 暴怒覺醒！"), Color(1.0, 0.4, 0.1), true)
 			_shake = 0.35
 			trigger_hit_stop(0.1)
 			_flash(player_body, Color(3.0, 1.5, 0.5))
+		"bare_fist":
+			_append_log(_t("[color=#fc8]武器次數耗盡 · 改為赤手！（攻擊下降，無法放武器技）[/color]"))
+			_spawn_float("player", _t("赤　手"), Color(1.0, 0.75, 0.4), true)
+			_flash(player_body, Color(1.2, 0.9, 0.5))
+			_layout_battle_equipment_overlays()
+			_refresh_weapon_dock()
+		"weapon_use":
+			var left_u := int(data.get("uses_left", -1))
+			if left_u == 3 or left_u == 1:
+				_append_log(_t("[color=#aaa]武器剩餘 %d 次[/color]") % left_u)
 		"miss":
 			_append_log(_t("%s 未中") % data.get("attacker"))
 			_spawn_float(str(data.get("defender")), _t("未中"), Color(0.7, 0.7, 0.8))
@@ -2019,10 +2410,20 @@ func _on_end(won: bool) -> void:
 	countdown.visible = false
 	countdown_sub.visible = false
 	AudioManager.battle_end(won)
+	## 破部位掉落暫存：僅勝利入袋（由 main._grant_boss_loot 統一發；不進存檔）
+	if sim != null:
+		BattleSim.last_victory_part_loot = sim.pending_part_materials.duplicate() if won else []
+	else:
+		BattleSim.last_victory_part_loot = []
 	if won:
-		banner.text = _t("勝　利")
-		banner.modulate = Color(1, 1, 1, 1)
-		_append_log(_t("[color=#6f6]勝利！[/color]"))
+		if sim != null and sim.boss_fled:
+			banner.text = _t("趕　跑")
+			banner.modulate = Color(1.0, 0.92, 0.55, 1)
+			_append_log(_t("[color=#fc8]敵人逃走——殘片入袋！[/color]"))
+		else:
+			banner.text = _t("勝　利")
+			banner.modulate = Color(1, 1, 1, 1)
+			_append_log(_t("[color=#6f6]勝利！[/color]"))
 		## 勝利瞬間切 Boss 名場面靜幀（有則顯示）
 		var sig: Texture2D = SpriteDB.boss_signature(_mode)
 		if sig and enemy_body:

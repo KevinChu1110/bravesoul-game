@@ -27,7 +27,7 @@ var last_health_ok: bool = false
 var last_health_ms: int = -1
 ## 伺服器認定的可交易金幣（影子帳）。市集買東西是扣這一筆，不是扣存檔裡的數字。
 var ledger_gold: int = -1
-## 通關蠟燭總數（全服）。-1＝尚未拉過；離線顯示用 GameState 快取。
+## 通關燭火總數（全服）。-1＝尚未拉過；離線顯示用 GameState 快取。
 var candle_total: int = -1
 var refresh_token: String = ""
 var _http: HTTPRequest
@@ -689,6 +689,40 @@ func leaderboard_fetch(board: String, cb: Callable = Callable()) -> void:
 	_request("GET", path, null, true, _cb_list.bind(cb))
 
 
+## 非即時 PVP：上傳自己的戰鬥殘影；拉別人的來打（好友挑戰）
+func push_pvp_snapshot() -> void:
+	if not is_signed_in():
+		return
+	var snap: Dictionary = GameState.pvp_snapshot()
+	_request(
+		"POST",
+		"/rest/v1/pvp_snapshots",
+		{
+			"user_id": user_id,
+			"display_name": display_name if display_name != "" else str(snap.get("name", "")),
+			"power": int(snap.get("power", 0)),
+			"payload": snap,
+			"updated_at": Time.get_datetime_string_from_system(true),
+		},
+		true,
+		Callable(),
+		"resolution=merge-duplicates,return=minimal"
+	)
+
+
+func fetch_pvp_snapshots(cb: Callable = Callable()) -> void:
+	if not is_online_enabled():
+		_ok({"list": []}, cb)
+		return
+	_request(
+		"GET",
+		"/rest/v1/pvp_snapshots?order=updated_at.desc&limit=20&select=*",
+		null,
+		true,
+		_cb_list.bind(cb)
+	)
+
+
 ## 查伺服器認定的可交易餘額（市集面板顯示用）
 func fetch_ledger(cb: Callable = Callable()) -> void:
 	if not is_signed_in():
@@ -734,7 +768,7 @@ func panel_bbcode() -> String:
 		lines.append("URL：%s" % host)
 	lines.append("")
 	lines.append(candle_line(false))
-	lines.append(_t("不連線也能走完整趟旅途。連上之後多了：雲端存檔、旅人殘影、留言石、通關蠟燭。"))
+	lines.append(_t("不連線也能走完整趟旅途。連上之後多了：雲端存檔、旅人殘影、留言石、通關燭火。"))
 	return "\n".join(lines)
 
 

@@ -72,6 +72,9 @@ const TILE_PX := 32
 var FLOOR_RECT := Rect2(40, 80, 1200, 560)
 var _cam: Vector2 = Vector2.ZERO
 const MapCatalog = preload("res://scripts/world/map_catalog.gd")
+const MapSceneRegistry = preload("res://scripts/world/map_scene_registry.gd")
+const MapPalette = preload("res://scripts/art/map_palette.gd")
+var _map_stage: Node2D = null  ## 編輯器場景裝飾層（可選）
 var _tileset_cache: Dictionary = {}  ## kind -> TileSet
 ## 格座標 -> true 實心（相對 TileHost，即 FLOOR 內）
 var _solid: Dictionary = {}
@@ -123,6 +126,7 @@ func setup(p_map_id: String) -> void:
 	_build_chrome()
 	_load_map(p_map_id)
 	_apply_map_art(p_map_id)
+	_attach_map_stage(p_map_id)
 	_rebuild_entities()
 	_rebuild_collision()
 	_rebuild_minimap()
@@ -411,6 +415,7 @@ func _try_ambient_bubble() -> void:
 		"ding": _t("鐵還熱。"),
 		"sprout": _t("我也想練劍……"),
 		"star": _t("星屑不等人。"),
+		"gem_clerk": _t("匣裡還亮。"),
 		"merchant": _t("六域的價碼我都懂。"),
 		"fog_hide": _t("霧裡……有人在笑。"),
 		"acha": _t("茶涼了再打。"),
@@ -877,7 +882,7 @@ const SCENIC_OCCLUDERS := {
 	]
 }
 
-func _update_horizon_shade() -> void:
+func _update_horizon_shade(pal: Dictionary = {}) -> void:
 	if _horizon_shade == null:
 		return
 	if not _has_scenic_bg:
@@ -886,8 +891,8 @@ func _update_horizon_shade() -> void:
 	_horizon_shade.visible = true
 	_horizon_shade.position = FLOOR_RECT.position
 	_horizon_shade.size = Vector2(FLOOR_RECT.size.x, FLOOR_RECT.size.y * STAND_BAND_TOP_T)
-	## 淡淡壓暗遠景／屋頂帶，站立帶以下維持原亮度
-	_horizon_shade.color = Color(0.03, 0.02, 0.06, 0.20)
+	## 淡淡壓暗遠景／屋頂帶；色跟域走，不再一律紫灰
+	_horizon_shade.color = pal.get("horizon", Color(0.03, 0.02, 0.06, 0.20)) as Color
 
 
 func _clear_scenic_layers() -> void:
@@ -944,6 +949,34 @@ func _build_scenic_layers() -> void:
 		_scenic_layer_nodes.append(spr)
 
 
+func _clear_map_stage() -> void:
+	if _map_stage != null and is_instance_valid(_map_stage):
+		_map_stage.queue_free()
+	_map_stage = null
+
+
+## 掛上 scenes/maps/<id>.tscn（編輯器可預覽）。玩法實體仍以 map_catalog 為準。
+func _attach_map_stage(id: String) -> void:
+	_clear_map_stage()
+	if _world == null:
+		return
+	if not MapSceneRegistry.has_scene(id):
+		return
+	var path := MapSceneRegistry.scene_path(id)
+	var ps := load(path) as PackedScene
+	if ps == null:
+		return
+	_map_stage = ps.instantiate() as Node2D
+	if _map_stage == null:
+		return
+	## 場景內座標與 map_catalog 實體同為世界絕對座標
+	_map_stage.position = Vector2.ZERO
+	_map_stage.z_index = 2
+	_world.add_child(_map_stage)
+	if _map_stage.has_method("_sync_editor_preview"):
+		_map_stage.call("_sync_editor_preview")
+
+
 func _apply_map_art(id: String) -> void:
 	var floor_rect := FLOOR_RECT
 	_floor.position = floor_rect.position
@@ -953,37 +986,37 @@ func _apply_map_art(id: String) -> void:
 	_vignette.position = Vector2(floor_rect.position.x, floor_rect.position.y + floor_rect.size.y * 0.55)
 	_vignette.size = Vector2(floor_rect.size.x, floor_rect.size.y * 0.45)
 
-	## 底圖：專用 art → map id → 母域 fallback
+	## 底圖：catalog.art → map id。不准再用前綴偷母域圖——
+	## town_forge 曾被拉成廣場油畫塞進鐵匠鋪，那就是「AI 拼貼」。
+	## 要共用底圖，在 map_catalog 把 art 寫成母域 id（village_outskirts → village）。
 	var art_id := id
 	var data: Dictionary = MapCatalog.build(id)
 	if data.has("art"):
 		art_id = str(data.get("art", id))
 	var bg_tex := SpriteDB.map_bg(art_id)
-	if bg_tex == null:
+	if bg_tex == null and art_id != id:
 		bg_tex = SpriteDB.map_bg(id)
-	if bg_tex == null:
-		## 前綴 fallback（產圖未完成時仍可看母域）
-		for prefix in ["village", "road", "town", "wild", "mist", "dojo", "forest", "coast", "tower"]:
-			if str(art_id).begins_with(prefix) or str(id).begins_with(prefix):
-				bg_tex = SpriteDB.map_bg(prefix if prefix != "mist" else "mist_village")
-				if bg_tex:
-					break
+	var pal: Dictionary = MapPalette.of(id)
 	var has_scenic_bg := bg_tex != null
 	_has_scenic_bg = has_scenic_bg
 	_art_id = art_id
+	_bg.color = pal.get("bg", Color(0.08, 0.08, 0.1)) as Color
 	if has_scenic_bg:
 		## 完整顯示手繪底圖。必須 STRETCH_SCALE 對齊 FLOOR_RECT，
 		## 否則 COVERED 裁切會讓美術建築與 entity／碰撞座標錯位（看起來像穿模）。
 		_floor.texture = bg_tex
-		_floor.modulate = Color(1, 1, 1, 1)
+		_floor.modulate = pal.get("grade", Color.WHITE) as Color
 		_floor.stretch_mode = TextureRect.STRETCH_SCALE
-		_floor_tint.color = Color(0.04, 0.03, 0.06, 0.10)
+		_floor_tint.color = pal.get("wash", Color(0.04, 0.03, 0.06, 0.10)) as Color
 	else:
 		_floor.texture = null
-		_floor_tint.color = Color(0.12, 0.1, 0.1, 0.5)
+		_floor.modulate = Color.WHITE
+		_floor_tint.color = pal.get("wash", Color(0.12, 0.10, 0.10, 0.45)) as Color
+	if _vignette:
+		_vignette.color = pal.get("vignette", Color(0.02, 0.02, 0.04, 0.14)) as Color
 
-	_build_tilemap(art_id if art_id != "" else id, has_scenic_bg)
-	_update_horizon_shade()
+	_build_tilemap(art_id if art_id != "" else id, has_scenic_bg, pal)
+	_update_horizon_shade(pal)
 	_build_scenic_layers()
 
 	var banner_path := "res://assets/sprites/maps/%s_banner.png" % art_id
@@ -1026,7 +1059,7 @@ func _get_or_make_tileset(kind: String) -> TileSet:
 	return ts
 
 
-func _build_tilemap(map_id_s: String, scenic_bg: bool = false) -> void:
+func _build_tilemap(map_id_s: String, scenic_bg: bool = false, pal: Dictionary = {}) -> void:
 	if _tile_map == null or _tile_host == null:
 		return
 	_tile_host.position = FLOOR_RECT.position
@@ -1066,7 +1099,8 @@ func _build_tilemap(map_id_s: String, scenic_bg: bool = false) -> void:
 					continue
 				var n := int(abs(sin(float(x * 12 + y * 7 + seed_n)) * 1000.0))
 				_tile_map.set_cell(Vector2i(x, y), 0, Vector2i(n % variants, 0))
-		_tile_map.modulate = Color(1, 1, 1, 0.22)
+		var tc: Color = pal.get("tile", Color.WHITE) as Color
+		_tile_map.modulate = Color(tc.r, tc.g, tc.b, 0.14)
 	else:
 		for y in _map_rows:
 			for x in _map_cols:
@@ -1077,7 +1111,8 @@ func _build_tilemap(map_id_s: String, scenic_bg: bool = false) -> void:
 				if map_id_s == "road" and abs(y - _map_rows / 2) <= 1:
 					vi = mini(1, variants - 1)
 				_tile_map.set_cell(Vector2i(x, y), 0, Vector2i(vi, 0))
-		_tile_map.modulate = Color(1, 1, 1, 0.92)
+		var tc2: Color = pal.get("tile", Color.WHITE) as Color
+		_tile_map.modulate = Color(tc2.r, tc2.g, tc2.b, 0.88)
 	## 牆層 tileset
 	var wall_ts := _get_or_make_tileset("wall")
 	if _wall_map and wall_ts:
@@ -1208,6 +1243,11 @@ func _scenic_blockers(mid: String) -> Array:
 		"town", "town_keep", "town_market":
 			raw.append(Rect2(o.x + s.x * 0.58, o.y + s.y * 0.08, s.x * 0.30, s.y * 0.28))
 			raw.append(Rect2(o.x + s.x * 0.08, o.y + s.y * 0.08, s.x * 0.20, s.y * 0.24))
+		"town_forge", "town_soul", "town_gem", "town_tutor":
+			## 室內：左右牆柱，中央留走道
+			raw.append(Rect2(o.x, o.y + s.y * 0.10, s.x * 0.10, s.y * 0.70))
+			raw.append(Rect2(o.x + s.x * 0.90, o.y + s.y * 0.10, s.x * 0.10, s.y * 0.70))
+			raw.append(Rect2(o.x + s.x * 0.18, o.y + s.y * 0.08, s.x * 0.64, s.y * 0.12))
 		"forest", "forest_deep", "forest_lake", "forest_canopy":
 			raw.append(Rect2(o.x, o.y + s.y * 0.18, s.x * 0.10, s.y * 0.65))
 			raw.append(Rect2(o.x + s.x * 0.90, o.y + s.y * 0.18, s.x * 0.10, s.y * 0.65))
@@ -1683,7 +1723,7 @@ func _rebuild_minimap() -> void:
 		elif id in ["leo_gate", "fog_gate", "fog_gate_deep", "trial_hall", "falcon_nest", "falcon_nest_deep", "boar_cliff", "boar_cliff_near"]:
 			col = Color(0.95, 0.4, 0.4, 0.95)
 			dot.size = Vector2(6, 6)
-		elif id in ["maisui", "greybeard", "ding", "star", "sprout", "fog_hide", "acha", "wind_ear", "tide_roar", "duanye", "merchant"]:
+		elif id in ["maisui", "greybeard", "ding", "star", "sprout", "fog_hide", "acha", "wind_ear", "tide_roar", "duanye", "merchant", "gem_clerk"]:
 			col = Color(0.45, 0.75, 1.0, 0.95)
 			dot.size = Vector2(5, 5)
 		elif id.begins_with("save") or id == "menu_save":

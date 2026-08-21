@@ -64,8 +64,36 @@ static func _enemy_def_raw(mode: String) -> Dictionary:
 				"is_boss": true, "art": "wreck_captain", "art_fallback": "tide",
 				"windup": 0.32, "recover": 0.48, "king_slash_cd": 3.2, "hazard": "rockfall", "hazard_cd": 5.0,
 			}
+		"pvp_snap":
+			return _pvp_snap_def()
 		_:
 			return {}
+
+
+static func _pvp_snap_def() -> Dictionary:
+	var raw: Variant = {}
+	if Engine.get_main_loop() is SceneTree:
+		var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameState")
+		if gs:
+			raw = gs.get_flag("pvp.pending_def", {})
+	if typeof(raw) != TYPE_DICTIONARY or (raw as Dictionary).is_empty():
+		return {
+			"id": "pvp_snap", "name": _t("好友殘影"), "max_hp": 80, "atk": 12, "def": 5, "speed": 11.0,
+			"is_boss": false, "art": "pvp_snap", "art_fallback": "pvp_snap", "power": 0,
+		}
+	var d: Dictionary = raw
+	return {
+		"id": "pvp_snap",
+		"name": str(d.get("name", _t("好友殘影"))),
+		"max_hp": maxi(40, int(d.get("max_hp", 80))),
+		"atk": maxi(6, int(d.get("atk", 12))),
+		"def": maxi(0, int(d.get("def", 5))),
+		"speed": maxf(8.0, float(d.get("speed", 11.0))),
+		"is_boss": false,
+		"art": "pvp_snap",
+		"art_fallback": "pvp_snap",
+		"power": int(d.get("power", 0)),
+	}
 
 
 static func is_world_battle(mode: String) -> bool:

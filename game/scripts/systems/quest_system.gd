@@ -1,5 +1,5 @@
 extends Node
-## 每日獎勵 + 長遠任務（離線）。進度寫入 GameState.flags。
+## 每日委託 + 長遠任務（離線）。進度寫入 GameState.flags。
 
 const DAILY_KEY := "meta.daily_day"
 const DAILY_CLAIMED := "meta.daily_claimed"
@@ -24,7 +24,7 @@ const COMMISSION_POOL: Array[Dictionary] = [
 	{"id": "d_craft", "name": "爐邊功課", "desc": "鍛造升階或職系武器 1 次", "track": "craft", "need": 1, "gold": 45, "dust": 2, "xp": 35},
 	{"id": "d_shop", "name": "市集一遊", "desc": "在材料行購買 1 次", "track": "shop", "need": 1, "gold": 18, "dust": 1, "xp": 15},
 	{"id": "d_hunt", "name": "星途一狩", "desc": "狩獵場有獎通關 1 次", "track": "hunt", "need": 1, "gold": 35, "dust": 2, "xp": 40},
-	{"id": "d_arena", "name": "演武試劍", "desc": "競技場通關 1 次（有獎或練習皆可）", "track": "arena", "need": 1, "gold": 32, "dust": 2, "xp": 38},
+	{"id": "d_arena", "name": "演武試劍", "desc": "演武場通關 1 次（有獎或練習皆可）", "track": "arena", "need": 1, "gold": 32, "dust": 2, "xp": 38},
 ]
 
 ## 相容舊常數名（測試／外部若仍引用）
@@ -381,7 +381,7 @@ func claimable_count() -> int:
 	return n
 
 
-## 「今日星途」儀表板用：可領的紅點（不含長遠里程碑，避免永遠紅）
+## 「今日村莊」儀表板用：可領的紅點（不含長遠里程碑，避免永遠紅）
 func starpath_reward_count() -> int:
 	var n := 0
 	if can_claim_daily():
@@ -414,7 +414,7 @@ func starpath_todo_count() -> int:
 func starpath_summary_bbcode() -> String:
 	refresh_daily()
 	var lines: PackedStringArray = []
-	lines.append("[b]今日星途[/b]")
+	lines.append("[b]今日村莊[/b]")
 	lines.append("連續簽到 %d 天 · %s" % [
 		int(GameState.get_flag(DAILY_STREAK, 0)), streak_milestone_hint()
 	])
@@ -431,17 +431,17 @@ func starpath_summary_bbcode() -> String:
 		if ar and ar.has_method("is_unlocked") and bool(ar.call("is_unlocked")):
 			var left_a: int = int(ar.call("daily_left"))
 			var best: int = int(ar.call("best_score"))
-			lines.append("[b]演武競技場[/b]  有獎剩 %d · 最佳 %d 分" % [left_a, best])
+			lines.append("[b]演武場[/b]  有獎剩 %d · 最佳 %d 分" % [left_a, best])
 		elif ar:
-			lines.append("[b]演武競技場[/b]  （進騎士堡後解鎖）")
+			lines.append("[b]演武場[/b]  （進騎士堡後解鎖）")
 		var ht: Node = tree.root.get_node_or_null("HuntSystem")
 		if ht and ht.has_method("is_unlocked") and bool(ht.call("is_unlocked")):
 			var left_h: int = int(ht.call("daily_left"))
-			lines.append("[b]星途獵場[/b]  有獎剩 %d" % left_h)
+			lines.append("[b]野外獵場[/b]  有獎剩 %d" % left_h)
 		elif ht:
-			lines.append("[b]星途獵場[/b]  （進騎士堡後解鎖）")
+			lines.append("[b]野外獵場[/b]  （進騎士堡後解鎖）")
 	lines.append("")
-	lines.append("[b]星途足跡[/b]  地圖上的半透明旅人＝殘影；留言石可留字")
+	lines.append("[b]旅人足跡[/b]  地圖上的半透明旅人＝殘影；留言石可留字")
 	var rew := starpath_reward_count()
 	var todo := starpath_todo_count()
 	lines.append("")

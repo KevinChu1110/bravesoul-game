@@ -1,25 +1,59 @@
 extends Node
-## 戰魂：探索星屑 → 觀星凝魂 → 入魂槽。非 gacha。
+## 戰魂／抽魂＝聚魂（原作招牌）。
+## 葫蘆魂器綠→藍→紫→橙跳階；金幣＋每日免費；紫微十四主星。
+## 見 docs/PRODUCT_BRIDGE.md §6；參考 bravesoul/engine/soul.py。
 
 const ContentLoc := preload("res://scripts/systems/content_loc.gd")
 
+## 紫微斗數十四主星（截圖證實）；數值映射到本作三圍
 const STARS: Array[Dictionary] = [
-	{"id": "破軍", "stat": "atk", "label": "攻", "base": 2},
-	{"id": "七殺", "stat": "atk", "label": "銳", "base": 1},  ## 另加微量速度感用 atk
-	{"id": "貪狼", "stat": "hp", "label": "血", "base": 6},
-	{"id": "天梁", "stat": "def", "label": "防", "base": 2},
 	{"id": "紫微", "stat": "all", "label": "衡", "base": 1},
+	{"id": "天機", "stat": "atk", "label": "機", "base": 2},
+	{"id": "太陽", "stat": "atk", "label": "陽", "base": 3},
+	{"id": "武曲", "stat": "atk", "label": "武", "base": 3},
+	{"id": "天同", "stat": "hp", "label": "同", "base": 8},
+	{"id": "廉貞", "stat": "atk", "label": "廉", "base": 2},
+	{"id": "天府", "stat": "def", "label": "府", "base": 3},
+	{"id": "太陰", "stat": "hp", "label": "陰", "base": 8},
+	{"id": "貪狼", "stat": "hp", "label": "血", "base": 6},
+	{"id": "巨門", "stat": "atk", "label": "巨", "base": 2},
+	{"id": "天相", "stat": "def", "label": "相", "base": 3},
+	{"id": "天梁", "stat": "def", "label": "防", "base": 2},
+	{"id": "七殺", "stat": "atk", "label": "銳", "base": 2},
+	{"id": "破軍", "stat": "atk", "label": "攻", "base": 2},
 ]
 
+## 品質倍率（神＝頂級；大凶可賣／合成素材感）
 const QUALITIES: Array[Dictionary] = [
-	{"id": "凡", "mult": 1.0, "weight": 50},
-	{"id": "吉", "mult": 1.5, "weight": 30},
-	{"id": "大吉", "mult": 2.2, "weight": 15},
-	{"id": "稀世", "mult": 3.0, "weight": 5},
+	{"id": "大凶", "mult": 0.4, "weight": 0},
+	{"id": "凡", "mult": 1.0, "weight": 0},
+	{"id": "吉", "mult": 1.6, "weight": 0},
+	{"id": "大吉", "mult": 2.3, "weight": 0},
+	{"id": "稀世", "mult": 3.2, "weight": 0},
+	{"id": "神", "mult": 4.5, "weight": 0},
 ]
 
-const RITUAL_COST := 3  ## 每次觀星耗星屑
+## 葫蘆階（永不降級語意由「同色摔回綠」表現循環）
+const VESSEL_LADDER: Array[String] = ["綠葫蘆", "藍葫蘆", "紫葫蘆", "橙葫蘆"]
+## 金幣花費（較原作 200/500/1500/3000 略降，適配本作經濟；精神不變）
+const VESSEL_COST := {"綠葫蘆": 80, "藍葫蘆": 200, "紫葫蘆": 500, "橙葫蘆": 1000}
+## 同色 jackpot → 摔回綠
+const VESSEL_MATCH := {"綠葫蘆": "吉", "藍葫蘆": "大吉", "紫葫蘆": "稀世", "橙葫蘆": "神"}
+const VESSEL_UP := {"綠葫蘆": 0.30, "藍葫蘆": 0.20, "紫葫蘆": 0.10, "橙葫蘆": 0.0}
+## 各階品質權重表
+const VESSEL_QUALITY := {
+	"綠葫蘆": {"大凶": 40, "凡": 35, "吉": 25},
+	"藍葫蘆": {"凡": 30, "吉": 40, "大吉": 30},
+	"紫葫蘆": {"吉": 30, "大吉": 40, "稀世": 30},
+	"橙葫蘆": {"神": 100},
+}
+
+## 相容舊測試／UI：星屑代價常數保留為「建議持有星屑」顯示用，實際主代價是金幣
+const RITUAL_COST := 0
 const FUSE_COUNT := 3
+## 凡～稀世：3 合 1 最高到 3 階。神品質＝原作「神魂」，聚俠網 2012：最高 10 級。
+const FUSE_MAX_LEVEL := 3
+const SHEN_MAX_LEVEL := 10
 
 ## 秘境專屬戰魂（唯一）：key = boss battle mode
 const SECRET_RELICS: Dictionary = {
@@ -119,6 +153,9 @@ func soul_display(s: Dictionary) -> String:
 	var star: String = str(s.get("star", "？"))
 	var lv2: int = int(s.get("level", 0))
 	var lv_s2 := "" if lv2 <= 0 else "·%d" % lv2
+	## 原作截圖：僅「神」品質加「神-」前綴
+	if q == "神":
+		return "%s%s%s" % [_t("神-"), soul_word(star), lv_s2]
 	return "%s·%s%s" % [soul_word(q), soul_word(star), lv_s2]
 
 
@@ -242,44 +279,28 @@ func total_equipped_bonus() -> Dictionary:
 func _star_weights() -> Dictionary:
 	var w: Dictionary = {}
 	for st in STARS:
-		w[str(st.get("id", ""))] = 20.0
+		w[str(st.get("id", ""))] = 14.0
 	if GameState.has_flag("boss.leo_cleared"):
-		w["破軍"] = float(w.get("破軍", 20)) + 25.0
-		w["七殺"] = float(w.get("七殺", 20)) + 10.0
+		w["破軍"] = float(w.get("破軍", 14)) + 25.0
+		w["七殺"] = float(w.get("七殺", 14)) + 10.0
+		w["太陽"] = float(w.get("太陽", 14)) + 8.0
 	if GameState.has_flag("boss.white_fog_cleared"):
-		w["紫微"] = float(w.get("紫微", 20)) + 15.0
+		w["紫微"] = float(w.get("紫微", 14)) + 15.0
+		w["天機"] = float(w.get("天機", 14)) + 8.0
 	if GameState.has_flag("boss.abo_cleared"):
-		w["天梁"] = float(w.get("天梁", 20)) + 20.0
+		w["天梁"] = float(w.get("天梁", 14)) + 20.0
+		w["天府"] = float(w.get("天府", 14)) + 10.0
 	if GameState.has_flag("c0_care") or GameState.has_wheat_stalk or GameState.wheat_stalk_broken:
-		w["天梁"] = float(w.get("天梁", 20)) + 12.0
-		w["貪狼"] = float(w.get("貪狼", 20)) + 8.0
+		w["天梁"] = float(w.get("天梁", 14)) + 12.0
+		w["貪狼"] = float(w.get("貪狼", 14)) + 8.0
+		w["天同"] = float(w.get("天同", 14)) + 6.0
 	if GameState.has_flag("boss.shadowwind_cleared"):
-		w["七殺"] = float(w.get("七殺", 20)) + 12.0
+		w["七殺"] = float(w.get("七殺", 14)) + 12.0
+		w["天機"] = float(w.get("天機", 14)) + 8.0
 	if GameState.has_flag("boss.stonefist_cleared"):
-		w["貪狼"] = float(w.get("貪狼", 20)) + 12.0
-	## 進度抬高品質（在 roll 品質時另算）
+		w["貪狼"] = float(w.get("貪狼", 14)) + 12.0
+		w["武曲"] = float(w.get("武曲", 14)) + 8.0
 	return w
-
-
-func _quality_weights() -> Array:
-	var out: Array = []
-	var progress := 0
-	if GameState.has_flag("boss.leo_cleared"):
-		progress += 1
-	if GameState.has_flag("boss.white_fog_cleared"):
-		progress += 1
-	if GameState.has_flag("boss.abo_cleared"):
-		progress += 1
-	if GameState.has_flag("game_cleared"):
-		progress += 2
-	for q in QUALITIES:
-		var wt: float = float(q.get("weight", 10))
-		if str(q.get("id", "")) == "大吉":
-			wt += float(progress) * 3.0
-		if str(q.get("id", "")) == "稀世":
-			wt += float(progress) * 1.5
-		out.append({"id": q.get("id"), "mult": q.get("mult"), "weight": wt})
-	return out
 
 
 func _pick_weighted(items: Array, key: String = "weight") -> Dictionary:
@@ -297,11 +318,72 @@ func _pick_weighted(items: Array, key: String = "weight") -> Dictionary:
 	return items[items.size() - 1]
 
 
+func today_key() -> String:
+	var dt := Time.get_datetime_dict_from_system()
+	return "%04d-%02d-%02d" % [int(dt.get("year", 2026)), int(dt.get("month", 1)), int(dt.get("day", 1))]
+
+
+func ensure_daily_free() -> void:
+	var day := today_key()
+	if GameState.soul_free_day != day:
+		GameState.soul_free_day = day
+		GameState.soul_free_draws = 1
+
+
+func as_vessel(v: String) -> String:
+	if v in VESSEL_LADDER:
+		return v
+	return "綠葫蘆"
+
+
+func vessel_cost(vessel: String = "") -> int:
+	var v := as_vessel(vessel if vessel != "" else GameState.soul_vessel)
+	return int(VESSEL_COST.get(v, 80))
+
+
+func ritual_cost_gold() -> int:
+	ensure_daily_free()
+	if GameState.soul_free_draws > 0:
+		return 0
+	return vessel_cost()
+
+
 func can_ritual() -> bool:
-	return GameState.stardust >= RITUAL_COST
+	ensure_daily_free()
+	if GameState.soul_free_draws > 0:
+		return true
+	return GameState.gold >= vessel_cost()
 
 
-## 觀星 UI 足跡連線文案（簡版儀式感：先連線 → 再點亮出魂）
+## 原作聚魂有 ×10。花費以「當下葫蘆階 × 付費次數」估；抽的過程中若升階，
+## 實際可能多扣一點，錢不夠就停，不預扣頂階。
+func ritual_batch_gold_estimate(n: int = 10) -> int:
+	ensure_daily_free()
+	var paid: int = maxi(0, n - GameState.soul_free_draws)
+	return paid * vessel_cost()
+
+
+func can_ritual_batch(n: int = 10) -> bool:
+	ensure_daily_free()
+	if n <= 0:
+		return false
+	if GameState.soul_free_draws >= n:
+		return true
+	return GameState.gold >= ritual_batch_gold_estimate(n)
+
+
+func vessel_ladder_bbcode() -> String:
+	var cur := as_vessel(GameState.soul_vessel)
+	var bits: PackedStringArray = []
+	for v in VESSEL_LADDER:
+		if v == cur:
+			bits.append("[b]%s[/b]" % v)
+		else:
+			bits.append(v)
+	return " → ".join(bits)
+
+
+## 聚魂殿足跡連線文案（加權星曜；品質仍看葫蘆階）
 func ritual_footprint_line() -> String:
 	var parts: PackedStringArray = []
 	if GameState.has_flag("boss.leo_cleared"):
@@ -317,35 +399,93 @@ func ritual_footprint_line() -> String:
 	if GameState.has_flag("boss.stonefist_cleared"):
 		parts.append(_t("岸岩·血"))
 	if parts.is_empty():
-		return _t("星圖仍暗——但你的腳步已經在畫線。")
-	return _t("足跡連線亮起：%s。") % " · ".join(parts)
+		return _t("魂器仍樸——但你的腳步已經在畫線。")
+	return _t("足跡偏科：%s。") % " · ".join(parts)
 
 
-func ritual() -> Dictionary:
-	## 觀星：耗星屑，回傳新生戰魂 dict；失敗回空
+func _roll_quality_for_vessel(vessel: String) -> String:
+	var table: Dictionary = VESSEL_QUALITY.get(as_vessel(vessel), VESSEL_QUALITY["綠葫蘆"])
+	var items: Array = []
+	for q in table.keys():
+		items.append({"id": str(q), "weight": float(table[q])})
+	var pick: Dictionary = _pick_weighted(items)
+	return str(pick.get("id", "凡"))
+
+
+func _next_vessel_after(vessel: String, quality: String) -> Dictionary:
+	## 回傳 {next, climbed, reset}
+	var v := as_vessel(vessel)
+	var match_q := str(VESSEL_MATCH.get(v, ""))
+	if quality == match_q:
+		return {"next": "綠葫蘆", "climbed": false, "reset": true}
+	var idx := VESSEL_LADDER.find(v)
+	if idx < 0:
+		idx = 0
+	var top := VESSEL_LADDER.size() - 1
+	var up := float(VESSEL_UP.get(v, 0.0))
+	if idx < top and randf() < up:
+		return {"next": VESSEL_LADDER[idx + 1], "climbed": true, "reset": false}
+	return {"next": v, "climbed": false, "reset": false}
+
+
+func ritual(quiet: bool = false) -> Dictionary:
+	## 抽魂／聚魂：品質看葫蘆階；星曜受足跡加權；耗免費或金幣
 	if not can_ritual():
 		return {}
-	GameState.stardust -= RITUAL_COST
+	ensure_daily_free()
+	var vessel := as_vessel(GameState.soul_vessel)
+	var used_free := false
+	if GameState.soul_free_draws > 0:
+		GameState.soul_free_draws -= 1
+		used_free = true
+	else:
+		var cost := vessel_cost(vessel)
+		if GameState.gold < cost:
+			return {}
+		GameState.add_gold(-cost)
 	var sw: Dictionary = _star_weights()
 	var star_items: Array = []
 	for k in sw.keys():
 		star_items.append({"id": k, "weight": sw[k]})
+	## 十四星：足跡未覆蓋的星也要有底權重
+	for st in STARS:
+		var sid := str(st.get("id", ""))
+		if not sw.has(sid):
+			star_items.append({"id": sid, "weight": 12.0})
 	var star_pick: Dictionary = _pick_weighted(star_items)
-	var q_pick: Dictionary = _pick_weighted(_quality_weights())
+	var quality := _roll_quality_for_vessel(vessel)
 	var soul := {
 		"id": "soul_%d_%d" % [Time.get_ticks_msec(), randi() % 10000],
 		"star": str(star_pick.get("id", "破軍")),
-		"quality": str(q_pick.get("id", "凡")),
+		"quality": quality,
 		"level": 0,
 		"equipped": false,
 	}
+	var nv: Dictionary = _next_vessel_after(vessel, quality)
+	GameState.soul_vessel = str(nv.get("next", vessel))
 	GameState.souls.append(soul)
-	_ritual_success_hooks(soul)
+	if not quiet:
+		_ritual_success_hooks(soul, vessel, used_free, nv)
 	return soul
 
 
-## 觀星成功：既有 sfx + 冒險日誌（toast 由 main 三步演出負責）
-func _ritual_success_hooks(soul: Dictionary) -> void:
+func ritual_batch(n: int = 10) -> Array:
+	## 連續抽魂；每抽吃當下葫蘆階（會跳階）。錢不夠就停。
+	var out: Array = []
+	for _i in n:
+		if not can_ritual():
+			break
+		var s: Dictionary = ritual(true)
+		if s.is_empty():
+			break
+		out.append(s)
+	if not out.is_empty() and AudioManager and AudioManager.has_method("play_ritual_success"):
+		AudioManager.play_ritual_success()
+	return out
+
+
+## 抽魂成功：sfx + 日誌
+func _ritual_success_hooks(soul: Dictionary, from_vessel: String = "", used_free: bool = false, nv: Dictionary = {}) -> void:
 	if AudioManager and AudioManager.has_method("play_ritual_success"):
 		AudioManager.play_ritual_success()
 	var tree := Engine.get_main_loop()
@@ -353,7 +493,15 @@ func _ritual_success_hooks(soul: Dictionary) -> void:
 		return
 	var gl: Node = (tree as SceneTree).root.get_node_or_null("GameLog")
 	if gl != null and gl.has_method("system"):
-		gl.call("system", _t("觀星凝出 %s（%s）") % [soul_display(soul), soul_bonus_line(soul)])
+		var extra := ""
+		if bool(nv.get("reset", false)):
+			extra = _t("（同色頂階——魂器摔回綠葫蘆）")
+		elif bool(nv.get("climbed", false)):
+			extra = _t("（魂器升至 %s）") % str(nv.get("next", ""))
+		var pay := _t("免費") if used_free else _t("%d 金") % vessel_cost(from_vessel)
+		gl.call("system", _t("抽魂凝出 %s（%s）｜%s｜%s%s") % [
+			soul_display(soul), soul_bonus_line(soul), from_vessel, pay, extra
+		])
 
 
 func unequip_all_of(sid: String) -> void:
@@ -371,6 +519,43 @@ func _set_soul_equipped(sid: String, eq: bool) -> void:
 			s["equipped"] = eq
 			GameState.souls[i] = s
 			return
+
+
+func slot_soul(slot: int) -> Dictionary:
+	ensure_slots()
+	if slot < 0 or slot >= GameState.soul_slots.size():
+		return {}
+	return find_soul(str(GameState.soul_slots[slot]))
+
+
+func compare_embed(sid: String, slot: int) -> Dictionary:
+	## 新魂相對該槽現況的三圍差（空槽＝從 0 起算）
+	var incoming: Dictionary = find_soul(sid)
+	var cur: Dictionary = slot_soul(slot)
+	var nb: Dictionary = calc_soul_bonus(incoming) if not incoming.is_empty() else {"atk": 0, "def": 0, "hp": 0}
+	var ob: Dictionary = calc_soul_bonus(cur) if not cur.is_empty() else {"atk": 0, "def": 0, "hp": 0}
+	var da: int = int(nb.get("atk", 0)) - int(ob.get("atk", 0))
+	var dd: int = int(nb.get("def", 0)) - int(ob.get("def", 0))
+	var dh: int = int(nb.get("hp", 0)) - int(ob.get("hp", 0))
+	var bits: PackedStringArray = []
+	if da > 0:
+		bits.append(_t("攻+%d") % da)
+	elif da < 0:
+		bits.append(_t("攻%d") % da)
+	if dd > 0:
+		bits.append(_t("防+%d") % dd)
+	elif dd < 0:
+		bits.append(_t("防%d") % dd)
+	if dh > 0:
+		bits.append(_t("血+%d") % dh)
+	elif dh < 0:
+		bits.append(_t("血%d") % dh)
+	var delta := "＝" if bits.is_empty() else " ".join(bits)
+	var cur_name := soul_display(cur) if not cur.is_empty() else _t("（空）")
+	return {
+		"atk": da, "def": dd, "hp": dh,
+		"line": _t("槽%d：%s → %s（%s）") % [slot + 1, cur_name, soul_display(incoming), delta],
+	}
 
 
 func equip_soul(sid: String, slot: int) -> String:
@@ -411,13 +596,21 @@ func bag_souls() -> Array:
 	return out
 
 
+func fuse_max_level(quality: String) -> int:
+	if quality == "神":
+		return SHEN_MAX_LEVEL
+	return FUSE_MAX_LEVEL
+
+
 func can_fuse(star: String, quality: String, level: int) -> bool:
+	var cap := fuse_max_level(quality)
+	if level + 1 > cap:
+		return false
 	var n := 0
 	for s in bag_souls():
 		if str(s.get("star", "")) == star \
 				and str(s.get("quality", "")) == quality \
-				and int(s.get("level", 0)) == level \
-				and level < 3:
+				and int(s.get("level", 0)) == level:
 			n += 1
 	return n >= FUSE_COUNT
 
@@ -468,10 +661,21 @@ func grant_starter_soul() -> Dictionary:
 
 func panel_status_bbcode() -> String:
 	ensure_slots()
+	ensure_daily_free()
 	var bonus: Dictionary = total_equipped_bonus()
 	var lines: PackedStringArray = []
-	lines.append(_t("[b]星途 · 戰魂[/b]"))
-	lines.append(_t("星屑：%d（觀星一次耗 %d）") % [GameState.stardust, RITUAL_COST])
+	lines.append(_t("[b]聚魂殿 · 戰魂[/b]"))
+	lines.append(_t("神魂＝神品質戰魂（神-星名）。最高 10 級。不是另一套系統。"))
+	lines.append(_t("魂器：%s") % vessel_ladder_bbcode())
+	var cost := ritual_cost_gold()
+	if cost <= 0:
+		lines.append(_t("今日免費抽魂尚餘 %d 次｜金幣 %d｜星屑 %d") % [
+			GameState.soul_free_draws, GameState.gold, GameState.stardust
+		])
+	else:
+		lines.append(_t("下次抽魂：%d 金｜金幣 %d｜星屑 %d") % [
+			cost, GameState.gold, GameState.stardust
+		])
 	lines.append(_t("武器：%s  T%d · 魂槽 %d") % [GameState.weapon_display(), GameState.weapon_tier, slot_count()])
 	lines.append(_t("入魂加成：攻+%d  防+%d  血+%d") % [
 		int(bonus.get("atk", 0)), int(bonus.get("def", 0)), int(bonus.get("hp", 0))

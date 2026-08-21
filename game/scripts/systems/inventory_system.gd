@@ -97,6 +97,14 @@ const CATALOG: Dictionary = {
 		"color": Color(0.7, 0.65, 0.45),
 		"glyph": "📜",
 	},
+	"medal": {
+		"name": "勳章",
+		"desc": "傭兵／演武功績。手藝工坊可用 50 枚點燃熔爐（原作替代金幣）。",
+		"kind": "key",
+		"stack": 99,
+		"color": Color(0.85, 0.7, 0.3),
+		"glyph": "🏅",
+	},
 	"relic_token": {
 		"name": "秘境印記",
 		"desc": "通關秘境留下的印。收藏用。",
@@ -184,7 +192,7 @@ const CATALOG: Dictionary = {
 	},
 	"star_ore": {
 		"name": "星砂礦",
-		"desc": "觀星／星途武器材料。",
+		"desc": "抽魂／獵場武器材料。",
 		"kind": "material",
 		"stack": 99,
 		"sell": 10,
@@ -211,6 +219,15 @@ const CATALOG: Dictionary = {
 		"buy": 28,
 		"color": Color(0.65, 0.6, 0.5),
 		"glyph": "碎",
+	},
+	"friendship_key": {
+		"name": "友誼鑰匙",
+		"desc": "好友挑戰勝利所得。三把開一個友誼寶箱。",
+		"kind": "key",
+		"stack": 99,
+		"sell": 0,
+		"color": Color(0.85, 0.7, 0.35),
+		"glyph": "鑰",
 	},
 }
 

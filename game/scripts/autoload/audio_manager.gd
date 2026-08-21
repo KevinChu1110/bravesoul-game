@@ -232,7 +232,13 @@ func play_bgm(id: String, fade: float = BGM_FADE) -> void:
 		_current_bgm = id
 		return
 	## 同曲且已在播 → 不重切（避免選單重建時靜音）
+	## 例外：戰鬥結束會把音量壓低，回探索同曲時要拉回，否則會一直「悶聲」
 	if id == _current_bgm and _bgm_active and _bgm_active.playing:
+		if _bgm_active.volume_db < _bgm_db - 1.0:
+			if _fade_tween and is_instance_valid(_fade_tween):
+				_fade_tween.kill()
+			_fade_tween = create_tween()
+			_fade_tween.tween_property(_bgm_active, "volume_db", _bgm_db, maxf(0.35, fade * 0.55))
 		return
 	var stream: AudioStream = _bgm_streams.get(id)
 	if stream == null:
@@ -348,7 +354,8 @@ static func map_to_bgm(map_id: String) -> String:
 		return "forest"
 	if map_id.begins_with("coast"):
 		return "coast"
-	if map_id.begins_with("tower") or map_id == "blackflame_scar":
+	## 疤地／塔／終境同用 tower；裂縫入口若掛在 postgame hub 仍回 town
+	if map_id.begins_with("tower") or map_id == "blackflame_scar" or map_id.begins_with("scar"):
 		return "tower"
 	return "town"
 

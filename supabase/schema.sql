@@ -169,6 +169,36 @@ create policy "leaderboard_update_own"
   on public.leaderboard for update
   using (auth.uid() = user_id);
 
+-- ── 非即時 PVP 殘影（好友挑戰打的是這份，不是即時操作）──
+create table if not exists public.pvp_snapshots (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  display_name text not null default '星途旅人',
+  power int not null default 0,
+  payload jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  primary key (user_id)
+);
+
+alter table public.pvp_snapshots enable row level security;
+
+drop policy if exists "pvp_snapshots_select_all" on public.pvp_snapshots;
+create policy "pvp_snapshots_select_all"
+  on public.pvp_snapshots for select
+  using (true);
+
+drop policy if exists "pvp_snapshots_upsert_own" on public.pvp_snapshots;
+create policy "pvp_snapshots_upsert_own"
+  on public.pvp_snapshots for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "pvp_snapshots_update_own" on public.pvp_snapshots;
+create policy "pvp_snapshots_update_own"
+  on public.pvp_snapshots for update
+  using (auth.uid() = user_id);
+
+grant select on table public.pvp_snapshots to anon, authenticated;
+grant insert, update on table public.pvp_snapshots to authenticated;
+
 -- ── 市集／房間：2026-08-16 移除 ──
 --
 -- market_listings / market_credit / rooms / room_members / room_events /

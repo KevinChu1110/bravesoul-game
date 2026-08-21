@@ -64,6 +64,9 @@ func _process(delta: float) -> void:
 	if GameState.chapter == "" or GameState.chapter == "title":
 		return
 	GameState.play_time += delta
+	## 能量自然回復（與旅途同節奏）
+	if EnergySystem:
+		EnergySystem.refresh()
 
 
 # ─── 路徑 ───
@@ -107,6 +110,8 @@ func save_game(slot: int = -1) -> Error:
 	var err := _write(s, payload)
 	if err == OK:
 		current_slot = s
+		if OnlineGate and OnlineGate.has_method("is_signed_in") and bool(OnlineGate.call("is_signed_in")):
+			OnlineGate.push_pvp_snapshot()
 	return err
 
 

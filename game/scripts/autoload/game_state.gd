@@ -6,7 +6,7 @@ signal gold_changed(amount: int)
 signal chapter_changed(chapter: String)
 
 ## 存檔版本。改動存檔結構就 +1，並在 save_migration.gd 補一支對應的升級步驟。
-const VERSION := 4
+const VERSION := 9
 
 ## 主線章節：title | c0 | c1 | c2 | c3 | c4 | c5 | c6 | cleared
 var chapter: String = "title"
@@ -18,6 +18,10 @@ var player_name: String = "小白"
 var level: int = 1
 var xp: int = 0
 var gold: int = 30
+
+## 能量（原作開戰消耗；上限 15、約 30 分回復 1）
+var energy: int = 15
+var energy_ts: float = 0.0  ## unix；開始回復計時
 
 ## 累積遊玩秒數。由 SaveManager 逐幀累加，只算真的在旅途上的時間。
 ## 存檔面板要靠它讓玩家分辨哪一格是自己投入比較久的那段。
@@ -56,10 +60,14 @@ var wheat_stalk_broken: bool = false
 ## 連敗升階（W4）
 var forge_fail_streak: int = 0
 
-## 戰魂
-var stardust: int = 0  ## 星屑
+## 戰魂／抽魂（聚魂）
+var stardust: int = 0  ## 星屑（足跡／獎勵；抽魂主代價改為金幣＋每日免費）
 var souls: Array = []  ## [{id,star,quality,level,equipped}]
 var soul_slots: Array = []  ## 長度=槽數，元素=soul id 或 ""
+## 葫蘆魂器跳階：綠／藍／紫／橙（對齊原作）
+var soul_vessel: String = "綠葫蘆"
+var soul_free_draws: int = 1
+var soul_free_day: String = ""  ## YYYY-MM-DD；換日重置免費次數
 
 ## 背包／快捷欄（楓式）
 var inventory: Dictionary = {}  ## item_id -> count
@@ -70,7 +78,27 @@ var ui_layout: Dictionary = {}
 ## 裝備實例（0.11）
 var equip_bag: Array = []  ## 未裝備實例
 var equip_worn: Dictionary = {}  ## uid -> inst
-var equip_slots: Dictionary = {"weapon": "", "armor": "", "accessory": ""}
+var equip_slots: Dictionary = {
+	"weapon": "", "armor": "",
+	"ring": "", "necklace": "", "bracelet": "", "earring": "", "amulet": "", "belt": "",
+}
+## 真正多武器欄（原作：升級解鎖更多武器欄；非器魂快捷）
+## 長度 3；元素＝equip uid 或 ""。equip_slots.weapon 與 active 欄同步。
+var weapon_loadout: Array = ["", "", ""]
+var weapon_loadout_active: int = 0
+
+## 寶石背包：[{id, color:red|yellow|blue, level:1-5}]
+var gem_bag: Array = []
+## 寶石碎片（熔煉產線原料）
+var gem_shards: Dictionary = {"red": 0, "yellow": 0, "blue": 0}
+## Lv20 熔爐第二產線（原作 2500 金解鎖）
+var gem_furnace: bool = false
+var gem_smelt_day: String = ""
+var gem_smelt_used: int = 0
+
+## 演武挑戰狀（原作：有限次數，約 90 分回 1；上限 5）
+var arena_tickets: int = 5
+var arena_ticket_ts: float = 0.0  ## unix；開始回復計時
 
 ## 角色爆擊基線（裝備再加成）
 var crit_rate: float = 5.0
@@ -119,6 +147,14 @@ func _equipped_weapon_line() -> String:
 	return _migrate_path_style(raw)
 
 
+func _gem_bonuses() -> Dictionary:
+	if Engine.get_main_loop() is SceneTree:
+		var g: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GemSystem")
+		if g != null and g.has_method("worn_bonuses"):
+			return g.call("worn_bonuses") as Dictionary
+	return {}
+
+
 func effective_atk() -> int:
 	var a := atk + weapon_atk
 	if stain_flame:
@@ -132,6 +168,8 @@ func effective_atk() -> int:
 	var pid := _migrate_path_style(path_style)
 	if wline != "" and wline == pid:
 		a += 2
+	var gb := _gem_bonuses()
+	a = int(round(float(a) * (1.0 + float(gb.get("atk_pct", 0.0)))))
 	return a
 
 
@@ -139,6 +177,8 @@ func effective_def() -> int:
 	var d := def_stat + soul_bonus_def() + equip_bonus_def()
 	var wb := weapon_class_bonuses()
 	d += int(wb.get("def", 0))
+	var gb := _gem_bonuses()
+	d = int(round(float(d) * (1.0 + float(gb.get("def_pct", 0.0)))))
 	return d
 
 
@@ -146,14 +186,25 @@ func effective_max_hp() -> int:
 	var h := max_hp + soul_bonus_hp() + equip_bonus_hp()
 	var wb := weapon_class_bonuses()
 	h += int(wb.get("hp", 0))
+	var gb := _gem_bonuses()
+	h = int(round(float(h) * (1.0 + float(gb.get("hp_pct", 0.0)))))
 	return h
 
 
 func effective_crit() -> float:
 	var c := crit_rate + equip_bonus_crit()
 	var wb := weapon_class_bonuses()
+	c += float(_gem_bonuses().get("crit", 0.0))
 	c += float(wb.get("crit", 0))
 	return c
+
+
+func effective_hit() -> float:
+	return float(_gem_bonuses().get("hit", 0.0))
+
+
+func effective_eva() -> float:
+	return float(_gem_bonuses().get("eva", 0.0))
 
 
 func effective_crit_dmg() -> float:
@@ -293,6 +344,20 @@ func power_score() -> int:
 	return s
 
 
+## 非即時 PVP：上傳／被打的是這份殘影，不是即時操作
+func pvp_snapshot() -> Dictionary:
+	return {
+		"name": player_name,
+		"level": level,
+		"max_hp": effective_max_hp(),
+		"atk": effective_atk(),
+		"def": effective_def(),
+		"speed": effective_speed(),
+		"power": power_score(),
+		"path": path_style,
+	}
+
+
 func _migrate_path_style(p: String) -> String:
 	match p:
 		"soul":
@@ -378,6 +443,8 @@ func to_dict() -> Dictionary:
 		"xp": xp,
 		"path_style": path_style,
 		"gold": gold,
+		"energy": energy,
+		"energy_ts": energy_ts,
 		"play_time": play_time,
 		"max_hp": max_hp,
 		"hp": hp,
@@ -397,12 +464,24 @@ func to_dict() -> Dictionary:
 		"stardust": stardust,
 		"souls": souls.duplicate(true),
 		"soul_slots": soul_slots.duplicate(),
+		"soul_vessel": soul_vessel,
+		"soul_free_draws": soul_free_draws,
+		"soul_free_day": soul_free_day,
 		"inventory": inventory.duplicate(true),
 		"hotbar": hotbar.duplicate(),
 		"ui_layout": ui_layout.duplicate(true),
 		"equip_bag": equip_bag.duplicate(true),
 		"equip_worn": equip_worn.duplicate(true),
 		"equip_slots": equip_slots.duplicate(true),
+		"weapon_loadout": weapon_loadout.duplicate(),
+		"weapon_loadout_active": weapon_loadout_active,
+		"gem_bag": gem_bag.duplicate(true),
+		"gem_shards": gem_shards.duplicate(true),
+		"gem_furnace": gem_furnace,
+		"gem_smelt_day": gem_smelt_day,
+		"gem_smelt_used": gem_smelt_used,
+		"arena_tickets": arena_tickets,
+		"arena_ticket_ts": arena_ticket_ts,
 		"crit_rate": crit_rate,
 		"crit_dmg": crit_dmg,
 		"dmg_variance": dmg_variance,
@@ -435,6 +514,8 @@ func from_dict(d: Dictionary) -> void:
 	xp = int(d.get("xp", 0))
 	path_style = _migrate_path_style(str(d.get("path_style", "")))
 	gold = int(d.get("gold", 0))
+	energy = int(d.get("energy", 15))
+	energy_ts = float(d.get("energy_ts", 0.0))
 	play_time = float(d.get("play_time", 0.0))
 	max_hp = int(d.get("max_hp", 50))
 	hp = int(d.get("hp", max_hp))
@@ -456,6 +537,11 @@ func from_dict(d: Dictionary) -> void:
 	stardust = int(d.get("stardust", 0))
 	souls = _array_field(d, "souls")
 	soul_slots = _array_field(d, "soul_slots")
+	soul_vessel = str(d.get("soul_vessel", "綠葫蘆"))
+	if soul_vessel == "":
+		soul_vessel = "綠葫蘆"
+	soul_free_draws = int(d.get("soul_free_draws", 1))
+	soul_free_day = str(d.get("soul_free_day", ""))
 	inventory = _dict_field(d, "inventory")
 	hotbar = _array_field(d, "hotbar", ["", "", "", "", "", "", "", ""])
 	while hotbar.size() < 8:
@@ -465,7 +551,22 @@ func from_dict(d: Dictionary) -> void:
 	ui_layout = _dict_field(d, "ui_layout")
 	equip_bag = _array_field(d, "equip_bag")
 	equip_worn = _dict_field(d, "equip_worn")
-	equip_slots = _dict_field(d, "equip_slots", {"weapon": "", "armor": "", "accessory": ""})
+	equip_slots = _dict_field(d, "equip_slots", {
+		"weapon": "", "armor": "",
+		"ring": "", "necklace": "", "bracelet": "", "earring": "", "amulet": "", "belt": "",
+	})
+	weapon_loadout = _array_field(d, "weapon_loadout", ["", "", ""])
+	## 只補不截：截斷會讓 round-trip 測試／手動加長陣列靜默丟資料；玩法層 _ensure 再用前 3 格
+	while weapon_loadout.size() < 3:
+		weapon_loadout.append("")
+	weapon_loadout_active = int(d.get("weapon_loadout_active", 0))
+	gem_bag = _array_field(d, "gem_bag")
+	gem_shards = _dict_field(d, "gem_shards", {"red": 0, "yellow": 0, "blue": 0})
+	gem_furnace = bool(d.get("gem_furnace", false))
+	gem_smelt_day = str(d.get("gem_smelt_day", ""))
+	gem_smelt_used = int(d.get("gem_smelt_used", 0))
+	arena_tickets = int(d.get("arena_tickets", 5))
+	arena_ticket_ts = float(d.get("arena_ticket_ts", 0.0))
 	crit_rate = float(d.get("crit_rate", 5.0))
 	crit_dmg = float(d.get("crit_dmg", 50.0))
 	dmg_variance = float(d.get("dmg_variance", 0.08))
@@ -480,6 +581,8 @@ func reset_new_game() -> void:
 		"xp": 0,
 		"path_style": "",
 		"gold": 30,
+		"energy": 15,
+		"energy_ts": 0.0,
 		"max_hp": 50,
 		"hp": 50,
 		"atk": 10,
@@ -498,6 +601,9 @@ func reset_new_game() -> void:
 		"stardust": 0,
 		"souls": [],
 		"soul_slots": [],
+		"soul_vessel": "綠葫蘆",
+		"soul_free_draws": 1,
+		"soul_free_day": "",
 		"inventory": {},
 		"hotbar": ["", "", "", "", "", "", "", ""],
 		"ui_layout": {},

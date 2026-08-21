@@ -1,0 +1,19 @@
+{
+  "_note": "Suno 產曲來源（2026-08-21）。每首取第一版 uuid；可在 suno.com/song/<uuid> 試聽其他 take。",
+  "account": "guanrung1110",
+  "tracks": {
+    "title": "c32b0fe7-550c-453b-b05b-f1f676a89da6",
+    "village": "26304e1c-df57-4a83-83c1-f20060231e8e",
+    "town": "b0e67ffc-4b86-46fc-b772-0e7ff2382f9f",
+    "road": "29c76340-e688-40fd-8fb0-2d650c6c33a7",
+    "wild": "6c1dbf50-84f2-403c-9aa6-c1ba5c07d3d2",
+    "mist": "3eeecb1e-b884-456d-91ae-1466a81d760d",
+    "dojo": "746b8dcf-5eda-45de-83b4-02054a2afe65",
+    "forest": "74d29e28-e26b-4007-938c-21780dcd5b40",
+    "coast": "6e0659b1-214e-489a-95b0-4d79897d04e7",
+    "battle": "98543fed-f020-4731-94cd-ef1c5abc6e10",
+    "boss": "9ad8396a-0eaa-49f6-97b5-3d1c39f199ea",
+    "tower": "f43bbd3c-972b-429a-b43c-a81b85d065f8",
+    "ending": "cda5f9ad-a68a-47b4-817d-1dbe0f6cf99b"
+  }
+}

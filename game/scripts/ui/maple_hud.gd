@@ -17,6 +17,8 @@ var _exp_bar: ProgressBar
 var _hp_val: Label
 var _gold_l: Label
 var _tip_l: Label
+var _acc_row: HBoxContainer
+var _acc_cells: Array = []
 var _drag_handle: Control
 
 
@@ -26,8 +28,8 @@ func _ready() -> void:
 	anchor_right = 0
 	anchor_bottom = 0
 	position = Vector2(10, 10)
-	size = Vector2(228, 118)
-	custom_minimum_size = Vector2(228, 118)
+	size = Vector2(248, 148)
+	custom_minimum_size = Vector2(248, 148)
 	_build()
 	## 戰鬥中 HP 由 BattleSim 的戰鬥單位當權威，變動不經過任何訊號。
 	## 加進群組讓 battle_view 每幀推一次，兩條血條才不會各說各話。
@@ -119,6 +121,20 @@ func _build() -> void:
 	_gold_l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(_gold_l)
 
+	_acc_row = HBoxContainer.new()
+	_acc_row.add_theme_constant_override("separation", 3)
+	_acc_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(_acc_row)
+	_acc_cells.clear()
+	for i in 6:
+		var cell := TextureRect.new()
+		cell.custom_minimum_size = Vector2(22, 22)
+		cell.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		cell.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_acc_row.add_child(cell)
+		_acc_cells.append(cell)
+
 	_tip_l = Label.new()
 	_tip_l.add_theme_font_size_override("font_size", 10)
 	_tip_l.add_theme_color_override("font_color", Color(0.70, 0.66, 0.60))
@@ -183,13 +199,22 @@ func refresh() -> void:
 			claim = int(q.call("claimable_count"))
 	var claim_s := Loc.t("hud.claim", {"n": claim}) if claim > 0 else ""
 	var week := Loc.t("pause.week1") if GameState.ng_plus <= 0 else Loc.t("pause.echo", {"n": GameState.ng_plus})
+	var energy_s := ""
+	if Engine.get_main_loop() is SceneTree:
+		var es: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("EnergySystem")
+		if es and es.has_method("current"):
+			energy_s = " · " + Loc.t("hud.energy", {
+				"cur": int(es.call("current")),
+				"max": int(es.get("MAX_ENERGY")) if es.get("MAX_ENERGY") != null else 15,
+			})
 	_gold_l.text = Loc.t("hud.gold_power", {
 		"gold": GameState.gold, "pow": GameState.power_score(), "week": week, "claim": claim_s,
-	})
+	}) + energy_s
+	_refresh_acc_row()
 
 	var path_s := GameState.path_display() if GameState.path_style != "" else Loc.t("hud.no_path")
 	var tip := Loc.t("hud.tip", {"weapon": GameState.weapon_display(), "path": path_s})
-	## 通關蠟燭人數常駐（有快取／已拉取才顯示）
+	## 通關燭火人數常駐（有快取／已拉取才顯示）
 	if Engine.get_main_loop() is SceneTree:
 		var og: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("OnlineGate")
 		if og and og.has_method("candle_total_cached"):
@@ -202,3 +227,27 @@ func refresh() -> void:
 					c_line = Loc.t("hud.candle", {"n": cn})
 				tip = "%s · %s" % [tip, c_line]
 	_tip_l.text = tip
+
+
+func _refresh_acc_row() -> void:
+	if _acc_cells.is_empty():
+		return
+	var unlocked := false
+	if Engine.get_main_loop() is SceneTree:
+		var eq: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("EquipmentSystem")
+		if eq and eq.has_method("accessories_unlocked"):
+			unlocked = bool(eq.call("accessories_unlocked"))
+		var slots: Array[String] = ["ring", "necklace", "bracelet", "earring", "amulet", "belt"]
+		for i in _acc_cells.size():
+			var cell: TextureRect = _acc_cells[i]
+			cell.modulate = Color(0.45, 0.45, 0.5, 0.7) if not unlocked else Color.WHITE
+			cell.texture = null
+			if not unlocked or i >= slots.size():
+				continue
+			var slot := slots[i]
+			var uid := str(GameState.equip_slots.get(slot, ""))
+			if uid == "" or not GameState.equip_worn.has(uid):
+				continue
+			var inst: Dictionary = GameState.equip_worn[uid]
+			cell.texture = SpriteDB.equip_icon_for_inst(inst)
+			cell.modulate = Color.WHITE

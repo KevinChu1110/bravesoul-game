@@ -253,12 +253,12 @@ static func weapon_tempo(weapon_class: String) -> Dictionary:
 		"bow": {"windup": 0.30, "recover": 0.38},
 		"gun": {"windup": 0.42, "recover": 0.55},
 		"magic": {"windup": 0.32, "recover": 0.42},
-		"dart": {"windup": 0.18, "recover": 0.28},
-		"dagger": {"windup": 0.16, "recover": 0.26},
-		"fist": {"windup": 0.20, "recover": 0.32},
-		"claw": {"windup": 0.18, "recover": 0.30},
-		"axe": {"windup": 0.35, "recover": 0.50},
-		"hammer": {"windup": 0.36, "recover": 0.52},
+		"dart": {"windup": 0.14, "recover": 0.22},
+		"dagger": {"windup": 0.15, "recover": 0.24},
+		"fist": {"windup": 0.18, "recover": 0.28},
+		"claw": {"windup": 0.16, "recover": 0.26},
+		"axe": {"windup": 0.42, "recover": 0.58},
+		"hammer": {"windup": 0.40, "recover": 0.56},
 		"spear": {"windup": 0.28, "recover": 0.42},
 		"crystal": {"windup": 0.28, "recover": 0.45},
 	}
@@ -271,3 +271,70 @@ static func weapon_tempo(weapon_class: String) -> Dictionary:
 	var wu := _tbl("weapon_tempo.%s.windup" % weapon_class, base["windup"])
 	var rc := _tbl("weapon_tempo.%s.recover" % weapon_class, base["recover"])
 	return {"windup": wu, "recover": rc}
+
+
+## 本場武器使用次數上限（原作有、具體數字失傳→combat.json 原創補完）
+static func weapon_uses_for(weapon_class: String) -> int:
+	var builtin: Dictionary = {
+		"sword": 16, "spear": 15, "bow": 14, "gun": 12, "magic": 14, "crystal": 14,
+		"axe": 12, "hammer": 12, "dart": 22, "dagger": 20, "fist": 18, "claw": 18,
+	}
+	var fallback := 16
+	if builtin.has(weapon_class):
+		fallback = int(builtin[weapon_class])
+	if weapon_class.is_empty():
+		return int(_tbl("weapon_uses.default", float(fallback)))
+	return int(_tbl("weapon_uses.%s" % weapon_class, float(fallback)))
+
+
+static func bare_fist_atk_mult() -> float:
+	return _tbl("bare_fist.atk_mult", 0.55)
+
+
+static func bare_fist_tempo() -> Dictionary:
+	return {
+		"windup": _tbl("bare_fist.windup", 0.20),
+		"recover": _tbl("bare_fist.recover", 0.32),
+	}
+
+
+static func berserk_auto_duration() -> float:
+	return _tbl("berserk.auto_duration", 6.0)
+
+
+static func berserk_auto_atk_mult() -> float:
+	return _tbl("berserk.auto_atk_mult", 1.25)
+
+
+static func berserk_auto_atb_mult() -> float:
+	return _tbl("berserk.auto_atb_mult", 1.25)
+
+
+static func berserk_manual_duration() -> float:
+	return _tbl("berserk.manual_duration", 8.0)
+
+
+static func berserk_manual_atk_mult() -> float:
+	return _tbl("berserk.manual_atk_mult", 1.40)
+
+
+static func berserk_manual_atb_mult() -> float:
+	return _tbl("berserk.manual_atb_mult", 1.40)
+
+
+## 經驗分流（批次 6）：野外／獵場材料為主、薄經驗；回村演武才是經驗主源。
+## 不歸零野外 XP。
+static func field_xp(max_hp: int, skirmish_wins: int = 0) -> int:
+	var xp_n := 8 + int(maxi(0, max_hp) / 14)
+	if skirmish_wins >= 40:
+		xp_n = maxi(4, int(xp_n * 0.5))
+	elif skirmish_wins >= 25:
+		xp_n = maxi(6, int(xp_n * 0.7))
+	return maxi(1, xp_n)
+
+
+static func arena_xp(max_hp: int, practice: bool = false) -> int:
+	var xp_n := 18 + int(maxi(0, max_hp) / 8)
+	if practice:
+		xp_n = maxi(1, int(round(float(xp_n) * 0.35)))
+	return maxi(1, xp_n)

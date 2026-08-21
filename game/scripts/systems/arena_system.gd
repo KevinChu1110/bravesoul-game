@@ -1,12 +1,15 @@
 extends Node
-## 競技場 v1：PVE 波次天梯。仿 HuntSystem；分數記 PB，可選上雲排行。
+## 演武場 v1：PVE 波次天梯（對齊原作演武／角鬥精神）。仿 HuntSystem；分數記 PB，可選上雲排行。
 ## Autoload：ArenaSystem
 
 const ContentLoc := preload("res://scripts/systems/content_loc.gd")
 
-const DAILY_CAP := 3
+const DAILY_CAP := 3  ## 相容舊日結統計；有獎開戰改走挑戰狀
 const PRACTICE_MULT := 0.35
 const LEADERBOARD_BOARD := "arena_best"
+## 原作演武：挑戰狀上限 5、約 90 分回 1（參考 bot／考據）
+const TICKET_MAX := 5
+const TICKET_REGEN_SEC := 90.0 * 60.0
 
 ## 五波既有雜魚（WorldContent mode），越打越硬
 const WAVES: Array[Dictionary] = [
@@ -31,9 +34,87 @@ func today_key() -> String:
 	return "%04d-%02d-%02d" % [int(d.year), int(d.month), int(d.day)]
 
 
+func day_best() -> int:
+	return int(GameState.get_flag(_fk("day_best"), 0))
+
+
+func last_settle_msg() -> String:
+	return str(GameState.get_flag(_fk("last_settle_msg"), ""))
+
+
+## 原作角鬥場：每日依排名結算報酬。本作以「當日最高分」分檔發獎（本地）。
+func rank_reward_for_score(score: int) -> Dictionary:
+	if score <= 0:
+		return {"gold": 0, "dust": 0, "tier": 0, "label": _t("未上榜")}
+	if score >= 6000:
+		return {"gold": 120, "dust": 3, "tier": 4, "label": _t("角鬥·至尊")}
+	if score >= 4000:
+		return {"gold": 80, "dust": 2, "tier": 3, "label": _t("角鬥·菁英")}
+	if score >= 2000:
+		return {"gold": 40, "dust": 1, "tier": 2, "label": _t("角鬥·精銳")}
+	return {"gold": 15, "dust": 0, "tier": 1, "label": _t("角鬥·新銳")}
+
+
+func _note_day_score(score: int) -> void:
+	if score <= 0:
+		return
+	if score > day_best():
+		GameState.set_flag(_fk("day_best"), score)
+
+
+func _settle_previous_day(prev_day: String) -> void:
+	if prev_day == "":
+		return
+	var settle_key := _fk("settled_%s" % prev_day)
+	if GameState.has_flag(settle_key):
+		return
+	var score := day_best()
+	var rew: Dictionary = rank_reward_for_score(score)
+	GameState.set_flag(settle_key, true)
+	var gold_n := int(rew.get("gold", 0))
+	var dust_n := int(rew.get("dust", 0))
+	if gold_n > 0:
+		GameState.add_gold(gold_n)
+	if dust_n > 0:
+		GameState.add_stardust(dust_n)
+	var gem_n := 0
+	var tier := int(rew.get("tier", 0))
+	if tier > 0 and Engine.get_main_loop() is SceneTree:
+		var gem: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GemSystem")
+		if gem != null and gem.has_method("grant_arena_settle_shards"):
+			gem_n = int(gem.call("grant_arena_settle_shards", tier))
+	var msg: String
+	if score <= 0:
+		msg = _t("角鬥日結（%s）：昨日未參賽。") % prev_day
+	else:
+		msg = _t("角鬥日結（%s）：昨日最高 %d →【%s】金 +%d") % [
+			prev_day, score, str(rew.get("label", "")), gold_n
+		]
+		if dust_n > 0:
+			msg += _t(" · 星屑 +%d") % dust_n
+		if gem_n > 0:
+			msg += _t(" · 寶石碎片 +%d") % gem_n
+		var med_n := mini(4, maxi(1, tier))
+		if Engine.get_main_loop() is SceneTree:
+			var inv: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("InventorySystem")
+			if inv != null and inv.has_method("add_item"):
+				inv.call("add_item", "medal", med_n)
+				msg += _t(" · 勳章 +%d") % med_n
+	GameState.set_flag(_fk("last_settle_msg"), msg)
+	GameState.set_flag(_fk("last_settle_gold"), gold_n)
+	GameState.set_flag(_fk("last_settle_score"), score)
+
+
 func _refresh_daily() -> void:
 	var today := today_key()
-	if str(GameState.get_flag(_fk("day"), "")) != today:
+	var prev := str(GameState.get_flag(_fk("day"), ""))
+	if prev != "" and prev != today:
+		## 換日：先結算昨日日榜，再清今日場次
+		_settle_previous_day(prev)
+		GameState.set_flag(_fk("day"), today)
+		GameState.set_flag(_fk("runs_today"), 0)
+		GameState.set_flag(_fk("day_best"), 0)
+	elif prev == "":
 		GameState.set_flag(_fk("day"), today)
 		GameState.set_flag(_fk("runs_today"), 0)
 
@@ -44,7 +125,57 @@ func runs_today() -> int:
 
 
 func daily_left() -> int:
-	return maxi(0, DAILY_CAP - runs_today())
+	## 對外「剩餘有獎」改以挑戰狀為準
+	return tickets()
+
+
+func _refresh_tickets() -> void:
+	var n := int(GameState.arena_tickets)
+	var ts := float(GameState.arena_ticket_ts)
+	var now := Time.get_unix_time_from_system()
+	if n >= TICKET_MAX:
+		GameState.arena_tickets = TICKET_MAX
+		GameState.arena_ticket_ts = 0.0
+		return
+	if ts <= 0.0:
+		GameState.arena_ticket_ts = now
+		return
+	var gained := int(floor((now - ts) / TICKET_REGEN_SEC))
+	if gained <= 0:
+		return
+	n = mini(TICKET_MAX, n + gained)
+	GameState.arena_tickets = n
+	if n >= TICKET_MAX:
+		GameState.arena_ticket_ts = 0.0
+	else:
+		GameState.arena_ticket_ts = ts + float(gained) * TICKET_REGEN_SEC
+
+
+func tickets() -> int:
+	_refresh_tickets()
+	return int(GameState.arena_tickets)
+
+
+func ticket_regen_left_sec() -> float:
+	_refresh_tickets()
+	if tickets() >= TICKET_MAX:
+		return 0.0
+	var ts := float(GameState.arena_ticket_ts)
+	if ts <= 0.0:
+		return TICKET_REGEN_SEC
+	var now := Time.get_unix_time_from_system()
+	var left := TICKET_REGEN_SEC - fmod(now - ts, TICKET_REGEN_SEC)
+	return maxf(0.0, left)
+
+
+func try_spend_ticket() -> bool:
+	_refresh_tickets()
+	if int(GameState.arena_tickets) <= 0:
+		return false
+	GameState.arena_tickets = int(GameState.arena_tickets) - 1
+	if float(GameState.arena_ticket_ts) <= 0.0:
+		GameState.arena_ticket_ts = Time.get_unix_time_from_system()
+	return true
 
 
 func is_unlocked() -> bool:
@@ -78,16 +209,25 @@ func clears_total() -> int:
 
 func status_bbcode() -> String:
 	_refresh_daily()
+	_refresh_tickets()
 	var lines: PackedStringArray = []
-	lines.append(_t("[b]演武競技場[/b]"))
-	lines.append(_t("騎士堡演武台。五波雜魚天梯——記個人最高分，不刷獵場材料。"))
+	lines.append(_t("[b]演武場[/b]（給經驗）· [b]角鬥日結[/b]（給排名獎）"))
+	lines.append(_t("魔王敗後二十年，傭兵團仍用演武台磨刀——五波雜魚天梯，不刷獵場材料。"))
 	lines.append("")
 	if not is_unlocked():
 		lines.append(_t("（進入騎士堡後解鎖）"))
 		return "\n".join(lines)
-	lines.append(_t("今日有獎場次：%d／%d（剩餘 %d）") % [runs_today(), DAILY_CAP, daily_left()])
-	lines.append(_t("個人最佳：%d 分 · 通關次數 %d") % [best_score(), clears_total()])
-	lines.append(_t("有獎場次用完後仍可練習（金減、分數不上榜）。"))
+	var tix := tickets()
+	lines.append(_t("挑戰狀：%d／%d") % [tix, TICKET_MAX])
+	if tix < TICKET_MAX:
+		var mins := int(ceil(ticket_regen_left_sec() / 60.0))
+		lines.append(_t("（約 %d 分後回復 1 張）") % maxi(1, mins))
+	lines.append(_t("今日最高：%d 分 · 生涯最佳：%d · 通關 %d") % [day_best(), best_score(), clears_total()])
+	lines.append(_t("消耗挑戰狀＝有獎演武（經驗比野外厚＋上榜）；無狀仍可練習（金減、不上榜）。"))
+	lines.append(_t("角鬥日結：換日依昨日最高分發金／星屑／寶石（新銳／精銳／菁英／至尊）。"))
+	var settle := last_settle_msg()
+	if settle != "":
+		lines.append("[color=#8c8]%s[/color]" % settle)
 	if is_run_active():
 		lines.append(_t("[color=#c96]進行中：第 %d／%d 試 · 本輪 %d 分[/color]") % [
 			current_wave() + 1, WAVES.size(), run_score()
@@ -101,14 +241,20 @@ func start_run(force_practice: bool = false) -> Dictionary:
 	if is_run_active():
 		return {"ok": false, "msg": _t("已有進行中的試煉。請先打完或放棄。")}
 	_refresh_daily()
-	var practice := force_practice or daily_left() <= 0
+	_refresh_tickets()
+	var practice := force_practice
+	if not practice:
+		if tickets() <= 0:
+			practice = true
+		elif not try_spend_ticket():
+			practice = true
 	GameState.set_flag(_fk("active"), true)
 	GameState.set_flag(_fk("wave"), 0)
 	GameState.set_flag(_fk("practice"), practice)
 	GameState.set_flag(_fk("waves_cleared"), 0)
 	GameState.set_flag(_fk("score_run"), 0)
 	SaveManager.save_game()
-	var msg := _t("試煉開始（練習·不上榜）。") if practice else _t("試煉開始（有獎）。")
+	var msg := _t("演武開始（練習·不上榜）。") if practice else _t("演武開始（消耗挑戰狀·有獎）。")
 	return {
 		"ok": true,
 		"practice": practice,
@@ -143,10 +289,7 @@ func wave_mode(index: int = -1) -> String:
 
 func wave_xp(mode: String, practice: bool) -> int:
 	var def: Dictionary = WorldContent.enemy_def(mode)
-	var xp_n := 12 + int(int(def.get("max_hp", 50)) / 10)
-	if practice:
-		xp_n = int(float(xp_n) * PRACTICE_MULT)
-	return maxi(0, xp_n)
+	return Formulas.arena_xp(int(def.get("max_hp", 50)), practice)
 
 
 ## leftover_hp：戰鬥結束時玩家剩餘 HP（main 傳入）；沒傳就用 0
@@ -247,6 +390,7 @@ func _finish_run(full_clear: bool) -> Dictionary:
 
 
 func _maybe_commit_pb(score: int, waves: int) -> bool:
+	_note_day_score(score)
 	if score <= best_score():
 		return false
 	GameState.set_flag(_fk("best_score"), score)

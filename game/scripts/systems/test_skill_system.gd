@@ -200,14 +200,26 @@ func _initialize() -> void:
 		else:
 			print("bow priority OK")
 
-		## 切到火槍系統：應放 powder_shot（同職另一套）
+		## 切到火槍系統：應放 powder_shot（嚴格綁定 line）
 		gs.path_style = "gun"
-		var kit_gun: Dictionary = sk.pick_battle_skill(1.0)
+		var kit_gun: Dictionary = sk.pick_battle_skill(1.0, "gun")
 		if str(kit_gun.get("id", "")) != "powder_shot":
 			push_error("gun line want powder_shot got %s" % kit_gun)
 			ok = false
 		else:
 			print("gun line priority OK")
+		## 嚴格綁定：持弓時不得放火槍技
+		var kit_bow_only: Dictionary = sk.pick_battle_skill(1.0, "bow")
+		if str(kit_bow_only.get("id", "")) == "powder_shot":
+			push_error("strict bind: bow must not cast powder_shot")
+			ok = false
+		## 持劍時不應放出已學的弓技
+		var kit_sword_empty: Dictionary = sk.pick_battle_skill(1.0, "sword")
+		if not kit_sword_empty.is_empty() and str(kit_sword_empty.get("line", "")) != "sword":
+			push_error("strict bind: sword kit leaked other line %s" % kit_sword_empty)
+			ok = false
+		else:
+			print("strict weapon bind OK")
 
 		## 忍者：選鏢也會拿到匕首急刺；當前線 mist_needle
 		gs.skill_data = {}

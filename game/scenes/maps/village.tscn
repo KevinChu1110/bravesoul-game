@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3 uid="uid://bsmapvillage001"]
+
+[ext_resource type="Script" path="res://scripts/world/map_stage.gd" id="1_stage"]
+[ext_resource type="Texture2D" path="res://assets/sprites/maps/village_bg.webp" id="2_bg"]
+
+[node name="MapStage" type="Node2D"]
+script = ExtResource("1_stage")
+map_id = "village"
+art_id = "village"
+world_size = Vector2(2800, 1562)
+
+[node name="EditorPreview" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.4)
+texture = ExtResource("2_bg")
+centered = false
+
+[node name="Decor" type="Node2D" parent="."]
+
+[node name="NoteLantern" type="Marker2D" parent="Decor"]
+position = Vector2(1860, 976)
+gizmo_extents = 12.0
+
+[node name="Markers" type="Node2D" parent="."]
+
+[node name="Spawn" type="Marker2D" parent="Markers"]
+position = Vector2(880, 1173)
+gizmo_extents = 20.0
+
+[node name="Maisui" type="Marker2D" parent="Markers"]
+position = Vector2(1332, 1109)
+gizmo_extents = 16.0
+
+[node name="ExitEast" type="Marker2D" parent="Markers"]
+position = Vector2(2510, 874)
+gizmo_extents = 16.0

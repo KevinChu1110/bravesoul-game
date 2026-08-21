@@ -34,9 +34,9 @@ func _initialize() -> void:
 		quit(1)
 	print("  ok daily rotation pick=%d" % a.size())
 
-	## 今日星途彙總不應噴錯
+	## 今日村莊彙總不應噴錯
 	var _sum: String = qs.starpath_summary_bbcode()
-	if _sum.find("今日星途") < 0 and _sum.find("Starpath") < 0 and _sum.find("[b]") < 0:
+	if _sum.find("今日村莊") < 0 and _sum.find("Starpath") < 0 and _sum.find("[b]") < 0:
 		push_error("starpath summary empty-ish")
 		print("ARENA_DAILY_FAIL")
 		quit(1)
@@ -72,5 +72,59 @@ func _initialize() -> void:
 		print("ARENA_DAILY_FAIL")
 		quit(1)
 	print("  ok arena clear best=%d" % ar.best_score())
+
+	## 挑戰狀：有獎開戰耗 1
+	gs.arena_tickets = 2
+	gs.arena_ticket_ts = 0.0
+	var st2: Dictionary = ar.start_run(false)
+	if not bool(st2.get("ok", false)) or bool(st2.get("practice", true)):
+		push_error("ticket run should be rewarded %s" % st2)
+		print("ARENA_DAILY_FAIL")
+		quit(1)
+	if int(gs.arena_tickets) != 1:
+		push_error("ticket not spent got %d" % int(gs.arena_tickets))
+		print("ARENA_DAILY_FAIL")
+		quit(1)
+	ar.abandon_run()
+	gs.arena_tickets = 0
+	var st3: Dictionary = ar.start_run(false)
+	if not bool(st3.get("practice", false)):
+		push_error("no ticket should force practice")
+		print("ARENA_DAILY_FAIL")
+		quit(1)
+	ar.abandon_run()
+	print("  ok challenge tickets")
+
+	## 角鬥日結：換日依昨日最高分發獎
+	gs.set_flag("arena.day", "2020-01-01")
+	gs.set_flag("arena.day_best", 4500)
+	gs.set_flag("arena.runs_today", 2)
+	var gold0: int = int(gs.gold)
+	var dust0: int = int(gs.stardust)
+	ar._refresh_daily()  ## 應結算 4500 → 菁英
+	if int(gs.gold) < gold0 + 80:
+		push_error("settle gold expected +80 got %s→%s" % [gold0, gs.gold])
+		print("ARENA_DAILY_FAIL")
+		quit(1)
+	if int(gs.stardust) < dust0 + 2:
+		push_error("settle dust")
+		print("ARENA_DAILY_FAIL")
+		quit(1)
+	if ar.day_best() != 0:
+		push_error("day_best should reset after settle")
+		print("ARENA_DAILY_FAIL")
+		quit(1)
+	if ar.last_settle_msg() == "":
+		push_error("settle msg empty")
+		print("ARENA_DAILY_FAIL")
+		quit(1)
+	## 同日再 refresh 不應重複發獎
+	var gold1: int = int(gs.gold)
+	ar._refresh_daily()
+	if int(gs.gold) != gold1:
+		push_error("double settle")
+		print("ARENA_DAILY_FAIL")
+		quit(1)
+	print("  ok arena daily settle msg=%s" % ar.last_settle_msg())
 	print("ARENA_DAILY_OK")
 	quit(0)

@@ -88,6 +88,11 @@ func _process(_delta: float) -> bool:
 	_check_v1_upgrade()
 	_check_v2_upgrade()
 	_check_v3_upgrade()
+	_check_v4_to_v5()
+	_check_v5_to_v6()
+	_check_v6_to_v7()
+	_check_v7_to_v8()
+	_check_v8_to_v9()
 	_check_idempotent()
 	_check_future_version()
 	_check_garbage()
@@ -277,6 +282,136 @@ func _check_v3_upgrade() -> void:
 		_fail("清市集旗標時把別的旗標一起清掉了")
 		return
 	print("  ok 第 3 版升到第 4 版：倉庫與掛單的東西全數退回背包，殘留旗標清乾淨")
+
+
+func _check_v4_to_v5() -> void:
+	var v4 := {
+		"version": 4,
+		"player_name": "舊存檔",
+		"gold": 100,
+		"stardust": 9,
+		"souls": [],
+		"soul_slots": [],
+	}
+	var res: Dictionary = SaveMigration.migrate(v4)
+	if not bool(res.get("ok", false)):
+		_fail("第 4 版存檔升不上來：%s" % str(res.get("reason", "")))
+		return
+	var d: Dictionary = res.get("data", {})
+	if str(d.get("soul_vessel", "")) != "綠葫蘆":
+		_fail("魂器應預設綠葫蘆，實際 %s" % str(d.get("soul_vessel", "")))
+		return
+	if int(d.get("soul_free_draws", -1)) != 1:
+		_fail("應給 1 次免費抽魂")
+		return
+	if int(d.get("version", 0)) != int(SaveMigration.CURRENT):
+		_fail("版號未升到 CURRENT")
+		return
+	print("  ok 第 4 版升到第 5 版：補上葫蘆魂器與每日免費")
+
+
+func _check_v5_to_v6() -> void:
+	var v5 := {
+		"version": 5,
+		"player_name": "能量前",
+		"soul_vessel": "綠葫蘆",
+		"soul_free_draws": 1,
+		"equip_slots": {"weapon": "w1", "armor": "", "accessory": "acc1"},
+		"equip_bag": [{"uid": "b1", "slot": "accessory", "name": "舊飾"}],
+		"equip_worn": {"acc1": {"uid": "acc1", "slot": "accessory", "name": "舊飾"}},
+	}
+	var res: Dictionary = SaveMigration.migrate(v5)
+	if not bool(res.get("ok", false)):
+		_fail("第 5 版存檔升不上來：%s" % str(res.get("reason", "")))
+		return
+	var d: Dictionary = res.get("data", {})
+	if int(d.get("energy", -1)) != 15:
+		_fail("應補能量 15")
+		return
+	var sl: Dictionary = d.get("equip_slots", {})
+	if str(sl.get("ring", "")) != "acc1" or sl.has("accessory"):
+		_fail("accessory 應遷到 ring：%s" % str(sl))
+		return
+	print("  ok 第 5 版升到第 6 版：能量＋飾品六槽遷移")
+
+
+func _check_v6_to_v7() -> void:
+	var v6 := {
+		"version": 6,
+		"player_name": "武器欄前",
+		"energy": 15,
+		"equip_slots": {"weapon": "blade1", "armor": "", "ring": ""},
+	}
+	var res: Dictionary = SaveMigration.migrate(v6)
+	if not bool(res.get("ok", false)):
+		_fail("第 6 版存檔升不上來：%s" % str(res.get("reason", "")))
+		return
+	var d: Dictionary = res.get("data", {})
+	var lo: Array = d.get("weapon_loadout", [])
+	if lo.size() != 3 or str(lo[0]) != "blade1":
+		_fail("應把 weapon 灌進 loadout[0]：%s" % str(lo))
+		return
+	if int(d.get("weapon_loadout_active", -1)) != 0:
+		_fail("active 應為 0")
+		return
+	if str((d.get("equip_slots", {}) as Dictionary).get("weapon", "")) != "blade1":
+		_fail("equip_slots.weapon 應與 active 同步")
+		return
+	if int(d.get("version", 0)) != int(SaveMigration.CURRENT):
+		_fail("版號未升到 CURRENT")
+		return
+	print("  ok 第 6 版升到第 7 版：多武器欄遷移")
+
+
+func _check_v7_to_v8() -> void:
+	var v7 := {
+		"version": 7,
+		"player_name": "寶石前",
+		"weapon_loadout": ["w1", "", ""],
+		"weapon_loadout_active": 0,
+		"flags": {"arena.runs_today": 1},
+	}
+	var res: Dictionary = SaveMigration.migrate(v7)
+	if not bool(res.get("ok", false)):
+		_fail("第 7 版存檔升不上來：%s" % str(res.get("reason", "")))
+		return
+	var d: Dictionary = res.get("data", {})
+	if typeof(d.get("gem_bag", null)) != TYPE_ARRAY:
+		_fail("應補 gem_bag")
+		return
+	var tix := int(d.get("arena_tickets", -1))
+	if tix < 1 or tix > 5:
+		_fail("挑戰狀應在 1～5：%d" % tix)
+		return
+	if int(d.get("version", 0)) != int(SaveMigration.CURRENT):
+		_fail("版號未升到 CURRENT")
+		return
+	print("  ok 第 7 版升到第 8 版：寶石＋挑戰狀")
+
+
+func _check_v8_to_v9() -> void:
+	var v8 := {
+		"version": 8,
+		"player_name": "熔爐前",
+		"gem_bag": [],
+		"arena_tickets": 3,
+	}
+	var res: Dictionary = SaveMigration.migrate(v8)
+	if not bool(res.get("ok", false)):
+		_fail("第 8 版存檔升不上來：%s" % str(res.get("reason", "")))
+		return
+	var d: Dictionary = res.get("data", {})
+	var sh: Dictionary = d.get("gem_shards", {})
+	if not sh.has("red") or not sh.has("blue"):
+		_fail("應補 gem_shards 三色：%s" % str(sh))
+		return
+	if bool(d.get("gem_furnace", true)):
+		_fail("新檔熔爐應預設 false")
+		return
+	if int(d.get("version", 0)) != int(SaveMigration.CURRENT):
+		_fail("版號未升到 CURRENT")
+		return
+	print("  ok 第 8 版升到第 9 版：碎片＋熔爐")
 
 
 ## 已經是最新版的檔再升一次要原封不動 —— 遊戲每次載入都會呼叫，不能每次都變一點

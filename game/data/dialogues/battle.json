@@ -62,7 +62,7 @@
   "battle.falcon_lose": [
     {
       "speaker": "疾影",
-      "text": "風把你帶走了……再等一次。"
+      "text": "風把你帶走了……再等一次。任務還沒完。"
     },
     {
       "speaker": "系統",
@@ -72,7 +72,7 @@
   "battle.boar_lose": [
     {
       "speaker": "石拳",
-      "text": "力氣不夠。站穩再來。"
+      "text": "力氣不夠。站穩再來。任務還沒完。"
     },
     {
       "speaker": "系統",

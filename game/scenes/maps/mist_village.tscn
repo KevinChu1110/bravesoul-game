@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://bsmapmistv0001"]
+
+[ext_resource type="Script" path="res://scripts/world/map_stage.gd" id="1_stage"]
+[ext_resource type="Texture2D" path="res://assets/sprites/maps/mist_village_bg.webp" id="2_bg"]
+
+[node name="MapStage" type="Node2D"]
+script = ExtResource("1_stage")
+map_id = "mist_village"
+art_id = "mist_village"
+world_size = Vector2(3000, 1674)
+
+[node name="EditorPreview" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.4)
+texture = ExtResource("2_bg")
+centered = false
+
+[node name="Decor" type="Node2D" parent="."]
+
+[node name="Markers" type="Node2D" parent="."]
+
+[node name="Spawn" type="Marker2D" parent="Markers"]
+position = Vector2(220, 850)
+gizmo_extents = 20.0

@@ -55,15 +55,31 @@ var parry_used: bool = false
 var telegraph_timer: float = 0.0
 
 ## 部位破壞系統 (Part Break System)
+## 單部位相容欄位（舊 Boss／測試）；多部位用 `parts`。
 var has_part: bool = false
 var part_name: String = ""
 var part_max_hp: int = 0
 var part_hp: int = 0
 var part_broken: bool = false
+## 多部位：[{id, name, max_hp, hp, broken, effect, material, ptype}]
+## effect: "def_down" | "enrage" | "expose" | "slow_break"
+## ptype: helmet | armor | boots | crown（原作分型）
+var parts: Array = []
+## 部位全破後本體易傷（對齊原作／boss.py）
+var parts_all_broken_vuln: float = 1.0
 
-## 暴怒覺醒 (Fury Awakening)
+## 暴怒覺醒 (Fury Awakening) — 原作：怒氣滿＝暴怒，屬性提升
 var fury_active: bool = false
 var fury_timer: float = 0.0
+var fury_atb_mult: float = 1.4  ## 由 BattleSim 依 auto／manual 寫入
+
+## 武器使用次數（原作：歸零→赤手）
+var weapon_uses_left: int = -1  ## <0＝未啟用（敵／測試舊路徑）
+var weapon_uses_max: int = 0
+var bare_fisted: bool = false
+var armed_atk: int = 0  ## 持武時的攻擊（赤手前快照）
+var armed_weapon_class: String = ""
+var armed_can_skill: bool = true
 
 ## 白霧戰
 var is_phantom: bool = false
@@ -86,8 +102,17 @@ func atb_rate_mult() -> float:
 		return 0.0
 	var mult: float = 0.45 if atb_slow_left > 0.0 else 1.0
 	if fury_active:
-		mult *= 1.4
+		mult *= fury_atb_mult
 	return mult
+
+
+## 累積怒氣；剛滿回 true（給自動暴怒用）
+func add_rage(amount: float, cap: float = 100.0) -> bool:
+	if amount <= 0.0:
+		return false
+	var before := rage
+	rage = minf(cap, rage + amount)
+	return before < cap and rage >= cap
 
 
 func tick_status(dt: float) -> void:
@@ -125,7 +150,7 @@ func take_damage(amount: int) -> int:
 	var dealt := mini(hp, maxi(0, incoming))
 	hp -= dealt
 	if dealt > 0:
-		rage = mini(100.0, rage + float(Formulas.rage_from_damage(dealt, max_hp)))
+		add_rage(float(Formulas.rage_from_damage(dealt, max_hp)), 100.0)
 	if hp <= 0:
 		hp = 0
 		state = State.DEAD

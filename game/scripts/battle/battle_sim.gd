@@ -36,6 +36,32 @@ var pending_micro_end: String = ""
 
 ## 玩家手動
 var player_id: String = "player"
+## 戰鬥內真正多武器欄快照（非器魂快捷）
+## 每欄：{index, uid, name, line, weapon_atk, uses_left, uses_max, unlocked, empty}
+var weapon_bars: Array = []
+var weapon_bar_active: int = 0
+## 不含當前武器攻擊的基底（切欄時用）
+var player_base_atk: int = 0
+## 部位鎖定："body" 或 parts[].id（雷歐盔／盾）
+var focus_part_id: String = "body"
+## 原作：本體血量降到此比例以下才可破壞部位（GNN）
+const PART_BREAK_HP_RATIO := 0.70
+## 本場已解鎖部位破壞（跨過門檻後維持）
+var parts_break_unlocked: bool = false
+## 破部位掉落（僅打贏才入袋；由 View／Main 結算）
+var pending_part_materials: Array = []
+## 上一場勝利的掉落暫存（不進存檔）
+static var last_victory_part_loot: Array = []
+## 全破後對本體傷害加成（對齊 boss.py BROKEN_BODY_DAMAGE_BONUS）
+const ALL_PARTS_BROKEN_BODY_MULT := 1.5
+## 原作：破部位後可能逃走（主線聖獸／魔王關閉；裂縫／秘境可開）
+var allow_part_flee: bool = false
+var boss_fled: bool = false
+## 破部位逃走機率（原創補完；enrage 較高＝變兇後逃）
+const PART_FLEE_CHANCE_DEFAULT := 0.10
+const PART_FLEE_CHANCE_ENRAGE := 0.18
+## 測試／腳本：下一破強制逃走一次
+var force_next_part_flee: bool = false
 
 ## 白霧模式：僅看破破綻可傷本體；幻影反噬
 var fog_mode: bool = false
@@ -352,8 +378,12 @@ func _begin_attack(u: BattleUnit) -> void:
 			target = st
 	u.target_id = target.id
 
-	## 怒氣滿且會技能
-	if u.can_skill and u.rage >= RAGE_MAX:
+	## 次數已盡 → 先進入赤手再出手（最後一擊仍算持武，在結算時扣）
+	if u.id == player_id:
+		_ensure_armed_or_bare(u)
+
+	## 怒氣滿且會技能（赤手無武器技）
+	if u.can_skill and not u.bare_fisted and u.rage >= RAGE_MAX:
 		if u.id == player_id:
 			_refresh_player_skill_choice(u)
 		u.state = BattleUnit.State.CAST
@@ -366,12 +396,18 @@ func _begin_attack(u: BattleUnit) -> void:
 			"kind": u.skill_kind,
 			"target": target.id,
 			"hits": maxi(1, u.skill_hits),
+			"berserk": u.fury_active,
 		})
 		return
 
 	u.state = BattleUnit.State.WINDUP
 	u.state_timer = u.windup_time
-	_emit("attack_swing", {"id": u.id, "target": target.id})
+	_emit("attack_swing", {
+		"id": u.id,
+		"target": target.id,
+		"bare_fist": u.bare_fisted,
+		"uses_left": u.weapon_uses_left,
+	})
 
 
 func cycle_player_target(dir: int = 1) -> String:
@@ -407,6 +443,8 @@ func _apply_player_hit_on_fog(attacker: BattleUnit, target: BattleUnit, dmg: int
 	if target.is_phantom:
 		var recoil := maxi(1, int(round(float(dmg) * 0.35)))
 		var dealt_self := attacker.take_damage(recoil)
+		if attacker.id == player_id:
+			_check_auto_berserk(attacker)
 		## 冰意：打幻影＝自己變慢（戰鬥機制，非對話）
 		attacker.atb_slow_left = maxf(attacker.atb_slow_left, 2.8)
 		_emit("fog_phantom_hit", {
@@ -459,6 +497,8 @@ func _resolve_strike(u: BattleUnit) -> void:
 	var miss_pct := Formulas.miss_chance(u.speed, target.speed, u.hit, target.eva)
 	if rng.randi_range(1, 100) <= miss_pct:
 		_emit("miss", {"attacker": u.id, "defender": target.id})
+		if u.id == player_id:
+			_consume_weapon_use(u)
 		u.state = BattleUnit.State.RECOVER
 		u.state_timer = u.recover_time
 		return
@@ -482,7 +522,9 @@ func _resolve_strike(u: BattleUnit) -> void:
 		## 第二章的王正好是玩家第一次真的需要技能的地方，而那一場技能是關的。
 		## 這裡補回來，條件跟一般命中那條一致（有打到才算）。
 		if u.can_skill and not target.is_phantom:
-			u.rage = minf(RAGE_MAX, u.rage + Formulas.rage_from_strike())
+			_gain_rage(u, Formulas.rage_from_strike())
+		if u.id == player_id:
+			_consume_weapon_use(u)
 		u.state = BattleUnit.State.STRIKE
 		u.state_timer = 0.08
 		return
@@ -502,12 +544,17 @@ func _resolve_strike(u: BattleUnit) -> void:
 			tide_player_swings += 1
 	if statue_mode and u.team == BattleUnit.Team.PLAYER:
 		dmg = _statue_filter_damage(target, dmg)
+	## 部位全破：本體易傷
+	if target.is_boss and target.parts_all_broken_vuln > 1.0:
+		dmg = int(round(float(dmg) * target.parts_all_broken_vuln))
 	var dealt := target.take_damage(dmg)
+	if target.id == player_id:
+		_check_auto_berserk(target)
 	if u.team == BattleUnit.Team.PLAYER and dealt > 0:
 		_process_part_damage(target, dealt, target.telegraph_active)
 	## 出手也累積戰意，否則戰意只能靠挨打累積，而挨到滿之前人就死了
 	if u.can_skill and dealt > 0:
-		u.rage = minf(RAGE_MAX, u.rage + Formulas.rage_from_strike())
+		_gain_rage(u, Formulas.rage_from_strike())
 	_emit("hit", {
 		"attacker": u.id,
 		"defender": target.id,
@@ -521,6 +568,8 @@ func _resolve_strike(u: BattleUnit) -> void:
 		_abo_add_guard(28.0 if is_crit else 18.0, _t("普攻"))
 	if statue_mode and u.team == BattleUnit.Team.PLAYER:
 		_statue_retarget_player()
+	if u.id == player_id:
+		_consume_weapon_use(u)
 	u.state = BattleUnit.State.STRIKE
 	u.state_timer = 0.08
 	if demon_mode:
@@ -528,7 +577,7 @@ func _resolve_strike(u: BattleUnit) -> void:
 
 
 func _refresh_player_skill_choice(u: BattleUnit) -> void:
-	## 依當前血量重選優先技能（危急恢復等）
+	## 依當前血量＋**當前武器 line**重選（原作：技能綁定武器）
 	var tree := Engine.get_main_loop()
 	if not (tree is SceneTree):
 		return
@@ -536,9 +585,11 @@ func _refresh_player_skill_choice(u: BattleUnit) -> void:
 	if n == null or not n.has_method("pick_battle_skill"):
 		return
 	var ratio: float = float(u.hp) / float(maxi(1, u.max_hp))
-	var kit: Dictionary = n.call("pick_battle_skill", ratio)
+	var kit: Dictionary = n.call("pick_battle_skill", ratio, u.weapon_class)
 	if kit.is_empty():
+		u.can_skill = false
 		return
+	u.can_skill = true
 	u.skill_id = str(kit.get("id", u.skill_id))
 	u.skill_name = str(kit.get("name", u.skill_name))
 	u.skill_kind = str(kit.get("kind", "attack"))
@@ -649,6 +700,8 @@ func _resolve_skill(u: BattleUnit) -> void:
 			"grant_mastery": hi == 0,
 		})
 	if fog_mode and u.team == BattleUnit.Team.PLAYER:
+		if u.id == player_id:
+			_consume_weapon_use(u)
 		u.state = BattleUnit.State.RECOVER
 		u.state_timer = u.recover_time * 1.2
 		return
@@ -656,6 +709,8 @@ func _resolve_skill(u: BattleUnit) -> void:
 		_abo_add_guard(42.0, u.skill_name)  ## 技能灌破防較多
 	if statue_mode and u.team == BattleUnit.Team.PLAYER:
 		_statue_retarget_player()
+	if u.id == player_id:
+		_consume_weapon_use(u)
 	u.state = BattleUnit.State.RECOVER
 	u.state_timer = u.recover_time * 1.2
 	if demon_mode:
@@ -1009,7 +1064,7 @@ func _perfect_parry(boss: BattleUnit) -> void:
 
 	var p := get_unit(player_id)
 	if p and p.is_alive() and boss.is_alive():
-		p.rage = minf(RAGE_MAX, p.rage + 40.0)
+		_gain_rage(p, 40.0)
 		_process_part_damage(boss, maxi(15, int(boss.part_max_hp * 0.45)), true)
 		## 石拳對撞：剝岩甲 + 固傷，不走一般破甲過濾
 		if boar_mode and boss.id == "boar":
@@ -1064,6 +1119,8 @@ func _resolve_king_slash_hit(boss: BattleUnit) -> void:
 			mult = 2.2
 		var dmg := Formulas.skill_damage(boss.atk, target.defense, mult)
 		var dealt := target.take_damage(dmg)
+		if target.id == player_id:
+			_check_auto_berserk(target)
 		_emit("hit", {
 			"attacker": boss.id,
 			"defender": target.id,
@@ -1259,6 +1316,7 @@ func _resolve_hazard(success: bool) -> void:
 				_emit("hazard_resolve", {"kind": kind, "success": false, "msg": _t("炸彈爆炸"), "damage": db, "hp": p.hp, "max_hp": p.max_hp})
 			_:
 				_emit("hazard_resolve", {"kind": kind, "success": false})
+		_check_auto_berserk(p)
 	## 時牢：副機制 rockfall 結束後切回炸彈
 	if chrono_mode and kind == "rockfall" and _chrono_pending_rock:
 		_chrono_pending_rock = false
@@ -1311,6 +1369,7 @@ func _step_tide(dt: float) -> void:
 			if p and p.is_alive():
 				var dmg := maxi(1, int(p.max_hp * 0.18))
 				var dealt := p.take_damage(dmg)
+				_check_auto_berserk(p)
 				_emit("tide_wave_fail", {"damage": dealt, "hp": p.hp, "max_hp": p.max_hp})
 				if p.hp <= 0:
 					_check_end()
@@ -1575,7 +1634,7 @@ static func make_tutorial_wolf_fight(player_stats: Dictionary) -> BattleSim:
 	p.atk = int(player_stats.get("atk", 14))
 	p.defense = int(player_stats.get("def", 5))
 	p.speed = float(player_stats.get("speed", 10))
-	_apply_player_skill_stats(p, player_stats)
+	_apply_player_skill_stats(sim, p, player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
 
@@ -1603,7 +1662,7 @@ static func make_leo_fight(player_stats: Dictionary) -> BattleSim:
 	p.atk = int(player_stats.get("atk", 22))
 	p.defense = int(player_stats.get("def", 8))
 	p.speed = float(player_stats.get("speed", 11))
-	_apply_player_skill_stats(p, player_stats)
+	_apply_player_skill_stats(sim, p, player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
 
@@ -1621,7 +1680,10 @@ static func make_leo_fight(player_stats: Dictionary) -> BattleSim:
 	leo.windup_time = 0.3
 	leo.recover_time = 0.45
 	leo.king_slash_cd = 2.5  ## 進半血後首發前的冷卻
-	_attach_boss_part(leo, _t("騎士重盾"), 0.35)
+	## 旗艦雙部位：盔（破→更兇）／盾（破→降防），可 Tab 鎖定
+	_attach_boss_part(leo, _t("騎士重盔"), 0.28, "helm", "enrage")
+	_attach_boss_part(leo, _t("騎士重盾"), 0.32, "shield", "def_down")
+	sim.focus_part_id = "shield"
 	sim.add_unit(leo)
 	sim.setup_hazard("fire_ring", 5.5)  ## 副機制：火圈閃避
 	return sim
@@ -1641,7 +1703,7 @@ static func make_falcon_fight(player_stats: Dictionary) -> BattleSim:
 	p.atk = int(player_stats.get("atk", 28))
 	p.defense = int(player_stats.get("def", 9))
 	p.speed = float(player_stats.get("speed", 13))
-	_apply_player_skill_stats(p, player_stats)
+	_apply_player_skill_stats(sim, p, player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
 
@@ -1657,7 +1719,9 @@ static func make_falcon_fight(player_stats: Dictionary) -> BattleSim:
 	f.speed = 16.0
 	f.windup_time = 0.2
 	f.recover_time = 0.35
-	_attach_boss_part(f, _t("疾影雙翼"), 0.30)
+	_attach_boss_part(f, _t("疾影羽冠"), 0.26, "crest", "enrage")
+	_attach_boss_part(f, _t("疾影雙翼"), 0.30, "wings", "slow_break")
+	sim.focus_part_id = "wings"
 	sim.add_unit(f)
 	sim.setup_hazard("wind_cut", 4.5)
 	return sim
@@ -1677,7 +1741,7 @@ static func make_boar_fight(player_stats: Dictionary) -> BattleSim:
 	p.atk = int(player_stats.get("atk", 28))
 	p.defense = int(player_stats.get("def", 10))
 	p.speed = float(player_stats.get("speed", 11))
-	_apply_player_skill_stats(p, player_stats)
+	_apply_player_skill_stats(sim, p, player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
 
@@ -1695,7 +1759,9 @@ static func make_boar_fight(player_stats: Dictionary) -> BattleSim:
 	b.speed = 7.5
 	b.windup_time = 0.35
 	b.recover_time = 0.5
-	_attach_boss_part(b, _t("石角堅岩"), 0.35)
+	_attach_boss_part(b, _t("石角堅岩"), 0.30, "horn", "enrage")
+	_attach_boss_part(b, _t("岩甲外殼"), 0.34, "shell", "def_down")
+	sim.focus_part_id = "shell"
 	sim.add_unit(b)
 	sim.setup_hazard("rockfall", 5.0)
 	return sim
@@ -1705,10 +1771,12 @@ static func make_boar_fight(player_stats: Dictionary) -> BattleSim:
 static func make_wrath_fight(player_stats: Dictionary) -> BattleSim:
 	var sim := BattleSim.new()
 	sim.wrath_mode = true
+	sim.allow_part_flee = true
 	sim.burn_stacks = 0
 	var p := _rift_player(player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
+	sim._setup_weapon_bars(player_stats)
 
 	var w := BattleUnit.new()
 	w.id = "wrath"
@@ -1725,12 +1793,15 @@ static func make_wrath_fight(player_stats: Dictionary) -> BattleSim:
 	w.windup_time = 0.28
 	w.recover_time = 0.42
 	w.king_slash_cd = 3.0
+	_attach_boss_part(w, _t("怒焰面具"), 0.28, "mask", "enrage")
+	_attach_boss_part(w, _t("無臉軀甲"), 0.32, "plate", "def_down")
+	sim.focus_part_id = "plate"
 	sim.add_unit(w)
 	sim.setup_hazard("fire_ring", 2.2)
 	return sim
 
 
-static func _apply_player_skill_stats(p: BattleUnit, player_stats: Dictionary) -> void:
+static func _apply_player_skill_stats(sim: Variant, p: BattleUnit, player_stats: Dictionary) -> void:
 	p.can_skill = bool(player_stats.get("can_skill", true))
 	var slash_lv: int = maxi(1, int(player_stats.get("slash_lv", 1)))
 	var default_mult: float = 1.8 + 0.12 * float(slash_lv - 1)
@@ -1747,8 +1818,13 @@ static func _apply_player_skill_stats(p: BattleUnit, player_stats: Dictionary) -
 	p.crit = float(player_stats.get("crit", Formulas.default_player_crit()))
 	p.crit_dmg = float(player_stats.get("crit_dmg", Formulas.default_crit_dmg()))
 	p.dmg_variance = float(player_stats.get("dmg_variance", Formulas.default_variance()))
+	p.hit = float(player_stats.get("hit", 0.0))
+	p.eva = float(player_stats.get("eva", 0.0))
 	## 流派姿態 + 風姿（時間模型 0.15）
 	_apply_weapon_class(p, player_stats)
+	## 多武器欄：此時單位可能尚未 add_unit，直接傳 p
+	if sim != null and sim is BattleSim:
+		(sim as BattleSim)._setup_weapon_bars(player_stats, p)
 
 
 ## 寫入 weapon_class、風姿、姿態初值。stats 可帶 weapon_class；否則讀 GameState.path_style。
@@ -1770,6 +1846,72 @@ static func _apply_weapon_class(p: BattleUnit, player_stats: Dictionary) -> void
 	var tempo: Dictionary = Formulas.weapon_tempo(wc)
 	p.windup_time = float(tempo.get("windup", p.windup_time))
 	p.recover_time = float(tempo.get("recover", p.recover_time))
+	## 本場武器使用次數（原作：歸零赤手）
+	_init_weapon_uses(p, wc)
+
+
+## 從 player_stats 灌入多武器欄；無資料時用當前 weapon_class 單欄
+func _setup_weapon_bars(player_stats: Dictionary, unit: BattleUnit = null) -> void:
+	weapon_bars.clear()
+	var raw: Variant = player_stats.get("weapon_loadout", [])
+	var active := int(player_stats.get("weapon_loadout_active", 0))
+	if raw is Array and not (raw as Array).is_empty():
+		for entry in raw:
+			if typeof(entry) != TYPE_DICTIONARY:
+				continue
+			var e: Dictionary = entry
+			var line := str(e.get("line", ""))
+			var uses_max := Formulas.weapon_uses_for(line) if line != "" else 0
+			var bar := {
+				"index": int(e.get("index", weapon_bars.size())),
+				"uid": str(e.get("uid", "")),
+				"name": str(e.get("name", "")),
+				"line": line,
+				"weapon_atk": int(e.get("weapon_atk", 0)),
+				"uses_left": uses_max,
+				"uses_max": uses_max,
+				"unlocked": bool(e.get("unlocked", true)),
+				"empty": bool(e.get("empty", str(e.get("uid", "")) == "")),
+			}
+			weapon_bars.append(bar)
+			if bool(e.get("active", false)):
+				active = int(bar["index"])
+	if weapon_bars.is_empty():
+		## 單測／無裝備：用當前 class 當唯一欄
+		var wc := str(player_stats.get("weapon_class", "sword"))
+		if wc.is_empty() and unit != null:
+			wc = unit.weapon_class
+		var um := Formulas.weapon_uses_for(wc)
+		weapon_bars.append({
+			"index": 0,
+			"uid": "",
+			"name": str(player_stats.get("weapon_name", "")),
+			"line": wc,
+			"weapon_atk": int(player_stats.get("weapon_atk", 0)),
+			"uses_left": um,
+			"uses_max": um,
+			"unlocked": true,
+			"empty": false,
+		})
+		active = 0
+	weapon_bar_active = clampi(active, 0, maxi(0, weapon_bars.size() - 1))
+	var p: BattleUnit = unit if unit != null else get_unit(player_id)
+	if p:
+		var bar2: Dictionary = weapon_bars[weapon_bar_active]
+		var cur_atk := int(bar2.get("weapon_atk", 0))
+		player_base_atk = maxi(0, p.atk - cur_atk)
+		## 覆寫次數為該欄獨立池
+		p.weapon_uses_max = int(bar2.get("uses_max", p.weapon_uses_max))
+		p.weapon_uses_left = int(bar2.get("uses_left", p.weapon_uses_left))
+		p.armed_atk = p.atk
+		p.armed_weapon_class = str(bar2.get("line", p.weapon_class))
+		## 確保 weapon_class 與作用中欄一致
+		var bline := str(bar2.get("line", ""))
+		if bline != "":
+			p.weapon_class = bline
+			var tempo: Dictionary = Formulas.weapon_tempo(bline)
+			p.windup_time = float(tempo.get("windup", p.windup_time))
+			p.recover_time = float(tempo.get("recover", p.recover_time))
 
 
 static func _rift_player(player_stats: Dictionary) -> BattleUnit:
@@ -1782,13 +1924,14 @@ static func _rift_player(player_stats: Dictionary) -> BattleUnit:
 	p.atk = int(player_stats.get("atk", 32))
 	p.defense = int(player_stats.get("def", 11))
 	p.speed = float(player_stats.get("speed", 12))
-	_apply_player_skill_stats(p, player_stats)
+	_apply_player_skill_stats(null, p, player_stats)
 	return p
 
 
 ## 裂縫·乙「潮噬」
 static func make_tide_fight(player_stats: Dictionary) -> BattleSim:
 	var sim := BattleSim.new()
+	sim.allow_part_flee = true
 	sim.tide_mode = true
 	sim.tide_summon_cd = 2.5
 	sim.tide_phase_cd = 3.0
@@ -1796,6 +1939,7 @@ static func make_tide_fight(player_stats: Dictionary) -> BattleSim:
 	var p := _rift_player(player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
+	sim._setup_weapon_bars(player_stats)
 	var t := BattleUnit.new()
 	t.id = "tide"
 	t.display_name = _t("無臉·潮噬")
@@ -1808,6 +1952,9 @@ static func make_tide_fight(player_stats: Dictionary) -> BattleSim:
 	t.speed = 9.0
 	t.windup_time = 0.3
 	t.recover_time = 0.45
+	_attach_boss_part(t, _t("刺胞囊"), 0.28, "sac", "enrage")
+	_attach_boss_part(t, _t("潮甲"), 0.32, "tide_plate", "def_down")
+	sim.focus_part_id = "tide_plate"
 	sim.add_unit(t)
 	return sim
 
@@ -1815,6 +1962,7 @@ static func make_tide_fight(player_stats: Dictionary) -> BattleSim:
 ## 裂縫·丙「石像殘響」
 static func make_statue_fight(player_stats: Dictionary) -> BattleSim:
 	var sim := BattleSim.new()
+	sim.allow_part_flee = true
 	sim.statue_mode = true
 	sim.statue_active_idx = 0
 	sim.statue_rotate_cd = 2.0
@@ -1822,6 +1970,7 @@ static func make_statue_fight(player_stats: Dictionary) -> BattleSim:
 	var p := _rift_player(player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
+	sim._setup_weapon_bars(player_stats)
 	for i in 3:
 		var s := BattleUnit.new()
 		s.id = "statue_%d" % i
@@ -1846,11 +1995,13 @@ static func make_statue_fight(player_stats: Dictionary) -> BattleSim:
 ## 裂縫·丁「時牢」
 static func make_chrono_fight(player_stats: Dictionary) -> BattleSim:
 	var sim := BattleSim.new()
+	sim.allow_part_flee = true
 	sim.chrono_mode = true
 	sim.chrono_rock_cd = 5.0
 	var p := _rift_player(player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
+	sim._setup_weapon_bars(player_stats)
 	var c := BattleUnit.new()
 	c.id = "chrono"
 	c.display_name = _t("無臉·時牢")
@@ -1866,6 +2017,9 @@ static func make_chrono_fight(player_stats: Dictionary) -> BattleSim:
 	c.windup_time = 0.3
 	c.recover_time = 0.42
 	c.king_slash_cd = 4.0
+	_attach_boss_part(c, _t("時針機關"), 0.28, "hand", "enrage")
+	_attach_boss_part(c, _t("時牢外殼"), 0.32, "case", "def_down")
+	sim.focus_part_id = "case"
 	sim.add_unit(c)
 	sim.setup_hazard("bomb", 2.8)
 	return sim
@@ -1888,7 +2042,7 @@ static func make_abo_fight(player_stats: Dictionary) -> BattleSim:
 	p.atk = int(player_stats.get("atk", 26))
 	p.defense = int(player_stats.get("def", 9))
 	p.speed = float(player_stats.get("speed", 11))
-	_apply_player_skill_stats(p, player_stats)
+	_apply_player_skill_stats(sim, p, player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
 
@@ -1905,7 +2059,9 @@ static func make_abo_fight(player_stats: Dictionary) -> BattleSim:
 	abo.speed = 8.0
 	abo.windup_time = 0.32
 	abo.recover_time = 0.5
-	_attach_boss_part(abo, _t("鋼鐵護甲"), 0.30)
+	_attach_boss_part(abo, _t("鋼腕護具"), 0.28, "gauntlet", "enrage")
+	_attach_boss_part(abo, _t("鋼鐵護甲"), 0.32, "mail", "def_down")
+	sim.focus_part_id = "mail"
 	sim.add_unit(abo)
 	sim.abo_base_defense = abo.defense
 	return sim
@@ -1923,7 +2079,7 @@ static func make_demon_fight(player_stats: Dictionary) -> BattleSim:
 	p.atk = int(player_stats.get("atk", 28))
 	p.defense = int(player_stats.get("def", 10))
 	p.speed = float(player_stats.get("speed", 12))
-	_apply_player_skill_stats(p, player_stats)
+	_apply_player_skill_stats(sim, p, player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
 
@@ -1945,7 +2101,9 @@ static func make_demon_fight(player_stats: Dictionary) -> BattleSim:
 	demon.windup_time = 0.28
 	demon.recover_time = 0.42
 	demon.king_slash_cd = 4.0
-	_attach_boss_part(demon, _t("黑焰核心"), 0.30)
+	_attach_boss_part(demon, _t("黑焰之角"), 0.28, "horn", "enrage")
+	_attach_boss_part(demon, _t("黑焰核心"), 0.32, "core", "expose")
+	sim.focus_part_id = "core"
 	sim.add_unit(demon)
 	sim.setup_hazard("time_clock", 6.0)  ## 副機制：控時時鐘
 	return sim
@@ -1964,7 +2122,7 @@ static func make_fog_fight(player_stats: Dictionary) -> BattleSim:
 	p.atk = int(player_stats.get("atk", 24))
 	p.defense = int(player_stats.get("def", 8))
 	p.speed = float(player_stats.get("speed", 11))
-	_apply_player_skill_stats(p, player_stats)
+	_apply_player_skill_stats(sim, p, player_stats)
 	p.target_id = "white_fog"
 	sim.add_unit(p)
 	sim.player_id = p.id
@@ -1987,6 +2145,10 @@ static func make_fog_fight(player_stats: Dictionary) -> BattleSim:
 	real_u.atk = 13
 	real_u.defense = 9
 	real_u.speed = 12.0
+	## 白霧 Tab 用於切目標，部位改為被動磨（鎖本體時 splash）；仍顯示血條
+	_attach_boss_part(real_u, _t("霧帷"), 0.28, "veil", "def_down")
+	_attach_boss_part(real_u, _t("真影核"), 0.30, "true_core", "expose")
+	sim.focus_part_id = "body"
 	sim.add_unit(real_u)
 
 	for pair in [["phantom_a", _t("幻影甲"), Vector2()], ["phantom_b", _t("幻影乙"), Vector2()]]:
@@ -2030,7 +2192,7 @@ static func make_world_fight(player_stats: Dictionary, mode: String) -> BattleSi
 	p.atk = int(player_stats.get("atk", 20))
 	p.defense = int(player_stats.get("def", 8))
 	p.speed = float(player_stats.get("speed", 11))
-	_apply_player_skill_stats(p, player_stats)
+	_apply_player_skill_stats(sim, p, player_stats)
 	sim.add_unit(p)
 	sim.player_id = p.id
 
@@ -2045,10 +2207,14 @@ static func make_world_fight(player_stats: Dictionary, mode: String) -> BattleSi
 	e.defense = int(def.get("def", 4))
 	e.speed = float(def.get("speed", 10.0))
 	if e.is_boss:
+		## 秘境／廣域小王：可破部位逃走（主線聖獸不開）
+		sim.allow_part_flee = true
 		e.windup_time = float(def.get("windup", 0.3))
 		e.recover_time = float(def.get("recover", 0.45))
 		e.king_slash_cd = float(def.get("king_slash_cd", 3.0))
-		_attach_boss_part(e, _t("溢能核心"), 0.25)
+		_attach_boss_part(e, _t("溢能尖角"), 0.26, "spike", "enrage")
+		_attach_boss_part(e, _t("溢能核心"), 0.28, "core", "expose")
+		sim.focus_part_id = "core"
 	sim.add_unit(e)
 
 	var hz := str(def.get("hazard", ""))
@@ -2057,73 +2223,461 @@ static func make_world_fight(player_stats: Dictionary, mode: String) -> BattleSi
 	return sim
 
 
-static func _attach_boss_part(u: BattleUnit, part_name: String, ratio: float = 0.3) -> void:
+static func _attach_boss_part(
+	u: BattleUnit,
+	part_name: String,
+	ratio: float = 0.3,
+	part_id: String = "",
+	effect: String = "",
+	material: String = "",
+	ptype: String = ""
+) -> void:
 	if u == null or not u.is_boss:
 		return
+	var pid := part_id if part_id != "" else "part_%d" % u.parts.size()
+	var max_hp := maxi(30, int(float(u.max_hp) * ratio))
+	## 未指定分型時依 effect 推原作盔／甲／靴／冠
+	var pt := ptype
+	if pt == "":
+		match effect:
+			"enrage":
+				pt = "helmet"
+			"def_down", "expose":
+				pt = "armor"
+			"slow_break":
+				pt = "boots"
+			_:
+				pt = "armor"
+	var mat := material
+	if mat == "":
+		match pt:
+			"helmet":
+				mat = "knight_shard"
+			"crown":
+				mat = "star_ore"
+			"boots":
+				mat = "oak_resin"
+			_:
+				mat = "iron_scrap"
+	u.parts.append({
+		"id": pid,
+		"name": part_name,
+		"max_hp": max_hp,
+		"hp": max_hp,
+		"broken": false,
+		"effect": effect,
+		"material": mat,
+		"ptype": pt,
+	})
 	u.has_part = true
-	u.part_name = part_name
-	u.part_max_hp = maxi(30, int(float(u.max_hp) * ratio))
-	u.part_hp = u.part_max_hp
-	u.part_broken = false
+	## 相容舊欄位：對齊第一個未破部位（或第一個）
+	_sync_legacy_part_fields(u)
+
+
+static func _sync_legacy_part_fields(u: BattleUnit) -> void:
+	if u == null or u.parts.is_empty():
+		u.has_part = false
+		return
+	u.has_part = true
+	var pick: Dictionary = u.parts[0]
+	for p in u.parts:
+		if not bool(p.get("broken", false)):
+			pick = p
+			break
+	u.part_name = str(pick.get("name", ""))
+	u.part_max_hp = int(pick.get("max_hp", 0))
+	u.part_hp = int(pick.get("hp", 0))
+	u.part_broken = bool(pick.get("broken", false))
+
+
+func cycle_part_focus(dir: int = 1) -> String:
+	## body → 各未破部位 → body…
+	var boss := _primary_boss_unit()
+	if boss == null or boss.parts.is_empty():
+		focus_part_id = "body"
+		return focus_part_id
+	var order: PackedStringArray = ["body"]
+	for p in boss.parts:
+		if not bool(p.get("broken", false)):
+			order.append(str(p.get("id", "")))
+	if order.is_empty():
+		focus_part_id = "body"
+		return focus_part_id
+	var idx := 0
+	for i in order.size():
+		if order[i] == focus_part_id:
+			idx = i
+			break
+	idx = (idx + dir) % order.size()
+	if idx < 0:
+		idx += order.size()
+	focus_part_id = order[idx]
+	_emit("part_focus", {"focus": focus_part_id, "label": part_focus_label()})
+	return focus_part_id
+
+
+func part_focus_label() -> String:
+	if focus_part_id == "" or focus_part_id == "body":
+		return _t("本體")
+	var boss := _primary_boss_unit()
+	if boss == null:
+		return _t("本體")
+	for p in boss.parts:
+		if str(p.get("id", "")) == focus_part_id:
+			return str(p.get("name", focus_part_id))
+	return _t("本體")
+
+
+func _primary_boss_unit() -> BattleUnit:
+	for id in units:
+		var u: BattleUnit = units[id]
+		if u != null and u.team == BattleUnit.Team.ENEMY and u.is_boss and u.is_alive():
+			return u
+	return null
 
 
 func _process_part_damage(target: BattleUnit, dealt: int, is_telegraph: bool) -> void:
-	if target == null or not target.has_part or target.part_broken or dealt <= 0:
+	if target == null or dealt <= 0:
+		return
+	## 多部位
+	if not target.parts.is_empty():
+		_process_multi_part_damage(target, dealt, is_telegraph)
+		return
+	## 舊單部位
+	if not target.has_part or target.part_broken:
 		return
 	var part_dmg: int = int(round(float(dealt) * (1.6 if is_telegraph else 1.0)))
 	target.part_hp -= part_dmg
 	if target.part_hp <= 0:
 		target.part_hp = 0
 		target.part_broken = true
-		var was_telegraph: bool = target.telegraph_active
-		if was_telegraph:
-			target.telegraph_active = false
-			target.state = BattleUnit.State.RECOVER
-			target.state_timer = 1.2
-		_emit("part_broken", {
+		_finish_part_break(target, target.part_name, "", is_telegraph)
+
+
+func _parts_can_break(target: BattleUnit) -> bool:
+	if target == null or target.parts.is_empty():
+		return false
+	if parts_break_unlocked:
+		return true
+	if target.max_hp <= 0:
+		return false
+	var ratio := float(target.hp) / float(target.max_hp)
+	if ratio <= PART_BREAK_HP_RATIO:
+		parts_break_unlocked = true
+		_emit("part_unlock", {
 			"boss_id": target.id,
-			"part_name": target.part_name,
-			"staggered": was_telegraph,
-			"hp": target.hp,
-			"max_hp": target.max_hp
+			"hp_ratio": ratio,
+			"msg": _t("破綻出現——可以破壞部位裝備了！"),
+		})
+		return true
+	return false
+
+
+func _process_multi_part_damage(target: BattleUnit, dealt: int, is_telegraph: bool) -> void:
+	var base_mult: float = 1.6 if is_telegraph else 1.0
+	var can_break := _parts_can_break(target)
+	for i in target.parts.size():
+		var p: Dictionary = target.parts[i]
+		if bool(p.get("broken", false)):
+			continue
+		var pid := str(p.get("id", ""))
+		var rate := 0.35  ## 鎖本體時仍會緩慢磨部位
+		if focus_part_id == pid:
+			rate = 1.35  ## 鎖定該部位：快速灌爆
+		elif focus_part_id != "body" and focus_part_id != "" and focus_part_id != pid:
+			rate = 0.0  ## 鎖別的部位時不磨這個
+		## 原作：血量未降到門檻前，部位幾乎打不破
+		if not can_break:
+			if focus_part_id == pid:
+				rate = 0.08  ## 僅極微量，提示「還太硬」
+			else:
+				rate = 0.0
+		if rate <= 0.0:
+			continue
+		var part_dmg: int = int(round(float(dealt) * base_mult * rate))
+		if part_dmg <= 0:
+			continue
+		p["hp"] = int(p.get("hp", 0)) - part_dmg
+		if int(p["hp"]) <= 0:
+			## 門檻前不允許真正破壞
+			if not can_break:
+				p["hp"] = 1
+				target.parts[i] = p
+				_emit("part_blocked", {
+					"boss_id": target.id,
+					"part_name": str(p.get("name", "")),
+					"msg": _t("部位仍牢固——先把本體壓到七成血以下。"),
+				})
+				continue
+			p["hp"] = 0
+			p["broken"] = true
+			target.parts[i] = p
+			var mat := str(p.get("material", ""))
+			var qty := 2 if str(p.get("effect", "")) == "enrage" else 1  ## 變兇時報酬更豐
+			if mat != "":
+				for _k in qty:
+					pending_part_materials.append(mat)
+			var fx := str(p.get("effect", ""))
+			_apply_part_break_effect(target, fx, str(p.get("name", "")))
+			_finish_part_break(target, str(p.get("name", "")), pid, target.telegraph_active, mat, qty)
+			## 若正在鎖已破部位，跳回本體
+			if focus_part_id == pid:
+				focus_part_id = "body"
+			_refresh_all_parts_broken_vuln(target)
+			## 原作：破部位後可能逃走（僅非主線）
+			if _try_part_flee(target, str(p.get("name", "")), fx):
+				return
+		else:
+			target.parts[i] = p
+	_sync_legacy_part_fields(target)
+
+
+func _try_part_flee(target: BattleUnit, part_name: String, effect: String) -> bool:
+	if not allow_part_flee or boss_fled or finished or target == null:
+		return false
+	var chance := PART_FLEE_CHANCE_ENRAGE if effect == "enrage" else PART_FLEE_CHANCE_DEFAULT
+	var forced := force_next_part_flee
+	force_next_part_flee = false
+	if not forced:
+		if rng == null:
+			rng = RandomNumberGenerator.new()
+			rng.randomize()
+		if rng.randf() >= chance:
+			return false
+	boss_fled = true
+	finished = true
+	won = true  ## 帶走已破部位殘片；視同趕跑成功
+	_emit("part_flee", {
+		"boss_id": target.id,
+		"part_name": part_name,
+		"msg": _t("【%s】碎裂後，敵人丟下殘片逃走了！") % part_name,
+	})
+	battle_ended.emit(true)
+	_emit("battle_end", {"won": true, "fled": true})
+	return true
+
+
+func _refresh_all_parts_broken_vuln(target: BattleUnit) -> void:
+	if target == null or target.parts.is_empty():
+		return
+	var all_broken := true
+	for p in target.parts:
+		if not bool(p.get("broken", false)):
+			all_broken = false
+			break
+	target.parts_all_broken_vuln = ALL_PARTS_BROKEN_BODY_MULT if all_broken else 1.0
+	if all_broken:
+		_emit("part_effect", {
+			"boss_id": target.id,
+			"part_name": _t("本體"),
+			"effect": "all_broken",
+			"msg": _t("部位全破！本體變得虛弱（受傷增加）。"),
 		})
 
 
-func switch_soul_style(style_id: String) -> bool:
+func _apply_part_break_effect(target: BattleUnit, effect: String, part_name: String) -> void:
+	match effect:
+		"def_down":
+			var before := target.defense
+			target.defense = maxi(2, target.defense - 6)
+			_emit("part_effect", {
+				"boss_id": target.id,
+				"part_name": part_name,
+				"effect": effect,
+				"msg": _t("部位破壞！【%s】防禦 %d→%d") % [part_name, before, target.defense],
+			})
+		"expose":
+			var before2 := target.defense
+			target.defense = maxi(1, target.defense - 9)
+			_emit("part_effect", {
+				"boss_id": target.id,
+				"part_name": part_name,
+				"effect": effect,
+				"msg": _t("核心暴露！【%s】防禦大幅下降 %d→%d") % [part_name, before2, target.defense],
+			})
+		"enrage":
+			target.atk += 5
+			target.speed += 1.5
+			target.king_slash_cd = maxf(0.8, target.king_slash_cd * 0.7)
+			_emit("part_effect", {
+				"boss_id": target.id,
+				"part_name": part_name,
+				"effect": effect,
+				"msg": _t("部位破壞！【%s】使其更兇（攻↑・出手更快）") % part_name,
+			})
+		"slow_break":
+			var spd0 := target.speed
+			target.speed = maxf(4.0, target.speed - 3.5)
+			_emit("part_effect", {
+				"boss_id": target.id,
+				"part_name": part_name,
+				"effect": effect,
+				"msg": _t("翼折！【%s】速度 %.1f→%.1f") % [part_name, spd0, target.speed],
+			})
+		_:
+			pass
+
+
+func _finish_part_break(
+	target: BattleUnit,
+	part_name: String,
+	part_id: String,
+	was_telegraph: bool,
+	material: String = "",
+	qty: int = 1
+) -> void:
+	if was_telegraph:
+		target.telegraph_active = false
+		target.state = BattleUnit.State.RECOVER
+		target.state_timer = 1.2
+	_emit("part_broken", {
+		"boss_id": target.id,
+		"part_id": part_id,
+		"part_name": part_name,
+		"staggered": was_telegraph,
+		"material": material,
+		"qty": qty,
+		"hp": target.hp,
+		"max_hp": target.max_hp,
+	})
+
+
+## 戰鬥中切換真正武器欄（1／2／3 手動；耗盡時 auto=true）。各欄獨立使用次數。
+func switch_weapon_slot(index: int, auto: bool = false) -> bool:
 	var p := get_unit(player_id)
 	if p == null or not p.is_alive():
 		return false
-	match style_id:
-		"axe":
-			p.weapon_class = "axe"
-			p.windup_time = 0.38
-			p.recover_time = 0.55
-			p.skill_name = _t("重劈")
-			p.skill_mult = 2.4
-			p.skill_hits = 1
-		"dagger":
-			p.weapon_class = "dagger"
-			p.windup_time = 0.18
-			p.recover_time = 0.28
-			p.skill_name = _t("瞬斬")
-			p.skill_mult = 1.2
-			p.skill_hits = 2
-		_: # "sword"
-			p.weapon_class = "sword"
-			p.windup_time = 0.25
-			p.recover_time = 0.40
-			p.skill_name = _t("橫斬")
-			p.skill_mult = 1.8
-			p.skill_hits = 1
-	_emit("soul_style_switched", {
-		"style": style_id,
+	if index < 0 or index >= weapon_bars.size():
+		return false
+	var bar: Dictionary = weapon_bars[index]
+	if not bool(bar.get("unlocked", false)):
+		if not auto:
+			_emit("weapon_slot_blocked", {"index": index, "reason": "locked"})
+		return false
+	if bool(bar.get("empty", true)) or str(bar.get("line", "")) == "":
+		if not auto:
+			_emit("weapon_slot_blocked", {"index": index, "reason": "empty"})
+		return false
+	## 自動切欄略過已耗盡的欄
+	if auto and int(bar.get("uses_left", 0)) <= 0:
+		return false
+	var line := str(bar.get("line", "sword"))
+	if index == weapon_bar_active and not p.bare_fisted and p.weapon_class == line:
+		return true  ## 已在此欄且 line 相同
+	## 換到另一欄才把舊欄次數寫回（同欄重生／單測灌假欄時不可把新次數蓋成 0）
+	if index != weapon_bar_active:
+		_persist_active_bar_uses(p)
+	weapon_bar_active = index
+	if p.bare_fisted:
+		_exit_bare_fist(p)
+	var w_atk := int(bar.get("weapon_atk", 0))
+	p.weapon_class = line
+	p.atk = player_base_atk + w_atk
+	p.armed_atk = p.atk
+	p.armed_weapon_class = line
+	var tempo: Dictionary = Formulas.weapon_tempo(line)
+	p.windup_time = float(tempo.get("windup", 0.25))
+	p.recover_time = float(tempo.get("recover", 0.40))
+	p.weapon_uses_max = int(bar.get("uses_max", Formulas.weapon_uses_for(line)))
+	p.weapon_uses_left = int(bar.get("uses_left", p.weapon_uses_max))
+	p.bare_fisted = false
+	## 手動切到已耗盡欄 → 再試自動下一把；都沒了才赤手
+	if p.weapon_uses_left <= 0:
+		if not _try_auto_switch_weapon(p):
+			_enter_bare_fist(p)
+	else:
+		_refresh_player_skill_choice(p)
+	_emit("weapon_slot_switched", {
+		"index": index,
+		"name": str(bar.get("name", "")),
+		"line": line,
 		"skill_name": p.skill_name,
 		"windup": p.windup_time,
-		"recover": p.recover_time
+		"recover": p.recover_time,
+		"uses_left": p.weapon_uses_left,
+		"uses_max": p.weapon_uses_max,
+		"atk": p.atk,
+		"auto": auto,
+	})
+	## 相容舊事件名（UI／測試）
+	_emit("soul_style_switched", {
+		"style": line,
+		"skill_name": p.skill_name,
+		"windup": p.windup_time,
+		"recover": p.recover_time,
+		"uses_left": p.weapon_uses_left,
+		"uses_max": p.weapon_uses_max,
 	})
 	return true
 
 
+## 原作：次數耗盡自動換下一把還有次數的武器欄；全光才赤手
+func _try_auto_switch_weapon(p: BattleUnit) -> bool:
+	if p == null or weapon_bars.is_empty():
+		return false
+	_persist_active_bar_uses(p)
+	var n := weapon_bars.size()
+	## 從下一欄開始繞一圈找還有次數的
+	for step in range(1, n + 1):
+		var i: int = (weapon_bar_active + step) % n
+		var b: Dictionary = weapon_bars[i]
+		if not bool(b.get("unlocked", false)):
+			continue
+		if bool(b.get("empty", true)) or str(b.get("line", "")) == "":
+			continue
+		if int(b.get("uses_left", 0)) <= 0:
+			continue
+		return switch_weapon_slot(i, true)
+	return false
+
+
+## 舊器魂快捷相容：依 line 找欄或臨時灌假欄（單測用）
+func switch_soul_style(style_id: String) -> bool:
+	var line := str(style_id)
+	match line:
+		"axe", "dagger", "sword", "bow", "gun", "magic", "crystal", "fist", "claw", "hammer", "spear", "dart":
+			pass
+		_:
+			line = "sword"
+	## 先找已有同 line 的欄
+	for i in weapon_bars.size():
+		var b: Dictionary = weapon_bars[i]
+		if str(b.get("line", "")) == line and bool(b.get("unlocked", false)) and not bool(b.get("empty", true)):
+			return switch_weapon_slot(i)
+	## 單測無真裝備：覆寫／新增一欄
+	var um := Formulas.weapon_uses_for(line)
+	var fake := {
+		"index": 0,
+		"uid": "test_%s" % line,
+		"name": line,
+		"line": line,
+		"weapon_atk": 0,
+		"uses_left": um,
+		"uses_max": um,
+		"unlocked": true,
+		"empty": false,
+	}
+	if weapon_bars.is_empty():
+		weapon_bars.append(fake)
+	else:
+		## 覆寫作用中欄的 line（保留次數重置）
+		fake["index"] = weapon_bar_active
+		weapon_bars[weapon_bar_active] = fake
+	return switch_weapon_slot(int(fake["index"]))
+
+
+func _persist_active_bar_uses(p: BattleUnit) -> void:
+	if weapon_bar_active < 0 or weapon_bar_active >= weapon_bars.size():
+		return
+	var bar: Dictionary = weapon_bars[weapon_bar_active]
+	if p.bare_fisted:
+		bar["uses_left"] = 0
+	else:
+		bar["uses_left"] = p.weapon_uses_left
+	weapon_bars[weapon_bar_active] = bar
+
+
+## 手動暴怒（F／4）：耗盡怒氣換更長、更強加成。怒氣未滿且未在暴怒中則失敗。
 func trigger_fury_awakening() -> bool:
 	var p := get_unit(player_id)
 	if p == null or not p.is_alive():
@@ -2131,12 +2685,121 @@ func trigger_fury_awakening() -> bool:
 	if p.rage < RAGE_MAX and not p.fury_active:
 		return false
 	p.rage = 0.0
-	p.fury_active = true
-	p.fury_timer = 8.0
-	p.atk_buff_left = 8.0
-	p.atk_buff_mult = 1.35
-	_emit("fury_awakening", {
-		"player_id": p.id,
-		"duration": 8.0
-	})
+	_apply_berserk(p, true)
 	return true
+
+
+## ── 武器次數／赤手／自動暴怒 ──
+
+static func _init_weapon_uses(p: BattleUnit, weapon_class: String) -> void:
+	var n := Formulas.weapon_uses_for(weapon_class)
+	p.weapon_uses_max = n
+	p.weapon_uses_left = n
+	p.bare_fisted = false
+	p.armed_atk = p.atk
+	p.armed_weapon_class = weapon_class
+	p.armed_can_skill = p.can_skill
+
+
+## 出手前：次數已盡 → 先自動切下一欄有次數的武器；全光才赤手（原作）
+func _ensure_armed_or_bare(u: BattleUnit) -> void:
+	if u == null or u.bare_fisted:
+		return
+	if u.weapon_uses_max > 0 and u.weapon_uses_left <= 0:
+		if not _try_auto_switch_weapon(u):
+			_enter_bare_fist(u)
+
+
+func _consume_weapon_use(u: BattleUnit) -> void:
+	if u == null or u.id != player_id:
+		return
+	if u.weapon_uses_left < 0:
+		return  ## 未啟用
+	if u.bare_fisted:
+		return
+	u.weapon_uses_left = maxi(0, u.weapon_uses_left - 1)
+	_persist_active_bar_uses(u)
+	_emit("weapon_use", {
+		"id": u.id,
+		"uses_left": u.weapon_uses_left,
+		"uses_max": u.weapon_uses_max,
+		"weapon_class": u.weapon_class,
+		"slot": weapon_bar_active,
+	})
+	## 不在此進赤手——最後一擊仍持武；下一動 _ensure_armed_or_bare 才換拳
+
+
+func _enter_bare_fist(u: BattleUnit) -> void:
+	if u.bare_fisted:
+		return
+	u.bare_fisted = true
+	if u.armed_atk <= 0:
+		u.armed_atk = u.atk
+	u.armed_weapon_class = u.weapon_class
+	u.armed_can_skill = u.can_skill
+	u.atk = maxi(1, int(round(float(u.armed_atk) * Formulas.bare_fist_atk_mult())))
+	u.weapon_class = "fist"
+	u.can_skill = false
+	var tempo: Dictionary = Formulas.bare_fist_tempo()
+	u.windup_time = float(tempo.get("windup", 0.20))
+	u.recover_time = float(tempo.get("recover", 0.32))
+	_emit("bare_fist", {
+		"id": u.id,
+		"atk": u.atk,
+		"armed_atk": u.armed_atk,
+	})
+
+
+func _exit_bare_fist(u: BattleUnit) -> void:
+	if not u.bare_fisted:
+		return
+	u.bare_fisted = false
+	if u.armed_atk > 0:
+		u.atk = u.armed_atk
+	u.can_skill = u.armed_can_skill
+
+
+func _gain_rage(u: BattleUnit, amount: float) -> void:
+	if u == null or amount <= 0.0:
+		return
+	## 赤手仍可累怒（挨打／揮拳），但放不出武器技
+	var crossed := u.add_rage(amount, RAGE_MAX)
+	if crossed:
+		_check_auto_berserk(u)
+
+
+func _check_auto_berserk(u: BattleUnit) -> void:
+	if u == null or u.id != player_id:
+		return
+	if u.rage < RAGE_MAX:
+		return
+	if u.fury_active:
+		return  ## 已在暴怒中不重疊刷新（手動可另開）
+	_apply_berserk(u, false)
+
+
+## auto：怒氣剛滿自動進（不耗怒）；manual：F 耗怒換更強
+func _apply_berserk(u: BattleUnit, manual: bool) -> void:
+	var dur: float
+	var atk_m: float
+	var atb_m: float
+	if manual:
+		dur = Formulas.berserk_manual_duration()
+		atk_m = Formulas.berserk_manual_atk_mult()
+		atb_m = Formulas.berserk_manual_atb_mult()
+	else:
+		dur = Formulas.berserk_auto_duration()
+		atk_m = Formulas.berserk_auto_atk_mult()
+		atb_m = Formulas.berserk_auto_atb_mult()
+	u.fury_active = true
+	u.fury_timer = dur
+	u.fury_atb_mult = atb_m
+	u.atk_buff_left = dur
+	u.atk_buff_mult = atk_m
+	_emit("fury_awakening", {
+		"player_id": u.id,
+		"duration": dur,
+		"auto": not manual,
+		"atk_mult": atk_m,
+		"atb_mult": atb_m,
+	})

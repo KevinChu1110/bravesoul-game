@@ -140,6 +140,25 @@ static func player_weapon_class_id() -> String:
 	return ""
 
 
+static func weapon_tex_for_class(weapon_class: String) -> Texture2D:
+	var wid := weapon_class
+	if wid == "":
+		return null
+	var t := tex("%s/player/weapons/%s.png" % [ROOT, wid])
+	if t:
+		return t
+	match wid:
+		"dagger":
+			t = tex("%s/player/weapons/dart.png" % ROOT)
+		"claw":
+			t = tex("%s/player/weapons/fist.png" % ROOT)
+	if t:
+		return t
+	if wid == "fist":
+		return tex("%s/player/weapons/fist.png" % ROOT)
+	return tex("%s/player/weapons/sword.png" % ROOT)
+
+
 static func player_weapon_overlay() -> Texture2D:
 	## 1) 每件武器 base_id 專用疊層
 	var bid := _equip_base_id("weapon")
@@ -151,18 +170,7 @@ static func player_weapon_overlay() -> Texture2D:
 	var wid := player_weapon_class_id()
 	if wid == "":
 		return null
-	var t := tex("%s/player/weapons/%s.png" % [ROOT, wid])
-	if t:
-		return t
-	## 新武器系統尚無專圖時退回同職近似
-	match wid:
-		"dagger":
-			t = tex("%s/player/weapons/dart.png" % ROOT)
-		"claw":
-			t = tex("%s/player/weapons/fist.png" % ROOT)
-	if t:
-		return t
-	return tex("%s/player/weapons/sword.png" % ROOT)
+	return weapon_tex_for_class(wid)
 
 
 ## 防具種類：plate | leather | veil | cloth | hide | wrap | gi | ""（類型 fallback）
@@ -439,6 +447,40 @@ static func _boss_art_key(mode: String) -> String:
 			return mode
 
 
+## 聚魂招牌：葫蘆魂器／十四星珠／神品質光環
+const SOUL_STAR_FILE := {
+	"紫微": "ziwei", "天機": "tianji", "太陽": "taiyang", "武曲": "wuqu",
+	"天同": "tiantong", "廉貞": "lianzhen", "天府": "tianfu", "太陰": "taiyin",
+	"貪狼": "tanlang", "巨門": "jumen", "天相": "tianxiang", "天梁": "tianliang",
+	"七殺": "qisha", "破軍": "pojun",
+}
+
+
+static func soul_vessel(vessel: String) -> Texture2D:
+	var key := "green"
+	match vessel:
+		"藍葫蘆":
+			key = "blue"
+		"紫葫蘆":
+			key = "purple"
+		"橙葫蘆":
+			key = "orange"
+		_:
+			key = "green"
+	return tex("%s/souls/gourd_%s.png" % [ROOT, key])
+
+
+static func soul_star(star_id: String) -> Texture2D:
+	var f := str(SOUL_STAR_FILE.get(star_id, ""))
+	if f == "":
+		return null
+	return tex("%s/souls/star_%s.png" % [ROOT, f])
+
+
+static func soul_shen() -> Texture2D:
+	return tex("%s/souls/shen.png" % ROOT)
+
+
 static func map_bg(map_id: String) -> Texture2D:
 	## 高解析版是 .webp（2633x1469，底圖不需要 alpha，PNG 純粹浪費空間），
 	## 還沒重出的維持 .png。兩種都找，webp 優先。
@@ -667,6 +709,10 @@ static func explore_entity_path(entity_id: String) -> String:
 			return "%s/props/banner.png" % ROOT if ResourceLoader.exists("%s/props/banner.png" % ROOT) else "%s/props/flag.png" % ROOT
 		"merchant":
 			return "%s/npcs/merchant.png" % ROOT
+		"gem_clerk":
+			return "%s/npcs/merchant.png" % ROOT
+		"tutor_hall", "soul_hall", "gem_shop":
+			return "%s/props/hut.png" % ROOT if ResourceLoader.exists("%s/props/hut.png" % ROOT) else "%s/props/gate.png" % ROOT
 		_:
 			return _fallback_prop_path(entity_id)
 
@@ -696,7 +742,7 @@ const _TOKEN_PROP := [
 	[["campfire", "bonfire"], "campfire"],
 	[["camp", "tent"], "camp"],
 	[["fire", "ember", "flame", "torch"], "fire"],
-	[["hut", "house", "inn", "dorm", "cabin", "mill", "barn", "shed", "room", "hall"], "hut"],
+	[["hut", "house", "inn", "dorm", "cabin", "mill", "barn", "shed", "room", "hall", "shop"], "hut"],
 	[["pine"], "pine"],
 	[["tree", "wood", "orchard", "willow", "canopy", "log", "bamboo", "reed"], "tree"],
 	[["rock", "stone", "bone", "rubble", "ore", "pile", "boulder", "vein", "obsidian"], "rock"],

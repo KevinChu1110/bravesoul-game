@@ -107,11 +107,15 @@ func _check_hunt_wave_xp(gs: Node, hunt: Node) -> void:
 		if def.is_empty():
 			_fail("狩獵波次的敵人 %s 在 WorldContent 裡查不到" % mode)
 			return
-		## main.gd 雜魚收尾用的同一條公式
-		var wild_xp := 12 + int(int(def.get("max_hp", 50)) / 10)
+		## 獵場＝野外薄經驗（Formulas.field_xp），材料才是多出來的
+		var wild_xp := Formulas.field_xp(int(def.get("max_hp", 50)), 0)
 		var got: int = hunt.wave_xp(mode, false)
 		if got != wild_xp:
 			_fail("狩獵波次 %s 給 %d 經驗，野外同一隻給 %d —— 兩邊要一致" % [mode, got, wild_xp])
+			return
+		var yard: int = Formulas.arena_xp(int(def.get("max_hp", 50)), false)
+		if yard <= got:
+			_fail("演武 %s 經驗 %d 應厚於野外／獵場 %d" % [mode, yard, got])
 			return
 		if got <= 0:
 			_fail("狩獵波次 %s 的經驗是 %d" % [mode, got])

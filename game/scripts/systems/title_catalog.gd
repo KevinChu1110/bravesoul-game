@@ -64,7 +64,7 @@ const ENTRIES: Array[Dictionary] = [
 	{
 		"flag": "title.arena_challenger",
 		"name": "演武挑戰者",
-		"desc": "競技場五波試煉通關一次。",
+		"desc": "演武場五波試煉通關一次。",
 		"cond": "arena1",
 	},
 	{

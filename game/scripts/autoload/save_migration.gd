@@ -15,7 +15,7 @@ extends RefCounted
 
 ## 目前的存檔版本。改動存檔結構時：這裡 +1、GameState.VERSION 同步 +1、
 ## 下面補一支 _vN_to_vN1()、然後去 test_save_slots.gd 加一個舊檔情境。
-const CURRENT := 4
+const CURRENT := 9
 
 ## 沒寫 version 的存檔一律當第 1 版。0.13 之前的檔就是這種。
 const OLDEST := 1
@@ -102,6 +102,16 @@ static func _step(from_v: int, d: Dictionary) -> Dictionary:
 			return _v2_to_v3(d)
 		3:
 			return _v3_to_v4(d)
+		4:
+			return _v4_to_v5(d)
+		5:
+			return _v5_to_v6(d)
+		6:
+			return _v6_to_v7(d)
+		7:
+			return _v7_to_v8(d)
+		8:
+			return _v8_to_v9(d)
 	return {}
 
 
@@ -227,4 +237,143 @@ static func _v3_to_v4(d: Dictionary) -> Dictionary:
 		d["flags"] = flags
 
 	d["inventory"] = bag
+	return d
+
+
+## 4 → 5：抽魂寫回原作葫蘆魂器。舊檔沒有魂器欄位，從綠葫蘆起步並給 1 次免費。
+static func _v4_to_v5(d: Dictionary) -> Dictionary:
+	if str(d.get("soul_vessel", "")) == "":
+		d["soul_vessel"] = "綠葫蘆"
+	if not d.has("soul_free_draws"):
+		d["soul_free_draws"] = 1
+	if not d.has("soul_free_day"):
+		d["soul_free_day"] = ""
+	return d
+
+
+## 5 → 6：能量制＋飾品六槽（舊 accessory → ring）。
+static func _v5_to_v6(d: Dictionary) -> Dictionary:
+	if not d.has("energy"):
+		d["energy"] = 15
+	if not d.has("energy_ts"):
+		d["energy_ts"] = 0.0
+	var slots: Variant = d.get("equip_slots", {})
+	if typeof(slots) != TYPE_DICTIONARY:
+		slots = {}
+	var sl: Dictionary = slots
+	if sl.has("accessory"):
+		var legacy := str(sl.get("accessory", ""))
+		if legacy != "" and str(sl.get("ring", "")) == "":
+			sl["ring"] = legacy
+		sl.erase("accessory")
+	for s in ["weapon", "armor", "ring", "necklace", "bracelet", "earring", "amulet", "belt"]:
+		if not sl.has(s):
+			sl[s] = ""
+	d["equip_slots"] = sl
+	## 背包／已裝備實例的 slot 欄位
+	for key in ["equip_bag"]:
+		var arr: Variant = d.get(key, [])
+		if typeof(arr) == TYPE_ARRAY:
+			var out: Array = []
+			for inst in arr:
+				if typeof(inst) == TYPE_DICTIONARY:
+					var e: Dictionary = inst
+					if str(e.get("slot", "")) == "accessory":
+						e["slot"] = "ring"
+					out.append(e)
+				else:
+					out.append(inst)
+			d[key] = out
+	var worn: Variant = d.get("equip_worn", {})
+	if typeof(worn) == TYPE_DICTIONARY:
+		var wo: Dictionary = {}
+		for uid in (worn as Dictionary).keys():
+			var inst2: Variant = (worn as Dictionary)[uid]
+			if typeof(inst2) == TYPE_DICTIONARY:
+				var e2: Dictionary = inst2
+				if str(e2.get("slot", "")) == "accessory":
+					e2["slot"] = "ring"
+				wo[uid] = e2
+			else:
+				wo[uid] = inst2
+		d["equip_worn"] = wo
+	return d
+
+
+## 6 → 7：真正多武器欄（最多 3；由 equip_slots.weapon 灌進第 1 欄）
+static func _v6_to_v7(d: Dictionary) -> Dictionary:
+	var loadout: Variant = d.get("weapon_loadout", null)
+	if typeof(loadout) != TYPE_ARRAY:
+		loadout = ["", "", ""]
+	var lo: Array = loadout
+	while lo.size() < 3:
+		lo.append("")
+	if lo.size() > 3:
+		lo.resize(3)
+	var slots: Variant = d.get("equip_slots", {})
+	var wuid := ""
+	if typeof(slots) == TYPE_DICTIONARY:
+		wuid = str((slots as Dictionary).get("weapon", ""))
+	## 若三欄皆空，把當前武器放進第 0 欄
+	var any := false
+	for i in 3:
+		if str(lo[i]) != "":
+			any = true
+			break
+	if not any and wuid != "":
+		lo[0] = wuid
+	elif wuid != "" and str(lo[0]) == "":
+		lo[0] = wuid
+	d["weapon_loadout"] = lo
+	var active := int(d.get("weapon_loadout_active", 0))
+	if active < 0 or active > 2:
+		active = 0
+	## 若 active 空而 0 有武，對齊 0
+	if str(lo[active]) == "" and str(lo[0]) != "":
+		active = 0
+	d["weapon_loadout_active"] = active
+	## 同步 equip_slots.weapon = active 欄
+	if typeof(slots) != TYPE_DICTIONARY:
+		slots = {
+			"weapon": "", "armor": "",
+			"ring": "", "necklace": "", "bracelet": "", "earring": "", "amulet": "", "belt": "",
+		}
+	(slots as Dictionary)["weapon"] = str(lo[active])
+	d["equip_slots"] = slots
+	return d
+
+
+## 7 → 8：寶石背包＋演武挑戰狀
+static func _v7_to_v8(d: Dictionary) -> Dictionary:
+	if typeof(d.get("gem_bag", null)) != TYPE_ARRAY:
+		d["gem_bag"] = []
+	if not d.has("arena_tickets"):
+		## 舊檔：依今日剩餘有獎場次灌挑戰狀（最多 5）
+		var runs := 0
+		var flags: Variant = d.get("flags", {})
+		if typeof(flags) == TYPE_DICTIONARY:
+			runs = int((flags as Dictionary).get("arena.runs_today", 0))
+		var left := maxi(0, 3 - runs)
+		d["arena_tickets"] = clampi(maxi(left, 1), 1, 5)
+	if not d.has("arena_ticket_ts"):
+		d["arena_ticket_ts"] = 0.0
+	return d
+
+
+## 8 → 9：寶石碎片＋熔爐第二產線
+static func _v8_to_v9(d: Dictionary) -> Dictionary:
+	if typeof(d.get("gem_shards", null)) != TYPE_DICTIONARY:
+		d["gem_shards"] = {"red": 0, "yellow": 0, "blue": 0}
+	else:
+		var sh: Dictionary = d["gem_shards"]
+		for c in ["red", "yellow", "blue"]:
+			if not sh.has(c):
+				sh[c] = 0
+		d["gem_shards"] = sh
+	if not d.has("gem_furnace"):
+		d["gem_furnace"] = false
+	if not d.has("gem_smelt_day"):
+		d["gem_smelt_day"] = ""
+	if not d.has("gem_smelt_used"):
+		d["gem_smelt_used"] = 0
 	return d

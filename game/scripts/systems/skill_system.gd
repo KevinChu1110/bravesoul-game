@@ -1156,10 +1156,16 @@ func try_unlock(id: String) -> bool:
 	return learn(id, 1)
 
 
-## 戰鬥用：挑當前該放的技能
-## 優先序：危急 heal → **當前武器系統**攻擊 → 同職業另一武器系統 → 其他已學
-func pick_battle_skill(hp_ratio: float = 1.0) -> Dictionary:
+## 戰鬥用：挑當前該放的技能（原作：技能綁定武器類型，裝錯不會發動）
+## weapon_line：戰鬥中當前武器欄的 line；空則用 path_style／作用中裝備
+## 只允許 **同一武器 line**；不再用同職另一系統或跨職技能自動放
+func pick_battle_skill(hp_ratio: float = 1.0, weapon_line: String = "") -> Dictionary:
 	ensure_skill_map()
+	var my_line := normalize_weapon_id(weapon_line) if weapon_line != "" else _path_id()
+	## 尚未選流派／未裝備：旅途預設劍（C0 橫斬）；有武器欄則嚴格綁定
+	if my_line == "":
+		my_line = "sword"
+	## 危急治療：同樣必須綁當前線（鐵衛＝鎚、晶盾＝水晶、緊急恢復＝劍）
 	var best_heal: Dictionary = {}
 	var best_heal_p := -1
 	for d in CATALOG:
@@ -1167,6 +1173,9 @@ func pick_battle_skill(hp_ratio: float = 1.0) -> Dictionary:
 			continue
 		var sid: String = str(d.get("id", ""))
 		if not is_learned(sid):
+			continue
+		var hline := normalize_weapon_id(str(d.get("line", "")))
+		if hline != my_line:
 			continue
 		var threshold := 0.40
 		if sid == "iron_guard":
@@ -1186,60 +1195,59 @@ func pick_battle_skill(hp_ratio: float = 1.0) -> Dictionary:
 			"name": str(best_heal.get("name", hid)),
 			"kind": "heal",
 			"mult": 0.0,
+			"hits": 1,
 			"heal_pct": heal_pct_for(hid),
+			"line": str(best_heal.get("line", "")),
 		}
 
-	var my_line := _path_id()
-	var my_prof := profession_of(my_line)
-	## tier: 2=當前武器系統, 1=同職業另一系統, 0=其他
 	var best: Dictionary = {}
 	var best_p := -1
-	var best_tier := -1
 	for d in CATALOG:
 		var sid: String = str(d.get("id", ""))
 		if str(d.get("kind", "")) != "attack":
 			continue
 		if not is_learned(sid):
 			continue
-		var line := str(d.get("line", ""))
-		var prof := str(d.get("profession", profession_of(line)))
-		var tier := 0
-		if my_line != "" and line == my_line:
-			tier = 2
-		elif my_prof != "" and prof == my_prof:
-			tier = 1
+		var line := normalize_weapon_id(str(d.get("line", "")))
+		if my_line == "" or line != my_line:
+			continue
 		var prio: int = int(d.get("priority", 0))
-		if tier > best_tier or (tier == best_tier and prio > best_p):
-			best_tier = tier
+		if prio > best_p:
 			best_p = prio
 			best = d
 	if best.is_empty():
-		return {
-			"id": "slash",
-			"name": _t("橫斬"),
-			"kind": "attack",
-			"mult": 1.8,
-			"hits": 1,
-			"heal_pct": 0.0,
-		}
-	var sid2: String = str(best.get("id", "slash"))
+		## 當前線沒有已學攻擊技 → 不硬塞跨線橫斬
+		return {}
+	var sid2: String = str(best.get("id", ""))
 	return {
 		"id": sid2,
-		"name": str(best.get("name", _t("橫斬"))),
+		"name": str(best.get("name", sid2)),
 		"kind": "attack",
 		"mult": mult_for(sid2),
 		"hits": hits_for(sid2),
 		"heal_pct": 0.0,
+		"line": str(best.get("line", my_line)),
 	}
 
 
-func battle_player_stats_patch() -> Dictionary:
-	var kit: Dictionary = pick_battle_skill(1.0)
+func battle_player_stats_patch(weapon_line: String = "") -> Dictionary:
+	var line := weapon_line
+	if line == "":
+		## 優先作用中武器欄的 line
+		if Engine.get_main_loop() is SceneTree:
+			var eq: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("EquipmentSystem")
+			if eq != null and eq.has_method("active_weapon_line"):
+				line = str(eq.call("active_weapon_line"))
+		if line == "":
+			line = _path_id()
+	var kit: Dictionary = pick_battle_skill(1.0, line)
+	var has_kit := not kit.is_empty()
 	return {
-		"can_skill": is_learned("slash") or kit.get("id", "") != "",
+		"can_skill": has_kit,
+		"weapon_class": normalize_weapon_id(line),
 		"slash_lv": maxi(1, get_lv("slash")),
-		"skill_id": str(kit.get("id", "slash")),
-		"skill_name": str(kit.get("name", _t("橫斬"))),
+		"skill_id": str(kit.get("id", "")),
+		"skill_name": str(kit.get("name", "")),
 		"skill_mult": float(kit.get("mult", 1.8)),
 		"skill_hits": int(kit.get("hits", 1)),
 		"skill_kind": str(kit.get("kind", "attack")),
@@ -1267,7 +1275,8 @@ func panel_status_bbcode() -> String:
 	var lines: PackedStringArray = []
 	lines.append(_t("[b]旅途 · 招式[/b]"))
 	lines.append(_t("鐵匠養器 · 星途養魂 · [color=#c9e]旅途養招[/color]"))
-	lines.append(_t("六職業各有兩套對等武器系統（非主副）；換武器系統就換出招風格。"))
+	lines.append(_t("六職業各有兩套對等武器系統（非主副）。戰鬥中技能嚴格綁定【當前武器欄】的類型。"))
+	lines.append(_t("武器欄：第1欄開局 · 第2欄 Lv10 · 第3欄 Lv16；次數耗盡自動切下一把，也可按 1／2／3 預切。"))
 	lines.append(_t("熟練靠戰鬥命中累積；滿了會自動升階。灰鬚可指點加速。"))
 	var pid := _path_id()
 	var prof := profession_of(pid)

@@ -514,7 +514,7 @@
     },
     "star_pendant": {
       "name": "星屑墜",
-      "slot": "accessory",
+      "slot": "necklace",
       "tier": 1,
       "line": "soul",
       "base": {
@@ -527,7 +527,7 @@
     },
     "oak_charm": {
       "name": "橡心符",
-      "slot": "accessory",
+      "slot": "amulet",
       "tier": 2,
       "line": "iron",
       "base": {
@@ -540,7 +540,7 @@
     },
     "blade_ring": {
       "name": "鋒勢指環",
-      "slot": "accessory",
+      "slot": "ring",
       "tier": 2,
       "line": "sword",
       "base": {
@@ -549,6 +549,84 @@
         "hp": 2,
         "crit": 4,
         "crit_dmg": 10
+      }
+    },
+    "mist_earring": {
+      "name": "霧晶耳環",
+      "slot": "earring",
+      "tier": 2,
+      "line": "magic",
+      "base": {
+        "atk": 0,
+        "def": 1,
+        "hp": 6,
+        "crit": 3,
+        "crit_dmg": 8
+      }
+    },
+    "tide_bracelet": {
+      "name": "潮貝手環",
+      "slot": "bracelet",
+      "tier": 2,
+      "line": "hammer",
+      "base": {
+        "atk": 0,
+        "def": 3,
+        "hp": 8,
+        "crit": 0,
+        "crit_dmg": 4
+      }
+    },
+    "scar_amulet": {
+      "name": "疤焰護符",
+      "slot": "amulet",
+      "tier": 3,
+      "line": "axe",
+      "base": {
+        "atk": 3,
+        "def": 0,
+        "hp": 4,
+        "crit": 2,
+        "crit_dmg": 14
+      }
+    },
+    "knight_belt": {
+      "name": "騎士腰帶",
+      "slot": "belt",
+      "tier": 2,
+      "line": "sword",
+      "base": {
+        "atk": 1,
+        "def": 2,
+        "hp": 12,
+        "crit": 1,
+        "crit_dmg": 5
+      }
+    },
+    "wolf_fang_ring": {
+      "name": "狼牙戒指",
+      "slot": "ring",
+      "tier": 1,
+      "line": "",
+      "base": {
+        "atk": 2,
+        "def": 0,
+        "hp": 0,
+        "crit": 6,
+        "crit_dmg": 8
+      }
+    },
+    "green_necklace": {
+      "name": "翠玉項鍊",
+      "slot": "necklace",
+      "tier": 1,
+      "line": "",
+      "base": {
+        "atk": 0,
+        "def": 1,
+        "hp": 8,
+        "crit": 2,
+        "crit_dmg": 6
       }
     }
   },

@@ -2,7 +2,7 @@
   "c6.refugee": [
     {
       "speaker": "Refugiado",
-      "text": "La puerta de la torre se abrió… No nos atrevemos a subir. Tú… ¿eres ese conejo?"
+      "text": "La puerta de la torre se abrió… No nos atrevemos a subir. Tú… ¿eres el más débil de la banda mercenario?"
     }
   ],
   "c6.scroll_pile": [
@@ -142,7 +142,7 @@
     },
     {
       "speaker": "Leo",
-      "text": "Ve, conejo. Las puertas de la fortaleza se abren para ti."
+      "text": "Ve. Las puertas de la fortaleza se abren para ti."
     },
     {
       "speaker": "Leo",
@@ -314,7 +314,7 @@
   "c4.arrive": [
     {
       "speaker": "Oídoviento",
-      "text": "Si quieres ver a la Sombra Veloz, aprende antes a esperar. El compás en que el viento para: ese es el bueno."
+      "text": "¿La compañía? Tus pies son más lentos que el viento. Bien. Si quieres ver a la Sombra Veloz, aprende a esperar. El compás en que el viento para: ese es el de verdad."
     },
     {
       "speaker": "Sistema",
@@ -350,7 +350,7 @@
     },
     {
       "speaker": "Pensamiento",
-      "text": "Mira al viento, no a mí."
+      "text": "Mira el viento, no los títulos."
     }
   ],
   "c4.arrow_path_done": [
@@ -370,7 +370,7 @@
     },
     {
       "speaker": "Pensamiento",
-      "text": "Esperar… no es debilidad. Es ver claro."
+      "text": "Esperar… no es debilidad. Es ver claro — y entonces disparar."
     }
   ],
   "c4.herb_looted": [
@@ -388,15 +388,15 @@
   "c4.falcon_win": [
     {
       "speaker": "Sombra Veloz",
-      "text": "Alcanzaste al viento… Qué criatura tan curiosa."
+      "text": "Atrapaste el viento… el más débil de la compañía, y aun así esperaste."
     },
     {
       "speaker": "Sombra Veloz",
-      "text": "Toma la pluma plateada. No es premio: es para que recuerdes que hay quien se detiene por ti."
+      "text": "Toma la pluma de plata. No es premio — es recuerdo: alguien quiso parar por ti. Al informar, no escribas 'héroe'."
     },
     {
       "speaker": "Oídoviento",
-      "text": "(A lo lejos) …Ve. La costa sigue rugiendo."
+      "text": "(A lo lejos) Ve. La costa sigue rugiendo. Si la compañía pregunta: esperaste al viento."
     },
     {
       "speaker": "Sistema",
@@ -518,7 +518,7 @@
   "c6.demon_win": [
     {
       "speaker": "Rey Demonio",
-      "text": "Imposible… por un… conejo…"
+      "text": "Imposible… el más débil de la banda…"
     },
     {
       "speaker": "El Anterior",
@@ -534,7 +534,7 @@
     },
     {
       "speaker": "Sistema",
-      "text": "150 de oro, 8 de polvo estelar. Cinco hilos de luz estelar suben y se posan en tu pelaje."
+      "text": "150 de oro, 8 de polvo estelar. Cinco hilos de luz estelar suben y se posan en tu hombro."
     }
   ],
   "post.rift_not_open": [

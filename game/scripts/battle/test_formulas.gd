@@ -425,6 +425,24 @@ func _initialize() -> void:
 	else:
 		print("stance hammer tankier OK h=", h_lost, " g=", g_lost)
 
+	## 野外薄、演武厚；刷多了野外再薄，但不歸零
+	var f0 := Formulas.field_xp(50, 0)
+	var f25 := Formulas.field_xp(50, 25)
+	var f40 := Formulas.field_xp(50, 40)
+	var a0 := Formulas.arena_xp(50, false)
+	var ap := Formulas.arena_xp(50, true)
+	if f0 <= 0 or a0 <= f0:
+		push_error("xp split: arena should beat field f=%s a=%s" % [f0, a0])
+		ok = false
+	elif f25 >= f0 or f40 >= f25 or f40 < 4:
+		push_error("xp split: field dim failed 0=%s 25=%s 40=%s" % [f0, f25, f40])
+		ok = false
+	elif ap <= 0 or ap >= a0:
+		push_error("xp split: practice %s vs rewarded %s" % [ap, a0])
+		ok = false
+	else:
+		print("xp split OK field=", f0, " arena=", a0, " dim40=", f40)
+
 	if ok:
 		print("TEST_OK")
 		quit(0)
